@@ -282,6 +282,20 @@
 
         .rules-table .high { color: var(--accent); }
         .rules-table .med { color: #b58900; }
+        .rules-table .low { color: var(--text-secondary); }
+
+        .rule-category {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            margin: 40px 0 12px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .rule-category:first-of-type { margin-top: 0; }
 
         @media (max-width: 700px) {
             .rules { padding: 64px 0; }
@@ -544,7 +558,9 @@
     <section class="rules" id="rules">
         <div class="container">
             <h2>Detection rules</h2>
-            <p>Every flag is based on documented, auditable logic. No black boxes.</p>
+            <p>24 transparent rules across 12 categories. Every flag is based on documented, auditable logic.</p>
+
+            <h3 class="rule-category">Timeline Rules</h3>
             <table class="rules-table">
                 <thead>
                     <tr>
@@ -557,7 +573,7 @@
                 <tbody>
                     <tr>
                         <td class="code">A1</td>
-                        <td class="name">Excessive reporting</td>
+                        <td class="name">Excessive reporting period</td>
                         <td class="desc">Removal date exceeds 8 years from date opened</td>
                         <td class="severity high">High</td>
                     </tr>
@@ -567,6 +583,12 @@
                         <td class="desc">Removal date inconsistent with DOFD + 7 years</td>
                         <td class="severity high">High</td>
                     </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Re-Aging Indicators</h3>
+            <table class="rules-table">
+                <tbody>
                     <tr>
                         <td class="code">B1</td>
                         <td class="name">Classic re-aging</td>
@@ -579,6 +601,12 @@
                         <td class="desc">No DOFD on collection with recent open date</td>
                         <td class="severity med">Medium</td>
                     </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Cross-Bureau &amp; Status Rules</h3>
+            <table class="rules-table">
+                <tbody>
                     <tr>
                         <td class="code">C1</td>
                         <td class="name">Bureau inconsistency</td>
@@ -587,26 +615,170 @@
                     </tr>
                     <tr>
                         <td class="code">D1</td>
-                        <td class="name">SOL expired</td>
-                        <td class="desc">Account reported after statute of limitations</td>
+                        <td class="name">Status/balance mismatch</td>
+                        <td class="desc">Paid account still showing balance</td>
                         <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">D2</td>
-                        <td class="name">Impossible timeline</td>
-                        <td class="desc">DOFD predates account open date</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">D3</td>
-                        <td class="name">Ancient account</td>
-                        <td class="desc">Account age exceeds 15 years</td>
-                        <td class="severity med">Medium</td>
                     </tr>
                     <tr>
                         <td class="code">E1</td>
-                        <td class="name">Balance irregularity</td>
-                        <td class="desc">Balance increased after charge-off date</td>
+                        <td class="name">Future date violation</td>
+                        <td class="desc">Any reported date is in the future</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Payment &amp; Fee Abuse</h3>
+            <table class="rules-table">
+                <tbody>
+                    <tr>
+                        <td class="code">F1</td>
+                        <td class="name">Payment misapplication</td>
+                        <td class="desc">Payment recorded but balance unchanged</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">F2</td>
+                        <td class="name">Activity date refresh</td>
+                        <td class="desc">Old debt shows recent activity date</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">G1</td>
+                        <td class="name">Excessive fee growth</td>
+                        <td class="desc">Balance exceeds 150% of original amount</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">G2</td>
+                        <td class="name">Transfer balance increase</td>
+                        <td class="desc">Balance grew when transferred to collector</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Medical Debt (2023 CFPB Rules)</h3>
+            <table class="rules-table">
+                <tbody>
+                    <tr>
+                        <td class="code">H1</td>
+                        <td class="name">Premature reporting</td>
+                        <td class="desc">Medical debt reported before 365-day waiting period</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">H2</td>
+                        <td class="name">Paid medical still showing</td>
+                        <td class="desc">Paid medical debt should be removed</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">H3</td>
+                        <td class="name">Under threshold</td>
+                        <td class="desc">Medical debt under $500 should not appear</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Credit Limit &amp; Account Age</h3>
+            <table class="rules-table">
+                <tbody>
+                    <tr>
+                        <td class="code">I1</td>
+                        <td class="name">Limit suppression</td>
+                        <td class="desc">Credit limit reported as $0 or equal to balance</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">I2</td>
+                        <td class="name">Account age mismatch</td>
+                        <td class="desc">Collection date differs from original account</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Zombie Debt &amp; Duplicates</h3>
+            <table class="rules-table">
+                <tbody>
+                    <tr>
+                        <td class="code">J1</td>
+                        <td class="name">Zombie debt revival</td>
+                        <td class="desc">Dormant debt suddenly shows new activity</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">J2</td>
+                        <td class="name">Collector waterfall</td>
+                        <td class="desc">Same debt reported by 3+ different collectors</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">DU1</td>
+                        <td class="name">Duplicate reporting</td>
+                        <td class="desc">Same balance from multiple furnishers</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">DU2</td>
+                        <td class="name">Same debt, different numbers</td>
+                        <td class="desc">Multiple account numbers for same original debt</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Advanced Pattern Detection</h3>
+            <table class="rules-table">
+                <tbody>
+                    <tr>
+                        <td class="code">K1</td>
+                        <td class="name">Impossible sequence</td>
+                        <td class="desc">Delinquency pattern skips required stages</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">K2</td>
+                        <td class="name">Suspicious round balance</td>
+                        <td class="desc">Exact round number suggests estimation</td>
+                        <td class="severity low">Low</td>
+                    </tr>
+                    <tr>
+                        <td class="code">K3</td>
+                        <td class="name">High balance over limit</td>
+                        <td class="desc">High balance exceeds credit limit by 20%+</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">K4</td>
+                        <td class="name">Payment date inconsistency</td>
+                        <td class="desc">Last payment years after DOFD</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">K5</td>
+                        <td class="name">Minimum payment trap</td>
+                        <td class="desc">Payments made but balance grew over time</td>
+                        <td class="severity low">Low</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="rule-category">Statute of Limitations</h3>
+            <table class="rules-table">
+                <tbody>
+                    <tr>
+                        <td class="code">S1</td>
+                        <td class="name">SOL expired</td>
+                        <td class="desc">Debt is past state statute of limitations</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">S2</td>
+                        <td class="name">SOL revival risk</td>
+                        <td class="desc">Payment may have restarted SOL on old debt</td>
                         <td class="severity high">High</td>
                     </tr>
                 </tbody>
