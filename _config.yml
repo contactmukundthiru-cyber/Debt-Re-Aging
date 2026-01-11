@@ -5,16 +5,18 @@ author: Mukund Thiru
 baseurl: "/Debt-Re-Aging"
 url: "https://contactmukundthiru-cyber.github.io"
 
-# Theme
-remote_theme: pages-themes/cayman@v0.2.0
-
-# Plugins
-plugins:
-  - jekyll-remote-theme
-
-# Build settings
-markdown: kramdown
-highlighter: rouge
-
-# Social
-github_username: contactmukundthiru-cyber
+# Exclude Jekyll theme - using custom HTML
+exclude:
+  - README.md
+  - CONTRIBUTING.md
+  - LICENSE
+  - docs/
+  - tests/
+  - app/
+  - templates/
+  - samples/
+  - "*.py"
+  - "*.sh"
+  - requirements.txt
+  - Dockerfile
+  - docker-compose.yml
