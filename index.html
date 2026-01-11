@@ -3,1654 +3,713 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Debt Re-Aging Case Factory | Free Tool for Consumer Advocates</title>
-    <meta name="description" content="A free, privacy-preserving tool for legal aid organizations to detect debt re-aging violations and generate dispute packets.">
-    <meta name="keywords" content="debt re-aging, FCRA, credit report disputes, legal aid, consumer advocacy">
-    <meta name="author" content="Mukund Thiru">
-    <meta name="robots" content="index, follow">
-
-    <meta property="og:title" content="Debt Re-Aging Case Factory">
-    <meta property="og:description" content="Free tool for detecting debt re-aging violations in credit reports">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://contactmukundthiru-cyber.github.io/Debt-Re-Aging/">
-
+    <title>Case Factory - Detect Debt Re-Aging Violations</title>
+    <meta name="description" content="Free, offline tool for legal aid organizations to detect debt re-aging violations and generate dispute packets.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖</text></svg>">
-
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Debt Re-Aging Case Factory",
-        "description": "A free, privacy-preserving tool for legal aid organizations to detect debt re-aging violations",
-        "applicationCategory": "Legal Software",
-        "operatingSystem": "Windows, macOS, Linux",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "author": { "@type": "Person", "name": "Mukund Thiru" }
-    }
-    </script>
-
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --white: #ffffff;
-            --gray-50: #fafafa;
-            --gray-100: #f4f4f5;
-            --gray-200: #e4e4e7;
-            --gray-300: #d4d4d8;
-            --gray-400: #a1a1aa;
-            --gray-500: #71717a;
-            --gray-600: #52525b;
-            --gray-700: #3f3f46;
-            --gray-800: #27272a;
-            --gray-900: #18181b;
-            --gray-950: #09090b;
-            --blue-600: #2563eb;
-            --blue-700: #1d4ed8;
-            --green-600: #16a34a;
-            --green-50: #f0fdf4;
-            --amber-600: #d97706;
-            --amber-50: #fffbeb;
-            --red-600: #dc2626;
-            --red-50: #fef2f2;
+            --bg: #FFFDF9;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --border: #e5e2dd;
+            --accent: #c44;
+            --code-bg: #1a1a1a;
         }
 
         html { scroll-behavior: smooth; }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-            background: var(--white);
-            color: var(--gray-900);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Skip link for accessibility */
-        .skip-link {
-            position: absolute;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--gray-900);
-            color: var(--white);
-            padding: 12px 24px;
-            border-radius: 0 0 8px 8px;
-            z-index: 9999;
-            font-weight: 500;
-            text-decoration: none;
-        }
-        .skip-link:focus { top: 0; }
-
-        ::selection { background: var(--blue-600); color: var(--white); }
-
-        a { color: inherit; }
-
-        .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
-
-        h1, h2, h3, h4 { font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
-
-        /* Focus states for accessibility */
-        a:focus-visible, button:focus-visible {
-            outline: 2px solid var(--blue-600);
-            outline-offset: 2px;
-        }
-
-        /* Reduced motion support */
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+            * { transition: none !important; }
             html { scroll-behavior: auto; }
         }
 
-        /* ===== HEADER ===== */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.2s, box-shadow 0.2s;
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 17px;
         }
 
-        .header.scrolled {
-            border-bottom-color: var(--gray-200);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        a { color: inherit; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+        /* NAV */
+        nav {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .header-inner {
+        nav .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 72px;
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
             font-weight: 600;
-            font-size: 1.125rem;
-            color: var(--gray-900);
+            font-size: 15px;
+            text-decoration: none;
+            letter-spacing: -0.01em;
         }
-
-        .logo-mark {
-            width: 36px;
-            height: 36px;
-            background: var(--gray-900);
-            border-radius: 10px;
-            display: grid;
-            place-items: center;
-        }
-
-        .logo-mark svg { width: 20px; height: 20px; color: var(--white); }
-
-        .nav { display: flex; align-items: center; gap: 32px; }
 
         .nav-links {
             display: flex;
-            gap: 8px;
+            gap: 32px;
             list-style: none;
         }
 
         .nav-links a {
-            display: block;
-            padding: 8px 16px;
-            font-size: 0.9375rem;
-            font-weight: 500;
-            color: var(--gray-600);
+            font-size: 14px;
             text-decoration: none;
-            border-radius: 8px;
-            transition: color 0.15s, background 0.15s;
+            color: var(--text-secondary);
         }
 
-        .nav-links a:hover {
-            color: var(--gray-900);
-            background: var(--gray-100);
-        }
+        .nav-links a:hover { color: var(--text); }
 
-        .nav-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: var(--gray-900);
-            color: var(--white);
-            font-size: 0.9375rem;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: background 0.15s;
-        }
-
-        .nav-cta:hover { background: var(--gray-800); }
-        .nav-cta svg { width: 18px; height: 18px; }
-
-        /* Mobile menu */
-        .mobile-toggle {
-            display: none;
-            width: 44px;
-            height: 44px;
-            background: var(--gray-100);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .mobile-toggle span,
-        .mobile-toggle span::before,
-        .mobile-toggle span::after {
-            display: block;
-            width: 18px;
-            height: 2px;
-            background: var(--gray-900);
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: all 0.2s;
-        }
-
-        .mobile-toggle span { top: 50%; margin-top: -1px; }
-        .mobile-toggle span::before { content: ''; top: -6px; }
-        .mobile-toggle span::after { content: ''; top: 6px; }
-
-        .mobile-toggle.active span { background: transparent; }
-        .mobile-toggle.active span::before { top: 0; transform: translateX(-50%) rotate(45deg); }
-        .mobile-toggle.active span::after { top: 0; transform: translateX(-50%) rotate(-45deg); }
-
-        .mobile-menu {
-            display: none;
-            position: fixed;
-            top: 72px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--white);
-            padding: 24px;
-            z-index: 99;
-        }
-
-        .mobile-menu.active { display: block; }
-
-        .mobile-menu-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .mobile-menu-links a {
-            display: block;
-            padding: 16px;
-            font-size: 1.125rem;
-            font-weight: 500;
-            color: var(--gray-900);
-            text-decoration: none;
-            border-radius: 12px;
-            transition: background 0.15s;
-        }
-
-        .mobile-menu-links a:hover { background: var(--gray-100); }
-
-        .mobile-menu-cta {
-            display: block;
-            margin-top: 24px;
-            padding: 16px;
-            background: var(--gray-900);
-            color: var(--white);
-            font-size: 1.125rem;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .nav { display: none; }
-            .mobile-toggle { display: block; }
-        }
-
-        /* ===== HERO ===== */
+        /* HERO */
         .hero {
-            padding: 160px 0 100px;
-            background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
-            position: relative;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            pointer-events: none;
-        }
-
-        .hero-inner {
-            display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 80px;
-            align-items: center;
-            position: relative;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .hero-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px 6px 8px;
-            background: var(--green-50);
-            color: var(--green-600);
-            font-size: 0.8125rem;
-            font-weight: 600;
-            border-radius: 100px;
-        }
-
-        .hero-label svg { width: 16px; height: 16px; }
-
-        .version-tag {
-            padding: 6px 12px;
-            background: var(--gray-100);
-            color: var(--gray-600);
-            font-size: 0.75rem;
-            font-weight: 600;
-            font-family: ui-monospace, monospace;
-            border-radius: 100px;
+            padding: 120px 0 100px;
+            border-bottom: 1px solid var(--border);
         }
 
         .hero h1 {
-            font-size: 3.25rem;
-            font-weight: 700;
+            font-size: clamp(36px, 6vw, 56px);
+            font-weight: 600;
+            line-height: 1.1;
             letter-spacing: -0.03em;
-            margin-bottom: 24px;
+            max-width: 700px;
+            margin-bottom: 32px;
         }
 
-        .hero h1 span {
-            background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-700) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 80px;
+            align-items: start;
         }
 
-        .hero-text {
-            font-size: 1.1875rem;
-            color: var(--gray-600);
-            line-height: 1.7;
+        .hero p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 480px;
             margin-bottom: 40px;
-            max-width: 540px;
         }
 
-        .hero-actions {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 56px;
-        }
-
-        .btn {
+        .hero-cta {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px 28px;
-            font-size: 1rem;
-            font-weight: 600;
+            gap: 8px;
+            padding: 14px 24px;
+            background: var(--text);
+            color: var(--bg);
             text-decoration: none;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.15s;
+            font-size: 15px;
+            font-weight: 500;
         }
 
-        .btn svg { width: 20px; height: 20px; }
+        .hero-cta:hover { background: #333; }
 
-        .btn-primary {
-            background: var(--gray-900);
-            color: var(--white);
+        .hero-meta {
+            padding-top: 48px;
+            margin-top: 48px;
+            border-top: 1px solid var(--border);
         }
 
-        .btn-primary:hover { background: var(--gray-800); transform: translateY(-1px); }
-
-        .btn-secondary {
-            background: var(--white);
-            color: var(--gray-900);
-            box-shadow: inset 0 0 0 1px var(--gray-300);
-        }
-
-        .btn-secondary:hover { background: var(--gray-50); box-shadow: inset 0 0 0 1px var(--gray-400); }
-
-        .hero-metrics {
-            display: flex;
-            gap: 48px;
-            padding-top: 32px;
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--gray-900);
-            line-height: 1;
+        .hero-meta span {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
             margin-bottom: 4px;
         }
 
-        .metric-label {
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        /* Hero visual */
-        .hero-visual {
-            position: relative;
-        }
-
-        .app-preview {
-            background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 16px;
-            box-shadow: 0 24px 48px -12px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
-
-        .app-preview-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 20px;
-            background: var(--gray-50);
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .app-preview-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--gray-300);
-        }
-
-        .app-preview-dot:first-child { background: #ff5f57; }
-        .app-preview-dot:nth-child(2) { background: #febc2e; }
-        .app-preview-dot:nth-child(3) { background: #28c840; }
-
-        .app-preview-content {
-            padding: 20px;
-        }
-
-        .app-preview-sidebar {
-            display: flex;
-            gap: 16px;
-        }
-
-        .app-sidebar-nav {
-            width: 48px;
-            background: var(--gray-100);
-            border-radius: 8px;
-            padding: 12px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .app-sidebar-nav-item {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: grid;
-            place-items: center;
-            background: transparent;
-        }
-
-        .app-sidebar-nav-item.active {
-            background: var(--white);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
-        .app-sidebar-nav-item svg {
-            width: 16px;
-            height: 16px;
-            color: var(--gray-500);
-        }
-
-        .app-sidebar-nav-item.active svg {
-            color: var(--gray-900);
-        }
-
-        .app-main {
-            flex: 1;
-        }
-
-        .app-preview-step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            background: var(--gray-50);
-            border-radius: 8px;
-            margin-bottom: 6px;
-            transition: background 0.15s;
-        }
-
-        .app-preview-step:hover { background: var(--gray-100); }
-        .app-preview-step:last-child { margin-bottom: 0; }
-
-        .app-preview-step.active {
-            background: var(--blue-600);
-        }
-
-        .app-preview-step.active .step-number {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .app-preview-step.active .step-label {
-            color: var(--white);
-        }
-
-        .app-preview-step.completed .step-number {
-            background: var(--green-600);
-        }
-
-        .step-number {
-            width: 24px;
-            height: 24px;
-            background: var(--gray-200);
-            color: var(--gray-600);
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 6px;
-            display: grid;
-            place-items: center;
-            flex-shrink: 0;
-        }
-
-        .step-label {
-            font-size: 0.8125rem;
+        .hero-meta strong {
+            font-size: 14px;
             font-weight: 500;
-            color: var(--gray-600);
         }
 
-        .app-preview-step.completed .step-label {
-            color: var(--gray-700);
+        .sidebar-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            padding: 28px;
         }
 
-        .app-preview-status {
-            margin-top: 16px;
-            padding: 12px;
-            background: var(--amber-50);
-            border: 1px solid #fde68a;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .app-preview-status svg {
-            width: 18px;
-            height: 18px;
-            color: var(--amber-600);
-        }
-
-        .app-preview-status span {
-            font-size: 0.8125rem;
-            font-weight: 500;
-            color: var(--amber-600);
-        }
-
-        @media (max-width: 1024px) {
-            .hero-inner { grid-template-columns: 1fr; gap: 48px; }
-            .hero-visual { order: -1; max-width: 400px; margin: 0 auto; }
-            .hero h1 { font-size: 2.5rem; }
-        }
-
-        @media (max-width: 640px) {
-            .hero { padding: 120px 0 64px; }
-            .hero h1 { font-size: 2rem; }
-            .hero-actions { flex-direction: column; }
-            .btn { width: 100%; }
-            .hero-metrics { flex-direction: column; gap: 24px; }
-        }
-
-        /* ===== TRUST BAR ===== */
-        .trust-bar {
-            padding: 40px 0;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .trust-items {
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            flex-wrap: wrap;
-        }
-
-        .trust-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9375rem;
-            font-weight: 500;
-            color: var(--gray-600);
-        }
-
-        .trust-item svg { width: 20px; height: 20px; color: var(--green-600); }
-
-        @media (max-width: 640px) {
-            .trust-items { gap: 24px; }
-        }
-
-        /* ===== FEATURES ===== */
-        .features {
-            padding: 120px 0;
-        }
-
-        .section-header {
-            max-width: 640px;
-            margin-bottom: 64px;
-        }
-
-        .section-label {
-            display: inline-block;
-            font-size: 0.8125rem;
+        .sidebar-box h3 {
+            font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--blue-600);
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 2.25rem;
-            margin-bottom: 16px;
-        }
-
-        .section-text {
-            font-size: 1.125rem;
-            color: var(--gray-600);
-            line-height: 1.7;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-        }
-
-        .feature-card {
-            padding: 32px;
-            background: var(--gray-50);
-            border-radius: 16px;
-            transition: background 0.15s;
-        }
-
-        .feature-card:hover { background: var(--gray-100); }
-
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
             margin-bottom: 20px;
         }
 
-        .feature-icon svg { width: 24px; height: 24px; color: var(--gray-700); }
-
-        .feature-card h3 {
-            font-size: 1.125rem;
-            margin-bottom: 8px;
+        .sidebar-box ul {
+            list-style: none;
         }
 
-        .feature-card p {
-            font-size: 0.9375rem;
-            color: var(--gray-600);
-            line-height: 1.6;
+        .sidebar-box li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
         }
 
-        @media (max-width: 1024px) {
-            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        .sidebar-box li:last-child { border-bottom: none; }
+
+        .sidebar-box .val {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            color: var(--text-secondary);
         }
 
-        @media (max-width: 640px) {
-            .features { padding: 80px 0; }
-            .features-grid { grid-template-columns: 1fr; }
-            .section-title { font-size: 1.75rem; }
+        @media (max-width: 800px) {
+            .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+            .hero { padding: 80px 0 64px; }
         }
 
-        /* ===== RULES ===== */
-        .rules {
-            padding: 120px 0;
-            background: var(--gray-950);
-            color: var(--white);
+        /* WHAT IT DOES */
+        .what {
+            padding: 100px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .rules .section-label { color: var(--gray-400); }
-        .rules .section-title { color: var(--white); }
-        .rules .section-text { color: var(--gray-400); }
-
-        .rules-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .rule-card {
-            padding: 24px;
-            background: var(--gray-900);
-            border-radius: 12px;
-            border-left: 3px solid var(--green-600);
-            transition: transform 0.15s;
-        }
-
-        .rule-card:hover { transform: translateY(-2px); }
-        .rule-card.high { border-left-color: var(--red-600); }
-        .rule-card.medium { border-left-color: var(--amber-600); }
-
-        .rule-id {
-            display: inline-block;
-            padding: 4px 10px;
-            font-size: 0.6875rem;
-            font-weight: 700;
-            font-family: ui-monospace, monospace;
+        .what h2 {
+            font-size: 14px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            background: rgba(22, 163, 74, 0.15);
-            color: #4ade80;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
         }
 
-        .rule-card.high .rule-id { background: rgba(220, 38, 38, 0.15); color: #f87171; }
-        .rule-card.medium .rule-id { background: rgba(217, 119, 6, 0.15); color: #fbbf24; }
-
-        .rule-card h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--white);
-        }
-
-        .rule-card p {
-            font-size: 0.875rem;
-            color: var(--gray-400);
-        }
-
-        @media (max-width: 1024px) {
-            .rules-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 640px) {
-            .rules { padding: 80px 0; }
-            .rules-grid { grid-template-columns: 1fr; }
-        }
-
-        /* ===== HOW IT WORKS ===== */
-        .how-it-works {
-            padding: 120px 0;
-        }
-
-        .steps-container {
+        .what-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 48px;
         }
 
-        .steps-list {
-            counter-reset: step;
-        }
-
-        .step-item {
-            display: flex;
-            gap: 24px;
-            padding: 32px 0;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .step-item:last-child { border-bottom: none; }
-
-        .step-item::before {
-            counter-increment: step;
-            content: counter(step);
-            width: 40px;
-            height: 40px;
-            background: var(--gray-100);
-            color: var(--gray-600);
-            font-size: 1rem;
+        .what-item h3 {
+            font-size: 17px;
             font-weight: 600;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            flex-shrink: 0;
-        }
-
-        .step-item h3 {
-            font-size: 1.125rem;
             margin-bottom: 8px;
         }
 
-        .step-item p {
-            font-size: 0.9375rem;
-            color: var(--gray-600);
-            line-height: 1.6;
+        .what-item p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
-        .steps-visual {
-            background: var(--gray-100);
-            border-radius: 24px;
-            padding: 48px;
-            text-align: center;
+        @media (max-width: 700px) {
+            .what-grid { grid-template-columns: 1fr; gap: 32px; }
+            .what { padding: 64px 0; }
         }
 
-        .steps-visual-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 20px;
-            display: grid;
-            place-items: center;
-            margin: 0 auto 24px;
+        /* RULES */
+        .rules {
+            padding: 100px 0;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
         }
 
-        .steps-visual-icon svg { width: 40px; height: 40px; color: var(--gray-700); }
-
-        .steps-visual h3 {
-            font-size: 1.25rem;
-            margin-bottom: 8px;
+        .rules h2 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
         }
 
-        .steps-visual p {
-            font-size: 0.9375rem;
-            color: var(--gray-600);
+        .rules > .container > p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            max-width: 500px;
         }
 
-        @media (max-width: 1024px) {
-            .steps-container { grid-template-columns: 1fr; gap: 48px; }
-            .steps-visual { order: -1; }
+        .rules-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        /* ===== INSTALL ===== */
+        .rules-table th {
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            padding: 12px 0;
+            border-bottom: 2px solid var(--text);
+        }
+
+        .rules-table td {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px;
+            vertical-align: top;
+        }
+
+        .rules-table tr:last-child td { border-bottom: none; }
+
+        .rules-table .code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 500;
+            width: 60px;
+        }
+
+        .rules-table .name { font-weight: 500; }
+
+        .rules-table .desc {
+            color: var(--text-secondary);
+        }
+
+        .rules-table .severity {
+            text-align: right;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .rules-table .high { color: var(--accent); }
+        .rules-table .med { color: #b58900; }
+
+        @media (max-width: 700px) {
+            .rules { padding: 64px 0; }
+            .rules-table .desc { display: none; }
+        }
+
+        /* INSTALL */
         .install {
-            padding: 120px 0;
-            background: var(--gray-50);
+            padding: 100px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .install h2 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
         }
 
         .install-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
         }
 
-        .install-card {
-            background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 16px;
-            padding: 32px;
-        }
-
-        .install-card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .install-card-header svg { width: 28px; height: 28px; color: var(--gray-700); }
-
-        .install-card-header h3 { font-size: 1.25rem; }
-
-        .install-tag {
-            margin-left: auto;
-            padding: 4px 12px;
-            background: var(--green-50);
-            color: var(--green-600);
-            font-size: 0.75rem;
+        .install-card h3 {
+            font-size: 17px;
             font-weight: 600;
-            border-radius: 100px;
+            margin-bottom: 8px;
         }
 
         .install-card > p {
-            font-size: 0.9375rem;
-            color: var(--gray-600);
-            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
         }
 
         .code-block {
-            background: var(--gray-950);
-            border-radius: 12px;
+            background: var(--code-bg);
             padding: 20px;
-            position: relative;
             overflow-x: auto;
         }
 
         .code-block code {
-            display: block;
-            font-family: ui-monospace, 'SF Mono', monospace;
-            font-size: 0.875rem;
-            line-height: 1.8;
-            color: var(--gray-300);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #a8a8a8;
         }
 
-        .code-block .comment { color: var(--gray-500); }
-        .code-block .cmd { color: #93c5fd; }
+        .code-block .cmd { color: #fff; }
+        .code-block .cmt { color: #666; }
 
-        .copy-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 36px;
-            height: 36px;
-            background: var(--gray-800);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: grid;
-            place-items: center;
-            transition: background 0.15s;
-        }
-
-        .copy-btn:hover { background: var(--gray-700); }
-        .copy-btn svg { width: 18px; height: 18px; color: var(--gray-400); }
-        .copy-btn.copied svg { color: var(--green-600); }
-
-        @media (max-width: 768px) {
-            .install { padding: 80px 0; }
+        @media (max-width: 700px) {
             .install-grid { grid-template-columns: 1fr; }
+            .install { padding: 64px 0; }
         }
 
-        /* ===== FAQ ===== */
+        /* FAQ */
         .faq {
-            padding: 120px 0;
+            padding: 100px 0;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
         }
 
-        .faq .section-header { text-align: center; margin-left: auto; margin-right: auto; }
-
-        .faq-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 32px;
-            max-width: 960px;
-            margin: 0 auto;
+        .faq h2 {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
         }
+
+        .faq-item {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .faq-item:first-of-type { border-top: 1px solid var(--border); }
 
         .faq-item h3 {
-            font-size: 1.0625rem;
+            font-size: 17px;
+            font-weight: 500;
             margin-bottom: 8px;
         }
 
         .faq-item p {
-            font-size: 0.9375rem;
-            color: var(--gray-600);
-            line-height: 1.7;
+            font-size: 15px;
+            color: var(--text-secondary);
+            max-width: 600px;
         }
 
-        @media (max-width: 768px) {
-            .faq { padding: 80px 0; }
-            .faq-grid { grid-template-columns: 1fr; }
+        @media (max-width: 700px) {
+            .faq { padding: 64px 0; }
         }
 
-        /* ===== BUILT FOR ===== */
-        .built-for {
-            padding: 100px 0;
-            background: var(--gray-50);
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .built-for .section-header { text-align: center; margin-left: auto; margin-right: auto; }
-
-        .built-for-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .built-for-item {
-            text-align: center;
-            padding: 32px 20px;
-            background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 12px;
-        }
-
-        .built-for-icon {
-            width: 56px;
-            height: 56px;
-            background: var(--gray-100);
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            margin: 0 auto 16px;
-        }
-
-        .built-for-icon svg {
-            width: 28px;
-            height: 28px;
-            color: var(--gray-700);
-        }
-
-        .built-for-item h4 {
-            font-size: 0.9375rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .built-for-item p {
-            font-size: 0.8125rem;
-            color: var(--gray-500);
-        }
-
-        @media (max-width: 768px) {
-            .built-for { padding: 64px 0; }
-            .built-for-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 480px) {
-            .built-for-grid { grid-template-columns: 1fr; }
-        }
-
-        /* ===== CTA ===== */
-        .cta {
-            padding: 100px 0;
-            background: var(--gray-950);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(ellipse at 50% 0%, rgba(37, 99, 235, 0.12) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .cta h2 {
-            font-size: 2.25rem;
-            color: var(--white);
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .cta p {
-            font-size: 1.125rem;
-            color: var(--gray-400);
-            margin-bottom: 40px;
-            max-width: 480px;
-            margin-left: auto;
-            margin-right: auto;
-            position: relative;
-        }
-
-        .cta-actions {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            position: relative;
-        }
-
-        .cta .btn-primary {
-            background: var(--white);
-            color: var(--gray-900);
-        }
-
-        .cta .btn-primary:hover { background: var(--gray-100); }
-
-        .cta .btn-secondary {
-            background: transparent;
-            color: var(--white);
-            box-shadow: inset 0 0 0 1px var(--gray-700);
-        }
-
-        .cta .btn-secondary:hover { background: var(--gray-900); }
-
-        @media (max-width: 640px) {
-            .cta { padding: 64px 0; }
-            .cta h2 { font-size: 1.75rem; }
-            .cta-actions { flex-direction: column; max-width: 320px; margin: 0 auto; }
-        }
-
-        /* ===== FOOTER ===== */
-        .footer {
-            padding: 64px 0 32px;
-            border-top: 1px solid var(--gray-200);
+        /* FOOTER */
+        footer {
+            padding: 64px 0;
         }
 
         .footer-grid {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
             gap: 64px;
-            margin-bottom: 48px;
         }
 
-        .footer-brand p {
-            font-size: 0.9375rem;
-            color: var(--gray-600);
-            margin-top: 16px;
-            max-width: 320px;
-            line-height: 1.6;
+        footer p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 300px;
+            margin-top: 12px;
         }
 
-        .footer-links h4 {
-            font-size: 0.8125rem;
+        footer h4 {
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--gray-900);
-            margin-bottom: 20px;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
         }
 
-        .footer-links ul { list-style: none; }
+        footer ul { list-style: none; }
 
-        .footer-links li { margin-bottom: 12px; }
+        footer li { margin-bottom: 8px; }
 
-        .footer-links a {
-            font-size: 0.9375rem;
-            color: var(--gray-600);
+        footer a {
+            font-size: 14px;
+            color: var(--text-secondary);
             text-decoration: none;
-            transition: color 0.15s;
         }
 
-        .footer-links a:hover { color: var(--gray-900); }
+        footer a:hover { color: var(--text); }
 
         .footer-bottom {
-            padding-top: 32px;
-            border-top: 1px solid var(--gray-200);
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-secondary);
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .footer-bottom p {
-            font-size: 0.875rem;
-            color: var(--gray-500);
         }
 
         .disclaimer {
-            background: var(--amber-50);
-            border: 1px solid #fde68a;
-            border-radius: 10px;
-            padding: 16px 20px;
-            font-size: 0.8125rem;
-            color: var(--gray-600);
-            max-width: 720px;
-            margin: 32px auto 0;
-            text-align: center;
+            margin-top: 48px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-secondary);
         }
 
-        .disclaimer strong { color: var(--amber-600); }
+        @media (max-width: 700px) {
+            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+            .footer-bottom { flex-direction: column; gap: 8px; }
+        }
 
-        @media (max-width: 768px) {
-            .footer-grid { grid-template-columns: 1fr; gap: 40px; }
-            .footer-bottom { flex-direction: column; text-align: center; }
+        /* Mobile nav */
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .mobile-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: var(--text);
+            margin: 4px 0;
+        }
+
+        @media (max-width: 600px) {
+            .nav-links { display: none; }
+            .mobile-toggle { display: block; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: var(--bg);
+                padding: 24px;
+                border-bottom: 1px solid var(--border);
+                gap: 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <a href="#main" class="skip-link">Skip to main content</a>
-
-    <header class="header">
-        <div class="container header-inner">
-            <a href="#" class="logo" aria-label="Case Factory Home">
-                <div class="logo-mark">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
-                </div>
-                Case Factory
-            </a>
-            <nav class="nav" aria-label="Main navigation">
-                <ul class="nav-links">
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#rules">Rules</a></li>
-                    <li><a href="#install">Install</a></li>
-                    <li><a href="#faq">FAQ</a></li>
-                </ul>
-                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" target="_blank" rel="noopener" class="nav-cta">
-                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-                    GitHub
-                </a>
-            </nav>
-            <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false">
-                <span></span>
+    <nav>
+        <div class="container">
+            <a href="#" class="logo">Case Factory</a>
+            <ul class="nav-links">
+                <li><a href="#rules">Rules</a></li>
+                <li><a href="#install">Install</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" target="_blank">GitHub</a></li>
+            </ul>
+            <button class="mobile-toggle" aria-label="Menu">
+                <span></span><span></span><span></span>
             </button>
         </div>
-    </header>
-
-    <nav class="mobile-menu" aria-label="Mobile navigation">
-        <ul class="mobile-menu-links">
-            <li><a href="#features">Features</a></li>
-            <li><a href="#rules">Detection Rules</a></li>
-            <li><a href="#install">Installation</a></li>
-            <li><a href="#faq">FAQ</a></li>
-        </ul>
-        <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" target="_blank" rel="noopener" class="mobile-menu-cta">View on GitHub</a>
     </nav>
 
-    <main id="main">
-        <section class="hero">
-            <div class="container hero-inner">
-                <div>
-                    <div class="hero-badge">
-                        <div class="hero-label">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Free &amp; Open Source
-                        </div>
-                        <span class="version-tag">v1.0.0</span>
-                    </div>
-                    <h1>Detect <span>Debt Re-Aging</span> Violations</h1>
-                    <p class="hero-text">A privacy-first tool for legal aid organizations to identify illegal debt re-aging practices and generate professional dispute documentation.</p>
-                    <div class="hero-actions">
-                        <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/archive/refs/heads/main.zip" class="btn btn-primary">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            Download Free
-                        </a>
-                        <a href="#install" class="btn btn-secondary">View Installation</a>
-                    </div>
-                    <div class="hero-metrics">
-                        <div>
-                            <div class="metric-value">9</div>
-                            <div class="metric-label">Detection Rules</div>
-                        </div>
-                        <div>
-                            <div class="metric-value">50</div>
-                            <div class="metric-label">State SOL Database</div>
-                        </div>
-                        <div>
-                            <div class="metric-value">100%</div>
-                            <div class="metric-label">Offline &amp; Private</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="hero-visual">
-                    <div class="app-preview">
-                        <div class="app-preview-header">
-                            <div class="app-preview-dot"></div>
-                            <div class="app-preview-dot"></div>
-                            <div class="app-preview-dot"></div>
-                        </div>
-                        <div class="app-preview-content">
-                            <div class="app-preview-sidebar">
-                                <div class="app-sidebar-nav">
-                                    <div class="app-sidebar-nav-item active">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                    </div>
-                                    <div class="app-sidebar-nav-item">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    </div>
-                                    <div class="app-sidebar-nav-item">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                    </div>
-                                    <div class="app-sidebar-nav-item">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    </div>
-                                </div>
-                                <div class="app-main">
-                                    <div class="app-preview-step completed">
-                                        <div class="step-number"><svg fill="none" viewBox="0 0 24 24" stroke="white" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                                        <div class="step-label">Upload credit report</div>
-                                    </div>
-                                    <div class="app-preview-step completed">
-                                        <div class="step-number"><svg fill="none" viewBox="0 0 24 24" stroke="white" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                                        <div class="step-label">Review extracted text</div>
-                                    </div>
-                                    <div class="app-preview-step completed">
-                                        <div class="step-number"><svg fill="none" viewBox="0 0 24 24" stroke="white" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                                        <div class="step-label">Verify parsed fields</div>
-                                    </div>
-                                    <div class="app-preview-step active">
-                                        <div class="step-number">4</div>
-                                        <div class="step-label">Check for violations</div>
-                                    </div>
-                                    <div class="app-preview-step">
-                                        <div class="step-number">5</div>
-                                        <div class="step-label">Generate packet</div>
-                                    </div>
-                                    <div class="app-preview-status">
-                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                        <span>2 potential violations found</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <section class="hero">
+        <div class="container hero-grid">
+            <div>
+                <h1>Detect debt re-aging violations in credit reports</h1>
+                <p>A free tool for legal aid organizations. Runs locally, never uploads data. Generates dispute packets with one click.</p>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/archive/refs/heads/main.zip" class="hero-cta">
+                    Download v1.0.0
+                </a>
+                <div class="hero-meta">
+                    <span>License</span>
+                    <strong>MIT Open Source</strong>
                 </div>
             </div>
-        </section>
+            <div class="sidebar-box">
+                <h3>At a glance</h3>
+                <ul>
+                    <li>Detection rules <span class="val">9</span></li>
+                    <li>State SOL data <span class="val">50</span></li>
+                    <li>Output formats <span class="val">PDF, MD</span></li>
+                    <li>Data uploaded <span class="val">None</span></li>
+                    <li>Price <span class="val">Free</span></li>
+                </ul>
+            </div>
+        </div>
+    </section>
 
-        <section class="trust-bar">
-            <div class="container">
-                <div class="trust-items">
-                    <div class="trust-item">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        100% Local Processing
-                    </div>
-                    <div class="trust-item">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        No Data Leaves Your Machine
-                    </div>
-                    <div class="trust-item">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        FCRA Compliant
-                    </div>
-                    <div class="trust-item">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                        MIT Licensed
-                    </div>
+    <section class="what">
+        <div class="container">
+            <h2>What it does</h2>
+            <div class="what-grid">
+                <div class="what-item">
+                    <h3>Extract</h3>
+                    <p>Upload a credit report PDF or image. OCR extracts dates, creditors, balances, and account details automatically.</p>
+                </div>
+                <div class="what-item">
+                    <h3>Analyze</h3>
+                    <p>Nine transparent rules check for timeline inconsistencies, re-aging patterns, and statute of limitations violations.</p>
+                </div>
+                <div class="what-item">
+                    <h3>Document</h3>
+                    <p>Generate dispute letters, evidence summaries, and furnisher notifications. Ready to send to credit bureaus.</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="features" id="features">
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-label">Features</div>
-                    <h2 class="section-title">Built for Consumer Advocates</h2>
-                    <p class="section-text">Professional-grade tools designed specifically for legal aid organizations and consumer advocacy groups.</p>
-                </div>
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </div>
-                        <h3>Smart OCR Extraction</h3>
-                        <p>Advanced image preprocessing with 4 configurable levels for accurate text extraction from scans and photos.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <h3>Automated Field Parsing</h3>
-                        <p>Intelligent parsing identifies dates, creditors, account types, and other critical information automatically.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <h3>9 Detection Rules</h3>
-                        <p>Transparent, documented rules check for timeline inconsistencies and re-aging patterns.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        </div>
-                        <h3>Dispute Packet Generation</h3>
-                        <p>Generate complete documentation with bureau letters, furnisher letters, and evidence checklists.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <h3>50-State SOL Database</h3>
-                        <p>Built-in statute of limitations data for all 50 states to identify time-barred debts.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
-                        </div>
-                        <h3>Batch Processing</h3>
-                        <p>Process multiple accounts simultaneously for clients with complex credit reports.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <section class="rules" id="rules">
+        <div class="container">
+            <h2>Detection rules</h2>
+            <p>Every flag is based on documented, auditable logic. No black boxes.</p>
+            <table class="rules-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Rule</th>
+                        <th class="desc">Trigger</th>
+                        <th>Severity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="code">A1</td>
+                        <td class="name">Excessive reporting</td>
+                        <td class="desc">Removal date exceeds 8 years from date opened</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">A2</td>
+                        <td class="name">DOFD misalignment</td>
+                        <td class="desc">Removal date inconsistent with DOFD + 7 years</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">B1</td>
+                        <td class="name">Classic re-aging</td>
+                        <td class="desc">Date opened 24+ months after DOFD</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">B2</td>
+                        <td class="name">Missing DOFD</td>
+                        <td class="desc">No DOFD on collection with recent open date</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">C1</td>
+                        <td class="name">Bureau inconsistency</td>
+                        <td class="desc">Different removal dates across bureaus</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">D1</td>
+                        <td class="name">SOL expired</td>
+                        <td class="desc">Account reported after statute of limitations</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">D2</td>
+                        <td class="name">Impossible timeline</td>
+                        <td class="desc">DOFD predates account open date</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                    <tr>
+                        <td class="code">D3</td>
+                        <td class="name">Ancient account</td>
+                        <td class="desc">Account age exceeds 15 years</td>
+                        <td class="severity med">Medium</td>
+                    </tr>
+                    <tr>
+                        <td class="code">E1</td>
+                        <td class="name">Balance irregularity</td>
+                        <td class="desc">Balance increased after charge-off date</td>
+                        <td class="severity high">High</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-        <section class="rules" id="rules">
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-label">Detection Engine</div>
-                    <h2 class="section-title">Transparent, Auditable Rules</h2>
-                    <p class="section-text">Every flag is based on documented rules. No black boxes, no hidden logic.</p>
-                </div>
-                <div class="rules-grid">
-                    <div class="rule-card high"><div class="rule-id">A1</div><h4>Excessive Reporting Period</h4><p>Removal date exceeds 8 years from date opened</p></div>
-                    <div class="rule-card high"><div class="rule-id">A2</div><h4>DOFD Misalignment</h4><p>Removal date inconsistent with DOFD + 7 years</p></div>
-                    <div class="rule-card high"><div class="rule-id">B1</div><h4>Classic Re-Aging</h4><p>Date opened 24+ months after DOFD</p></div>
-                    <div class="rule-card medium"><div class="rule-id">B2</div><h4>Missing DOFD</h4><p>No DOFD on collection with recent open date</p></div>
-                    <div class="rule-card medium"><div class="rule-id">C1</div><h4>Cross-Bureau Inconsistency</h4><p>Different removal dates across bureaus</p></div>
-                    <div class="rule-card high"><div class="rule-id">D1</div><h4>SOL Expired</h4><p>Account reported after statute of limitations</p></div>
-                    <div class="rule-card high"><div class="rule-id">D2</div><h4>Impossible Timeline</h4><p>DOFD predates account open date</p></div>
-                    <div class="rule-card medium"><div class="rule-id">D3</div><h4>Ancient Account</h4><p>Account age exceeds 15 years</p></div>
-                    <div class="rule-card high"><div class="rule-id">E1</div><h4>Balance Irregularity</h4><p>Balance increased after charge-off date</p></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="install" id="install">
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-label">Get Started</div>
-                    <h2 class="section-title">Quick Installation</h2>
-                    <p class="section-text">Up and running in under 5 minutes with Docker or Python.</p>
-                </div>
-                <div class="install-grid">
-                    <div class="install-card">
-                        <div class="install-card-header">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                            <h3>Docker</h3>
-                            <span class="install-tag">Recommended</span>
-                        </div>
-                        <p>Easiest setup with all dependencies included. Requires Docker Desktop.</p>
-                        <div class="code-block" id="docker-code">
-                            <button class="copy-btn" data-target="docker-code" aria-label="Copy to clipboard">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            </button>
-                            <code><span class="comment"># Clone repository</span>
+    <section class="install" id="install">
+        <div class="container">
+            <h2>Installation</h2>
+            <div class="install-grid">
+                <div class="install-card">
+                    <h3>Docker (recommended)</h3>
+                    <p>All dependencies included. Requires Docker Desktop.</p>
+                    <div class="code-block">
+                        <code><span class="cmt"># Clone and run</span>
 <span class="cmd">git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git</span>
 <span class="cmd">cd Debt-Re-Aging</span>
-
-<span class="comment"># Start application</span>
 <span class="cmd">docker-compose up</span>
 
-<span class="comment"># Open http://localhost:8501</span></code>
-                        </div>
+<span class="cmt"># Open http://localhost:8501</span></code>
                     </div>
-                    <div class="install-card">
-                        <div class="install-card-header">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                            <h3>Python</h3>
-                        </div>
-                        <p>Native Python installation for advanced users or custom setups.</p>
-                        <div class="code-block" id="python-code">
-                            <button class="copy-btn" data-target="python-code" aria-label="Copy to clipboard">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            </button>
-                            <code><span class="comment"># Clone and install</span>
+                </div>
+                <div class="install-card">
+                    <h3>Python</h3>
+                    <p>Native installation for custom setups.</p>
+                    <div class="code-block">
+                        <code><span class="cmt"># Install dependencies</span>
 <span class="cmd">git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git</span>
 <span class="cmd">cd Debt-Re-Aging</span>
 <span class="cmd">pip install -r requirements.txt</span>
 
-<span class="comment"># Run application</span>
+<span class="cmt"># Run</span>
 <span class="cmd">streamlit run app/main.py</span></code>
-                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="faq" id="faq">
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-label">FAQ</div>
-                    <h2 class="section-title">Frequently Asked Questions</h2>
-                </div>
-                <div class="faq-grid">
-                    <div class="faq-item">
-                        <h3>What is debt re-aging?</h3>
-                        <p>Debt re-aging is an illegal practice where collectors manipulate dates to extend how long negative information appears on credit reports, violating the Fair Credit Reporting Act.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Is my data secure?</h3>
-                        <p>Yes. All processing happens locally on your machine. No data is ever sent to external servers. The tool works completely offline after installation.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Who is this tool for?</h3>
-                        <p>This tool is designed for legal aid organizations, pro bono clinics, and consumer advocacy groups helping clients with credit report disputes.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>Is this legal advice?</h3>
-                        <p>No. This tool is for informational purposes only. Always consult with a qualified attorney before taking legal action based on the findings.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>What file formats are supported?</h3>
-                        <p>The tool accepts PDF, PNG, JPG, and JPEG files. It uses OCR to extract text from scanned documents and images.</p>
-                    </div>
-                    <div class="faq-item">
-                        <h3>How accurate is the detection?</h3>
-                        <p>All 9 detection rules are transparent and documented. You can review and verify each flag before generating dispute letters.</p>
-                    </div>
-                </div>
+    <section class="faq" id="faq">
+        <div class="container">
+            <h2>Common questions</h2>
+            <div class="faq-item">
+                <h3>What is debt re-aging?</h3>
+                <p>An illegal practice where debt collectors manipulate dates to extend how long negative information appears on credit reports, violating the Fair Credit Reporting Act.</p>
             </div>
-        </section>
-
-        <section class="built-for">
-            <div class="container">
-                <div class="section-header">
-                    <div class="section-label">Built For</div>
-                    <h2 class="section-title">Who Uses Case Factory</h2>
-                </div>
-                <div class="built-for-grid">
-                    <div class="built-for-item">
-                        <div class="built-for-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                        </div>
-                        <h4>Legal Aid Orgs</h4>
-                        <p>Non-profit legal services</p>
-                    </div>
-                    <div class="built-for-item">
-                        <div class="built-for-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        </div>
-                        <h4>Law Clinics</h4>
-                        <p>University programs</p>
-                    </div>
-                    <div class="built-for-item">
-                        <div class="built-for-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                        </div>
-                        <h4>Advocacy Groups</h4>
-                        <p>Consumer protection</p>
-                    </div>
-                    <div class="built-for-item">
-                        <div class="built-for-icon">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                        </div>
-                        <h4>Pro Bono Attorneys</h4>
-                        <p>Individual practice</p>
-                    </div>
-                </div>
+            <div class="faq-item">
+                <h3>Is my data secure?</h3>
+                <p>Yes. All processing happens locally. Nothing is uploaded anywhere. The tool works completely offline after installation.</p>
             </div>
-        </section>
-
-        <section class="cta">
-            <div class="container">
-                <h2>Ready to Get Started?</h2>
-                <p>Download the free tool and start detecting debt re-aging violations today.</p>
-                <div class="cta-actions">
-                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/archive/refs/heads/main.zip" class="btn btn-primary">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        Download Free
-                    </a>
-                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
-                </div>
+            <div class="faq-item">
+                <h3>Who is this for?</h3>
+                <p>Legal aid organizations, law school clinics, consumer advocacy groups, and pro bono attorneys helping clients dispute credit report errors.</p>
             </div>
-        </section>
-    </main>
+            <div class="faq-item">
+                <h3>Is this legal advice?</h3>
+                <p>No. This is an informational tool. Always consult a qualified attorney before taking legal action.</p>
+            </div>
+            <div class="faq-item">
+                <h3>What file formats work?</h3>
+                <p>PDF, PNG, JPG, and JPEG. The tool uses OCR to extract text from scanned documents.</p>
+            </div>
+        </div>
+    </section>
 
-    <footer class="footer">
+    <footer>
         <div class="container">
             <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="#" class="logo" aria-label="Case Factory Home">
-                        <div class="logo-mark">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
-                        </div>
-                        Case Factory
-                    </a>
-                    <p>A free, open-source tool helping consumer advocates detect debt re-aging violations and protect consumer rights.</p>
+                <div>
+                    <a href="#" class="logo">Case Factory</a>
+                    <p>Free, open-source tool for detecting debt re-aging violations. Built for consumer advocates.</p>
                 </div>
-                <div class="footer-links">
-                    <h4>Resources</h4>
+                <div>
+                    <h4>Documentation</h4>
                     <ul>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md">Quick Start Guide</a></li>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/FAQ.md">Documentation</a></li>
+                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md">Quick Start</a></li>
                         <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/RULES.md">Rule Reference</a></li>
                         <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/CONTRIBUTING.md">Contributing</a></li>
                     </ul>
                 </div>
-                <div class="footer-links">
+                <div>
                     <h4>Project</h4>
                     <ul>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging">GitHub Repository</a></li>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues">Report an Issue</a></li>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/LICENSE">MIT License</a></li>
+                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging">Repository</a></li>
+                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues">Issues</a></li>
                         <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/releases">Releases</a></li>
                     </ul>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>Debt Re-Aging Case Factory v1.0.0</p>
-                <p>Built by Mukund Thiru</p>
-            </div>
             <div class="disclaimer">
-                <p><strong>Disclaimer:</strong> This tool is for informational purposes only and does not constitute legal advice. The detection of potential issues does not guarantee that a violation has occurred. Always consult with a qualified attorney before taking legal action.</p>
+                <strong>Disclaimer:</strong> This tool is for informational purposes only and does not constitute legal advice. Always consult with a qualified attorney before taking legal action.
+            </div>
+            <div class="footer-bottom">
+                <span>v1.0.0</span>
+                <span>MIT License</span>
             </div>
         </div>
     </footer>
 
     <script>
-        // Header scroll effect
-        const header = document.querySelector('.header');
-        let lastScroll = 0;
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            if (currentScroll > 10) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-            lastScroll = currentScroll;
-        }, { passive: true });
-
-        // Mobile menu toggle
-        const mobileToggle = document.querySelector('.mobile-toggle');
-        const mobileMenu = document.querySelector('.mobile-menu');
-
-        mobileToggle.addEventListener('click', () => {
-            const isActive = mobileMenu.classList.toggle('active');
-            mobileToggle.classList.toggle('active');
-            mobileToggle.setAttribute('aria-expanded', isActive);
-            document.body.style.overflow = isActive ? 'hidden' : '';
-        });
-
-        // Close mobile menu on link click
-        document.querySelectorAll('.mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.remove('active');
-                mobileToggle.classList.remove('active');
-                mobileToggle.setAttribute('aria-expanded', 'false');
-                document.body.style.overflow = '';
-            });
-        });
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', e => {
-                const href = anchor.getAttribute('href');
-                if (href === '#') return;
-                e.preventDefault();
-                const target = document.querySelector(href);
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Copy to clipboard
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const codeBlock = btn.closest('.code-block');
-                const code = codeBlock.querySelector('code').textContent;
-                navigator.clipboard.writeText(code).then(() => {
-                    btn.classList.add('copied');
-                    btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
-                    setTimeout(() => {
-                        btn.classList.remove('copied');
-                        btn.innerHTML = '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
-                    }, 2000);
-                });
-            });
+        document.querySelector('.mobile-toggle').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('open');
         });
     </script>
 </body>
