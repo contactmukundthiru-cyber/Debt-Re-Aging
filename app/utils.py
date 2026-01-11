@@ -164,7 +164,31 @@ def get_statute_of_limitations_years() -> int:
 
 
 def cleanup_old_cases(output_dir: str, max_age_hours: int = 24):
-    # ... existing cleanup_old_cases code ...
+    """
+    Clean up old case files from the output directory.
+
+    Args:
+        output_dir: Directory containing case output files
+        max_age_hours: Maximum age in hours before files are deleted
+    """
+    if not os.path.exists(output_dir):
+        return
+
+    now = time.time()
+    max_age_seconds = max_age_hours * 3600
+
+    for item in os.listdir(output_dir):
+        item_path = os.path.join(output_dir, item)
+        try:
+            if os.path.isfile(item_path):
+                if now - os.path.getmtime(item_path) > max_age_seconds:
+                    os.remove(item_path)
+            elif os.path.isdir(item_path):
+                if now - os.path.getmtime(item_path) > max_age_seconds:
+                    shutil.rmtree(item_path)
+        except (OSError, IOError):
+            pass  # Skip files that can't be accessed
+
 
 def estimate_removal_date(dofd: str) -> Optional[str]:
     """
