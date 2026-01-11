@@ -101,6 +101,16 @@
             outline-offset: 2px;
         }
 
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+
         /* ===== HEADER ===== */
         .header {
             position: fixed;
@@ -110,7 +120,13 @@
             z-index: 100;
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--gray-200);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .header.scrolled {
+            border-bottom-color: var(--gray-200);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
         .header-inner {
@@ -271,6 +287,18 @@
         .hero {
             padding: 160px 0 100px;
             background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
         }
 
         .hero-inner {
@@ -278,6 +306,14 @@
             grid-template-columns: 1fr 420px;
             gap: 80px;
             align-items: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
         .hero-label {
@@ -290,10 +326,19 @@
             font-size: 0.8125rem;
             font-weight: 600;
             border-radius: 100px;
-            margin-bottom: 24px;
         }
 
         .hero-label svg { width: 16px; height: 16px; }
+
+        .version-tag {
+            padding: 6px 12px;
+            background: var(--gray-100);
+            color: var(--gray-600);
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: ui-monospace, monospace;
+            border-radius: 100px;
+        }
 
         .hero h1 {
             font-size: 3.25rem;
@@ -409,40 +454,127 @@
         .app-preview-dot:nth-child(3) { background: #28c840; }
 
         .app-preview-content {
-            padding: 24px;
+            padding: 20px;
+        }
+
+        .app-preview-sidebar {
+            display: flex;
+            gap: 16px;
+        }
+
+        .app-sidebar-nav {
+            width: 48px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            padding: 12px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .app-sidebar-nav-item {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            background: transparent;
+        }
+
+        .app-sidebar-nav-item.active {
+            background: var(--white);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .app-sidebar-nav-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--gray-500);
+        }
+
+        .app-sidebar-nav-item.active svg {
+            color: var(--gray-900);
+        }
+
+        .app-main {
+            flex: 1;
         }
 
         .app-preview-step {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 14px 16px;
+            gap: 12px;
+            padding: 12px 14px;
             background: var(--gray-50);
-            border-radius: 10px;
-            margin-bottom: 8px;
+            border-radius: 8px;
+            margin-bottom: 6px;
             transition: background 0.15s;
         }
 
         .app-preview-step:hover { background: var(--gray-100); }
         .app-preview-step:last-child { margin-bottom: 0; }
 
-        .step-number {
-            width: 28px;
-            height: 28px;
-            background: var(--gray-900);
+        .app-preview-step.active {
+            background: var(--blue-600);
+        }
+
+        .app-preview-step.active .step-number {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .app-preview-step.active .step-label {
             color: var(--white);
-            font-size: 0.8125rem;
+        }
+
+        .app-preview-step.completed .step-number {
+            background: var(--green-600);
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: var(--gray-200);
+            color: var(--gray-600);
+            font-size: 0.75rem;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
             display: grid;
             place-items: center;
             flex-shrink: 0;
         }
 
         .step-label {
-            font-size: 0.9375rem;
+            font-size: 0.8125rem;
             font-weight: 500;
+            color: var(--gray-600);
+        }
+
+        .app-preview-step.completed .step-label {
             color: var(--gray-700);
+        }
+
+        .app-preview-status {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--amber-50);
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-preview-status svg {
+            width: 18px;
+            height: 18px;
+            color: var(--amber-600);
+        }
+
+        .app-preview-status span {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--amber-600);
         }
 
         @media (max-width: 1024px) {
@@ -840,17 +972,92 @@
             .faq-grid { grid-template-columns: 1fr; }
         }
 
+        /* ===== BUILT FOR ===== */
+        .built-for {
+            padding: 100px 0;
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .built-for .section-header { text-align: center; margin-left: auto; margin-right: auto; }
+
+        .built-for-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .built-for-item {
+            text-align: center;
+            padding: 32px 20px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+        }
+
+        .built-for-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--gray-100);
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 16px;
+        }
+
+        .built-for-icon svg {
+            width: 28px;
+            height: 28px;
+            color: var(--gray-700);
+        }
+
+        .built-for-item h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .built-for-item p {
+            font-size: 0.8125rem;
+            color: var(--gray-500);
+        }
+
+        @media (max-width: 768px) {
+            .built-for { padding: 64px 0; }
+            .built-for-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .built-for-grid { grid-template-columns: 1fr; }
+        }
+
         /* ===== CTA ===== */
         .cta {
             padding: 100px 0;
             background: var(--gray-950);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(37, 99, 235, 0.12) 0%, transparent 60%);
+            pointer-events: none;
         }
 
         .cta h2 {
             font-size: 2.25rem;
             color: var(--white);
             margin-bottom: 16px;
+            position: relative;
         }
 
         .cta p {
@@ -860,12 +1067,14 @@
             max-width: 480px;
             margin-left: auto;
             margin-right: auto;
+            position: relative;
         }
 
         .cta-actions {
             display: flex;
             justify-content: center;
             gap: 16px;
+            position: relative;
         }
 
         .cta .btn-primary {
@@ -1010,9 +1219,12 @@
         <section class="hero">
             <div class="container hero-inner">
                 <div>
-                    <div class="hero-label">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Free &amp; Open Source
+                    <div class="hero-badge">
+                        <div class="hero-label">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Free &amp; Open Source
+                        </div>
+                        <span class="version-tag">v1.0.0</span>
                     </div>
                     <h1>Detect <span>Debt Re-Aging</span> Violations</h1>
                     <p class="hero-text">A privacy-first tool for legal aid organizations to identify illegal debt re-aging practices and generate professional dispute documentation.</p>
@@ -1046,25 +1258,47 @@
                             <div class="app-preview-dot"></div>
                         </div>
                         <div class="app-preview-content">
-                            <div class="app-preview-step">
-                                <div class="step-number">1</div>
-                                <div class="step-label">Upload credit report</div>
-                            </div>
-                            <div class="app-preview-step">
-                                <div class="step-number">2</div>
-                                <div class="step-label">Review extracted text</div>
-                            </div>
-                            <div class="app-preview-step">
-                                <div class="step-number">3</div>
-                                <div class="step-label">Verify parsed fields</div>
-                            </div>
-                            <div class="app-preview-step">
-                                <div class="step-number">4</div>
-                                <div class="step-label">Check for violations</div>
-                            </div>
-                            <div class="app-preview-step">
-                                <div class="step-number">5</div>
-                                <div class="step-label">Generate dispute packet</div>
+                            <div class="app-preview-sidebar">
+                                <div class="app-sidebar-nav">
+                                    <div class="app-sidebar-nav-item active">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    </div>
+                                    <div class="app-sidebar-nav-item">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <div class="app-sidebar-nav-item">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                    </div>
+                                    <div class="app-sidebar-nav-item">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
+                                </div>
+                                <div class="app-main">
+                                    <div class="app-preview-step completed">
+                                        <div class="step-number"><svg fill="none" viewBox="0 0 24 24" stroke="white" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                                        <div class="step-label">Upload credit report</div>
+                                    </div>
+                                    <div class="app-preview-step completed">
+                                        <div class="step-number"><svg fill="none" viewBox="0 0 24 24" stroke="white" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                                        <div class="step-label">Review extracted text</div>
+                                    </div>
+                                    <div class="app-preview-step completed">
+                                        <div class="step-number"><svg fill="none" viewBox="0 0 24 24" stroke="white" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                                        <div class="step-label">Verify parsed fields</div>
+                                    </div>
+                                    <div class="app-preview-step active">
+                                        <div class="step-number">4</div>
+                                        <div class="step-label">Check for violations</div>
+                                    </div>
+                                    <div class="app-preview-step">
+                                        <div class="step-number">5</div>
+                                        <div class="step-label">Generate packet</div>
+                                    </div>
+                                    <div class="app-preview-status">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        <span>2 potential violations found</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1257,6 +1491,45 @@
             </div>
         </section>
 
+        <section class="built-for">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-label">Built For</div>
+                    <h2 class="section-title">Who Uses Case Factory</h2>
+                </div>
+                <div class="built-for-grid">
+                    <div class="built-for-item">
+                        <div class="built-for-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <h4>Legal Aid Orgs</h4>
+                        <p>Non-profit legal services</p>
+                    </div>
+                    <div class="built-for-item">
+                        <div class="built-for-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        </div>
+                        <h4>Law Clinics</h4>
+                        <p>University programs</p>
+                    </div>
+                    <div class="built-for-item">
+                        <div class="built-for-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <h4>Advocacy Groups</h4>
+                        <p>Consumer protection</p>
+                    </div>
+                    <div class="built-for-item">
+                        <div class="built-for-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <h4>Pro Bono Attorneys</h4>
+                        <p>Individual practice</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="cta">
             <div class="container">
                 <h2>Ready to Get Started?</h2>
@@ -1314,6 +1587,19 @@
     </footer>
 
     <script>
+        // Header scroll effect
+        const header = document.querySelector('.header');
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 10) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            lastScroll = currentScroll;
+        }, { passive: true });
+
         // Mobile menu toggle
         const mobileToggle = document.querySelector('.mobile-toggle');
         const mobileMenu = document.querySelector('.mobile-menu');
