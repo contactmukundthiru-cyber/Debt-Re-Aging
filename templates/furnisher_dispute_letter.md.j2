@@ -1,0 +1,128 @@
+# Furnisher/Creditor Dispute Letter
+
+**Case Reference:** {{ case_id }}
+**Date:** {{ generated_date | format_date }}
+
+---
+
+**FROM:**
+{% if consumer.name %}
+{{ consumer.name }}
+{% else %}
+[YOUR NAME]
+{% endif %}
+{% if consumer.address %}
+{{ consumer.address }}
+{% else %}
+[YOUR ADDRESS]
+[CITY, STATE ZIP]
+{% endif %}
+
+**TO:**
+{{ fields.furnisher_or_collector or fields.original_creditor or '[FURNISHER/CREDITOR NAME]' }}
+[FURNISHER ADDRESS]
+[CITY, STATE ZIP]
+
+---
+
+**Re: Dispute of Reported Information and Request for Investigation**
+
+To Whom It May Concern:
+
+I am writing pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681s-2, to dispute information you have furnished to one or more consumer reporting agencies regarding an account associated with my name.
+
+## Account Information
+
+| Field | Value as Reported |
+|-------|-------------------|
+| Account Reference | {{ fields.furnisher_or_collector or '[ACCOUNT/REFERENCE NUMBER]' }} |
+{% if fields.original_creditor %}
+| Original Creditor | {{ fields.original_creditor }} |
+{% endif %}
+| Account Type | {{ fields.account_type or '[ACCOUNT TYPE]' }} |
+| Date Opened as Reported | {{ fields.date_opened | format_date if fields.date_opened else '[DATE]' }} |
+{% if fields.dofd %}
+| Date of First Delinquency | {{ fields.dofd | format_date }} |
+{% endif %}
+| Credit Bureau | {{ fields.bureau or '[BUREAU NAME]' }} |
+
+## Nature of Dispute
+
+I am disputing the accuracy of information you have furnished to credit reporting agencies regarding this account. Based on my review, there appear to be potential timeline inaccuracies that require investigation and correction.
+
+{% if has_flags %}
+### Specific Concerns
+
+{% for flag in flags %}
+**{{ loop.index }}. {{ flag.rule_name }}**
+
+{{ flag.explanation }}
+
+{% endfor %}
+{% endif %}
+
+## Request for Action
+
+As a furnisher of information to consumer reporting agencies, you have obligations under the FCRA (15 U.S.C. § 1681s-2) to:
+
+1. **Report only accurate information** to consumer reporting agencies
+
+2. **Investigate disputes** forwarded by consumer reporting agencies and correct any inaccuracies
+
+3. **Not report information** you know or have reasonable cause to believe is inaccurate
+
+I am requesting that you:
+
+1. **Conduct a thorough investigation** of the accuracy of all dates associated with this account, particularly:
+   - The Date of First Delinquency (DOFD)
+   - The account opening date
+   - The estimated removal date
+
+2. **Correct any inaccurate information** with all consumer reporting agencies to which you have furnished data
+
+3. **Provide me with documentation** verifying the accuracy of the reported dates, including:
+   - Records establishing the Date of First Delinquency
+   - Documentation of the account history
+   - Basis for the reported removal date
+
+4. **Confirm in writing** what actions you have taken in response to this dispute
+
+## Legal Framework
+
+Please note that under the FCRA:
+
+- Furnishers must report accurate information (15 U.S.C. § 1681s-2(a))
+- Furnishers must investigate consumer disputes (15 U.S.C. § 1681s-2(b))
+- Reporting debt with a reset or inaccurate date of first delinquency may constitute illegal debt re-aging
+- Willful or negligent violations may result in statutory damages, actual damages, punitive damages, and attorney's fees
+
+I am also sending a copy of this dispute to the credit bureau(s) reporting this information.
+
+## Response Requested
+
+Please respond to this dispute within 30 days with:
+
+1. Confirmation of the investigation conducted
+2. Documentation supporting the reported dates
+3. Notice of any corrections made to the consumer reporting agencies
+
+Sincerely,
+
+{% if consumer.name %}
+{{ consumer.name }}
+{% else %}
+[YOUR SIGNATURE]
+[YOUR PRINTED NAME]
+{% endif %}
+
+---
+
+**CC:** {{ fields.bureau or '[Credit Bureau]' }}
+
+**Sent via:** Certified Mail, Return Receipt Requested
+
+---
+
+*This letter template was generated for informational purposes only and does not constitute legal advice.*
+
+*Case Reference: {{ case_id }}*

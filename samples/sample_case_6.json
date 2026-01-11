@@ -1,0 +1,52 @@
+{
+  "name": "Sample Case 6: Student Loan Collection",
+  "description": "A de-identified private student loan collection example.",
+  "raw_text": "COLLECTION - EDUCATIONAL\n\nCreditor: STUDENT LOAN RECOVERY INC\nOriginal Lender: PRIVATE EDUCATION LENDERS\nAccount Classification: Educational Collection\n\nOpened: 01/2021\nDelinquent Since: 03/2017\nReported: October 2024\n\nOriginal Loan: $8,500\nBalance Owed: $12,340\n\nRemoval Expected: January 2028\n\nSource: Equifax Credit File",
+  "fields": {
+    "original_creditor": {
+      "value": "PRIVATE EDUCATION LENDERS",
+      "confidence": "High",
+      "source_text": "Original Lender: PRIVATE EDUCATION LENDERS"
+    },
+    "furnisher_or_collector": {
+      "value": "STUDENT LOAN RECOVERY INC",
+      "confidence": "High",
+      "source_text": "Creditor: STUDENT LOAN RECOVERY INC"
+    },
+    "account_type": {
+      "value": "collection",
+      "confidence": "High",
+      "source_text": "Account Classification: Educational Collection"
+    },
+    "date_opened": {
+      "value": "2021-01-01",
+      "confidence": "Medium",
+      "source_text": "Opened: 01/2021"
+    },
+    "date_reported_or_updated": {
+      "value": "2024-10-01",
+      "confidence": "Medium",
+      "source_text": "Reported: October 2024"
+    },
+    "dofd": {
+      "value": "2017-03-01",
+      "confidence": "Medium",
+      "source_text": "Delinquent Since: 03/2017"
+    },
+    "estimated_removal_date": {
+      "value": "2028-01-01",
+      "confidence": "Medium",
+      "source_text": "Removal Expected: January 2028"
+    },
+    "bureau": {
+      "value": "Equifax",
+      "confidence": "High",
+      "source_text": "Source: Equifax Credit File"
+    }
+  },
+  "expected_flags": [
+    "B1",
+    "A2"
+  ],
+  "notes": "This private student loan collection shows issues: (1) Date opened (2021) is nearly 4 years after DOFD (2017), (2) Removal date (2028) appears calculated from the collector's open date rather than DOFD. Based on DOFD of 03/2017, removal should have been around 2024. Note: Federal student loans have different rules and may not follow the 7-year FCRA timeline."
+}

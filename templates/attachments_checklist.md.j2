@@ -1,0 +1,107 @@
+# Attachments Checklist
+
+**Case Reference:** {{ case_id }}
+**Date:** {{ generated_date | format_date }}
+
+---
+
+## Required Attachments
+
+Use this checklist to gather and organize documents before sending your dispute letters.
+
+### Identity Verification
+- [ ] Copy of government-issued photo ID (driver's license, state ID, or passport)
+- [ ] Copy of Social Security card OR document showing full SSN (redact all but last 4 digits)
+- [ ] Proof of current address (utility bill, bank statement, etc. dated within 60 days)
+
+### Credit Report Documentation
+- [ ] Copy of credit report page(s) showing the disputed account
+- [ ] Highlight or circle the specific information being disputed
+- [ ] Note the date the credit report was obtained
+
+{% if flags %}
+### Evidence Supporting Your Dispute
+
+Based on the identified issues, gather the following documents if available:
+
+{% for flag in flags %}
+#### For {{ flag.rule_name }} ({{ flag.rule_id }}):
+{% for evidence in flag.suggested_evidence %}
+- [ ] {{ evidence }}
+{% endfor %}
+
+{% endfor %}
+{% endif %}
+
+### Additional Recommended Documents
+
+- [ ] Any prior correspondence with the creditor or collector
+- [ ] Any prior correspondence with credit bureaus about this account
+- [ ] Previous credit reports showing different information for this account
+- [ ] Payment records or account statements from the original creditor
+- [ ] Debt validation letters received
+- [ ] Settlement agreements or payment arrangements (if applicable)
+
+---
+
+## Mailing Checklist
+
+Before sending your dispute:
+
+- [ ] Keep copies of ALL documents you are sending
+- [ ] Do NOT send original documents (copies only)
+- [ ] Use certified mail with return receipt requested
+- [ ] Record the certified mail tracking number(s)
+- [ ] Note the date mailed
+
+### Addresses for Credit Bureaus
+
+**Experian:**
+Experian
+P.O. Box 4500
+Allen, TX 75013
+
+**Equifax:**
+Equifax Information Services LLC
+P.O. Box 740256
+Atlanta, GA 30374
+
+**TransUnion:**
+TransUnion LLC Consumer Dispute Center
+P.O. Box 2000
+Chester, PA 19016
+
+---
+
+## After Sending
+
+- [ ] Save certified mail receipt
+- [ ] Note the expected response deadline (30 days from receipt)
+- [ ] Set a calendar reminder for follow-up
+- [ ] When response is received, review it carefully
+- [ ] Document any changes made to your credit report
+
+---
+
+## Organization Tips
+
+1. **Create a folder** for this case (physical or digital)
+2. **Date all documents** when you receive or send them
+3. **Keep a log** of all communications
+4. **Store copies** of everything in a safe place
+5. **Back up digital copies** if storing electronically
+
+---
+
+## Important Notes
+
+- Credit bureaus must respond within 30 days (or 45 days in some circumstances)
+- If they don't respond or the response is unsatisfactory, you may have legal options
+- Keep all documentation for at least 7 years
+- Consider consulting with a consumer rights attorney if your dispute is denied
+
+---
+
+*This checklist was generated for organizational purposes only and does not constitute legal advice.*
+
+*Case Reference: {{ case_id }}*

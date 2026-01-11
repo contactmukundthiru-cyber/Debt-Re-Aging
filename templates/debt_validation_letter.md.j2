@@ -1,0 +1,59 @@
+# Debt Validation Request
+
+**Case Reference:** {{ case_id }}
+**Date:** {{ generated_date | format_date }}
+
+---
+
+**FROM:**
+{% if consumer.name %}
+{{ consumer.name }}
+{% else %}
+[YOUR NAME]
+{% endif %}
+{% if consumer.address %}
+{{ consumer.address }}
+{% else %}
+[YOUR ADDRESS]
+[CITY, STATE ZIP]
+{% endif %}
+
+**TO:**
+{{ fields.furnisher_or_collector or '[COLLECTION AGENCY NAME]' }}
+[COLLECTION AGENCY ADDRESS]
+
+---
+
+**Re: Formal Request for Debt Validation - 15 U.S.C. § 1692g**
+
+To Whom It May Concern:
+
+I am writing this letter in response to your recent communication regarding the account referenced above. This is not a refusal to pay, but a formal request for validation of the debt pursuant to the Fair Debt Collection Practices Act (FDCPA), 15 U.S.C. § 1692g.
+
+I request that you provide the following information and documentation:
+
+1. **Proof of Authority:** Documentation showing your legal authority to collect this debt, including any assignment or purchase agreement between you and the original creditor.
+2. **Original Account Records:** A copy of the original signed contract or agreement that created this debt.
+3. **Calculation of Debt:** A complete itemization of the alleged debt, including the original principal amount, and any interest or fees added since the account was charged off.
+4. **Delinquency Information:** The specific date of first delinquency with the original creditor.
+5. **Licensing:** Verification that you are licensed to collect debts in my state of residence.
+
+Please be advised that if you fail to provide this validation within 30 days, you must cease all collection activities, including reporting this information to credit bureaus.
+
+If you have already reported this debt to any credit reporting agency, you must now mark the account as "disputed" as required by 15 U.S.C. § 1692e(8).
+
+I look forward to receiving your prompt response with the requested documentation.
+
+Sincerely,
+
+{% if consumer.name %}
+{{ consumer.name }}
+{% else %}
+[YOUR SIGNATURE]
+[YOUR PRINTED NAME]
+{% endif %}
+
+---
+
+*This letter template was generated for informational purposes only and does not constitute legal advice.*
+*Case Reference: {{ case_id }}*

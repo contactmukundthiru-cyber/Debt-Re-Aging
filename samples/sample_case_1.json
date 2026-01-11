@@ -1,0 +1,52 @@
+{
+  "name": "Sample Case 1: Collection Account with Re-aging Indicators",
+  "description": "A de-identified example showing a collection account with a date opened significantly after the DOFD, suggesting potential re-aging.",
+  "raw_text": "COLLECTIONS\n\nCreditor: ABC COLLECTIONS INC\nOriginal Creditor: EXAMPLE BANK NA\nAccount Type: Collection\nAccount Status: Open\n\nDate Opened: 03/15/2023\nDate of First Delinquency: 01/20/2019\nDate Reported: 11/01/2023\nBalance: $2,450\nOriginal Amount: $1,875\n\nEstimated date of removal: 03/2030\n\nReported by: Experian\n\nThis account is scheduled to continue on record until 03/2030.",
+  "fields": {
+    "original_creditor": {
+      "value": "EXAMPLE BANK NA",
+      "confidence": "High",
+      "source_text": "Original Creditor: EXAMPLE BANK NA"
+    },
+    "furnisher_or_collector": {
+      "value": "ABC COLLECTIONS INC",
+      "confidence": "High",
+      "source_text": "Creditor: ABC COLLECTIONS INC"
+    },
+    "account_type": {
+      "value": "collection",
+      "confidence": "High",
+      "source_text": "Account Type: Collection"
+    },
+    "date_opened": {
+      "value": "2023-03-15",
+      "confidence": "High",
+      "source_text": "Date Opened: 03/15/2023"
+    },
+    "date_reported_or_updated": {
+      "value": "2023-11-01",
+      "confidence": "High",
+      "source_text": "Date Reported: 11/01/2023"
+    },
+    "dofd": {
+      "value": "2019-01-20",
+      "confidence": "High",
+      "source_text": "Date of First Delinquency: 01/20/2019"
+    },
+    "estimated_removal_date": {
+      "value": "2030-03-01",
+      "confidence": "Medium",
+      "source_text": "Estimated date of removal: 03/2030"
+    },
+    "bureau": {
+      "value": "Experian",
+      "confidence": "High",
+      "source_text": "Reported by: Experian"
+    }
+  },
+  "expected_flags": [
+    "B1",
+    "A2"
+  ],
+  "notes": "This sample demonstrates multiple re-aging indicators: The date opened (2023) is over 4 years after the DOFD (2019), and the estimated removal date (2030) is 11 years after the original delinquency instead of the legally mandated ~7 years."
+}

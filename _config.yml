@@ -1,0 +1,20 @@
+# GitHub Pages configuration
+title: Debt Re-Aging Case Factory
+description: A free, privacy-preserving tool for detecting debt re-aging violations in credit reports
+author: Mukund Thiru
+baseurl: "/Debt-Re-Aging"
+url: "https://contactmukundthiru-cyber.github.io"
+
+# Theme
+remote_theme: pages-themes/cayman@v0.2.0
+
+# Plugins
+plugins:
+  - jekyll-remote-theme
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Social
+github_username: contactmukundthiru-cyber

@@ -1,0 +1,49 @@
+{
+  "name": "Sample Case 7: Utility Collection - Borderline Case",
+  "description": "A de-identified utility collection that is borderline - dates are close but may warrant review.",
+  "raw_text": "UTILITY COLLECTION\n\nCollection Company: UTILITY RECOVERY SPECIALISTS\nOriginal Utility: CITY POWER & WATER\nType: Utility Collection Account\n\nDate Placed: 09/15/2021\nOriginal Default: 04/20/2020\nLast Update: 11/2024\n\nAmount: $342\nCurrent: $342\n\nScheduled Removal: 04/2027\n\nCredit Bureau: TransUnion",
+  "fields": {
+    "original_creditor": {
+      "value": "CITY POWER & WATER",
+      "confidence": "High",
+      "source_text": "Original Utility: CITY POWER & WATER"
+    },
+    "furnisher_or_collector": {
+      "value": "UTILITY RECOVERY SPECIALISTS",
+      "confidence": "High",
+      "source_text": "Collection Company: UTILITY RECOVERY SPECIALISTS"
+    },
+    "account_type": {
+      "value": "collection",
+      "confidence": "High",
+      "source_text": "Type: Utility Collection Account"
+    },
+    "date_opened": {
+      "value": "2021-09-15",
+      "confidence": "High",
+      "source_text": "Date Placed: 09/15/2021"
+    },
+    "date_reported_or_updated": {
+      "value": "2024-11-01",
+      "confidence": "Medium",
+      "source_text": "Last Update: 11/2024"
+    },
+    "dofd": {
+      "value": "2020-04-20",
+      "confidence": "High",
+      "source_text": "Original Default: 04/20/2020"
+    },
+    "estimated_removal_date": {
+      "value": "2027-04-01",
+      "confidence": "High",
+      "source_text": "Scheduled Removal: 04/2027"
+    },
+    "bureau": {
+      "value": "TransUnion",
+      "confidence": "High",
+      "source_text": "Credit Bureau: TransUnion"
+    }
+  },
+  "expected_flags": [],
+  "notes": "This utility collection is properly dated. While the date opened (09/2021) is 17 months after DOFD (04/2020), this is within the 24-month threshold and represents a reasonable time for debt to be placed in collections. The removal date of 04/2027 correctly aligns with 7 years from the DOFD."
+}

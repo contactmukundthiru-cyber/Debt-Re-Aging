@@ -1,0 +1,52 @@
+{
+  "name": "Sample Case 5: Medical Collection with Timeline Issues",
+  "description": "A de-identified medical collection showing potential re-aging patterns.",
+  "raw_text": "MEDICAL COLLECTION\n\nCollection Agency: HEALTHCARE REVENUE SERVICES\nOriginal Provider: REGIONAL MEDICAL GROUP\nAccount Type: Medical Collection\n\nAccount Opened: 05/10/2022\nFirst Delinquent: 08/15/2018\nLast Activity: 08/15/2018\nDate Reported: 09/2024\n\nOriginal Amount: $456\nCurrent Balance: $456\n\nWill be removed: 05/2029\n\nBureau: Experian",
+  "fields": {
+    "original_creditor": {
+      "value": "REGIONAL MEDICAL GROUP",
+      "confidence": "High",
+      "source_text": "Original Provider: REGIONAL MEDICAL GROUP"
+    },
+    "furnisher_or_collector": {
+      "value": "HEALTHCARE REVENUE SERVICES",
+      "confidence": "High",
+      "source_text": "Collection Agency: HEALTHCARE REVENUE SERVICES"
+    },
+    "account_type": {
+      "value": "collection",
+      "confidence": "High",
+      "source_text": "Account Type: Medical Collection"
+    },
+    "date_opened": {
+      "value": "2022-05-10",
+      "confidence": "High",
+      "source_text": "Account Opened: 05/10/2022"
+    },
+    "date_reported_or_updated": {
+      "value": "2024-09-01",
+      "confidence": "Medium",
+      "source_text": "Date Reported: 09/2024"
+    },
+    "dofd": {
+      "value": "2018-08-15",
+      "confidence": "High",
+      "source_text": "First Delinquent: 08/15/2018"
+    },
+    "estimated_removal_date": {
+      "value": "2029-05-01",
+      "confidence": "Medium",
+      "source_text": "Will be removed: 05/2029"
+    },
+    "bureau": {
+      "value": "Experian",
+      "confidence": "High",
+      "source_text": "Bureau: Experian"
+    }
+  },
+  "expected_flags": [
+    "B1",
+    "A2"
+  ],
+  "notes": "This medical collection shows: (1) Date opened (2022) is almost 4 years after DOFD (2018), indicating the collection agency is using their own open date; (2) Removal date (2029) is 7 years from their open date, not from DOFD - it should be around 2025-2026 based on DOFD. This debt may have already exceeded the proper reporting period."
+}

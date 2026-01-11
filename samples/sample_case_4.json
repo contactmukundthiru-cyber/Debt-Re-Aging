@@ -1,0 +1,52 @@
+{
+  "name": "Sample Case 4: Multiple Red Flags - Severe Re-aging",
+  "description": "A de-identified example showing multiple timeline inconsistencies indicating severe debt re-aging.",
+  "raw_text": "COLLECTION ACCOUNT\n\nFurnisher: AGGRESSIVE RECOVERY LLC\nOriginal Creditor: OLD BANK CORP\nAccount Type: Collection\n\nDate Account Opened: 11/20/2024\nLast Reported: 12/01/2024\nAccount Status: Open Collection\n\nOriginal Amount: $1,200\nCurrent Balance: $2,875\n\nNo DOFD Listed\n\nScheduled to remain until: 11/2031\n\nReported by: TransUnion",
+  "fields": {
+    "original_creditor": {
+      "value": "OLD BANK CORP",
+      "confidence": "High",
+      "source_text": "Original Creditor: OLD BANK CORP"
+    },
+    "furnisher_or_collector": {
+      "value": "AGGRESSIVE RECOVERY LLC",
+      "confidence": "High",
+      "source_text": "Furnisher: AGGRESSIVE RECOVERY LLC"
+    },
+    "account_type": {
+      "value": "collection",
+      "confidence": "High",
+      "source_text": "Account Type: Collection"
+    },
+    "date_opened": {
+      "value": "2024-11-20",
+      "confidence": "High",
+      "source_text": "Date Account Opened: 11/20/2024"
+    },
+    "date_reported_or_updated": {
+      "value": "2024-12-01",
+      "confidence": "High",
+      "source_text": "Last Reported: 12/01/2024"
+    },
+    "dofd": {
+      "value": null,
+      "confidence": "Low",
+      "source_text": "No DOFD Listed"
+    },
+    "estimated_removal_date": {
+      "value": "2031-11-01",
+      "confidence": "Medium",
+      "source_text": "Scheduled to remain until: 11/2031"
+    },
+    "bureau": {
+      "value": "TransUnion",
+      "confidence": "High",
+      "source_text": "Reported by: TransUnion"
+    }
+  },
+  "expected_flags": [
+    "A1",
+    "B2"
+  ],
+  "notes": "This sample shows multiple red flags: (1) No DOFD is reported on a collection account, (2) A very recent date opened (2024), (3) Removal date 7 years from open date rather than DOFD, (4) Balance has more than doubled from original amount. This pattern is consistent with debt re-aging."
+}

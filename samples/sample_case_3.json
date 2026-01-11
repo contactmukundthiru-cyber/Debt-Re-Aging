@@ -1,0 +1,49 @@
+{
+  "name": "Sample Case 3: Charge-Off with Proper Dates",
+  "description": "A de-identified example showing a charge-off account with properly reported dates (no flags expected).",
+  "raw_text": "CHARGE-OFF ACCOUNT\n\nCreditor Name: FIRST NATIONAL CREDIT UNION\nAccount Type: Charge-Off\nAccount Status: Closed\n\nDate Opened: 06/15/2017\nDate of First Delinquency: 02/28/2019\nDate of Last Activity: 02/28/2019\nCharge-Off Date: 08/15/2019\n\nOriginal Balance: $3,200\nCurrent Balance: $3,200\n\nEstimated Removal Date: 02/2026\n\nReported by: Equifax",
+  "fields": {
+    "original_creditor": {
+      "value": "FIRST NATIONAL CREDIT UNION",
+      "confidence": "High",
+      "source_text": "Creditor Name: FIRST NATIONAL CREDIT UNION"
+    },
+    "furnisher_or_collector": {
+      "value": "FIRST NATIONAL CREDIT UNION",
+      "confidence": "High",
+      "source_text": "Creditor Name: FIRST NATIONAL CREDIT UNION"
+    },
+    "account_type": {
+      "value": "charge_off",
+      "confidence": "High",
+      "source_text": "Account Type: Charge-Off"
+    },
+    "date_opened": {
+      "value": "2017-06-15",
+      "confidence": "High",
+      "source_text": "Date Opened: 06/15/2017"
+    },
+    "date_reported_or_updated": {
+      "value": "2019-08-15",
+      "confidence": "Medium",
+      "source_text": "Charge-Off Date: 08/15/2019"
+    },
+    "dofd": {
+      "value": "2019-02-28",
+      "confidence": "High",
+      "source_text": "Date of First Delinquency: 02/28/2019"
+    },
+    "estimated_removal_date": {
+      "value": "2026-02-01",
+      "confidence": "High",
+      "source_text": "Estimated Removal Date: 02/2026"
+    },
+    "bureau": {
+      "value": "Equifax",
+      "confidence": "High",
+      "source_text": "Reported by: Equifax"
+    }
+  },
+  "expected_flags": [],
+  "notes": "This sample shows a properly reported charge-off account. The DOFD is 02/2019, and the estimated removal date of 02/2026 is approximately 7 years later, which is correct. The date opened (2017) is before the DOFD, which is proper."
+}

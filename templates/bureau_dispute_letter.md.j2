@@ -1,0 +1,129 @@
+# Credit Bureau Dispute Letter
+
+**Case Reference:** {{ case_id }}
+**Date:** {{ generated_date | format_date }}
+
+---
+
+**FROM:**
+{% if consumer.name %}
+{{ consumer.name }}
+{% else %}
+[YOUR NAME]
+{% endif %}
+{% if consumer.address %}
+{{ consumer.address }}
+{% else %}
+[YOUR ADDRESS]
+[CITY, STATE ZIP]
+{% endif %}
+
+**TO:**
+{% if fields.bureau == 'Experian' %}
+Experian
+P.O. Box 4500
+Allen, TX 75013
+{% elif fields.bureau == 'Equifax' %}
+Equifax Information Services LLC
+P.O. Box 740256
+Atlanta, GA 30374
+{% elif fields.bureau == 'TransUnion' %}
+TransUnion LLC Consumer Dispute Center
+P.O. Box 2000
+Chester, PA 19016
+{% else %}
+[CREDIT BUREAU NAME]
+[CREDIT BUREAU ADDRESS]
+{% endif %}
+
+---
+
+**Re: Dispute of Inaccurate Information - Request for Investigation and Correction**
+
+To Whom It May Concern:
+
+I am writing pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681 et seq., to dispute information appearing on my credit report that I believe to be inaccurate.
+
+## Account Information Being Disputed
+
+| Field | Reported Value |
+|-------|----------------|
+| Furnisher/Creditor | {{ fields.furnisher_or_collector or fields.original_creditor or '[CREDITOR NAME]' }} |
+{% if fields.original_creditor and fields.furnisher_or_collector %}
+| Original Creditor | {{ fields.original_creditor }} |
+{% endif %}
+| Account Type | {{ fields.account_type or '[ACCOUNT TYPE]' }} |
+| Date Opened as Reported | {{ fields.date_opened | format_date if fields.date_opened else '[DATE OPENED]' }} |
+{% if fields.dofd %}
+| Date of First Delinquency | {{ fields.dofd | format_date }} |
+{% endif %}
+| Estimated Removal Date | {{ fields.estimated_removal_date | format_date if fields.estimated_removal_date else '[REMOVAL DATE]' }} |
+
+## Basis for Dispute
+
+I am disputing this account because the reported information appears to contain timeline inaccuracies that may constitute improper debt re-aging or misreporting of the account's history.
+
+{% if has_flags %}
+Specifically, I have identified the following concerns:
+
+{% for flag in flags %}
+**{{ loop.index }}. {{ flag.rule_name }}**
+
+{{ flag.explanation }}
+
+{% endfor %}
+{% else %}
+I request verification of the accuracy of all dates and information associated with this account.
+{% endif %}
+
+## Request for Action
+
+Pursuant to the FCRA, I request that you:
+
+1. **Conduct a reasonable investigation** into the accuracy of the disputed information within 30 days of receiving this dispute.
+
+2. **Contact the furnisher** of this information to verify its accuracy, including all reported dates.
+
+3. **Provide me with the results** of your investigation in writing, including:
+   - A description of the procedure used to determine accuracy
+   - The business name and address of any furnisher contacted
+   - A notice that I may request a description of the method used to verify
+
+4. **Delete or correct** any information that cannot be verified as accurate.
+
+5. **Provide a free copy** of my credit report if any changes are made.
+
+## Documentation
+
+I am enclosing copies of relevant documentation to support this dispute. Please see the attached checklist for a list of enclosed materials.
+
+## Legal Notice
+
+Please be advised that under the FCRA:
+
+- You must conduct a reasonable investigation within 30 days (15 U.S.C. § 1681i(a)(1))
+- Failure to investigate or correct inaccurate information may constitute a willful violation
+- I reserve all rights to pursue statutory and actual damages for any violations
+
+I request that you process this dispute promptly and provide me with a written response regarding the results of your investigation.
+
+Sincerely,
+
+{% if consumer.name %}
+{{ consumer.name }}
+{% else %}
+[YOUR SIGNATURE]
+[YOUR PRINTED NAME]
+{% endif %}
+
+---
+
+**Enclosures:** See Attachments Checklist
+
+**Sent via:** Certified Mail, Return Receipt Requested
+
+---
+
+*This letter template was generated for informational purposes only and does not constitute legal advice.*
+
+*Case Reference: {{ case_id }}*

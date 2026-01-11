@@ -1,0 +1,51 @@
+{
+  "name": "Sample Case 2: Collection Account Missing DOFD",
+  "description": "A de-identified example showing a collection account without a reported Date of First Delinquency, making it impossible to verify proper removal timing.",
+  "raw_text": "COLLECTION ACCOUNT\n\nReporting Agency: TransUnion\n\nFurnisher: NATIONAL RECOVERY SERVICES\nOriginal Account: REGIONAL MEDICAL CENTER\nAccount Type: Medical Collection\n\nDate Account Opened: 08/22/2024\nLast Reported: 10/15/2024\nAccount Status: Collection\n\nOriginal Balance: $892\nCurrent Balance: $892\n\nComments: Placed for collection\n\nScheduled to remain on file until: 08/2031\n\nNo Date of First Delinquency reported.",
+  "fields": {
+    "original_creditor": {
+      "value": "REGIONAL MEDICAL CENTER",
+      "confidence": "Medium",
+      "source_text": "Original Account: REGIONAL MEDICAL CENTER"
+    },
+    "furnisher_or_collector": {
+      "value": "NATIONAL RECOVERY SERVICES",
+      "confidence": "High",
+      "source_text": "Furnisher: NATIONAL RECOVERY SERVICES"
+    },
+    "account_type": {
+      "value": "collection",
+      "confidence": "High",
+      "source_text": "Account Type: Medical Collection"
+    },
+    "date_opened": {
+      "value": "2024-08-22",
+      "confidence": "High",
+      "source_text": "Date Account Opened: 08/22/2024"
+    },
+    "date_reported_or_updated": {
+      "value": "2024-10-15",
+      "confidence": "High",
+      "source_text": "Last Reported: 10/15/2024"
+    },
+    "dofd": {
+      "value": null,
+      "confidence": "Low",
+      "source_text": "No Date of First Delinquency reported."
+    },
+    "estimated_removal_date": {
+      "value": "2031-08-01",
+      "confidence": "Medium",
+      "source_text": "Scheduled to remain on file until: 08/2031"
+    },
+    "bureau": {
+      "value": "TransUnion",
+      "confidence": "High",
+      "source_text": "Reporting Agency: TransUnion"
+    }
+  },
+  "expected_flags": [
+    "B2"
+  ],
+  "notes": "This sample shows a common issue with collection accounts - no DOFD is reported, but the account shows a recent 'date opened' (2024). Without the DOFD, consumers cannot verify whether the removal date (2031) is correct. The original debt may have become delinquent years earlier."
+}

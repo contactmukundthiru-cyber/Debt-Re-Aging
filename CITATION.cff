@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Debt Re-Aging Case Factory"
+abstract: "A privacy-preserving tool for detecting potential debt re-aging in credit reports and generating standardized dispute documentation."
+authors:
+  - family-names: "Thiru"
+    given-names: "Mukund"
+    email: "contactmukundthiru1@gmail.com"
+version: "1.0.0"
+date-released: "2024-01-01"
+license: MIT
+repository-code: "https://github.com/contactmukundthiru-cyber/Debt-Re-Aging"
+keywords:
+  - credit-reporting
+  - consumer-protection
+  - debt-collection
+  - fcra
+  - fair-credit-reporting-act
+  - debt-re-aging
+  - dispute-letters
+  - legal-aid
+  - python
+  - streamlit
