@@ -5,10 +5,13 @@ Uses regex patterns and heuristics to identify key timeline data.
 
 import re
 import difflib
+import logging
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field, asdict
 from app.utils import normalize_date, validate_iso_date
 
+# Configure logging
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ExtractedField:
@@ -21,27 +24,27 @@ class ExtractedField:
 
 
 @dataclass
-    23|class ParsedFields:
-    24|    """Container for all parsed fields from a credit report snippet."""
-    25|    original_creditor: ExtractedField = None
-    26|    furnisher_or_collector: ExtractedField = None
-    27|    account_type: ExtractedField = None
-    28|    account_status: ExtractedField = None
-    29|    current_balance: ExtractedField = None
-    30|    date_opened: ExtractedField = None
-    31|    date_reported_or_updated: ExtractedField = None
-    32|    dofd: ExtractedField = None
-    33|    estimated_removal_date: ExtractedField = None
-    34|    bureau: ExtractedField = None
-    35|    raw_text: str = ""
+class ParsedFields:
+    """Container for all parsed fields from a credit report snippet."""
+    original_creditor: ExtractedField = None
+    furnisher_or_collector: ExtractedField = None
+    account_type: ExtractedField = None
+    account_status: ExtractedField = None
+    current_balance: ExtractedField = None
+    date_opened: ExtractedField = None
+    date_reported_or_updated: ExtractedField = None
+    dofd: ExtractedField = None
+    estimated_removal_date: ExtractedField = None
+    bureau: ExtractedField = None
+    raw_text: str = ""
 
-    36|    def to_dict(self) -> Dict[str, Any]:
-    37|        """Convert to dictionary for serialization."""
-    38|        result = {}
-    39|        for key in ['original_creditor', 'furnisher_or_collector', 'account_type',
-    40|                    'account_status', 'current_balance',
-    41|                    'date_opened', 'date_reported_or_updated', 'dofd',
-    42|                    'estimated_removal_date', 'bureau']:
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        result = {}
+        for key in ['original_creditor', 'furnisher_or_collector', 'account_type',
+                    'account_status', 'current_balance',
+                    'date_opened', 'date_reported_or_updated', 'dofd',
+                    'estimated_removal_date', 'bureau']:
             field_obj = getattr(self, key)
             if field_obj:
                 result[key] = {
@@ -243,22 +246,29 @@ class CreditReportParser:
             end_pos=0
         )
 
-    def _extract_account_type(self, text: str) -> ExtractedField:
-        # ... existing _extract_account_type ...
-
     def _extract_status(self, text: str) -> ExtractedField:
-        """Extract account status (paid, settled, etc.)."""
-        for pattern, _ in self.status_patterns:
-            match = pattern.search(text)
-            if match:
-                status = match.group(1).lower()
-                return ExtractedField(
-                    value=status,
-                    confidence='High',
-                    source_text=match.group(),
-                    start_pos=match.start(),
-                    end_pos=match.end()
-                )
+        """Extract account status with lexical fuzzy matching."""
+        status_keywords = {
+            'paid': ['paid', 'paid in full', 'zero balance', 'settled'],
+            'delinquent': ['delinquent', 'past due', 'late', '30 days', '60 days', '90 days'],
+            'collection': ['collection', 'placed for collection', 'transfer', 'sold'],
+            'charge_off': ['charge-off', 'charged off', 'profit and loss'],
+            'current': ['current', 'on time', 'active']
+        }
+        
+        for canonical, variants in status_keywords.items():
+            for variant in variants:
+                if variant in text.lower():
+                    # Find exact match position
+                    idx = text.lower().find(variant)
+                    return ExtractedField(
+                        value=canonical,
+                        confidence='High',
+                        source_text=text[idx:idx+len(variant)],
+                        start_pos=idx,
+                        end_pos=idx+len(variant)
+                    )
+        
         return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
 
     def _extract_balance(self, text: str) -> ExtractedField:
@@ -277,14 +287,13 @@ class CreditReportParser:
         return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
 
     def _extract_date_field(self, text: str, patterns: List[re.Pattern]) -> ExtractedField:
-        """Extract a date field using multiple patterns."""
+        """Extract a date field using regex + fuzzy anchor matching."""
+        # Method 1: Regex
         for pattern in patterns:
             match = pattern.search(text)
             if match:
-                # Get the captured date group
                 date_str = match.group(1) if match.lastindex else match.group()
                 normalized, confidence = normalize_date(date_str)
-
                 return ExtractedField(
                     value=normalized,
                     confidence=confidence,
@@ -293,13 +302,41 @@ class CreditReportParser:
                     end_pos=match.end()
                 )
 
-        return ExtractedField(
-            value=None,
-            confidence='Low',
-            source_text='',
-            start_pos=0,
-            end_pos=0
-        )
+        # Method 2: Fuzzy Anchor Word Matching
+        # This helps when the colon or whitespace is garbled
+        anchor_words = {
+            'date_opened': ['opened', 'open date', 'dt open'],
+            'date_reported_or_updated': ['reported', 'updated', 'as of', 'last report'],
+            'dofd': ['delinquency', 'dofd', 'first delinquent', 'delq'],
+            'estimated_removal_date': ['removal', 'drops off', 'on record', 'remove']
+        }
+        
+        # We need to know which field we are currently extracting
+        # This is a bit of a hack since patterns doesn't tell us the name
+        current_field = None
+        for name, p_list in self.date_field_patterns.items():
+            if patterns == p_list:
+                current_field = name
+                break
+        
+        if current_field:
+            for anchor in anchor_words.get(current_field, []):
+                idx = text.lower().find(anchor)
+                if idx != -1:
+                    # Look for a date in the 50 characters following the anchor
+                    window = text[idx:idx+50]
+                    date_match = self.date_regex.search(window)
+                    if date_match:
+                        normalized, confidence = normalize_date(date_match.group())
+                        return ExtractedField(
+                            value=normalized,
+                            confidence='Medium', # Lower because it's a fuzzy window
+                            source_text=f"{anchor}...{date_match.group()}",
+                            start_pos=idx,
+                            end_pos=idx + date_match.end()
+                        )
+
+        return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
 
     def _extract_creditor(self, text: str) -> ExtractedField:
         """Extract original creditor name."""
@@ -366,8 +403,20 @@ def parse_credit_report(text: str) -> ParsedFields:
     Returns:
         ParsedFields object
     """
+    logger.info(f"Starting field parsing for text of length {len(text)}")
     parser = CreditReportParser()
-    return parser.parse(text)
+    result = parser.parse(text)
+    
+    high_conf = 0
+    for f_name in ['original_creditor', 'furnisher_or_collector', 'account_type', 
+                  'account_status', 'current_balance', 'date_opened', 
+                  'date_reported_or_updated', 'dofd', 'estimated_removal_date', 'bureau']:
+        f_obj = getattr(result, f_name)
+        if f_obj and f_obj.confidence == 'High':
+            high_conf += 1
+            
+    logger.info(f"Parsing complete. Found {high_conf} high-confidence fields.")
+    return result
 
 
 def fields_to_editable_dict(parsed: ParsedFields) -> Dict[str, Dict[str, Any]]:

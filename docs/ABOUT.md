@@ -61,18 +61,36 @@ This tool is designed for:
 - Always verify extracted information before submitting disputes
 - **This tool is NOT legal advice**
 
-## Credits & Attribution
+## About the Developer
 
-This tool was built by **Mukund Thiru**, a high school student, as part of an independent research project on enforcement gaps in credit reporting.
+This tool was built by **[Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)**, a student researcher passionate about using technology to help people.
 
-If you use this tool in your work, please cite it appropriately. See the CITATION.cff file for proper citation format.
+### Mission
+
+The goal of this project is simple: make it easier for everyday people to fight back against unfair credit reporting practices. Millions of Americans have errors on their credit reports, but most don't have the time, knowledge, or resources to dispute them effectively.
+
+By automating the detection process and generating proper dispute letters, this tool aims to:
+
+- **Level the playing field** between consumers and large credit bureaus
+- **Support legal aid organizations** that help people who can't afford attorneys
+- **Expose systematic problems** in how debts are reported and transferred
+- **Make the dispute process accessible** to anyone, not just legal professionals
+
+### Why This Matters
+
+Credit report errors can cost people jobs, housing, and loans. Debt re-aging is particularly harmful because it extends the damage for years beyond what the law allows. Yet enforcement is weak, and most violations go unchallenged simply because they're hard to detect.
+
+This tool is one small step toward fixing that.
 
 ## Contact & Support
 
 For questions, feedback, or to report issues:
 
-- GitHub: https://github.com/contactmukundthiru-cyber
-- Email: contactmukundthiru1@gmail.com
+- **Portfolio**: [contactmukundthiru-cyber.github.io/Personal-Portfolio](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
+- **GitHub**: [github.com/contactmukundthiru-cyber](https://github.com/contactmukundthiru-cyber)
+- **Email**: contactmukundthiru1@gmail.com
+
+If you use this tool in your work, please cite it appropriately. See the CITATION.cff file for proper citation format.
 
 ## License
 

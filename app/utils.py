@@ -16,17 +16,36 @@ from dateutil.relativedelta import relativedelta
 
 def normalize_date(date_str: str) -> Tuple[Optional[str], str]:
     """
-    Normalize a date string to ISO format (YYYY-MM-DD).
-
-    Returns:
-        Tuple of (normalized_date or None, confidence level)
+    Normalize a date string to ISO format (YYYY-MM-DD) with fuzzy OCR correction.
+    
+    Handles common OCR errors:
+    - 'O' or 'o' instead of '0'
+    - 'I' or 'l' instead of '1'
+    - 'S' instead of '5'
+    - 'B' instead of '8'
     """
     if not date_str or not isinstance(date_str, str):
         return None, "Low"
 
+    # Stage 1: Fuzzy OCR Correction
+    original_str = date_str
+    # Only perform replacement if the string looks like it's trying to be a date
+    # (contains slashes, dashes, or a mix of digits and suspicious letters)
+    if any(c in date_str for c in '/-') or sum(c.isdigit() for c in date_str) > 2:
+        # Save month names before replacement
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        # Replacement map for common OCR errors
+        # Note: We don't replace 'S' -> '5' globally because of 'Sep'
+        date_str = date_str.replace('O', '0').replace('o', '0')
+        date_str = date_str.replace('I', '1').replace('l', '1')
+        date_str = date_str.replace('|', '1')
+        # Only replace S if it's not part of a month name
+        if not any(m in original_str for m in months):
+            date_str = date_str.replace('S', '5').replace('s', '5')
+
     date_str = date_str.strip()
 
-    # Common date patterns
+    # Stage 2: Pattern Matching
     patterns = [
         # ISO format
         (r'^(\d{4})-(\d{2})-(\d{2})$', '%Y-%m-%d', 'High'),
@@ -55,12 +74,28 @@ def normalize_date(date_str: str) -> Tuple[Optional[str], str]:
                 if '%d' not in fmt:
                     parsed = datetime.strptime(date_str, fmt)
                     # Default to first of month
-                    return parsed.strftime('%Y-%m-01'), confidence
+                    return parsed.strftime('%Y-%m-01'), "Medium" if confidence == "High" else "Low"
                 else:
                     parsed = datetime.strptime(date_str, fmt)
                     return parsed.strftime('%Y-%m-%d'), confidence
             except ValueError:
                 continue
+
+    # Stage 3: Brute force digit extraction if patterns fail
+    digits = re.sub(r'[^0-9]', '', date_str)
+    if len(digits) == 8: # MMDDYYYY
+        try:
+            m, d, y = int(digits[:2]), int(digits[2:4]), int(digits[4:])
+            if 1 <= m <= 12 and 1 <= d <= 31 and 1900 < y < 2100:
+                return f"{y}-{m:02d}-{d:02d}", "Low"
+        except: pass
+    elif len(digits) == 6: # MMDDYY
+        try:
+            m, d, y = int(digits[:2]), int(digits[2:4]), int(digits[4:])
+            year = 2000 + y if y < 50 else 1900 + y
+            if 1 <= m <= 12 and 1 <= d <= 31:
+                return f"{year}-{m:02d}-{d:02d}", "Low"
+        except: pass
 
     # Try to extract any year from the string
     year_match = re.search(r'\b(19\d{2}|20\d{2})\b', date_str)
@@ -178,6 +213,9 @@ def cleanup_old_cases(output_dir: str, max_age_hours: int = 24):
     max_age_seconds = max_age_hours * 3600
 
     for item in os.listdir(output_dir):
+        if item == 'metrics':
+            continue
+            
         item_path = os.path.join(output_dir, item)
         try:
             if os.path.isfile(item_path):
@@ -203,3 +241,36 @@ def estimate_removal_date(dofd: str) -> Optional[str]:
         return removal_date.strftime('%Y-%m-%d')
     except (ValueError, TypeError):
         return None
+
+def list_historical_cases(output_dir: str) -> list:
+    """
+    List all generated cases in the output directory.
+    Returns a list of dicts with case info.
+    """
+    if not os.path.exists(output_dir):
+        return []
+
+    import yaml
+    cases = []
+    for item in os.listdir(output_dir):
+        case_dir = os.path.join(output_dir, item)
+        if os.path.isdir(case_dir) and item != 'metrics':
+            case_file = os.path.join(case_dir, 'case.yaml')
+            if os.path.exists(case_file):
+                try:
+                    with open(case_file, 'r', encoding='utf-8') as f:
+                        data = yaml.safe_load(f)
+                        cases.append({
+                            'id': data.get('case_id', item),
+                            'date': data.get('generated', 'Unknown'),
+                            'consumer': data.get('consumer_info', {}).get('name', 'N/A'),
+                            'flags': data.get('summary', {}).get('total_flags', 0),
+                            'path': case_dir
+                        })
+                except Exception:
+                    continue
+    
+    # Sort by date descending
+    cases.sort(key=lambda x: x['date'], reverse=True)
+    return cases
+

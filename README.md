@@ -16,14 +16,29 @@ The tool helps legal aid organizations, consumer advocacy groups, and pro bono c
 
 ## Key Features
 
-- **🚀 Advanced OCR (OpenCV)**: Professional image preprocessing (Adaptive Thresholding, Bilateral Filtering) for higher accuracy from mobile photos or scans.
-- **⚖️ State SOL Integration**: Built-in database of Statute of Limitations for all 50 states to detect time-barred debts.
-- **🧠 Intelligent Rule Engine**: 10+ automated checks for re-aging, duplicate reporting, future dates, and balance inconsistencies.
-- **📄 Professional Export**: Generate dispute letters in standardized Markdown, printable HTML, or PDF format.
-- **📊 Metrics Dashboard**: Track organization-wide case volume and flag rates locally and privately.
-- **👯 Cross-Bureau Analysis**: Compare dates across Experian, Equifax, and TransUnion to find material reporting discrepancies.
-- **📂 Session Persistence**: Save your progress as a `.json` file and resume cases later without re-uploading documents.
-- **🛡️ Privacy First**: 100% local processing. Includes a "Privacy Mode" to mask PII during reviews and automated cleanup of output files.
+### Core Analysis
+- **Advanced OCR (OpenCV)**: Professional image preprocessing for higher accuracy from mobile photos or scans
+- **State SOL Integration**: Built-in database of Statute of Limitations for all 50 states
+- **Intelligent Rule Engine**: 20+ automated checks for re-aging, duplicate reporting, and violations
+- **Multi-Account Parser**: Analyze entire credit reports with automatic account segmentation
+- **Cross-Bureau Analysis**: Compare dates across Experian, Equifax, and TransUnion
+
+### Professional Output
+- **Dispute Letter Generator**: FCRA-compliant letters in Markdown, DOCX, and PDF formats
+- **Debt Validation Letters**: FDCPA-compliant validation request letters
+- **Case Documentation**: Complete case files with evidence summaries
+
+### Organizational Tools
+- **Case Management**: Save, load, and track cases with unique IDs
+- **Deadline Tracker**: Monitor 30-day response deadlines with reminders
+- **Analytics Dashboard**: Track success rates, patterns, and organizational metrics
+- **REST API**: Integrate with Legal Server, Salesforce, or custom CMS
+
+### User Experience
+- **Client Portal Mode**: Simplified interface for consumer self-service
+- **Multi-Language Support**: English and Spanish interfaces
+- **Training Materials**: Built-in tutorials and documentation
+- **Privacy First**: 100% local processing, no cloud, automated cleanup
 
 ---
 
@@ -39,20 +54,48 @@ git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git
 cd Debt-Re-Aging
 
 # Start with Docker
+# (Note: If you get a 'Permission Denied' error, see the Troubleshooting section below)
 docker-compose up
 
 # Open http://localhost:8501 in your browser
 ```
 
-### Option 2: Python
+---
+
+## Troubleshooting
+
+### Docker Permission Denied
+If you see a `Permission denied` error when running Docker commands on Linux/WSL, your user needs to be added to the `docker` group:
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+Also ensure the Docker service is running: `sudo service docker start`
+
+---
+
+### Option 2: Python (Local Setup)
+
+The easiest way to set up the project locally is using the provided setup script:
 
 ```bash
 # Clone the repository
 git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git
 cd Debt-Re-Aging
 
+# Run the setup script
+./setup.sh
+
+# Start the application
+./start.sh
+```
+
+Alternatively, you can set it up manually:
+
+```bash
 # Create virtual environment
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
@@ -115,6 +158,41 @@ Developers can verify the logic using the built-in test suite:
 
 ---
 
+## For Organizations
+
+### Quick Deployment
+
+```bash
+# Windows standalone executable
+cd installer
+build_windows.bat
+# Run dist/DebtReagingCaseFactory/DebtReagingCaseFactory.exe
+```
+
+### Integration Options
+
+1. **Standalone Desktop**: Run the Windows executable on staff computers
+2. **Shared Server**: Deploy on internal network for team access
+3. **API Integration**: Connect to your existing case management system
+
+### Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [Training Materials](docs/TRAINING_MATERIALS.md) | Staff training guide with video script |
+| [Institutional Adoption](docs/INSTITUTIONAL_ADOPTION.md) | Deployment roadmap and ROI analysis |
+| [Outreach Templates](docs/OUTREACH_TEMPLATES.md) | Emails, presentations, partnership proposals |
+
+### Success Metrics
+
+Track these KPIs in the Analytics Dashboard:
+- Cases processed per month
+- Dispute success rate by type
+- Average resolution time
+- Total debt amount removed from reports
+
+---
+
 ## Disclaimer
 
 **This tool is NOT legal advice.**
@@ -125,8 +203,12 @@ It is designed for informational purposes only. The analysis is based on general
 
 ## Contact & Credits
 
-- **Author**: Mukund Thiru
+- **Author**: [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
 - **Email**: contactmukundthiru1@gmail.com
 - **GitHub**: https://github.com/contactmukundthiru-cyber
+
+### Mission
+
+This tool exists to help everyday people fight back against unfair credit reporting. Credit report errors cost people jobs, housing, and loans - and most violations go unchallenged because they're hard to detect. This is one step toward fixing that.
 
 *Built with care for consumers and the organizations that serve them.*

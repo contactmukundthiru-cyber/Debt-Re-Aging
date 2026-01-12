@@ -1,0 +1,362 @@
+{
+  "A1": {
+    "name": "Estimated Removal Date Exceeds 8 Years from Date Opened",
+    "severity": "high",
+    "description": "The estimated removal date is more than 8 years after the reported date opened.",
+    "why_it_matters": "Under the Fair Credit Reporting Act (FCRA), most negative items must be removed from your credit report after 7 years from the date of first delinquency (DOFD). If the removal date is more than 8 years from when the account was opened, this could indicate the account is being improperly aged or the dates are inaccurate.",
+    "suggested_evidence": [
+      "Original account opening documentation",
+      "Payment history showing actual delinquency date",
+      "Prior credit reports showing different dates",
+      "Correspondence from original creditor"
+    ],
+    "legal_citations": ["FCRA_605_a", "FCRA_623_a1", "FCRA_616"]
+  },
+  "A2": {
+    "name": "Estimated Removal Inconsistent with DOFD + 7 Years",
+    "severity": "high",
+    "description": "The estimated removal date does not align with the Date of First Delinquency plus 7 years.",
+    "why_it_matters": "The credit reporting time limit is calculated from the Date of First Delinquency (DOFD), not from when a collection agency acquired the debt. If the removal date suggests a different calculation, the debt may have been illegally re-aged to extend how long it stays on your credit report.",
+    "suggested_evidence": [
+      "Documentation showing actual DOFD",
+      "Prior credit reports with different removal dates",
+      "Account statements showing payment history",
+      "Letters from original creditor about account status"
+    ],
+    "legal_citations": ["FCRA_605_a", "FCRA_623_a5", "FCRA_616"]
+  },
+  "B1": {
+    "name": "Date Opened More Than 24 Months After DOFD",
+    "severity": "high",
+    "description": "The account shows a date opened that is more than 24 months after the DOFD.",
+    "why_it_matters": "When a collection agency reports a \"date opened\" that is years after the original delinquency occurred, this is a classic sign of debt re-aging. The reporting period should be based on the ORIGINAL delinquency date with the original creditor, not when a collector opened their file. This practice illegally extends the time negative information appears on your report.",
+    "suggested_evidence": [
+      "Original account statements",
+      "Documentation from original creditor",
+      "Prior credit reports showing original dates",
+      "Debt purchase or assignment documents (if obtainable)"
+    ],
+    "legal_citations": ["FCRA_623_a5", "FDCPA_807_2A"]
+  },
+  "B2": {
+    "name": "No DOFD on Collection Account with Recent Open Date",
+    "severity": "medium",
+    "description": "A collection account shows no Date of First Delinquency but has a recent open date.",
+    "why_it_matters": "Collection accounts are required to report the Date of First Delinquency (DOFD) from the original account. When a collection account shows a recent \"date opened\" but no DOFD, it may be masking the true age of the debt. This makes it impossible to verify whether the debt should still be reported and could constitute re-aging.",
+    "suggested_evidence": [
+      "Request for DOFD from collector",
+      "Original creditor account history",
+      "Previous credit reports"
+    ],
+    "legal_citations": ["FCRA_623_a5"]
+  },
+  "C1": {
+    "name": "Inconsistent Removal Dates Across Bureaus",
+    "severity": "medium",
+    "description": "Different credit bureaus show materially different removal dates for the same debt.",
+    "why_it_matters": "The same debt should have the same removal date across all three credit bureaus, as it is based on a single Date of First Delinquency. If bureaus show different removal dates (more than a few months apart), at least one report contains inaccurate information that needs correction.",
+    "suggested_evidence": [
+      "Credit reports from all three bureaus",
+      "Documentation showing the actual DOFD",
+      "Prior correspondence with bureaus about this account",
+      "Account statements from original creditor"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "D1": {
+    "name": "Account Status vs. Balance Inconsistency",
+    "severity": "high",
+    "description": "The account status indicates it is paid or closed, but a balance is still being reported.",
+    "why_it_matters": "Reporting a balance on a paid or settled account is a violation of the FCRA requirement to report accurate information. This negatively impacts your debt-to-income ratio and credit score unfairly.",
+    "suggested_evidence": [
+      "Final payment receipt",
+      "Settlement agreement",
+      "Canceled check or bank statement showing final payment",
+      "\"Paid in Full\" letter from creditor"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FDCPA_807_2A"]
+  },
+  "E1": {
+    "name": "Future Date Violation",
+    "severity": "high",
+    "description": "A date is reported that is in the future.",
+    "why_it_matters": "Credit reports must contain accurate and verifiable information. Dates in the future are physically impossible and indicate a severe lack of data integrity by the furnisher. This often happens during intentional re-aging or due to software glitches, and it is a clear violation of the FCRA.",
+    "suggested_evidence": [
+      "Credit report highlighting the future date",
+      "Current calendar date documentation"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "F1": {
+    "name": "Payment Activity Without Balance Reduction",
+    "severity": "high",
+    "description": "Payment activity is recorded but balance remains unchanged or increased.",
+    "why_it_matters": "When a payment is made, the balance must decrease by at least the payment amount (minus any legitimate interest). If payments are being recorded but the balance is not decreasing, this could indicate misapplication of payments, phantom fees, or fraudulent accounting practices that violate the FDCPA.",
+    "suggested_evidence": [
+      "Payment receipts or bank statements showing payments made",
+      "Account statements before and after payment",
+      "Written correspondence about payment application",
+      "Amortization schedule if applicable"
+    ],
+    "legal_citations": ["FDCPA_807_2A", "FCRA_623_a1"]
+  },
+  "F2": {
+    "name": "Suspicious Last Activity Date Refresh",
+    "severity": "high",
+    "description": "Last activity date was updated recently on an old debt.",
+    "why_it_matters": "Debt collectors sometimes \"refresh\" the last activity date by reporting minor account activity (calls, letters, account reviews) to make old debts appear more recent. This is a re-aging tactic that can reset the clock on how long debt appears on your credit report, violating FCRA provisions.",
+    "suggested_evidence": [
+      "Prior credit reports showing older activity dates",
+      "Proof that no legitimate account activity occurred",
+      "Call logs or correspondence from collector",
+      "Documentation of original DOFD"
+    ],
+    "legal_citations": ["FCRA_605_a", "FDCPA_807_8"]
+  },
+  "G1": {
+    "name": "Excessive Balance Growth on Collection Account",
+    "severity": "medium",
+    "description": "Current balance significantly exceeds the original debt amount.",
+    "why_it_matters": "The FDCPA limits what fees and interest collectors can add to a debt. If the current balance is more than 150% of the original amount, this may indicate illegal fee stacking, unauthorized interest, or fabricated charges. Many states prohibit collectors from adding any fees not explicitly authorized in the original credit agreement.",
+    "suggested_evidence": [
+      "Original account statements showing initial balance",
+      "Itemized breakdown of current balance from collector",
+      "Original credit agreement showing allowed fees/interest",
+      "State laws on collection fee limits"
+    ],
+    "legal_citations": ["FDCPA_807_2A"]
+  },
+  "G2": {
+    "name": "Balance Increased After Account Transfer",
+    "severity": "high",
+    "description": "The balance increased when the account was transferred to a new collector.",
+    "why_it_matters": "When debt is sold or transferred, the balance should remain the same or decrease. Debt buyers typically purchase debts for pennies on the dollar. Any increase in balance at the point of transfer indicates fabricated charges, which is a violation of the FDCPA prohibition against collecting amounts not authorized by the agreement.",
+    "suggested_evidence": [
+      "Credit reports before and after transfer showing balance change",
+      "Notice of debt sale or assignment",
+      "Account statements from original creditor",
+      "Validation letter showing balance breakdown"
+    ],
+    "legal_citations": ["FDCPA_807_2A"]
+  },
+  "H1": {
+    "name": "Medical Debt Reported Prematurely",
+    "severity": "high",
+    "description": "Medical collection reported less than 365 days from service date.",
+    "why_it_matters": "As of 2023, new CFPB rules require that medical debt cannot be reported to credit bureaus until at least one year after the date of service. This waiting period allows time for insurance processing and billing disputes. Medical debt reported before this period is a violation of current credit reporting regulations.",
+    "suggested_evidence": [
+      "Medical bills showing date of service",
+      "Explanation of Benefits (EOB) from insurance",
+      "Insurance claim processing timeline",
+      "Any correspondence with medical provider about payment"
+    ],
+    "legal_citations": ["CFPB_2022_01"]
+  },
+  "H2": {
+    "name": "Paid Medical Debt Still Reporting",
+    "severity": "high",
+    "description": "A medical debt that has been paid is still appearing on the credit report.",
+    "why_it_matters": "Under current regulations, paid medical debts must be removed from credit reports. The three major credit bureaus agreed to remove all paid medical collection debt. If a paid medical account still appears, the furnisher is violating both this agreement and FCRA accuracy requirements.",
+    "suggested_evidence": [
+      "Payment receipt for medical debt",
+      "Zero balance statement from provider or collector",
+      "Insurance EOB showing claim was paid",
+      "Bank statement showing payment cleared"
+    ],
+    "legal_citations": ["CFPB_2022_01", "FCRA_623_a1"]
+  },
+  "H3": {
+    "name": "Medical Debt Under Reporting Threshold",
+    "severity": "medium",
+    "description": "Medical debt is below the $500 reporting threshold.",
+    "why_it_matters": "As of 2023, medical debts under $500 should not appear on credit reports under new credit bureau policies. If a medical collection under this threshold is being reported, it may be in violation of current reporting standards and should be removed upon dispute.",
+    "suggested_evidence": [
+      "Credit report showing the balance amount",
+      "Original medical bill showing amount owed",
+      "Documentation that this is medical debt"
+    ],
+    "legal_citations": ["CFPB_2022_01"]
+  },
+  "I1": {
+    "name": "Credit Limit Suppression",
+    "severity": "medium",
+    "description": "Credit limit reported as zero or equal to balance on revolving account.",
+    "why_it_matters": "When a creditor reports a $0 credit limit or sets the limit equal to the balance, it artificially inflates your credit utilization ratio to 100%. This tanks your credit score unfairly. Closed accounts should retain their historical credit limit to accurately reflect utilization history.",
+    "suggested_evidence": [
+      "Original account agreement showing credit limit",
+      "Prior statements showing higher credit limit",
+      "Prior credit reports showing correct limit",
+      "Account opening documentation"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "I2": {
+    "name": "Collection Account Age Mismatch",
+    "severity": "high",
+    "description": "Collection account date opened differs significantly from original account.",
+    "why_it_matters": "When debt is transferred to collections, the new account should inherit the original accounts open date for credit history purposes. If the collection agency uses their own acquisition date, it can artificially shorten your credit history length and misrepresent the true age of the debt relationship.",
+    "suggested_evidence": [
+      "Original account statements showing open date",
+      "Prior credit reports showing original creditor",
+      "Documentation from original creditor",
+      "Debt validation response from collector"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "J1": {
+    "name": "Zombie Debt Revival",
+    "severity": "high",
+    "description": "Dormant account suddenly shows new reporting activity after years of inactivity.",
+    "why_it_matters": "When a debt that has been inactive for years suddenly shows new reporting activity, it often indicates the debt was purchased by a new collector who is attempting to \"revive\" it. This re-aging tactic tries to restart the 7-year reporting clock and is a violation of FCRA. Old debts should naturally fall off, not reappear.",
+    "suggested_evidence": [
+      "Prior credit reports showing the account dormant or not present",
+      "Documentation of original DOFD",
+      "Proof that no legitimate new activity occurred",
+      "Any debt sale notices received"
+    ],
+    "legal_citations": ["FCRA_605_a", "FDCPA_807_8"]
+  },
+  "J2": {
+    "name": "Multiple Collector Waterfall",
+    "severity": "high",
+    "description": "Same debt appears to have been reported by 3+ different collectors.",
+    "why_it_matters": "When the same debt has been handled by multiple collectors (a \"waterfall\"), each previous collector should have zeroed out their tradeline. If multiple collectors are reporting the same debt simultaneously, or if the debt keeps reappearing under new names, this multiplies the negative impact and may indicate improper reporting.",
+    "suggested_evidence": [
+      "Credit reports showing multiple entries for same original debt",
+      "Original creditor account number on each entry",
+      "Debt sale/assignment notices",
+      "Correspondence from different collectors about same debt"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "K1": {
+    "name": "Impossible Delinquency Sequence",
+    "severity": "high",
+    "description": "Payment history shows delinquency pattern that is mathematically impossible.",
+    "why_it_matters": "Credit reports show payment history as a sequence (e.g., current, 30, 60, 90 days late). A valid sequence must progress logically - you cannot be 90 days late without first being 30 and 60 days late. Sequences that skip stages or show impossible patterns indicate data corruption or manipulation.",
+    "suggested_evidence": [
+      "Credit report showing payment history sequence",
+      "Bank statements showing actual payment dates",
+      "Creditor account statements",
+      "Payment confirmation records"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "K2": {
+    "name": "Suspiciously Round Balance",
+    "severity": "low",
+    "description": "Reported balance is an exact round number suggesting estimation or fabrication.",
+    "why_it_matters": "Real debts rarely end in exact round numbers like $5,000.00 or $10,000.00 due to interest calculations, fees, and partial payments. While not definitive proof of problems, suspiciously round balances on collection accounts may indicate the collector is reporting estimated amounts rather than actual verified balances.",
+    "suggested_evidence": [
+      "Request itemized statement from collector",
+      "Original account statements",
+      "Validation of debt showing balance breakdown"
+    ],
+    "legal_citations": ["FDCPA_807_2A"]
+  },
+  "K3": {
+    "name": "High Balance Exceeds Credit Limit",
+    "severity": "medium",
+    "description": "The reported high balance exceeds the credit limit significantly.",
+    "why_it_matters": "While some over-limit spending is possible, a high balance that dramatically exceeds the credit limit (by more than 20%) suggests either incorrect data, fee abuse, or manipulation of the account terms. This affects your utilization calculations and may indicate the creditor changed terms without proper notice.",
+    "suggested_evidence": [
+      "Original credit agreement showing limit",
+      "Account statements showing balance history",
+      "Any notices of credit limit changes",
+      "Over-limit fee history"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "K4": {
+    "name": "Date of Last Payment Inconsistency",
+    "severity": "medium",
+    "description": "Date of last payment does not align with DOFD and account status timeline.",
+    "why_it_matters": "The date of last payment should logically precede or closely follow the DOFD. If the last payment date is years after the DOFD, or if payments appear after the account was charged off, this indicates either data errors or potential SOL manipulation (collectors sometimes falsely report payments to restart SOL).",
+    "suggested_evidence": [
+      "Bank statements showing actual last payment",
+      "Account statements from creditor",
+      "Documentation of DOFD",
+      "Payment history records"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FDCPA_807_8"]
+  },
+  "K5": {
+    "name": "Minimum Payment Trap Indicator",
+    "severity": "low",
+    "description": "Account shows pattern of minimum payments with balance increases over time.",
+    "why_it_matters": "While not necessarily a reporting error, this pattern indicates the consumer may be trapped in a cycle where minimum payments do not cover interest, causing the balance to grow despite regular payments. This can be a sign of predatory lending practices that may be challengeable under state consumer protection laws.",
+    "suggested_evidence": [
+      "Complete payment history",
+      "Account statements showing interest rates",
+      "Minimum payment calculations",
+      "Original credit terms and APR"
+    ],
+    "legal_citations": ["FDCPA_807_2A"]
+  },
+  "S1": {
+    "name": "Debt May Be Beyond Statute of Limitations",
+    "severity": "medium",
+    "description": "The debt appears to be older than the state statute of limitations for legal collection.",
+    "why_it_matters": "Every state has a \"statute of limitations\" - a time limit for how long a creditor has the legal right to sue you to collect a debt. If this time has passed, the debt is considered \"time-barred.\" While you may still owe the debt, they cannot win a lawsuit against you to collect it if you raise the SOL as a defense.",
+    "suggested_evidence": [
+      "Proof of Date of First Delinquency",
+      "State-specific SOL documentation",
+      "Records of last payment date"
+    ],
+    "legal_citations": ["FDCPA_807_2A"]
+  },
+  "S2": {
+    "name": "SOL Revival Through Partial Payment",
+    "severity": "high",
+    "description": "A partial payment may have restarted the statute of limitations on a time-barred debt.",
+    "why_it_matters": "In many states, making a partial payment on a time-barred debt can restart the statute of limitations, giving collectors new legal power to sue. If a payment was recorded shortly before new collection activity began on an old debt, the consumer may have unknowingly revived the debt. This payment should be verified.",
+    "suggested_evidence": [
+      "Records of any payments made",
+      "State SOL laws regarding debt revival",
+      "Timeline of collection activity",
+      "Written acknowledgment requests from collector"
+    ],
+    "legal_citations": ["FDCPA_807_2A"]
+  },
+  "DU1": {
+    "name": "Potential Duplicate Reporting",
+    "severity": "high",
+    "description": "The same debt appears to be reported multiple times by different furnishers.",
+    "why_it_matters": "The same debt should not be reported as \"Active\" or having a \"Balance\" by multiple entities simultaneously. Usually, when a debt is sold, the original creditor must report a $0 balance. Duplicate reporting artificially inflates your debt and multiplies the negative impact on your credit score.",
+    "suggested_evidence": [
+      "Credit report showing both entries",
+      "Notice of assignment or sale of debt",
+      "Account statements showing the transfer"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "DU2": {
+    "name": "Same Debt Different Account Numbers",
+    "severity": "medium",
+    "description": "Multiple accounts with different numbers appear to reference the same original debt.",
+    "why_it_matters": "Collectors sometimes report the same debt under different account numbers, either due to internal numbering changes or intentional obfuscation. This makes it harder for consumers to track and dispute debts, and can result in the same debt being counted multiple times in creditworthiness calculations.",
+    "suggested_evidence": [
+      "Credit reports showing similar balances/dates across accounts",
+      "Original creditor name on each entry",
+      "Debt validation requests for each account",
+      "Timeline showing when accounts appeared"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
+  "M1": {
+    "name": "Metro2 Integrity: DOFD vs Charge-Off Logic",
+    "severity": "medium",
+    "description": "The relationship between DOFD and Charge-Off Date violates industry standards.",
+    "why_it_matters": "The Metro2 format used by furnishers requires that a charge-off date be logically consistent with the Date of First Delinquency (typically ~180 days). Discrepancies here prove the furnisher's internal records are disorganized or inaccurate.",
+    "suggested_evidence": ["Account ledger", "Communication from original creditor"],
+    "legal_citations": ["METRO2"]
+  },
+  "M2": {
+    "name": "Metro2 Compliance: Balance on Sold/Transferred Debt",
+    "severity": "high",
+    "description": "A balance is being reported on an account marked as 'Sold' or 'Transferred'.",
+    "why_it_matters": "Under Metro2 standards, once a debt is sold or transferred, the original furnisher MUST report a $0 balance. Reporting a balance on a sold debt causes duplicate debt reporting and violates the FCRA requirement for accuracy.",
+    "suggested_evidence": ["Notice of debt sale", "Final account statement"],
+    "legal_citations": ["METRO2", "FCRA_623_a1", "FCRA_616"]
+  }
+}

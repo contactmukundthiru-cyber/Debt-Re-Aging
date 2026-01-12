@@ -3,49 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case Factory - Detect Debt Re-Aging Violations</title>
-    <meta name="description" content="Free, offline tool for legal aid organizations to detect debt re-aging violations and generate dispute packets.">
+    <title>Credit Report Analyzer - Free Tool for Legal Aid</title>
+    <meta name="description" content="Free tool to find errors in credit reports and generate dispute letters. Runs on your computer, never uploads data.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        :root {
-            --bg: #FFFDF9;
-            --text: #1a1a1a;
-            --text-secondary: #666;
-            --border: #e5e2dd;
-            --accent: #c44;
-            --code-bg: #1a1a1a;
-        }
-
-        html { scroll-behavior: smooth; }
-
-        @media (prefers-reduced-motion: reduce) {
-            * { transition: none !important; }
-            html { scroll-behavior: auto; }
-        }
-
         body {
-            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #fff;
+            color: #1e293b;
             line-height: 1.6;
-            font-size: 17px;
         }
 
-        a { color: inherit; }
+        a { color: #2563eb; }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
 
-        /* NAV */
-        nav {
+        /* Header */
+        header {
             padding: 20px 0;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        nav .container {
+        header .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -53,836 +35,459 @@
 
         .logo {
             font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
             text-decoration: none;
-            letter-spacing: -0.01em;
+            color: #1e293b;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
+        nav a {
+            margin-left: 24px;
+            text-decoration: none;
+            color: #64748b;
             font-size: 14px;
-            text-decoration: none;
-            color: var(--text-secondary);
         }
 
-        .nav-links a:hover { color: var(--text); }
+        nav a:hover { color: #1e293b; }
 
-        /* HERO */
+        /* Hero */
         .hero {
-            padding: 120px 0 100px;
-            border-bottom: 1px solid var(--border);
+            padding: 80px 0 60px;
+            text-align: center;
         }
 
         .hero h1 {
-            font-size: clamp(36px, 6vw, 56px);
-            font-weight: 600;
-            line-height: 1.1;
-            letter-spacing: -0.03em;
-            max-width: 700px;
-            margin-bottom: 32px;
-        }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 80px;
-            align-items: start;
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            color: #0f172a;
         }
 
         .hero p {
             font-size: 18px;
-            color: var(--text-secondary);
-            max-width: 480px;
-            margin-bottom: 40px;
+            color: #64748b;
+            max-width: 500px;
+            margin: 0 auto 32px;
         }
 
-        .hero-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 24px;
-            background: var(--text);
-            color: var(--bg);
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        .hero-cta:hover { background: #333; }
-
-        .hero-meta {
-            padding-top: 48px;
-            margin-top: 48px;
-            border-top: 1px solid var(--border);
-        }
-
-        .hero-meta span {
-            display: block;
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .hero-meta strong {
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .sidebar-box {
-            background: #fff;
-            border: 1px solid var(--border);
-            padding: 28px;
-        }
-
-        .sidebar-box h3 {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-        }
-
-        .sidebar-box ul {
-            list-style: none;
-        }
-
-        .sidebar-box li {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 15px;
+        .hero-buttons {
             display: flex;
-            justify-content: space-between;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .sidebar-box li:last-child { border-bottom: none; }
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+        }
 
-        .sidebar-box .val {
-            font-family: 'IBM Plex Mono', monospace;
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover { background: #1d4ed8; }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .trust-badges {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 32px;
             font-size: 13px;
-            color: var(--text-secondary);
+            color: #64748b;
         }
 
-        @media (max-width: 800px) {
-            .hero-grid { grid-template-columns: 1fr; gap: 48px; }
-            .hero { padding: 80px 0 64px; }
+        .trust-badges span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        /* WHAT IT DOES */
-        .what {
-            padding: 100px 0;
-            border-bottom: 1px solid var(--border);
+        /* Section */
+        section {
+            padding: 60px 0;
+            border-top: 1px solid #e2e8f0;
         }
 
-        .what h2 {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
-        }
-
-        .what-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 48px;
-        }
-
-        .what-item h3 {
-            font-size: 17px;
+        section h2 {
+            font-size: 24px;
             font-weight: 600;
             margin-bottom: 8px;
         }
 
-        .what-item p {
-            font-size: 15px;
-            color: var(--text-secondary);
-            line-height: 1.5;
+        section > .container > p {
+            color: #64748b;
+            margin-bottom: 32px;
         }
 
-        @media (max-width: 700px) {
-            .what-grid { grid-template-columns: 1fr; gap: 32px; }
-            .what { padding: 64px 0; }
+        /* Steps */
+        .steps {
+            background: #f8fafc;
         }
 
-        /* RULES */
-        .rules {
-            padding: 100px 0;
+        .step-list {
+            display: grid;
+            gap: 24px;
+        }
+
+        .step {
             background: #fff;
-            border-bottom: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
         }
 
-        .rules h2 {
+        .step-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
             font-size: 14px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
+            margin-right: 12px;
+        }
+
+        .step h3 {
+            display: inline;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .step p {
+            margin-top: 8px;
+            color: #64748b;
+            font-size: 15px;
+            padding-left: 40px;
+        }
+
+        /* Install */
+        .install-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .install-box h3 {
+            font-size: 18px;
             margin-bottom: 16px;
         }
 
-        .rules > .container > p {
-            font-size: 15px;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
-            max-width: 500px;
+        .install-steps {
+            list-style: none;
+            counter-reset: install-counter;
         }
 
-        .rules-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .rules-table th {
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
+        .install-steps li {
+            counter-increment: install-counter;
             padding: 12px 0;
-            border-bottom: 2px solid var(--text);
-        }
-
-        .rules-table td {
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #e2e8f0;
             font-size: 15px;
-            vertical-align: top;
         }
 
-        .rules-table tr:last-child td { border-bottom: none; }
+        .install-steps li:last-child { border-bottom: none; }
 
-        .rules-table .code {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 13px;
-            font-weight: 500;
-            width: 60px;
-        }
-
-        .rules-table .name { font-weight: 500; }
-
-        .rules-table .desc {
-            color: var(--text-secondary);
-        }
-
-        .rules-table .severity {
-            text-align: right;
-            font-size: 12px;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .rules-table .high { color: var(--accent); }
-        .rules-table .med { color: #b58900; }
-        .rules-table .low { color: var(--text-secondary); }
-
-        .rule-category {
-            font-size: 13px;
+        .install-steps li::before {
+            content: counter(install-counter) ".";
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--text-secondary);
-            margin: 40px 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border);
+            margin-right: 8px;
+            color: #2563eb;
         }
 
-        .rule-category:first-of-type { margin-top: 0; }
-
-        @media (max-width: 700px) {
-            .rules { padding: 64px 0; }
-            .rules-table .desc { display: none; }
+        .install-steps code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 13px;
         }
 
-        /* INSTALL */
-        .install {
-            padding: 100px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .install h2 {
+        .install-note {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 16px;
             font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
+            color: #92400e;
+            margin-top: 16px;
         }
 
-        .install-grid {
+        /* Features */
+        .feature-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
         }
 
-        .install-card h3 {
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .install-card > p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-        }
-
-        .code-block {
-            background: var(--code-bg);
+        .feature {
             padding: 20px;
-            overflow-x: auto;
+            background: #f8fafc;
+            border-radius: 8px;
         }
 
-        .code-block code {
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 13px;
-            line-height: 1.7;
-            color: #a8a8a8;
+        .feature h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
         }
 
-        .code-block .cmd { color: #fff; }
-        .code-block .cmt { color: #666; }
-
-        @media (max-width: 700px) {
-            .install-grid { grid-template-columns: 1fr; }
-            .install { padding: 64px 0; }
+        .feature p {
+            font-size: 14px;
+            color: #64748b;
         }
 
         /* FAQ */
-        .faq {
-            padding: 100px 0;
-            background: #fff;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .faq h2 {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin-bottom: 48px;
-        }
-
         .faq-item {
-            padding: 24px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+            border-bottom: 1px solid #e2e8f0;
         }
-
-        .faq-item:first-of-type { border-top: 1px solid var(--border); }
 
         .faq-item h3 {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 500;
             margin-bottom: 8px;
         }
 
         .faq-item p {
+            color: #64748b;
             font-size: 15px;
-            color: var(--text-secondary);
-            max-width: 600px;
         }
 
-        @media (max-width: 700px) {
-            .faq { padding: 64px 0; }
-        }
-
-        /* FOOTER */
+        /* Footer */
         footer {
-            padding: 64px 0;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 64px;
-        }
-
-        footer p {
+            padding: 40px 0;
+            background: #f8fafc;
+            text-align: center;
             font-size: 14px;
-            color: var(--text-secondary);
-            max-width: 300px;
-            margin-top: 12px;
+            color: #64748b;
         }
 
-        footer h4 {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
+        footer a { color: #64748b; }
+
+        .footer-links {
             margin-bottom: 16px;
         }
 
-        footer ul { list-style: none; }
-
-        footer li { margin-bottom: 8px; }
-
-        footer a {
-            font-size: 14px;
-            color: var(--text-secondary);
-            text-decoration: none;
+        .footer-author {
+            margin-top: 8px;
         }
 
-        footer a:hover { color: var(--text); }
-
-        .footer-bottom {
-            margin-top: 64px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border);
-            font-size: 13px;
-            color: var(--text-secondary);
-            display: flex;
-            justify-content: space-between;
+        .footer-links a {
+            margin: 0 12px;
         }
 
-        .disclaimer {
-            margin-top: 48px;
-            padding: 20px;
-            background: #fff;
-            border: 1px solid var(--border);
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        @media (max-width: 700px) {
-            .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-            .footer-bottom { flex-direction: column; gap: 8px; }
-        }
-
-        /* Mobile nav */
-        .mobile-toggle {
-            display: none;
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-        }
-
-        .mobile-toggle span {
-            display: block;
-            width: 20px;
-            height: 2px;
-            background: var(--text);
-            margin: 4px 0;
-        }
-
+        /* Responsive */
         @media (max-width: 600px) {
-            .nav-links { display: none; }
-            .mobile-toggle { display: block; }
-            .nav-links.open {
-                display: flex;
-                flex-direction: column;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                right: 0;
-                background: var(--bg);
-                padding: 24px;
-                border-bottom: 1px solid var(--border);
-                gap: 16px;
-            }
+            .hero h1 { font-size: 28px; }
+            .trust-badges { flex-direction: column; gap: 12px; }
+            nav { display: none; }
         }
     </style>
 </head>
 <body>
-    <nav>
+    <header>
         <div class="container">
-            <a href="#" class="logo">Case Factory</a>
-            <ul class="nav-links">
-                <li><a href="#rules">Rules</a></li>
-                <li><a href="#install">Install</a></li>
-                <li><a href="#faq">FAQ</a></li>
-                <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" target="_blank">GitHub</a></li>
-            </ul>
-            <button type="button" class="mobile-toggle" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
+            <a href="#" class="logo">Credit Report Analyzer</a>
+            <nav>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#install">Install</a>
+                <a href="#faq">FAQ</a>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging">GitHub</a>
+            </nav>
         </div>
-    </nav>
+    </header>
 
     <section class="hero">
-        <div class="container hero-grid">
-            <div>
-                <h1>Detect debt re-aging violations in credit reports</h1>
-                <p>A free tool for legal aid organizations. Runs locally, never uploads data. Generates dispute packets with one click.</p>
-                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/archive/refs/heads/main.zip" class="hero-cta">
-                    Download v1.0.0
-                </a>
-                <div class="hero-meta">
-                    <span>License</span>
-                    <strong>MIT Open Source</strong>
-                </div>
-            </div>
-            <div class="sidebar-box">
-                <h3>At a glance</h3>
-                <ul>
-                    <li>Detection rules <span class="val">24</span></li>
-                    <li>State SOL data <span class="val">50</span></li>
-                    <li>Output formats <span class="val">PDF, MD</span></li>
-                    <li>Data uploaded <span class="val">None</span></li>
-                    <li>Price <span class="val">Free</span></li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <section class="what">
         <div class="container">
-            <h2>What it does</h2>
-            <div class="what-grid">
-                <div class="what-item">
-                    <h3>Extract</h3>
-                    <p>Upload a credit report PDF or image. OCR extracts dates, creditors, balances, and account details automatically.</p>
+            <h1>Find errors in credit reports.<br>Generate dispute letters.</h1>
+            <p>Free tool for legal aid organizations. Everything runs on your computer - no data is ever uploaded anywhere.</p>
+            <div class="hero-buttons">
+                <a href="#install" class="btn btn-primary">Download Free</a>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" class="btn btn-secondary">View on GitHub</a>
+            </div>
+            <div class="trust-badges">
+                <span>100% Free</span>
+                <span>Works Offline</span>
+                <span>No Account Needed</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="steps" id="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <p>Five simple steps from credit report to dispute letter.</p>
+
+            <div class="step-list">
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h3>Upload the credit report</h3>
+                    <p>Drop in a PDF or photo of the credit report. The tool reads the text automatically using OCR (optical character recognition). You can also paste text directly.</p>
                 </div>
-                <div class="what-item">
-                    <h3>Analyze</h3>
-                    <p>24 transparent rules check for re-aging, medical debt violations, zombie debt, fee abuse, and more.</p>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h3>Check the extracted text</h3>
+                    <p>Review what the tool read from the document. If anything looks wrong (blurry scan, missing text), you can fix it here before moving on.</p>
                 </div>
-                <div class="what-item">
-                    <h3>Document</h3>
-                    <p>Generate dispute letters, evidence summaries, and furnisher notifications. Ready to send to credit bureaus.</p>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h3>Verify the key details</h3>
+                    <p>The tool pulls out important fields like dates, balances, and creditor names. Double-check these are correct - especially the dates, since that's what we're analyzing.</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h3>See what issues were found</h3>
+                    <p>The tool runs 20+ checks looking for problems: dates that don't add up, debts reported too long, balances that don't match the status, and more. Each issue shows exactly why it was flagged.</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">5</span>
+                    <h3>Download your dispute letters</h3>
+                    <p>Get ready-to-send letters for each credit bureau. Just add the consumer's name and address, then print and mail. The letters cite specific FCRA sections and explain exactly what's wrong.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="rules" id="rules">
-        <div class="container">
-            <h2>Detection rules</h2>
-            <p>24 transparent rules across 12 categories. Every flag is based on documented, auditable logic.</p>
-
-            <h3 class="rule-category">Timeline Rules</h3>
-            <table class="rules-table">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Rule</th>
-                        <th class="desc">Trigger</th>
-                        <th>Severity</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="code">A1</td>
-                        <td class="name">Excessive reporting period</td>
-                        <td class="desc">Removal date exceeds 8 years from date opened</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">A2</td>
-                        <td class="name">DOFD misalignment</td>
-                        <td class="desc">Removal date inconsistent with DOFD + 7 years</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Re-Aging Indicators</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">B1</td>
-                        <td class="name">Classic re-aging</td>
-                        <td class="desc">Date opened 24+ months after DOFD</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">B2</td>
-                        <td class="name">Missing DOFD</td>
-                        <td class="desc">No DOFD on collection with recent open date</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Cross-Bureau &amp; Status Rules</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">C1</td>
-                        <td class="name">Bureau inconsistency</td>
-                        <td class="desc">Different removal dates across bureaus</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                    <tr>
-                        <td class="code">D1</td>
-                        <td class="name">Status/balance mismatch</td>
-                        <td class="desc">Paid account still showing balance</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">E1</td>
-                        <td class="name">Future date violation</td>
-                        <td class="desc">Any reported date is in the future</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Payment &amp; Fee Abuse</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">F1</td>
-                        <td class="name">Payment misapplication</td>
-                        <td class="desc">Payment recorded but balance unchanged</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">F2</td>
-                        <td class="name">Activity date refresh</td>
-                        <td class="desc">Old debt shows recent activity date</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">G1</td>
-                        <td class="name">Excessive fee growth</td>
-                        <td class="desc">Balance exceeds 150% of original amount</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                    <tr>
-                        <td class="code">G2</td>
-                        <td class="name">Transfer balance increase</td>
-                        <td class="desc">Balance grew when transferred to collector</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Medical Debt (2023 CFPB Rules)</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">H1</td>
-                        <td class="name">Premature reporting</td>
-                        <td class="desc">Medical debt reported before 365-day waiting period</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">H2</td>
-                        <td class="name">Paid medical still showing</td>
-                        <td class="desc">Paid medical debt should be removed</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">H3</td>
-                        <td class="name">Under threshold</td>
-                        <td class="desc">Medical debt under $500 should not appear</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Credit Limit &amp; Account Age</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">I1</td>
-                        <td class="name">Limit suppression</td>
-                        <td class="desc">Credit limit reported as $0 or equal to balance</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                    <tr>
-                        <td class="code">I2</td>
-                        <td class="name">Account age mismatch</td>
-                        <td class="desc">Collection date differs from original account</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Zombie Debt &amp; Duplicates</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">J1</td>
-                        <td class="name">Zombie debt revival</td>
-                        <td class="desc">Dormant debt suddenly shows new activity</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">J2</td>
-                        <td class="name">Collector waterfall</td>
-                        <td class="desc">Same debt reported by 3+ different collectors</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">DU1</td>
-                        <td class="name">Duplicate reporting</td>
-                        <td class="desc">Same balance from multiple furnishers</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">DU2</td>
-                        <td class="name">Same debt, different numbers</td>
-                        <td class="desc">Multiple account numbers for same original debt</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Advanced Pattern Detection</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">K1</td>
-                        <td class="name">Impossible sequence</td>
-                        <td class="desc">Delinquency pattern skips required stages</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                    <tr>
-                        <td class="code">K2</td>
-                        <td class="name">Suspicious round balance</td>
-                        <td class="desc">Exact round number suggests estimation</td>
-                        <td class="severity low">Low</td>
-                    </tr>
-                    <tr>
-                        <td class="code">K3</td>
-                        <td class="name">High balance over limit</td>
-                        <td class="desc">High balance exceeds credit limit by 20%+</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                    <tr>
-                        <td class="code">K4</td>
-                        <td class="name">Payment date inconsistency</td>
-                        <td class="desc">Last payment years after DOFD</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                    <tr>
-                        <td class="code">K5</td>
-                        <td class="name">Minimum payment trap</td>
-                        <td class="desc">Payments made but balance grew over time</td>
-                        <td class="severity low">Low</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3 class="rule-category">Statute of Limitations</h3>
-            <table class="rules-table">
-                <tbody>
-                    <tr>
-                        <td class="code">S1</td>
-                        <td class="name">SOL expired</td>
-                        <td class="desc">Debt is past state statute of limitations</td>
-                        <td class="severity med">Medium</td>
-                    </tr>
-                    <tr>
-                        <td class="code">S2</td>
-                        <td class="name">SOL revival risk</td>
-                        <td class="desc">Payment may have restarted SOL on old debt</td>
-                        <td class="severity high">High</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section class="install" id="install">
+    <section id="install">
         <div class="container">
             <h2>Installation</h2>
-            <div class="install-grid">
-                <div class="install-card">
-                    <h3>Docker (recommended)</h3>
-                    <p>All dependencies included. Requires Docker Desktop.</p>
-                    <div class="code-block">
-                        <code><span class="cmt"># Clone and run</span>
-<span class="cmd">git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git</span>
-<span class="cmd">cd Debt-Re-Aging</span>
-<span class="cmd">docker-compose up</span>
+            <p>Choose the easiest option for you.</p>
 
-<span class="cmt"># Open http://localhost:8501</span></code>
-                    </div>
+            <div class="install-box">
+                <h3>Option A: Windows (Easiest)</h3>
+                <ol class="install-steps">
+                    <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/archive/refs/heads/main.zip">Download the ZIP file</a> and unzip it anywhere</li>
+                    <li>Double-click <code>START_APP.bat</code></li>
+                    <li>Wait for it to install (first time takes 2-3 minutes)</li>
+                    <li>Browser opens automatically - you're done!</li>
+                </ol>
+                <div class="install-note">
+                    <strong>First time?</strong> You'll need Python installed. Get it free from <a href="https://python.org">python.org</a> - make sure to check "Add to PATH" during install.
                 </div>
-                <div class="install-card">
-                    <h3>Python</h3>
-                    <p>Native installation for custom setups.</p>
-                    <div class="code-block">
-                        <code><span class="cmt"># Install dependencies</span>
-<span class="cmd">git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git</span>
-<span class="cmd">cd Debt-Re-Aging</span>
-<span class="cmd">pip install -r requirements.txt</span>
+            </div>
 
-<span class="cmt"># Run</span>
-<span class="cmd">streamlit run app/main.py</span></code>
-                    </div>
+            <div class="install-box">
+                <h3>Option B: Command Line</h3>
+                <ol class="install-steps">
+                    <li>Open Terminal or Command Prompt</li>
+                    <li>Run: <code>git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git</code></li>
+                    <li>Run: <code>cd Debt-Re-Aging</code></li>
+                    <li>Run: <code>pip install -r requirements.txt</code></li>
+                    <li>Run: <code>streamlit run app/main.py</code></li>
+                </ol>
+            </div>
+
+            <div class="install-box">
+                <h3>Option C: Docker</h3>
+                <ol class="install-steps">
+                    <li>Install <a href="https://docker.com">Docker Desktop</a></li>
+                    <li>Run: <code>git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git</code></li>
+                    <li>Run: <code>cd Debt-Re-Aging && docker-compose up</code></li>
+                    <li>Open <code>http://localhost:8501</code></li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>What It Checks</h2>
+            <p>The tool looks for common credit report problems automatically.</p>
+
+            <div class="feature-grid">
+                <div class="feature">
+                    <h3>Date manipulation</h3>
+                    <p>Catches when collectors change dates to keep items on reports longer than 7 years</p>
+                </div>
+                <div class="feature">
+                    <h3>Expired debts</h3>
+                    <p>Flags debts past your state's statute of limitations</p>
+                </div>
+                <div class="feature">
+                    <h3>Duplicate accounts</h3>
+                    <p>Finds the same debt reported multiple times by different collectors</p>
+                </div>
+                <div class="feature">
+                    <h3>Balance errors</h3>
+                    <p>Spots paid accounts still showing balances, or fees that grew too much</p>
+                </div>
+                <div class="feature">
+                    <h3>Medical debt rules</h3>
+                    <p>Checks 2023 CFPB rules - 365-day waiting period, $500 threshold</p>
+                </div>
+                <div class="feature">
+                    <h3>Impossible dates</h3>
+                    <p>Catches dates in the future or sequences that don't make sense</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="faq" id="faq">
+    <section id="faq">
         <div class="container">
-            <h2>Common questions</h2>
+            <h2>Questions</h2>
+
             <div class="faq-item">
-                <h3>What is debt re-aging?</h3>
-                <p>An illegal practice where debt collectors manipulate dates to extend how long negative information appears on credit reports, violating the Fair Credit Reporting Act.</p>
+                <h3>Is my data safe?</h3>
+                <p>Yes. Everything runs on your computer. Nothing gets uploaded anywhere. The tool works completely offline after you install it.</p>
             </div>
-            <div class="faq-item">
-                <h3>Is my data secure?</h3>
-                <p>Yes. All processing happens locally. Nothing is uploaded anywhere. The tool works completely offline after installation.</p>
-            </div>
-            <div class="faq-item">
-                <h3>Who is this for?</h3>
-                <p>Legal aid organizations, law school clinics, consumer advocacy groups, and pro bono attorneys helping clients dispute credit report errors.</p>
-            </div>
+
             <div class="faq-item">
                 <h3>Is this legal advice?</h3>
-                <p>No. This is an informational tool. Always consult a qualified attorney before taking legal action.</p>
+                <p>No. This is an informational tool to help identify potential issues. Always have an attorney review before taking legal action.</p>
             </div>
+
             <div class="faq-item">
-                <h3>What file formats work?</h3>
-                <p>PDF, PNG, JPG, and JPEG. The tool uses OCR to extract text from scanned documents.</p>
+                <h3>What file types work?</h3>
+                <p>PDF, PNG, JPG, and JPEG. You can also paste text directly if you've already copied it from somewhere.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Does it work on Mac?</h3>
+                <p>Yes. Use Option B (command line) or Option C (Docker). The Windows batch file is just for convenience.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>Who made this?</h3>
+                <p><a href="https://contactmukundthiru-cyber.github.io/Personal-Portfolio/">Mukund Thiru</a>, a student researcher focused on using technology to protect consumers. This tool is part of ongoing work to address enforcement gaps in credit reporting and make legal aid more accessible. It's free and open source.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>I found a bug / have a suggestion</h3>
+                <p>Open an issue on <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues">GitHub</a> or email contactmukundthiru1@gmail.com</p>
             </div>
         </div>
     </section>
 
     <footer>
         <div class="container">
-            <div class="footer-grid">
-                <div>
-                    <a href="#" class="logo">Case Factory</a>
-                    <p>Free, open-source tool for detecting debt re-aging violations. Built for consumer advocates.</p>
-                </div>
-                <div>
-                    <h4>Documentation</h4>
-                    <ul>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md">Quick Start</a></li>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/RULES.md">Rule Reference</a></li>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/CONTRIBUTING.md">Contributing</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4>Project</h4>
-                    <ul>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging">Repository</a></li>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues">Issues</a></li>
-                        <li><a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/releases">Releases</a></li>
-                    </ul>
-                </div>
+            <div class="footer-links">
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging">GitHub</a>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md">Documentation</a>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues">Report Issue</a>
             </div>
-            <div class="disclaimer">
-                <strong>Disclaimer:</strong> This tool is for informational purposes only and does not constitute legal advice. Always consult with a qualified attorney before taking legal action.
-            </div>
-            <div class="footer-bottom">
-                <span>v1.0.0</span>
-                <span>MIT License</span>
-            </div>
+            <p>Free and open source. Not legal advice. MIT License.</p>
+            <p class="footer-author">Built by <a href="https://contactmukundthiru-cyber.github.io/Personal-Portfolio/">Mukund Thiru</a></p>
         </div>
     </footer>
-
-    <script>
-        document.querySelector('.mobile-toggle').addEventListener('click', function() {
-            document.querySelector('.nav-links').classList.toggle('open');
-        });
-    </script>
 </body>
 </html>

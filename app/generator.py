@@ -44,6 +44,10 @@ class PacketGenerator:
         # Add custom filters
         self.env.filters['format_date'] = self._format_date
         self.env.filters['severity_indicator'] = self._severity_indicator
+        
+        from app.utils import estimate_removal_date
+        self.env.filters['estimate_removal_date'] = lambda d: self._format_date(estimate_removal_date(d))
+
 
     def _format_date(self, date_str: str) -> str:
         """Format ISO date to readable format."""
@@ -93,6 +97,13 @@ class PacketGenerator:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         generated_files = {}
+
+        # Industry-Disruptive: Resolve Legal Citations for Documentation
+        from app.regulatory import get_citations as resolve_citations
+        for flag in flags:
+            cites = flag.get('legal_citations', [])
+            if cites:
+                flag['resolved_citations'] = resolve_citations(cites)
 
         # Prepare template context
         context = {
@@ -166,7 +177,28 @@ class PacketGenerator:
             f.write(checklist_template.render(context))
         generated_files['attachments_checklist.md'] = str(checklist_path)
 
+        # Generate timeline forensic report
+        timeline_report_path = output_dir / 'forensic_timeline_report.md'
+        timeline_template = self.env.get_template('timeline_report.md.j2')
+        
+        # Calculate variance for the report
+        if verified_fields.get('dofd') and verified_fields.get('estimated_removal_date'):
+            from app.utils import estimate_removal_date as est_rem
+            calc_rem = est_rem(verified_fields['dofd'])
+            if calc_rem:
+                try:
+                    d1 = datetime.strptime(calc_rem, '%Y-%m-%d')
+                    d2 = datetime.strptime(verified_fields['estimated_removal_date'], '%Y-%m-%d')
+                    context['variance_days'] = (d2 - d1).days
+                except:
+                    context['variance_days'] = None
+        
+        with open(timeline_report_path, 'w', encoding='utf-8') as f:
+            f.write(timeline_template.render(context))
+        generated_files['forensic_timeline_report.md'] = str(timeline_report_path)
+
         # Generate debt validation letter (only for collections)
+
         if verified_fields.get('account_type') == 'collection':
             val_letter_path = output_dir / 'debt_validation_letter.md'
             val_template = self.env.get_template('debt_validation_letter.md.j2')

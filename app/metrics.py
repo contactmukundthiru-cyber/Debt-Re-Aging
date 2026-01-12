@@ -96,9 +96,17 @@ class MetricsTracker:
 
         # Flag type distribution
         flag_distribution = {}
+        bureau_distribution = {}
+        account_type_distribution = {}
         for case in cases:
             for flag_type in case['flag_types']:
                 flag_distribution[flag_type] = flag_distribution.get(flag_type, 0) + 1
+            
+            b_name = case.get('bureau') or 'Unknown'
+            bureau_distribution[b_name] = bureau_distribution.get(b_name, 0) + 1
+            
+            acc_type = case.get('account_type') or 'Unknown'
+            account_type_distribution[acc_type] = account_type_distribution.get(acc_type, 0) + 1
 
         # Severity distribution
         severity_dist = {
@@ -122,10 +130,13 @@ class MetricsTracker:
             'cases_with_flags': cases_with_flags,
             'flag_rate_percent': (cases_with_flags / total_cases) * 100,
             'flag_distribution': flag_distribution,
+            'bureau_distribution': bureau_distribution,
+            'account_type_distribution': account_type_distribution,
             'severity_distribution': severity_dist,
             'avg_extraction_quality': avg_quality,
             'last_updated': datetime.now().isoformat()
         }
+
 
     def get_summary(self) -> Dict[str, Any]:
         """Get summary statistics."""
@@ -161,14 +172,16 @@ class MetricsTracker:
 
         # Get all field names
         fieldnames = list(cases[0].keys())
-        # Convert list fields to strings
-        for case in cases:
-            case['flag_types'] = ','.join(case.get('flag_types', []))
-
+        
         with open(filepath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
-            writer.writerows(cases)
+            for case in cases:
+                # Create a copy to avoid modifying the original data
+                case_copy = case.copy()
+                if isinstance(case_copy.get('flag_types'), list):
+                    case_copy['flag_types'] = ','.join(case_copy['flag_types'])
+                writer.writerow(case_copy)
 
         return str(filepath)
 

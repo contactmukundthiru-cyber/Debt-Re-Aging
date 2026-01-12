@@ -41,151 +41,143 @@ def markdown_to_html(md_content: str, title: str = "Document") -> str:
     <style>
         @page {{
             size: letter;
-            margin: 1in;
+            margin: 0.75in;
+            @bottom-right {{
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: 'Times New Roman', serif;
+                font-size: 9pt;
+            }}
+            @bottom-left {{
+                content: "Prepared via Debt Re-aging Case Factory";
+                font-family: 'Times New Roman', serif;
+                font-size: 8pt;
+                color: #777;
+            }}
         }}
 
         body {{
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.5;
-            color: #333;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #111;
             max-width: 7.5in;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0;
+        }}
+
+        .legal-header {{
+            text-align: right;
+            border-bottom: 2px solid #000;
+            margin-bottom: 30px;
+            padding-bottom: 5px;
+        }}
+
+        .certified-stamp {{
+            border: 2px solid #000;
+            display: inline-block;
+            padding: 5px 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14pt;
+            margin-bottom: 10px;
         }}
 
         h1 {{
-            font-size: 18pt;
+            font-size: 20pt;
             color: #000;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
             margin-top: 0;
         }}
 
         h2 {{
-            font-size: 14pt;
-            color: #333;
-            margin-top: 24px;
-            margin-bottom: 12px;
+            font-size: 15pt;
+            color: #000;
+            border-bottom: 1px solid #666;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
         }}
 
         h3 {{
-            font-size: 12pt;
-            color: #444;
-            margin-top: 18px;
+            font-size: 13pt;
+            color: #222;
+            margin-top: 20px;
             margin-bottom: 8px;
+            font-weight: bold;
         }}
 
         h4 {{
-            font-size: 12pt;
-            color: #555;
+            font-size: 11pt;
+            color: #333;
             font-weight: bold;
         }}
 
         p {{
-            margin-bottom: 12px;
+            margin-bottom: 15px;
+            text-align: justify;
         }}
 
         table {{
             width: 100%;
             border-collapse: collapse;
-            margin: 16px 0;
+            margin: 20px 0;
+            page-break-inside: avoid;
         }}
 
         th, td {{
-            border: 1px solid #ddd;
-            padding: 8px 12px;
+            border: 1px solid #444;
+            padding: 10px 15px;
             text-align: left;
         }}
 
         th {{
-            background-color: #f5f5f5;
+            background-color: #eee;
             font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9pt;
         }}
 
         tr:nth-child(even) {{
-            background-color: #fafafa;
+            background-color: #fcfcfc;
         }}
 
         ul, ol {{
-            margin-bottom: 12px;
-            padding-left: 24px;
+            margin-bottom: 15px;
+            padding-left: 30px;
         }}
 
         li {{
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }}
 
         blockquote {{
-            margin: 16px 0;
-            padding: 12px 20px;
-            border-left: 4px solid #ddd;
+            margin: 20px 0;
+            padding: 15px 25px;
+            border-left: 5px solid #000;
             background-color: #f9f9f9;
+            font-style: italic;
         }}
 
-        code {{
-            background-color: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 11pt;
-        }}
-
-        pre {{
-            background-color: #f4f4f4;
-            padding: 12px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }}
-
-        hr {{
-            border: none;
-            border-top: 1px solid #ddd;
-            margin: 24px 0;
-        }}
-
-        .disclaimer {{
-            background-color: #fff8e1;
-            border: 1px solid #ffcc02;
-            padding: 12px;
-            margin: 16px 0;
-            border-radius: 4px;
-        }}
-
-        .severity-high {{
-            background-color: #ffebee;
-            border-left: 4px solid #f44336;
-            padding: 12px;
-            margin: 12px 0;
-        }}
-
-        .severity-medium {{
-            background-color: #fff8e1;
-            border-left: 4px solid #ff9800;
-            padding: 12px;
-            margin: 12px 0;
-        }}
-
-        .severity-low {{
-            background-color: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 12px;
-            margin: 12px 0;
-        }}
-
-        @media print {{
-            body {{
-                padding: 0;
-            }}
-
-            .no-print {{
-                display: none;
-            }}
+        .case-footer {{
+            margin-top: 50px;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
         }}
     </style>
 </head>
 <body>
-{html_body}
+    <div class="legal-header">
+        <div class="certified-stamp">Certified Mail - Return Receipt Requested</div>
+        <div style="font-size: 9pt; color: #555;">DETERMINATION OF NON-COMPLIANCE</div>
+    </div>
+    {html_body}
+    <div class="case-footer">
+        INTERNAL CASE LOG ID: {title.replace(' ', '_').upper()} | TIMESTAMP: {tempfile.gettempprefix()}
+    </div>
 </body>
 </html>"""
 

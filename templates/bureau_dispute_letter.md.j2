@@ -38,58 +38,65 @@ Chester, PA 19016
 
 ---
 
-**Re: Dispute of Inaccurate Information - Request for Investigation and Correction**
+**Re: Formal Dispute of Inaccurate Information - Strict Compliance Requested**
 
 To Whom It May Concern:
 
-I am writing pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681 et seq., to dispute information appearing on my credit report that I believe to be inaccurate.
+I am writing this letter as a formal dispute pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681 et seq. I have identified significant inaccuracies on my credit report that involve either improper debt re-aging, timeline inconsistencies, or failure to adhere to the reporting requirements of the FCRA.
 
-## Account Information Being Disputed
+## Account Information Under Dispute
 
-| Field | Reported Value |
+| Detail | Statement of Fact |
 |-------|----------------|
-| Furnisher/Creditor | {{ fields.furnisher_or_collector or fields.original_creditor or '[CREDITOR NAME]' }} |
+| **Furnisher/Creditor** | {{ fields.furnisher_or_collector or fields.original_creditor or '[CREDITOR NAME]' }} |
 {% if fields.original_creditor and fields.furnisher_or_collector %}
-| Original Creditor | {{ fields.original_creditor }} |
+| **Original Creditor** | {{ fields.original_creditor }} |
 {% endif %}
-| Account Type | {{ fields.account_type or '[ACCOUNT TYPE]' }} |
-| Date Opened as Reported | {{ fields.date_opened | format_date if fields.date_opened else '[DATE OPENED]' }} |
+| **Account Type** | {{ fields.account_type or '[ACCOUNT TYPE]' }} |
+| **Reported Date Opened** | {{ fields.date_opened | format_date if fields.date_opened else '[DATE OPENED]' }} |
 {% if fields.dofd %}
-| Date of First Delinquency | {{ fields.dofd | format_date }} |
+| **Date of First Delinquency** | {{ fields.dofd | format_date }} |
 {% endif %}
-| Estimated Removal Date | {{ fields.estimated_removal_date | format_date if fields.estimated_removal_date else '[REMOVAL DATE]' }} |
+| **Estimated Removal Date** | {{ fields.estimated_removal_date | format_date if fields.estimated_removal_date else '[REMOVAL DATE]' }} |
 
-## Basis for Dispute
+## Legal Basis and Statement of Dispute
 
-I am disputing this account because the reported information appears to contain timeline inaccuracies that may constitute improper debt re-aging or misreporting of the account's history.
+The following errors were identified through professional forensic timeline analysis. These errors are not merely clerical; they constitute potential violations of the FCRA's requirement for maximum possible accuracy.
 
 {% if has_flags %}
-Specifically, I have identified the following concerns:
+### Specific Inconsistencies and Regulatory Violations:
 
 {% for flag in flags %}
-**{{ loop.index }}. {{ flag.rule_name }}**
+#### {{ loop.index }}. {{ flag.rule_name }} [Violation ID: {{ flag.rule_id }}]
 
-{{ flag.explanation }}
+**Analysis:** {{ flag.explanation }}
 
+**Impact:** {{ flag.why_it_matters }}
+
+{% if flag.resolved_citations %}
+**Legal Authority Supporting This Dispute:**
+{% for cite in flag.resolved_citations %}
+> **{{ cite.title }} ({{ cite.citation }}):** {{ cite.text }}
 {% endfor %}
-{% else %}
-I request verification of the accuracy of all dates and information associated with this account.
 {% endif %}
 
-## Request for Action
+---
+{% endfor %}
+{% else %}
+I request verification of the accuracy of all dates and information associated with this account, as current reporting appears inconsistent with my records.
+{% endif %}
 
-Pursuant to the FCRA, I request that you:
+## Formal Demand for Action
 
-1. **Conduct a reasonable investigation** into the accuracy of the disputed information within 30 days of receiving this dispute.
+Pursuant to 15 U.S.C. § 1681i, you are required to conduct a reasonable investigation. Given the specific timeline inconsistencies cited above, a simple automated verification (e-OSCAR) may be insufficient to satisfy your "reasonable investigation" requirement under the law.
 
-2. **Contact the furnisher** of this information to verify its accuracy, including all reported dates.
+I demand the following:
 
-3. **Provide me with the results** of your investigation in writing, including:
-   - A description of the procedure used to determine accuracy
-   - The business name and address of any furnisher contacted
-   - A notice that I may request a description of the method used to verify
+1. **Perform a thorough manual investigation** of the dates cited above.
+2. **Obtain proof from the furnisher** that the Date of First Delinquency (DOFD) and Date Opened are compliant with FCRA § 605 and § 623.
+3. **Correct or delete** the disputed information within 30 days.
+4. **Provide a detailed description** of the investigation results and the method of verification.
 
-4. **Delete or correct** any information that cannot be verified as accurate.
 
 5. **Provide a free copy** of my credit report if any changes are made.
 

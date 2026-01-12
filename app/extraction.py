@@ -5,13 +5,17 @@ Handles text extraction via PyMuPDF and OCR via pytesseract.
 
 import io
 import os
+import logging
 from pathlib import Path
 from typing import Tuple, Optional
 import fitz  # PyMuPDF
-from PIL import Image, ImageFilter, ImageOps
+from PIL import Image
 import pytesseract
 import numpy as np
 import cv2
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Minimum text length to consider embedded text extraction successful
 MIN_TEXT_THRESHOLD = 50
@@ -135,13 +139,19 @@ def extract_text(file_path: str, file_type: str) -> Tuple[str, str]:
     """
     file_path = str(file_path)
     file_lower = file_path.lower()
+    
+    logger.info(f"Starting extraction for {file_path} (Type: {file_type})")
 
-    if file_type == 'application/pdf' or file_lower.endswith('.pdf'):
-        return extract_text_from_pdf(file_path)
-    elif file_type.startswith('image/') or any(file_lower.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.tiff', '.bmp']):
-        return extract_text_from_image(file_path)
+    if file_lower.endswith('.pdf'):
+        res, method = extract_text_from_pdf(file_path)
+    elif any(file_lower.endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.tiff', '.bmp']):
+        res, method = extract_text_from_image(file_path)
     else:
+        logger.warning(f"Unsupported file type for {file_path}")
         return "Unsupported file type", "error"
+    
+    logger.info(f"Extraction complete for {file_path} using {method}. Length: {len(res)} characters.")
+    return res, method
 
 
 def extract_text_from_bytes(file_bytes: bytes, file_name: str) -> Tuple[str, str]:

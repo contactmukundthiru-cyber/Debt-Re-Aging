@@ -56,6 +56,25 @@ streamlit run app/main.py
 
 ---
 
+## Additional Features
+
+### For Organizations
+- **Case Manager**: Save and load cases with unique IDs
+- **Deadline Tracker**: Monitor 30-day response deadlines
+- **Analytics Dashboard**: Track success rates and patterns
+- **Batch Mode**: Process multiple cases at once
+
+### For Consumers
+- **Client Portal**: Simplified 4-step guided process
+- **Spanish Support**: Switch language in sidebar
+
+### Advanced
+- **Multi-Account Analysis**: Parse entire credit reports
+- **Cross-Bureau Analysis**: Compare across bureaus
+- **REST API**: Integrate with your CMS
+
+---
+
 ## Common Issues
 
 | Problem | Solution |

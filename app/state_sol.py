@@ -15,71 +15,72 @@ from dataclasses import dataclass
 
 @dataclass
 class StateSol:
-    """Statute of limitations for a state."""
+    """Statute of limitations and interest caps for a state."""
     state: str
     state_code: str
     written_contracts: int  # Years
     oral_contracts: int
     promissory_notes: int
     open_accounts: int  # Credit cards typically fall here
+    judgment_interest_cap: float = 0.10  # Default 10%
+    medical_interest_cap: float = 0.10   # Default 10%
     notes: str = ""
 
 
 # State Statute of Limitations Database
-# Sources: State civil procedure codes (as of 2024)
-# Note: Many states have different SOLs for different debt types
+# Sources: State civil procedure codes & interest rate statutes (as of 2024)
 STATE_SOL_DATABASE: Dict[str, StateSol] = {
-    'AL': StateSol('Alabama', 'AL', 6, 6, 6, 6),
-    'AK': StateSol('Alaska', 'AK', 3, 3, 3, 3),
-    'AZ': StateSol('Arizona', 'AZ', 6, 3, 6, 6),
-    'AR': StateSol('Arkansas', 'AR', 5, 5, 5, 5),
-    'CA': StateSol('California', 'CA', 4, 2, 4, 4),
-    'CO': StateSol('Colorado', 'CO', 6, 6, 6, 6),
-    'CT': StateSol('Connecticut', 'CT', 6, 3, 6, 6),
-    'DE': StateSol('Delaware', 'DE', 3, 3, 3, 3),
-    'DC': StateSol('District of Columbia', 'DC', 3, 3, 3, 3),
-    'FL': StateSol('Florida', 'FL', 5, 4, 5, 5),
-    'GA': StateSol('Georgia', 'GA', 6, 4, 6, 6),
-    'HI': StateSol('Hawaii', 'HI', 6, 6, 6, 6),
-    'ID': StateSol('Idaho', 'ID', 5, 4, 5, 5),
-    'IL': StateSol('Illinois', 'IL', 5, 5, 5, 5),
-    'IN': StateSol('Indiana', 'IN', 6, 6, 6, 6),
-    'IA': StateSol('Iowa', 'IA', 5, 5, 5, 5),
-    'KS': StateSol('Kansas', 'KS', 5, 3, 5, 5),
-    'KY': StateSol('Kentucky', 'KY', 5, 5, 5, 5),
-    'LA': StateSol('Louisiana', 'LA', 3, 3, 3, 3),
-    'ME': StateSol('Maine', 'ME', 6, 6, 6, 6),
-    'MD': StateSol('Maryland', 'MD', 3, 3, 3, 3),
-    'MA': StateSol('Massachusetts', 'MA', 6, 6, 6, 6),
-    'MI': StateSol('Michigan', 'MI', 6, 6, 6, 6),
-    'MN': StateSol('Minnesota', 'MN', 6, 6, 6, 6),
-    'MS': StateSol('Mississippi', 'MS', 3, 3, 3, 3),
-    'MO': StateSol('Missouri', 'MO', 5, 5, 5, 5),
-    'MT': StateSol('Montana', 'MT', 5, 5, 5, 5),
-    'NE': StateSol('Nebraska', 'NE', 5, 4, 5, 5),
-    'NV': StateSol('Nevada', 'NV', 6, 4, 6, 6),
-    'NH': StateSol('New Hampshire', 'NH', 3, 3, 3, 3),
-    'NJ': StateSol('New Jersey', 'NJ', 6, 6, 6, 6),
-    'NM': StateSol('New Mexico', 'NM', 6, 4, 6, 6),
-    'NY': StateSol('New York', 'NY', 6, 6, 6, 6),
-    'NC': StateSol('North Carolina', 'NC', 3, 3, 3, 3),
-    'ND': StateSol('North Dakota', 'ND', 6, 6, 6, 6),
-    'OH': StateSol('Ohio', 'OH', 6, 6, 6, 6),
-    'OK': StateSol('Oklahoma', 'OK', 5, 3, 5, 5),
-    'OR': StateSol('Oregon', 'OR', 6, 6, 6, 6),
-    'PA': StateSol('Pennsylvania', 'PA', 4, 4, 4, 4),
-    'RI': StateSol('Rhode Island', 'RI', 10, 10, 10, 10),
-    'SC': StateSol('South Carolina', 'SC', 3, 3, 3, 3),
-    'SD': StateSol('South Dakota', 'SD', 6, 6, 6, 6),
-    'TN': StateSol('Tennessee', 'TN', 6, 6, 6, 6),
-    'TX': StateSol('Texas', 'TX', 4, 4, 4, 4),
-    'UT': StateSol('Utah', 'UT', 6, 4, 6, 6),
-    'VT': StateSol('Vermont', 'VT', 6, 6, 6, 6),
-    'VA': StateSol('Virginia', 'VA', 5, 3, 5, 5),
-    'WA': StateSol('Washington', 'WA', 6, 3, 6, 6),
-    'WV': StateSol('West Virginia', 'WV', 6, 5, 6, 6),
-    'WI': StateSol('Wisconsin', 'WI', 6, 6, 6, 6),
-    'WY': StateSol('Wyoming', 'WY', 8, 8, 8, 8),
+    'AL': StateSol('Alabama', 'AL', 6, 6, 6, 6, 0.075, 0.08),
+    'AK': StateSol('Alaska', 'AK', 3, 3, 3, 3, 0.105, 0.05),
+    'AZ': StateSol('Arizona', 'AZ', 6, 3, 6, 6, 0.10, 0.03),
+    'AR': StateSol('Arkansas', 'AR', 5, 5, 5, 5, 0.10, 0.06),
+    'CA': StateSol('California', 'CA', 4, 2, 4, 4, 0.10, 0.05),
+    'CO': StateSol('Colorado', 'CO', 6, 6, 6, 6, 0.08, 0.08),
+    'CT': StateSol('Connecticut', 'CT', 6, 3, 6, 6, 0.10, 0.06),
+    'DE': StateSol('Delaware', 'DE', 3, 3, 3, 3, 0.10, 0.05),
+    'DC': StateSol('District of Columbia', 'DC', 3, 3, 3, 3, 0.06, 0.06),
+    'FL': StateSol('Florida', 'FL', 5, 4, 5, 5, 0.09, 0.09),
+    'GA': StateSol('Georgia', 'GA', 6, 4, 6, 6, 0.07, 0.07),
+    'HI': StateSol('Hawaii', 'HI', 6, 6, 6, 6, 0.10, 0.10),
+    'ID': StateSol('Idaho', 'ID', 5, 4, 5, 5, 0.12, 0.12),
+    'IL': StateSol('Illinois', 'IL', 5, 5, 5, 5, 0.09, 0.05),
+    'IN': StateSol('Indiana', 'IN', 6, 6, 6, 6, 0.08, 0.08),
+    'IA': StateSol('Iowa', 'IA', 5, 5, 5, 5, 0.05, 0.05),
+    'KS': StateSol('Kansas', 'KS', 5, 3, 5, 5, 0.10, 0.10),
+    'KY': StateSol('Kentucky', 'KY', 5, 5, 5, 5, 0.08, 0.08),
+    'LA': StateSol('Louisiana', 'LA', 3, 3, 3, 3, 0.08, 0.08),
+    'ME': StateSol('Maine', 'ME', 6, 6, 6, 6, 0.08, 0.08),
+    'MD': StateSol('Maryland', 'MD', 3, 3, 3, 3, 0.10, 0.06),
+    'MA': StateSol('Massachusetts', 'MA', 6, 6, 6, 6, 0.12, 0.06),
+    'MI': StateSol('Michigan', 'MI', 6, 6, 6, 6, 0.07, 0.07),
+    'MN': StateSol('Minnesota', 'MN', 6, 6, 6, 6, 0.06, 0.04),
+    'MS': StateSol('Mississippi', 'MS', 3, 3, 3, 3, 0.08, 0.08),
+    'MO': StateSol('Missouri', 'MO', 5, 5, 5, 5, 0.09, 0.09),
+    'MT': StateSol('Montana', 'MT', 5, 5, 5, 5, 0.10, 0.10),
+    'NE': StateSol('Nebraska', 'NE', 5, 4, 5, 5, 0.06, 0.06),
+    'NV': StateSol('Nevada', 'NV', 6, 4, 6, 6, 0.08, 0.00), # NV medical interest is 0%
+    'NH': StateSol('New Hampshire', 'NH', 3, 3, 3, 3, 0.08, 0.08),
+    'NJ': StateSol('New Jersey', 'NJ', 6, 6, 6, 6, 0.06, 0.06),
+    'NM': StateSol('New Mexico', 'NM', 6, 4, 6, 6, 0.08, 0.08),
+    'NY': StateSol('New York', 'NY', 6, 6, 6, 6, 0.09, 0.02), # NY medical interest cap is 2%
+    'NC': StateSol('North Carolina', 'NC', 3, 3, 3, 3, 0.08, 0.08),
+    'ND': StateSol('North Dakota', 'ND', 6, 6, 6, 6, 0.06, 0.06),
+    'OH': StateSol('Ohio', 'OH', 6, 6, 6, 6, 0.05, 0.05),
+    'OK': StateSol('Oklahoma', 'OK', 5, 3, 5, 5, 0.06, 0.06),
+    'OR': StateSol('Oregon', 'OR', 6, 6, 6, 6, 0.09, 0.09),
+    'PA': StateSol('Pennsylvania', 'PA', 4, 4, 4, 4, 0.06, 0.06),
+    'RI': StateSol('Rhode Island', 'RI', 10, 10, 10, 10, 0.12, 0.12),
+    'SC': StateSol('South Carolina', 'SC', 3, 3, 3, 3, 0.08, 0.08),
+    'SD': StateSol('South Dakota', 'SD', 6, 6, 6, 6, 0.10, 0.10),
+    'TN': StateSol('Tennessee', 'TN', 6, 6, 6, 6, 0.10, 0.10),
+    'TX': StateSol('Texas', 'TX', 4, 4, 4, 4, 0.06, 0.06),
+    'UT': StateSol('Utah', 'UT', 6, 4, 6, 6, 0.10, 0.10),
+    'VT': StateSol('Vermont', 'VT', 6, 6, 6, 6, 0.12, 0.12),
+    'VA': StateSol('Virginia', 'VA', 5, 3, 5, 5, 0.06, 0.06),
+    'WA': StateSol('Washington', 'WA', 6, 3, 6, 6, 0.12, 0.09),
+    'WV': StateSol('West Virginia', 'WV', 6, 5, 6, 6, 0.07, 0.07),
+    'WI': StateSol('Wisconsin', 'WI', 6, 6, 6, 6, 0.05, 0.05),
+    'WY': StateSol('Wyoming', 'WY', 8, 8, 8, 8, 0.07, 0.07),
 }
 
 

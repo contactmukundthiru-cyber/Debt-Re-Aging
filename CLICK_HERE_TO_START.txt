@@ -1,0 +1,38 @@
+===============================================
+   HOW TO START THE DEBT RE-AGING TOOL
+===============================================
+
+STEP 1: Double-click "START_APP.bat"
+
+STEP 2: Wait for browser to open
+        (First time may take 2-3 minutes to install)
+
+STEP 3: Use the app in your browser
+
+STEP 4: When done, close the black command window
+
+
+-----------------------------------------------
+   TROUBLESHOOTING
+-----------------------------------------------
+
+"Python not found" error:
+   -> Install Python from python.org
+   -> CHECK the box "Add Python to PATH"
+   -> Restart and try again
+
+App won't start:
+   -> Make sure no other app is using port 8501
+   -> Try closing and reopening
+
+Browser didn't open:
+   -> Manually go to: http://localhost:8501
+
+
+-----------------------------------------------
+   NEED HELP?
+-----------------------------------------------
+
+Email: contactmukundthiru1@gmail.com
+
+===============================================
