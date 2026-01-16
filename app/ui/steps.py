@@ -175,16 +175,22 @@ def render_step_3_verify():
     st.markdown("### Account Details")
 
     # Field definitions for display
+    # Field definitions for display
     field_info = {
         'original_creditor': ('Original Creditor', 'The original company you had the account with'),
         'furnisher_or_collector': ('Furnisher/Collector', 'The company reporting this to the credit bureau'),
         'account_type': ('Account Type', 'e.g., collection, charge_off, other'),
         'account_status': ('Account Status', 'e.g., Paid, Settled, Late, Default'),
         'current_balance': ('Current Balance', 'The current balance reported ($)'),
+        'original_amount': ('Original Amount', 'The initial amount of the debt ($)'),
         'date_opened': ('Date Opened', 'Date the account was opened (YYYY-MM-DD)'),
         'date_reported_or_updated': ('Date Reported/Updated', 'When this was last reported (YYYY-MM-DD)'),
         'dofd': ('Date of First Delinquency', 'When you first fell behind (YYYY-MM-DD)'),
+        'charge_off_date': ('Charge-Off Date', 'When the debt was charged off (YYYY-MM-DD)'),
+        'date_last_payment': ('Date of Last Payment', 'When you last made a payment (YYYY-MM-DD)'),
+        'date_last_activity': ('Date of Last Activity', 'When the account last had activity (YYYY-MM-DD)'),
         'estimated_removal_date': ('Estimated Removal Date', 'When this should drop off (YYYY-MM-DD)'),
+        'payment_history': ('Payment History', 'Raw delinquency markers (e.g., 30 60 90 C)'),
         'bureau': ('Credit Bureau', 'Experian, Equifax, TransUnion, or Unknown')
     }
 

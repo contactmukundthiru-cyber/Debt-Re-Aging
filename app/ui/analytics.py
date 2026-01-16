@@ -107,6 +107,41 @@ def render_batch_mode():
                 else:
                     st.success("No suspicious patterns found across your accounts.")
 
+            # Industry-Disruptive: Waterfall Trace Visualizer
+            st.subheader("Debt Chain of Custody (Waterfall Trace)")
+            with st.spinner("Tracing debt movement..."):
+                waterfall_data = {}
+                for acc in results.accounts:
+                    orig = acc.fields.get('original_creditor', {}).get('value')
+                    if orig:
+                        if orig not in waterfall_data: waterfall_data[orig] = []
+                        waterfall_data[orig].append({
+                            'collector': acc.fields.get('furnisher_or_collector', {}).get('value') or 'Unknown',
+                            'opened': acc.fields.get('date_opened', {}).get('value') or '?',
+                            'balance': acc.fields.get('current_balance', {}).get('value') or '0'
+                        })
+                
+                for orig, chain in waterfall_data.items():
+                    if len(chain) >= 2:
+                        st.markdown(f"**Original Debt: {orig}**")
+                        # Sort by date opened if possible
+                        chain.sort(key=lambda x: x['opened'] if x['opened'] != '?' else '9999-99-99')
+                        
+                        cols = st.columns(len(chain))
+                        for i, link in enumerate(chain):
+                            with cols[i]:
+                                color = "#2563eb" if i == len(chain)-1 else "#64748b"
+                                st.markdown(f"""
+                                <div style="background: white; border: 2px solid {color}; border-radius: 8px; padding: 10px; text-align: center;">
+                                    <div style="font-size: 0.7rem; color: #94a3b8;">{"CURRENT" if i == len(chain)-1 else f"LINK {i+1}"}</div>
+                                    <div style="font-weight: 700; font-size: 0.8rem; margin: 5px 0;">{link['collector']}</div>
+                                    <div style="font-size: 0.7rem;">Bal: ${link['balance']}</div>
+                                    <div style="font-size: 0.6rem; color: #94a3b8;">Opened: {link['opened']}</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+                                if i < len(chain)-1:
+                                    st.markdown("<div style='text-align: center; color: #cbd5e1;'>↓</div>", unsafe_allow_html=True)
+
             st.markdown("---")
             
             # Show summary
