@@ -582,11 +582,16 @@ def render_step_4_checks():
                         st.markdown(f"- {evidence}")
 
                 st.markdown("---")
-                st.markdown("**Data we analyzed:**")
-                trace_cols = st.columns(len(flag.get('field_values', {}).keys()) or 1)
-                for i, (k, v) in enumerate(flag.get('field_values', {}).items()):
-                    with trace_cols[i % len(trace_cols)]:
-                        st.metric(label=k.replace('_', ' ').title(), value=str(v))
+                st.markdown("**🔍 FORENSIC DATA TRACE**")
+                # High-end grid for data trace
+                data_points = list(flag.get('field_values', {}).items())
+                if data_points:
+                    for i in range(0, len(data_points), 3):
+                        cols = st.columns(3)
+                        for j in range(3):
+                            if i + j < len(data_points):
+                                k, v = data_points[i+j]
+                                cols[j].metric(label=k.replace('_', ' ').upper(), value=str(v))
     else:
         st.success("No obvious timeline inconsistencies detected!")
         st.info("""

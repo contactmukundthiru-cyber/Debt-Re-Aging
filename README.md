@@ -14,53 +14,35 @@ The tool helps legal aid organizations, consumer advocacy groups, and pro bono c
 
 ---
 
-## Key Features
+## Key Features (Unrivaled Forensic Capabilities)
 
-### Core Analysis
-- **Advanced OCR (OpenCV)**: Professional image preprocessing for higher accuracy from mobile photos or scans
-- **State SOL Integration**: Built-in database of Statute of Limitations for all 50 states
-- **Intelligent Rule Engine**: 20+ automated checks for re-aging, duplicate reporting, and violations
-- **Multi-Account Parser**: Analyze entire credit reports with automatic account segmentation
-- **Cross-Bureau Analysis**: Compare dates across Experian, Equifax, and TransUnion
+### Core Analysis & Intelligence
+- **Advanced OCR (OpenCV + Tesseract)**: Professional image preprocessing pipeline for high-accuracy extraction from mobile photos or scans.
+- **Systemic Behavioral Auditing**: Detects patterns of "Synthetic Aging" and "Clock Drift" across entire furnisher datasets.
+- **Intelligent Rule Engine**: 25+ automated checks for re-aging, duplicate reporting, and Metro 2 compliance.
+- **Multi-Account Segmenter**: Automatically splits entire credit reports into individual forensic account records.
+- **Cross-Bureau Reconciliation**: Analyzes material discrepancies between Experian, Equifax, and TransUnion.
 
-### Professional Output
-- **Dispute Letter Generator**: FCRA-compliant letters in Markdown, DOCX, and PDF formats
-- **Debt Validation Letters**: FDCPA-compliant validation request letters
-- **Case Documentation**: Complete case files with evidence summaries
-
-### Organizational Tools
-- **Case Management**: Save, load, and track cases with unique IDs
-- **Deadline Tracker**: Monitor 30-day response deadlines with reminders
-- **Analytics Dashboard**: Track success rates, patterns, and organizational metrics
-- **REST API**: Integrate with Legal Server, Salesforce, or custom CMS
-
-### User Experience
-- **Client Portal Mode**: Simplified interface for consumer self-service
-- **Multi-Language Support**: English and Spanish interfaces
-- **Training Materials**: Built-in tutorials and documentation
-- **Privacy First**: 100% local processing, no cloud, automated cleanup
+### Institutional Readiness
+- **REST API & Webhooks**: Seamless integration with Case Management Systems (CMS) like Legal Server or Salesforce.
+- **Security Whitepaper**: Built for "Zero-Trust" environments with 100% local processing.
+- **Multi-Language Support**: English and Spanish interfaces with international i18n framework.
+- **Outcome Analytics**: Track success rates and identify systemic violators for high-impact litigation.
 
 ---
 
 ## Quick Start
 
-### Option 1: Docker (Recommended)
+### Option 1: Web App (No Installation)
 
-Docker provides a hardened, rootless environment with all dependencies pre-installed.
+The fastest way to use the tool. All processing is done locally in your browser.
 
-```bash
-# Clone the repository
-git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git
-cd Debt-Re-Aging
-
-# Start with Docker
-# (Note: If you get a 'Permission Denied' error, see the Troubleshooting section below)
-docker-compose up
-
-# Open http://localhost:8501 in your browser
-```
+- **Launch**: [Web App (PWA)](./pwa-app/out/index.html)
+- **Features**: Instant analysis, OCR support for images, offline-ready.
 
 ---
+
+### Option 2: Docker (Recommended for Organizations)
 
 ## Troubleshooting
 

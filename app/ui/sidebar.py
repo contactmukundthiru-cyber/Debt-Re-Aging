@@ -314,12 +314,28 @@ def render_sidebar(project_root: Path):
 
         # Footer
         st.markdown("""
-        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0; text-align: center;">
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+        </div>
+        """, unsafe_allow_html=True)
+
+        with st.expander("🩺 Institutional Health"):
+            import shutil
+            tesseract_path = shutil.which("tesseract")
+            if tesseract_path:
+                st.success("OCR Engine: Active")
+            else:
+                st.warning("OCR Engine: Offline (Install Tesseract)")
+            
+            st.info("Logic Engine: v2.1.0-Forensic")
+            st.caption("Environment: Isolated / Air-Gapped Ready")
+
+        st.markdown("""
+        <div style="text-align: center; margin-top: 10px;">
             <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px;">
-                v1.0.0 - 100% Private
+                v2.1.0 - 100% Private
             </div>
             <div style="font-size: 0.65rem; color: #cbd5e1;">
-                All data stays on your computer
+                Institutional Forensic Suite
             </div>
         </div>
         """, unsafe_allow_html=True)

@@ -1,6 +1,6 @@
 # GitHub Pages configuration
-title: Debt Re-Aging Case Factory
-description: A free, privacy-preserving tool for detecting debt re-aging violations in credit reports
+title: Credit Report Analyzer
+description: Free tool to find errors in credit reports and generate dispute letters. Runs locally - no data uploaded.
 author: Mukund Thiru
 baseurl: "/Debt-Re-Aging"
 url: "https://contactmukundthiru-cyber.github.io"

@@ -379,6 +379,61 @@ class CaseManager:
 {case.notes or 'No notes recorded.'}
 """
 
+    def audit_systemic_violations(self) -> List[Dict[str, Any]]:
+        """
+        Institutional Feature: Systemic Behavioral Auditing.
+        Analyzes entire history to find furnishers with recurring violation patterns.
+        """
+        furnisher_stats = {}
+        
+        for entry in self._history['cases']:
+            case_id = entry['case_id']
+            case = self.load_case(case_id)
+            if not case or not case.flags:
+                continue
+                
+            furnisher = case.account_collector or case.account_creditor or "Unknown"
+            furnisher = furnisher.strip().upper()
+            
+            if furnisher not in furnisher_stats:
+                furnisher_stats[furnisher] = {
+                    'total_cases': 0,
+                    'total_flags': 0,
+                    'high_severity_flags': 0,
+                    'common_rules': {},
+                    'success_rate': 0,
+                    'resolved_cases': 0
+                }
+            
+            stats = furnisher_stats[furnisher]
+            stats['total_cases'] += 1
+            stats['total_flags'] += len(case.flags)
+            
+            for flag in case.flags:
+                rule_id = flag.get('rule_id', 'Unknown')
+                stats['common_rules'][rule_id] = stats['common_rules'].get(rule_id, 0) + 1
+                if flag.get('severity') == 'high':
+                    stats['high_severity_flags'] += 1
+            
+            if case.status.startswith('resolved_'):
+                stats['resolved_cases'] += 1
+                
+        # Filter for furnishers with enough data
+        systemic_issues = []
+        for furnisher, stats in furnisher_stats.items():
+            if stats['total_cases'] >= 3:
+                # Calculate systemic score
+                violation_rate = stats['total_flags'] / stats['total_cases']
+                systemic_issues.append({
+                    'furnisher': furnisher,
+                    'violation_rate': round(violation_rate, 2),
+                    'high_severity_count': stats['high_severity_flags'],
+                    'most_common_violation': max(stats['common_rules'], key=stats['common_rules'].get) if stats['common_rules'] else "None",
+                    'total_cases': stats['total_cases']
+                })
+                
+        return sorted(systemic_issues, key=lambda x: x['violation_rate'], reverse=True)
+
     def _format_disputes(self, disputes: List[Dict]) -> str:
         """Format disputes for markdown output."""
         if not disputes:
@@ -485,8 +540,8 @@ def render_case_manager_ui(st):
     manager = CaseManager()
 
     # Tabs for different views
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "My Cases", "Search", "Outcomes", "Statistics"
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "My Cases", "Search", "Outcomes", "Statistics", "Institutional Audit"
     ])
 
     with tab1:
@@ -577,3 +632,23 @@ def render_case_manager_ui(st):
         st.markdown("### Cases by Status")
         for status, count in stats['by_status'].items():
             st.markdown(f"- **{status}:** {count}")
+
+    with tab5:
+        st.subheader("Systemic Behavioral Audit")
+        st.markdown("""
+        **Unrivaled Institutional Intelligence**: This module analyzes recurring patterns across your entire case database 
+        to identify furnishers with systemic reporting violations.
+        """)
+        
+        systemic_issues = manager.audit_systemic_violations()
+        
+        if not systemic_issues:
+            st.info("Insufficient data for systemic auditing. Process more cases to see patterns.")
+        else:
+            for issue in systemic_issues:
+                with st.expander(f"🚩 {issue['furnisher']} - {issue['violation_rate']} flags/case"):
+                    col1, col2 = st.columns(2)
+                    col1.metric("Total Cases", issue['total_cases'])
+                    col1.metric("High Severity Flags", issue['high_severity_count'])
+                    col2.write(f"**Primary Violation Pattern**: {issue['most_common_violation']}")
+                    col2.warning("Potential for Class Action or CFPB Systemic Referral")

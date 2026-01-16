@@ -203,32 +203,22 @@ def create_case_metric(
 ) -> CaseMetric:
     """
     Create a CaseMetric from case processing data.
-
-    Args:
-        case_id: Unique case identifier
-        start_time: When processing started
-        end_time: When processing completed
-        original_fields: Fields as originally extracted
-        edited_fields: Fields after user edits
-        flags: List of flag dictionaries
-        extraction_method: 'ocr', 'embedded_text', or 'sample'
-        extraction_quality: Quality score 0-100
-
-    Returns:
-        CaseMetric object
     """
     # Calculate processing time
     processing_time = (end_time - start_time).total_seconds()
 
     # Count extracted and corrected fields
     fields_extracted = sum(1 for v in original_fields.values()
-                          if v and v.get('value'))
+                          if isinstance(v, dict) and v.get('value'))
+    
     fields_corrected = 0
-    for key in original_fields:
-        orig_val = original_fields.get(key, {}).get('value', '')
-        edit_val = edited_fields.get(key, {}).get('value', '')
-        if orig_val != edit_val:
-            fields_corrected += 1
+    for key, orig_data in original_fields.items():
+        if key in edited_fields:
+            orig_val = orig_data.get('value', '') if isinstance(orig_data, dict) else str(orig_data)
+            edit_data = edited_fields[key]
+            edit_val = edit_data.get('value', '') if isinstance(edit_data, dict) else str(edit_data)
+            if str(orig_val).strip() != str(edit_val).strip():
+                fields_corrected += 1
 
     # Analyze flags
     flag_types = [f.get('rule_id', 'unknown') for f in flags]
@@ -236,9 +226,15 @@ def create_case_metric(
     medium_severity = sum(1 for f in flags if f.get('severity') == 'medium')
     low_severity = sum(1 for f in flags if f.get('severity') == 'low')
 
-    # Get account info
-    bureau = edited_fields.get('bureau', {}).get('value', 'Unknown')
-    account_type = edited_fields.get('account_type', {}).get('value', 'Unknown')
+    # Get account info safely
+    def get_field_val(fields, key, default='Unknown'):
+        data = fields.get(key)
+        if isinstance(data, dict):
+            return data.get('value') or default
+        return data or default
+
+    bureau = get_field_val(edited_fields, 'bureau')
+    account_type = get_field_val(edited_fields, 'account_type')
 
     return CaseMetric(
         case_id=case_id,
@@ -251,8 +247,8 @@ def create_case_metric(
         high_severity_flags=high_severity,
         medium_severity_flags=medium_severity,
         low_severity_flags=low_severity,
-        bureau=bureau if isinstance(bureau, str) else 'Unknown',
-        account_type=account_type if isinstance(account_type, str) else 'Unknown',
+        bureau=str(bureau),
+        account_type=str(account_type),
         extraction_method=extraction_method,
         extraction_quality=extraction_quality
     )
