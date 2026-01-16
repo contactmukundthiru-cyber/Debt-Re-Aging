@@ -16,6 +16,14 @@ import {
   ScoreBreakdown,
   PatternInsight
 } from '../lib/analytics';
+import {
+  saveAnalysis,
+  getHistory,
+  getAnalysis,
+  deleteAnalysis,
+  formatTimestamp,
+  AnalysisRecord
+} from '../lib/storage';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -78,7 +86,14 @@ export default function CreditReportAnalyzer() {
   const [activeTab, setActiveTab] = useState<'violations' | 'timeline' | 'breakdown' | 'patterns' | 'actions'>('violations');
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<AnalysisRecord[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load history on mount
+  useEffect(() => {
+    setHistory(getHistory());
+  }, []);
 
   // Computed analytics
   const analytics = useMemo(() => {
@@ -192,7 +207,27 @@ export default function CreditReportAnalyzer() {
     setRiskProfile(profile);
     setActiveTab('violations');
     setStep(4);
-  }, [editableFields]);
+
+    // Save to history
+    saveAnalysis(editableFields, detectedFlags, profile, fileName || undefined);
+    setHistory(getHistory());
+  }, [editableFields, fileName]);
+
+  const loadFromHistory = useCallback((record: AnalysisRecord) => {
+    setEditableFields(record.fields);
+    setFlags(record.flags);
+    setRiskProfile(record.riskProfile);
+    setFileName(record.fileName || null);
+    setShowHistory(false);
+    setActiveTab('violations');
+    setStep(4);
+  }, []);
+
+  const removeFromHistory = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteAnalysis(id);
+    setHistory(getHistory());
+  }, []);
 
   const downloadDocument = useCallback((type: 'bureau' | 'validation' | 'cfpb' | 'summary') => {
     const generators: Record<string, () => { content: string; filename: string; mimeType: string }> = {
@@ -403,7 +438,7 @@ export default function CreditReportAnalyzer() {
                 </button>
               </div>
 
-              <div className="notice max-w-xl mx-auto">
+              <div className="notice max-w-xl mx-auto mb-8">
                 <div className="flex items-start gap-3">
                   <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -414,6 +449,66 @@ export default function CreditReportAnalyzer() {
                   </p>
                 </div>
               </div>
+
+              {/* Analysis History */}
+              {history.length > 0 && (
+                <div className="max-w-xl mx-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowHistory(!showHistory)}
+                    className="w-full flex items-center justify-between p-4 panel-inset hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="heading-sm">Recent Analyses</span>
+                      <span className="text-xs text-gray-400 font-normal">({history.length})</span>
+                    </div>
+                    <svg
+                      className={`w-5 h-5 text-gray-400 transition-transform ${showHistory ? 'rotate-180' : ''}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {showHistory && (
+                    <div className="border border-t-0 border-gray-100 divide-y divide-gray-100">
+                      {history.slice(0, 5).map((record) => (
+                        <button
+                          key={record.id}
+                          type="button"
+                          onClick={() => loadFromHistory(record)}
+                          className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors text-left group"
+                        >
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <span className="text-lg font-light">{record.riskProfile.overallScore}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="body-sm font-medium truncate">
+                              {record.fields.furnisherOrCollector || record.fields.originalCreditor || 'Unknown Account'}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {formatTimestamp(record.timestamp)} · {record.flags.length} violations
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => removeFromHistory(record.id, e)}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
+                            title="Delete"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
