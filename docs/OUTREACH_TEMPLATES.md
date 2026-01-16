@@ -18,7 +18,7 @@ I'm reaching out to share a free, open-source tool that may help your organizati
 Many consumers, particularly those in underserved communities, have debts illegally "re-aged" on their credit reports—making negative items stay longer than the law allows. Identifying these violations requires time-consuming manual analysis of dates and calculations.
 
 **The Solution:**
-The **Debt Re-Aging Case Factory** automates this analysis. Upload a credit report snippet, and in minutes the tool:
+The **Credit Report Analyzer** automates this analysis. Upload a credit report snippet, and in minutes the tool:
 - Extracts key dates and account information
 - Runs 10+ automated checks for FCRA violations
 - Generates professional dispute documentation
@@ -52,7 +52,7 @@ Best regards,
 
 Hi [Name],
 
-Thank you for your interest in piloting the Debt Re-Aging Case Factory! I'm excited to help your organization get started.
+Thank you for your interest in piloting the Credit Report Analyzer! I'm excited to help your organization get started.
 
 **Proposed Next Steps:**
 
@@ -95,7 +95,7 @@ Dear Professor [Name],
 I'm a [student/researcher/developer] reaching out about a legal technology tool that may benefit your consumer law clinic.
 
 **About the Tool:**
-The Debt Re-Aging Case Factory helps identify potential FCRA violations in consumer credit reports. It's designed for use by law students under attorney supervision and provides an excellent teaching opportunity for:
+The Credit Report Analyzer helps identify potential FCRA violations in consumer credit reports. It's designed for use by law students under attorney supervision and provides an excellent teaching opportunity for:
 - Understanding FCRA timelines and requirements
 - Practical client service experience
 - Legal technology exposure
@@ -135,7 +135,7 @@ Dear [Name],
 I learned about [Organization]'s work helping community members with financial wellness, and I wanted to share a free tool that might complement your programs.
 
 **What It Does:**
-The Debt Re-Aging Case Factory helps identify when debt collectors may have illegally manipulated dates on credit reports. This practice, called "re-aging," keeps negative items on credit reports longer than the law allows, unfairly harming people who are trying to rebuild their credit.
+The Credit Report Analyzer helps identify when debt collectors may have illegally manipulated dates on credit reports. This practice, called "re-aging," keeps negative items on credit reports longer than the law allows, unfairly harming people who are trying to rebuild their credit.
 
 **How It Helps Your Clients:**
 - Identifies potential issues in credit reports
@@ -223,7 +223,7 @@ Best,
 
 Debt re-aging—the illegal manipulation of dates on credit reports to extend the reporting period beyond statutory limits—disproportionately affects low-income consumers who lack resources to identify and challenge these violations. Traditional analysis requires attorneys to manually calculate date differentials across multiple data points, consuming valuable time that could be spent on representation.
 
-This presentation introduces the Debt Re-Aging Case Factory, a free, open-source tool that automates the identification of potential FCRA timeline violations. The tool processes credit report snippets using OCR technology, extracts relevant dates and account information, and applies over 10 transparent rules based on established FCRA principles. When issues are detected, it generates professional dispute documentation including bureau letters, furnisher letters, and debt validation requests.
+This presentation introduces the Credit Report Analyzer, a free, open-source tool that automates the identification of potential FCRA timeline violations. The tool processes credit report snippets using OCR technology, extracts relevant dates and account information, and applies over 10 transparent rules based on established FCRA principles. When issues are detected, it generates professional dispute documentation including bureau letters, furnisher letters, and debt validation requests.
 
 Key features include:
 - 100% local processing with no cloud data transmission
@@ -252,7 +252,7 @@ The presentation includes a live demonstration and time for Q&A.
 ```
 🔍 Excited to share a tool that's helping legal aid organizations identify illegal debt re-aging in credit reports!
 
-The Debt Re-Aging Case Factory:
+The Credit Report Analyzer:
 ✅ Free and open-source
 ✅ 100% private—no client data leaves your computer
 ✅ Saves 1-2 hours per case
@@ -303,7 +303,7 @@ Link: [URL]
 
 #### 1. Executive Summary
 
-This proposal outlines a partnership to implement the Debt Re-Aging Case Factory tool at [Partner Organization] to enhance their capacity to serve consumers with credit report issues.
+This proposal outlines a partnership to implement the Credit Report Analyzer tool at [Partner Organization] to enhance their capacity to serve consumers with credit report issues.
 
 #### 2. Background
 
@@ -351,4 +351,10 @@ This partnership involves no financial cost to [Partner Organization]. The tool 
 
 ---
 
-*For questions about these templates or assistance with outreach, contact: contactmukundthiru1@gmail.com*
+*For questions about these templates or assistance with outreach:*
+
+**Developer:** [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
+
+**Email:** contactmukundthiru1@gmail.com
+
+**GitHub:** [github.com/contactmukundthiru-cyber/Debt-Re-Aging](https://github.com/contactmukundthiru-cyber/Debt-Re-Aging)

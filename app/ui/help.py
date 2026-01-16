@@ -1,6 +1,178 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import sys
 from app.rules import RULE_DEFINITIONS
+
+
+def render_about_website():
+    """Render the About & Website page with GitHub Pages link."""
+    st.markdown("""
+    <div style="margin-bottom: 20px;">
+        <h1 style="color: #1e40af; margin-bottom: 8px;">Credit Report Analyzer</h1>
+        <p style="color: #64748b; font-size: 1.1rem;">
+            Free, open-source tool to find errors in credit reports and generate dispute letters
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Quick stats
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Rules", "24+", help="Automated checks for credit report errors")
+    col2.metric("States", "50", help="State-specific statute of limitations data")
+    col3.metric("Price", "Free", help="100% free and open source")
+    col4.metric("Privacy", "100%", help="All data stays on your computer")
+
+    st.markdown("---")
+
+    # Mission statement
+    st.markdown("""
+    ## The Problem We're Solving
+
+    **Millions of Americans have errors on their credit reports.** These errors can:
+    - Lower credit scores by 100+ points
+    - Result in denied loans, apartments, and jobs
+    - Cost families thousands in higher interest rates
+
+    One of the most insidious practices is **debt re-aging** - when collectors illegally
+    manipulate dates to keep negative items on reports longer than the 7 years allowed by law.
+
+    **The challenge:** Identifying these errors requires careful analysis of dates and timelines.
+    Legal aid attorneys often don't have time to do this detective work for every client.
+
+    ## Our Solution
+
+    This tool **automates the analysis**. Upload a credit report snippet, and in minutes:
+
+    1. **Extract** all text using OCR (optical character recognition)
+    2. **Parse** key dates, balances, and account information
+    3. **Analyze** against 24+ rules checking for FCRA violations
+    4. **Generate** professional dispute letters ready to send
+
+    ### What Makes This Different
+
+    | Feature | This Tool | Typical Services |
+    |---------|-----------|------------------|
+    | **Cost** | Free forever | $50-500/month |
+    | **Privacy** | 100% local | Upload to cloud |
+    | **Transparency** | Open source rules | Black box |
+    | **Speed** | Minutes | Days to weeks |
+    | **Control** | You own everything | Vendor lock-in |
+    """)
+
+    st.markdown("---")
+
+    # Website preview
+    st.markdown("## Visit Our Website")
+
+    st.markdown("""
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 20px 0;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+            <div style="background: #2563eb; color: white; padding: 12px 20px; border-radius: 8px; font-weight: 600;">
+                <a href="https://contactmukundthiru-cyber.github.io/Debt-Re-Aging/" target="_blank" style="color: white; text-decoration: none;">
+                    Open Website in New Tab
+                </a>
+            </div>
+            <div style="color: #64748b; font-size: 0.9rem;">
+                Full documentation, installation guides, and more
+            </div>
+        </div>
+        <div style="color: #1e293b; font-size: 0.95rem;">
+            <strong>Website includes:</strong>
+            <ul style="margin-top: 8px; padding-left: 20px;">
+                <li>Step-by-step installation guide</li>
+                <li>How the tool works (with examples)</li>
+                <li>All 24 rules explained</li>
+                <li>FAQ and troubleshooting</li>
+                <li>Organization pilot program info</li>
+            </ul>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Embed the website
+    st.markdown("### Website Preview")
+    try:
+        components.iframe(
+            "https://contactmukundthiru-cyber.github.io/Debt-Re-Aging/",
+            height=600,
+            scrolling=True
+        )
+    except Exception:
+        st.info("Website preview unavailable. Click the link above to visit the full site.")
+
+    st.markdown("---")
+
+    # Who built this
+    st.markdown("""
+    ## About the Developer
+
+    This tool was built by **[Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)**,
+    a student researcher focused on using technology to protect consumers from credit reporting abuses.
+
+    ### Why I Built This
+
+    > "I started researching credit reporting after learning that **1 in 5 consumers** have errors
+    > on their credit reports, yet the dispute process is so complex that most people give up.
+    > Legal aid organizations want to help, but they're overwhelmed.
+    >
+    > This tool is my attempt to democratize access to credit report analysis. If a computer
+    > can check dates and flag inconsistencies, attorneys can focus on what they do best -
+    > advocating for their clients."
+
+    ### Get Involved
+
+    - **Report bugs:** [GitHub Issues](https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues)
+    - **Suggest features:** Same link above
+    - **Pilot the tool:** Email contactmukundthiru1@gmail.com
+    - **Contribute code:** Pull requests welcome!
+
+    ### Contact
+
+    - **Email:** contactmukundthiru1@gmail.com
+    - **GitHub:** [github.com/contactmukundthiru-cyber](https://github.com/contactmukundthiru-cyber)
+    - **Portfolio:** [contactmukundthiru-cyber.github.io/Personal-Portfolio](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
+    """)
+
+    st.markdown("---")
+
+    # Technical details
+    with st.expander("Technical Details"):
+        st.markdown("""
+        ### Technology Stack
+
+        - **Frontend:** Streamlit (Python web framework)
+        - **OCR:** Tesseract OCR with OpenCV preprocessing
+        - **PDF Parsing:** PyMuPDF (fitz)
+        - **Rules Engine:** Custom Python with 24+ rule definitions
+        - **Templates:** Jinja2 for dispute letter generation
+
+        ### Data Flow
+
+        ```
+        Credit Report (PDF/Image)
+               ↓
+        OCR Text Extraction
+               ↓
+        Field Parsing (dates, balances, creditors)
+               ↓
+        Rules Engine (24+ automated checks)
+               ↓
+        Flag Generation (with severity levels)
+               ↓
+        Dispute Letter Templates
+               ↓
+        Exportable Packet (PDF, DOCX, Markdown)
+        ```
+
+        ### Privacy Architecture
+
+        - **Zero network calls** after installation
+        - **No telemetry or analytics**
+        - **All processing happens locally**
+        - **Files only saved when you click Export**
+        - **No accounts or login required**
+        """)
+
 
 def render_help_about():
     """Render the Help/About page."""

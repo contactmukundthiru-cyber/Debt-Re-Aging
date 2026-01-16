@@ -32,9 +32,12 @@ REGULATORY_MAP = {
     },
     "METRO2": {
         "title": "CDIA Metro2 Reporting Standards",
-        "citation": "Metro2 Reporting Guide",
-        "description": "Standardized industry format for credit reporting accuracy.",
-        "detail": "Requires strict adherence to field definitions to maintain credit file integrity."
+        "citation": "Metro2 Technical Guide",
+        "description": "Standardized industry format for consumer credit reporting.",
+        "subsections": {
+            "BASE": "Requirement for logical consistency in Base Segment fields (DOFD/Status).",
+            "J2": "Rules for reporting associated parties and bankruptcy indicators."
+        }
     },
     "FCRA_623": {
         "title": "FCRA § 623 (15 U.S.C. § 1681s-2)",
@@ -42,7 +45,8 @@ REGULATORY_MAP = {
         "description": "Responsibilities of furnishers of information to consumer reporting agencies.",
         "subsections": {
             "a1": "Prohibition against reporting inaccurate information.",
-            "a5": "Duty to provide notice of delinquency of accounts."
+            "a5": "Requirement to provide notice of delinquency (DOFD) within 90 days.",
+            "b": "Duty to conduct a reasonable investigation upon notice of dispute."
         }
     },
     "FDCPA_807": {

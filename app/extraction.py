@@ -8,27 +8,57 @@ import os
 import logging
 from pathlib import Path
 from typing import Tuple, Optional
-import fitz  # PyMuPDF
-from PIL import Image
-import pytesseract
-import numpy as np
-import cv2
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Try to import optional dependencies gracefully
+try:
+    import fitz  # PyMuPDF
+    PYMUPDF_AVAILABLE = True
+except ImportError:
+    PYMUPDF_AVAILABLE = False
+    logger.warning("PyMuPDF not available - PDF extraction disabled")
+
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    logger.warning("PIL not available - image processing disabled")
+
+try:
+    import pytesseract
+    TESSERACT_AVAILABLE = True
+except ImportError:
+    TESSERACT_AVAILABLE = False
+    logger.warning("pytesseract not available - OCR disabled")
+
+try:
+    import numpy as np
+    import cv2
+    OPENCV_AVAILABLE = True
+except ImportError:
+    OPENCV_AVAILABLE = False
+    logger.warning("OpenCV not available - advanced image preprocessing disabled")
 
 # Minimum text length to consider embedded text extraction successful
 MIN_TEXT_THRESHOLD = 50
 
 
-def preprocess_image(image: Image.Image) -> Image.Image:
+def preprocess_image(image):
     """
     Preprocess image for better OCR results using OpenCV.
-    - Grayscale conversion
-    - Noise reduction (Bilateral Filter)
-    - Adaptive thresholding (Otsu's Binarization)
-    - Deskewing (optional, but handled better by adaptive thresholding)
+    Falls back to basic processing if OpenCV is not available.
     """
+    if not PIL_AVAILABLE:
+        return image
+
+    if not OPENCV_AVAILABLE:
+        # Basic preprocessing without OpenCV - just convert to grayscale
+        return image.convert('L')
+
+    # Full preprocessing with OpenCV
     # Convert PIL to OpenCV format (BGR)
     open_cv_image = np.array(image.convert('RGB'))
     open_cv_image = open_cv_image[:, :, ::-1].copy()
@@ -43,7 +73,6 @@ def preprocess_image(image: Image.Image) -> Image.Image:
     _, thresh = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
     # If the image is mostly black (e.g., white text on black background), invert it
-    # OCR works best with black text on white background
     if np.mean(thresh) < 127:
         thresh = cv2.bitwise_not(thresh)
 
@@ -60,6 +89,9 @@ def extract_text_from_pdf(pdf_path: str) -> Tuple[str, str]:
     Returns:
         Tuple of (extracted_text, extraction_method)
     """
+    if not PYMUPDF_AVAILABLE:
+        return "PDF extraction not available. Please install PyMuPDF: pip install PyMuPDF", "error"
+
     try:
         doc = fitz.open(pdf_path)
         embedded_text = ""
@@ -73,7 +105,13 @@ def extract_text_from_pdf(pdf_path: str) -> Tuple[str, str]:
             doc.close()
             return embedded_text.strip(), "embedded_text"
 
-        # Fall back to OCR
+        # Fall back to OCR if available
+        if not TESSERACT_AVAILABLE or not PIL_AVAILABLE:
+            doc.close()
+            if embedded_text.strip():
+                return embedded_text.strip(), "embedded_text_partial"
+            return "OCR not available. Please install pytesseract and Pillow.", "error"
+
         ocr_text = ""
         for page_num in range(len(doc)):
             page = doc[page_num]
@@ -94,6 +132,7 @@ def extract_text_from_pdf(pdf_path: str) -> Tuple[str, str]:
         return ocr_text.strip(), "ocr"
 
     except Exception as e:
+        logger.error(f"PDF extraction error: {e}")
         return f"Error extracting text: {str(e)}", "error"
 
 
@@ -104,6 +143,12 @@ def extract_text_from_image(image_path: str) -> Tuple[str, str]:
     Returns:
         Tuple of (extracted_text, extraction_method)
     """
+    if not PIL_AVAILABLE:
+        return "Image processing not available. Please install Pillow: pip install Pillow", "error"
+
+    if not TESSERACT_AVAILABLE:
+        return "OCR not available. Please install pytesseract: pip install pytesseract", "error"
+
     try:
         # Open and preprocess image
         image = Image.open(image_path)
@@ -166,7 +211,6 @@ def extract_text_from_bytes(file_bytes: bytes, file_name: str) -> Tuple[str, str
         Tuple of (extracted_text, extraction_method)
     """
     import tempfile
-    import os
 
     file_lower = file_name.lower()
 

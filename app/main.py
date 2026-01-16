@@ -23,7 +23,7 @@ from app.ui import (
     render_step_3_verify, render_step_4_checks, render_step_5_generate,
     render_cross_bureau_analysis, render_batch_mode, render_historical_delta_analysis,
     render_metrics_dashboard, render_help_about, render_rules_documentation,
-    render_pilot_guide
+    render_pilot_guide, render_about_website, render_timeline_visualization
 )
 from app.settings import render_settings_page
 from app.case_manager import render_case_manager_ui
@@ -37,7 +37,7 @@ from app.error_handler import ErrorBoundary
 
 # Page configuration
 st.set_page_config(
-    page_title="Debt Re-Aging Case Factory",
+    page_title="Credit Report Analyzer",
     page_icon="📋",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -101,7 +101,9 @@ def main():
     settings_mgr = SettingsManager()
     t = get_translations(settings_mgr.settings.language)
 
-    if selected_tab == "Help / About":
+    if selected_tab == "About & Website":
+        render_about_website()
+    elif selected_tab == "Help / About":
         render_help_about()
     elif selected_tab == "Rules Documentation":
         render_rules_documentation()
@@ -113,6 +115,8 @@ def main():
         render_cross_bureau_analysis()
     elif app_mode == "Historical Delta Analysis":
         render_historical_delta_analysis()
+    elif app_mode == "Timeline Visualization":
+        render_timeline_visualization()
     elif app_mode == t.nav_metrics or app_mode == "Metrics Dashboard":
         render_metrics_dashboard()
     elif app_mode == t.nav_settings or app_mode == "Settings":
@@ -123,8 +127,14 @@ def main():
         render_deadline_dashboard(st)
     elif app_mode == "Analytics Dashboard":
         render_analytics_dashboard(st)
+    elif app_mode == "Furnisher Intelligence":
+        from app.furnisher_intel import render_furnisher_intelligence
+        render_furnisher_intelligence(st)
     elif app_mode == "Multi-Account Analysis":
         render_multi_account_ui(st)
+    elif app_mode == "Furnisher Compliance":
+        from app.ui.furnisher import render_furnisher_mode
+        render_furnisher_mode()
     elif app_mode == "Client Portal":
         inject_portal_css()
         render_client_portal(project_root)

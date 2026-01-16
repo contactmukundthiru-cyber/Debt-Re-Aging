@@ -1,9 +1,9 @@
-# Debt Re-Aging Case Factory - Training Materials
+# Credit Report Analyzer - Training Materials
 
 ## Quick Start Guide (5 Minutes)
 
 ### What This Tool Does
-The Debt Re-Aging Case Factory helps you find errors on credit reports that hurt consumers. It automatically detects when debt collectors illegally manipulate dates to keep negative items on credit reports longer than the law allows.
+The Credit Report Analyzer helps you find errors on credit reports that hurt consumers. It automatically detects when debt collectors illegally manipulate dates to keep negative items on credit reports longer than the law allows.
 
 ### The 5-Step Workflow
 
@@ -216,7 +216,7 @@ Best for: High-volume legal aid operations
 
 **[Screen: App homepage]**
 
-"Welcome to the Debt Re-Aging Case Factory. This tool helps consumer advocates detect illegal date manipulation on credit reports.
+"Welcome to the Credit Report Analyzer. This tool helps consumer advocates detect illegal date manipulation on credit reports.
 
 Debt re-aging is when collectors change dates to keep negative items on reports longer than the law allows. This violates the Fair Credit Reporting Act and hurts consumers.
 
@@ -288,6 +288,12 @@ A: Yes, with appropriate setup. Contact us for enterprise deployment.
 - **Rules Documentation**: Detailed explanation of all detection rules
 - **GitHub Issues**: Report bugs or request features
 - **Legal Aid Partner Network**: Connect with other organizations
+
+---
+
+**Developer:** [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
+
+**Email:** contactmukundthiru1@gmail.com
 
 ---
 

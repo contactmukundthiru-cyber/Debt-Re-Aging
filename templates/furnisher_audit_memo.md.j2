@@ -1,0 +1,47 @@
+# Furnisher Internal Audit Memo
+## FCRA § 623 Investigation Summary
+
+**Internal Auditor ID:** {{ auditor_id }}
+**Case Reference:** {{ case_id }}
+**Audit Date:** {{ audit_date | format_date }}
+
+---
+
+## 1. Reporting Integrity Summary
+The following metadata corresponds to the core ledger record vs. the reported data (Metro2 Segment).
+
+| Field | Core Ledger (Internal) | Reported (Metro2) | Status |
+|-------|-----------------------|-------------------|--------|
+| Account Number | {{ ledger.account_number }} | {{ segment.account_number }} | {{ 'MATCH' if ledger.account_number == segment.account_number else 'ERROR' }} |
+| **DOFD** | {{ ledger.dofd | format_date }} | {{ segment.date_first_delinquency | format_date }} | **{{ 'CONSISTENT' if ledger.dofd == segment.date_first_delinquency else 'INCONSISTENT' }}** |
+| Status Code | {{ ledger.status }} | {{ segment.account_status }} | {{ 'MATCH' if ledger.status == segment.account_status else 'MISMATCH' }} |
+
+---
+
+## 2. Reasonable Investigation Findings
+
+Based on a forensic comparison between the servicing system (Core Ledger) and the credit bureau reporting file:
+
+{% if results.inconsistencies %}
+### ⚠️ INCONSISTENCIES DETECTED
+The following fields do not align with the internal record of delinquency:
+{% for error in results.inconsistencies %}
+- **{{ error.field }}**: {{ error.message }}
+{% endfor %}
+
+**Remediation Action Required:**
+- Use **Segment J2 Update** to correct DOFD in next reporting batch.
+- Update Status Code to match servicing system.
+{% else %}
+### ✅ DATA INTEGRITY VERIFIED
+The Metro2 reporting segment for this account is logically consistent with the internal servicing ledger. No re-aging risks were detected during this audit.
+{% endif %}
+
+---
+
+## 3. Regulatory Certifications
+This audit was performed in accordance with **CDIA Metro2 Technical Standards** and **FCRA § 623(b)** "Reasonable Investigation" requirements.
+
+**Certification:** I certify that I have reviewed the internal transaction history for this account to verify the accuracy of the dates furnished to the Consumer Reporting Agencies (CRAs).
+
+**Signature:** __________________________ (Internal Compliance Officer)

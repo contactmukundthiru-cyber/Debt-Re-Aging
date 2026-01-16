@@ -150,13 +150,19 @@
 ## Getting Help
 
 ### Q: How do I report a bug?
-**A:** Open an issue at: https://github.com/contactmukundthiru-cyber/debt-reaging-case-factory/issues
+**A:** Open an issue at: https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues
 
 ### Q: How do I suggest a feature?
 **A:** Same place - open a GitHub issue with the "enhancement" label.
 
 ### Q: Who maintains this tool?
-**A:** Mukund Thiru (contactmukundthiru1@gmail.com) - a high school student researching credit reporting enforcement gaps.
+**A:** [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/) - a student researcher building tools to help consumers fight credit report errors.
+
+---
+
+**Contact:** contactmukundthiru1@gmail.com
+
+**Portfolio:** [contactmukundthiru-cyber.github.io/Personal-Portfolio](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
 
 ---
 

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-**Debt Re-Aging Case Factory v1.0.0**
+**Credit Report Analyzer v1.0.0**
 
 Get up and running in 5 minutes.
 
@@ -8,19 +8,35 @@ Get up and running in 5 minutes.
 
 ## Step 1: Install (Choose One)
 
-### Option A: Docker (Easiest)
-```bash
-docker-compose up
-```
-Open http://localhost:8501
+### Option A: Windows (Easiest)
 
-### Option B: Python
+1. [Download the ZIP file](https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/archive/refs/heads/main.zip)
+2. Unzip it anywhere on your computer
+3. Double-click `START_APP.bat`
+4. Wait for dependencies to install (first time only, takes 2-3 minutes)
+5. Browser opens automatically - you're done!
+
+**First time?** You need Python installed. Get it free from [python.org](https://python.org) - make sure to check "Add to PATH" during install.
+
+### Option B: Command Line
+
 ```bash
+git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git
+cd Debt-Re-Aging
 pip install -r requirements.txt
 streamlit run app/main.py
 ```
 
-**Note:** Also install Tesseract OCR:
+### Option C: Docker
+
+```bash
+git clone https://github.com/contactmukundthiru-cyber/Debt-Re-Aging.git
+cd Debt-Re-Aging
+docker-compose up
+```
+Open http://localhost:8501
+
+**Note:** For OCR to work, install Tesseract:
 - Windows: [Download here](https://github.com/UB-Mannheim/tesseract/wiki)
 - Mac: `brew install tesseract`
 - Linux: `sudo apt install tesseract-ocr`
@@ -31,17 +47,19 @@ streamlit run app/main.py
 
 1. Click **"Sample 1"** or **"Sample 2"** in the sidebar
 2. Click through each step to see how it works
-3. Generate a test packet
+3. Generate a test dispute packet
 
 ---
 
 ## Step 3: Process a Real Case
 
-1. **Upload** - Select a PDF or image of a credit report section
-2. **Review** - Check the extracted text, fix any OCR errors
-3. **Verify** - Review and correct the parsed fields (dates must be YYYY-MM-DD)
-4. **Check** - Review any flags identified
-5. **Generate** - Download the dispute packet ZIP
+| Step | What You Do |
+|------|-------------|
+| **1. Upload** | Drop in a PDF or photo of the credit report |
+| **2. Review** | Check the extracted text, fix any OCR errors |
+| **3. Verify** | Review the parsed fields (dates, balances, creditor) |
+| **4. Check** | See what issues were found |
+| **5. Generate** | Download your dispute letters |
 
 ---
 
@@ -82,6 +100,7 @@ streamlit run app/main.py
 | OCR text is garbled | Use a higher-resolution scan |
 | Dates not recognized | Enter them manually in YYYY-MM-DD format |
 | Fields missing | Add them manually in Step 3 |
+| "Python not found" | Install Python from python.org, check "Add to PATH" |
 
 ---
 
@@ -89,8 +108,9 @@ streamlit run app/main.py
 
 - See **Help / About** in the sidebar
 - Email: contactmukundthiru1@gmail.com
-- GitHub: https://github.com/contactmukundthiru-cyber
+- GitHub: [github.com/contactmukundthiru-cyber](https://github.com/contactmukundthiru-cyber)
+- Portfolio: [contactmukundthiru-cyber.github.io/Personal-Portfolio](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
 
 ---
 
-*Built by Mukund Thiru — student-led research project*
+*Built by [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/) - free tool for consumers and the organizations that serve them*

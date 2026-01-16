@@ -15,47 +15,57 @@ from app.utils import (
 )
 
 def render_step_1_upload():
-    """Render Step 1: Document Ingestion with high-end industrial styling."""
-    st.markdown('<div class="step-header"><h2>01. DATA INGESTION & ACQUISITION</h2></div>',
-                unsafe_allow_html=True)
-
-    st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
+    """Render Step 1: Upload credit report."""
     st.markdown("""
-    **INGESTION PROTOCOL**  
-    Upload a credit report snippet or paste raw text. The engine will execute 
-    multi-stage OCR and computer vision preprocessing to extract structured timelines.
-    """)
-    
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #1e40af; margin-bottom: 8px;">Step 1: Upload Your Credit Report</h2>
+        <p style="color: #64748b; font-size: 0.95rem;">
+            Upload a photo or PDF of the account you want to check, or paste the text directly.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Helpful tips
+    st.markdown("""
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <div style="color: #166534; font-weight: 600; margin-bottom: 8px;">Tips for best results:</div>
+        <ul style="color: #15803d; margin: 0; padding-left: 20px; font-size: 0.9rem;">
+            <li>Use a clear, well-lit photo or high-quality scan</li>
+            <li>Include all the dates shown on the account</li>
+            <li>Make sure text is readable (not blurry)</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
     # Input method tabs
-    input_tab1, input_tab2 = st.tabs(["⚙️ INDUSTRIAL OCR", "📄 RAW TEXT INGEST"])
+    input_tab1, input_tab2 = st.tabs(["Upload File", "Paste Text"])
 
     with input_tab1:
-        st.caption("UPLOAD SOURCE FILE (PDF/PNG/JPG)")
+        st.markdown("**Upload a PDF or image of your credit report**")
         uploaded_file = st.file_uploader(
             "Choose a file",
             type=['pdf', 'png', 'jpg', 'jpeg'],
-            help="Industrial OCR supports standard image/PDF formats",
+            help="Supported formats: PDF, PNG, JPG, JPEG",
             label_visibility="collapsed"
         )
 
     with input_tab2:
-        st.caption("PASTE SOURCE DATA DIRECTLY")
+        st.markdown("**Or paste the text from your credit report**")
         pasted_text = st.text_area(
             "Paste credit report text here",
             height=200,
-            placeholder="Copy the account details from your credit report and paste here...",
+            placeholder="Copy and paste the account details from your credit report here.\n\nInclude dates like:\n- Date Opened\n- Date of First Delinquency\n- Last Reported Date\n- Balance\n- Creditor Name",
             help="Paste the text from your credit report. Include dates and account information.",
             label_visibility="collapsed"
         )
 
-        if pasted_text and st.button("PROCESS RAW INGEST", type="primary", use_container_width=True):
+        if pasted_text and st.button("Continue with this text", type="primary", use_container_width=True):
             st.session_state.uploaded_file = None
             st.session_state.extracted_text = pasted_text
-            st.session_state.extraction_method = 'manual_ingest'
+            st.session_state.extraction_method = 'pasted_text'
             st.session_state.processing_start_time = datetime.now()
-            st.success("INGESTION COMPLETE")
+            st.success("Text received!")
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
     if uploaded_file is not None:
         st.session_state.uploaded_file = uploaded_file
@@ -81,55 +91,57 @@ def render_step_1_upload():
                 st.error(f"Error extracting text: {extracted_text}")
 
 def render_step_2_review():
-    """Render Step 2: Extraction Quality Audit with industrial styling."""
-    st.markdown('<div class="step-header"><h2>02. OCR QUALITY ASSURANCE</h2></div>',
-                unsafe_allow_html=True)
-
-    st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
+    """Render Step 2: Review extracted text."""
     st.markdown("""
-    **EXTRACTION PAYLOAD AUDIT**  
-    Review the raw output from the OCR engine. Verify that date strings and balance 
-    digits are correctly captured. Edits here will directly update the forensic model.
-    """)
-
-    st.markdown(f"""
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: #f1f5f9; padding: 4px 12px; border-radius: 20px; border: 1px solid #e2e8f0; color: #475569;">
-            ENGINE: {st.session_state.extraction_method.upper()}
-        </span>
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #1e40af; margin-bottom: 8px;">Step 2: Review the Extracted Text</h2>
+        <p style="color: #64748b; font-size: 0.95rem;">
+            Check that the text below looks correct. Fix any errors you see before continuing.
+        </p>
     </div>
     """, unsafe_allow_html=True)
+
+    # Show extraction method
+    method = st.session_state.extraction_method
+    method_display = {
+        'embedded_text': 'PDF text extraction',
+        'ocr': 'Image scanning (OCR)',
+        'pasted_text': 'Pasted text',
+        'sample': 'Sample case'
+    }.get(method, method)
+
+    st.info(f"Text extracted using: **{method_display}**")
 
     # Show extracted text in editable area
     display_text = st.session_state.extracted_text
     if st.session_state.privacy_mode:
         display_text = mask_pii(display_text)
 
+    st.markdown("**Review and edit the text if needed:**")
     edited_text = st.text_area(
-        "EXTRACTED RAW DATA",
+        "Extracted text",
         value=display_text,
         height=350,
-        help="Perform manual string correction for garbled OCR segments",
+        help="Fix any scanning errors - especially dates and numbers",
         label_visibility="collapsed"
     )
-    st.markdown('</div>', unsafe_allow_html=True)
 
     if not st.session_state.privacy_mode:
         st.session_state.extracted_text = edited_text
     else:
-        st.warning("Note: Edits made in Privacy Mode are not saved to prevent masking errors.")
+        st.warning("Privacy Mode is on. Edits won't be saved to avoid masking errors.")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("← Back to Upload"):
+        if st.button("Back"):
             st.session_state.current_step = 1
             st.rerun()
 
     with col2:
-        if st.button("Continue to Field Extraction →", type="primary"):
+        if st.button("Continue", type="primary"):
             # Parse the text
-            with st.spinner("Parsing fields..."):
+            with st.spinner("Extracting details..."):
                 parsed = parse_credit_report(st.session_state.extracted_text)
                 st.session_state.parsed_fields = parsed
                 st.session_state.editable_fields = fields_to_editable_dict(parsed)
@@ -138,19 +150,29 @@ def render_step_2_review():
             st.rerun()
 
 def render_step_3_verify():
-    """Render Step 3: Verify & Audit Fields with high-end industrial styling."""
-    st.markdown('<div class="step-header"><h2>03. DATA NORMALIZATION & AUDIT</h2></div>',
-                unsafe_allow_html=True)
+    """Render Step 3: Verify extracted details."""
+    st.markdown("""
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #1e40af; margin-bottom: 8px;">Step 3: Verify the Details</h2>
+        <p style="color: #64748b; font-size: 0.95rem;">
+            We found these details in your report. Please check they're correct and fill in any missing fields.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("""
-    The system has mapped raw text to structured forensic fields. Audit each entry below. 
-    **High Confidence** items match known furnisher patterns.
+    <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+        <div style="color: #92400e; font-size: 0.85rem;">
+            <strong>Important:</strong> Fields highlighted in red or yellow need your attention.
+            Dates should be in YYYY-MM-DD format (e.g., 2023-05-15).
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
     fields = st.session_state.editable_fields
     
     st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
-    st.markdown("### 📋 DATA AUDIT TERMINAL")
+    st.markdown("### Account Details")
 
     # Field definitions for display
     field_info = {
@@ -244,8 +266,8 @@ def render_step_3_verify():
 
     # Optional consumer info
     st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
-    st.subheader("👤 ENTITY IDENTIFICATION (OPTIONAL)")
-    st.caption("Including state information enables regional Statute of Limitations (SOL) heuristics.")
+    st.subheader("Your Information (Optional)")
+    st.caption("Add your name and state to personalize the dispute letters and check state-specific laws.")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -326,7 +348,7 @@ def render_timeline_visual(fields):
         
     dates.sort(key=lambda x: x['date'])
     
-    st.markdown("### 🗓️ FORENSIC TIMELINE TRACE")
+    st.markdown("### Timeline of Key Dates")
     
     min_date = dates[0]['date']
     max_date = dates[-1]['date']
@@ -350,13 +372,14 @@ def render_timeline_visual(fields):
 
 def render_step_4_checks():
     """Render Step 4: Run Checks."""
-    st.markdown('<div class="step-header"><h2>04. TIMELINE ANALYTICS & LOGIC CHECKS</h2></div>',
-                unsafe_allow_html=True)
-
     st.markdown("""
-    Executing automated heuristics to detect re-aging, SOL violations, and
-    reporting inconsistencies.
-    """)
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #1e40af; margin-bottom: 8px;">Step 4: Issues Found</h2>
+        <p style="color: #64748b; font-size: 0.95rem;">
+            We checked your report against 20+ rules. Here's what we found.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Prepare fields for rule checking
     verified_fields = {}
@@ -379,30 +402,30 @@ def render_step_4_checks():
 
     flags = st.session_state.rule_flags
 
-    # Industry-Disruptive: Dispute Strategy Recommender
+    # Dispute strategy recommendation
     if flags:
         st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
-        st.markdown("### 🎯 DISPUTE STRATEGY RECOMMENDATION")
-        
+        st.markdown("### Recommended Approach")
+
         has_metro2 = any(f.get('rule_id', '').startswith('M') for f in flags)
         has_reaging = any(f.get('rule_id', '').startswith('B') or f.get('rule_id', '') == 'K6' for f in flags)
-        
+
         if has_reaging:
-            strategy_title = "AGGRESSIVE FORENSIC DISPUTE"
-            strategy_desc = "The detected re-aging patterns constitute willful non-compliance. Focus on DOFD certification."
-            status_color = "#e11d48" # rose-600
+            strategy_title = "Strong Case - Re-Aging Detected"
+            strategy_desc = "We found signs that dates may have been changed illegally. Your dispute should focus on proving the correct Date of First Delinquency."
+            status_color = "#e11d48"  # rose-600
         elif has_metro2:
-            strategy_title = "TECHNICAL COMPLIANCE CHALLENGE"
-            strategy_desc = "Data integrity errors detected. Challenge the furnisher's ability to maintain accurate records via Metro2 standards."
-            status_color = "#d97706" # amber-600
+            strategy_title = "Technical Errors Found"
+            strategy_desc = "The data reporting doesn't follow standard rules. Your dispute can challenge whether they're keeping accurate records."
+            status_color = "#d97706"  # amber-600
         else:
-            strategy_title = "STANDARD ACCURACY DISPUTE"
-            strategy_desc = "Standard verification request. Request the furnisher provide evidence for the specific fields flagged."
-            status_color = "#2563eb" # blue-600
-            
+            strategy_title = "Potential Issues Found"
+            strategy_desc = "We found some things that don't look right. Request that they verify the specific details we flagged."
+            status_color = "#2563eb"  # blue-600
+
         st.markdown(f"""
-        <div style="background: {status_color}; color: white; padding: 12px 16px; border-radius: 6px; font-weight: 800; font-size: 0.9rem; margin-bottom: 12px; display: inline-block;">
-            STRATEGY: {strategy_title}
+        <div style="background: {status_color}; color: white; padding: 12px 16px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; margin-bottom: 12px; display: inline-block;">
+            {strategy_title}
         </div>
         <p style="font-size: 0.95rem; color: #475569;">{strategy_desc}</p>
         """, unsafe_allow_html=True)
@@ -410,7 +433,7 @@ def render_step_4_checks():
 
     # Display results
     if flags:
-        st.markdown(f"### 🚩 DETECTED ANOMALIES ({len(flags)})")
+        st.markdown(f"### Issues Found ({len(flags)})")
 
         for flag in flags:
             severity = flag.get('severity', 'medium')
@@ -420,32 +443,32 @@ def render_step_4_checks():
             <div class="{severity_class}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
-                        <h4 style="margin: 0; color: #0f172a; font-weight: 800; text-transform: uppercase; font-size: 1rem;">
+                        <h4 style="margin: 0; color: #0f172a; font-weight: 700; font-size: 1rem;">
                             {severity_to_emoji(severity)} {html.escape(flag.get('rule_name', 'Unknown Rule'))}
                         </h4>
                         <div style="margin-top: 8px; font-size: 0.95rem; color: #1e293b;">
-                            <strong>ANALYTICS FINDING:</strong> {html.escape(flag.get('explanation', 'No explanation available'))}
+                            {html.escape(flag.get('explanation', 'No explanation available'))}
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; opacity: 0.6; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px;">
-                            ID: {html.escape(flag.get('rule_id', 'N/A'))}
+                        <span style="font-family: monospace; font-size: 0.7rem; opacity: 0.6; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px;">
+                            Rule {html.escape(flag.get('rule_id', 'N/A'))}
                         </span>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            with st.expander("DETAILED EVIDENCE & IMPACT ANALYSIS"):
+            with st.expander("See more details"):
                 col_ev1, col_ev2 = st.columns(2)
                 with col_ev1:
-                    st.markdown(f"**IMPACT:**\n\n{flag.get('why_it_matters', '')}")
-                    
-                    # Regulatory Citations
+                    st.markdown(f"**Why this matters:**\n\n{flag.get('why_it_matters', '')}")
+
+                    # Legal references
                     cites = flag.get('legal_citations', [])
                     if cites:
                         st.markdown("---")
-                        st.markdown("**REGULATORY VIOLATIONS:**")
+                        st.markdown("**Related laws:**")
                         from app.regulatory import get_citations as resolve_citations
                         try:
                             resolved = resolve_citations(cites)
@@ -453,18 +476,18 @@ def render_step_4_checks():
                                 st.markdown(f"> **{r['title']}**: {r['text']}")
                         except Exception as e:
                             st.error(f"Error loading citations: {e}")
-                
+
                 with col_ev2:
-                    st.markdown("**REQUISITE EVIDENCE:**")
+                    st.markdown("**Evidence you should gather:**")
                     for evidence in flag.get('suggested_evidence', []):
                         st.markdown(f"- {evidence}")
 
                 st.markdown("---")
-                st.markdown("**🔍 FORENSIC DATA TRACE (AUDIT LOG)**")
+                st.markdown("**Data we analyzed:**")
                 trace_cols = st.columns(len(flag.get('field_values', {}).keys()) or 1)
                 for i, (k, v) in enumerate(flag.get('field_values', {}).items()):
                     with trace_cols[i % len(trace_cols)]:
-                        st.metric(label=k.replace('_', ' ').upper(), value=str(v))
+                        st.metric(label=k.replace('_', ' ').title(), value=str(v))
     else:
         st.success("No obvious timeline inconsistencies detected!")
         st.info("""
@@ -488,16 +511,27 @@ def render_step_4_checks():
             st.rerun()
 
 def render_step_5_generate():
-    """Render Step 5: Generate & Export Packet with industrial styling."""
-    st.markdown('<div class="step-header"><h2>05. ASSET COMPILATION & EXPORT</h2></div>',
-                unsafe_allow_html=True)
-
-    st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
+    """Render Step 5: Generate dispute letters."""
     st.markdown("""
-    **DISPUTE ASSET REPOSITORY**  
-    The system is ready to compile the forensic audit into standardized legal documents. 
-    Generated assets include formatted Markdown, professional PDFs, and editable Word documents.
-    """)
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #1e40af; margin-bottom: 8px;">Step 5: Generate Your Dispute Letters</h2>
+        <p style="color: #64748b; font-size: 0.95rem;">
+            Ready to create your dispute documentation. This includes letters to send to credit bureaus and collectors.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <div style="color: #1e40af; font-weight: 600; margin-bottom: 8px;">What you'll get:</div>
+        <ul style="color: #1e3a8a; margin: 0; padding-left: 20px; font-size: 0.9rem;">
+            <li>Dispute letter for the credit bureau</li>
+            <li>Letter for the debt collector/furnisher</li>
+            <li>Case summary with all the evidence</li>
+            <li>Checklist of documents to include</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Prepare verified fields
     verified_fields = {}
@@ -571,7 +605,7 @@ def render_step_5_generate():
 
         st.success(f"Packet generated successfully! Case ID: {result['case_id']}")
 
-        st.markdown("### 📂 COMPILED ASSET MANIFEST")
+        st.markdown("### Your Documents")
 
         # Show generated files
         for filename, filepath in result['generated_files'].items():
@@ -582,7 +616,7 @@ def render_step_5_generate():
             elif filename.endswith('.json'): icon = "🔢"
             elif filename.endswith('.yaml'): icon = "⚙️"
             
-            with st.expander(f"ASSET: {filename.upper()}"):
+            with st.expander(f"{icon} {filename}"):
                 try:
                     if filename.endswith('.pdf') or filename.endswith('.docx'):
                         st.info(f"{filename.split('.')[-1].upper()} file generated. Download the full packet to view.")
@@ -593,7 +627,7 @@ def render_step_5_generate():
                 except Exception as e:
                     st.error(f"Could not read file: {e}")
 
-        st.markdown("### 📥 DISTRIBUTION & PRINT")
+        st.markdown("### Download Your Packet")
 
         # Provide ZIP download
         zip_path = result['zip_path']
@@ -602,7 +636,7 @@ def render_step_5_generate():
                 zip_bytes = f.read()
 
             st.download_button(
-                label=f"📥 DOWNLOAD COMPLETE BUNDLE ({result['case_id']}.zip)",
+                label=f"Download All Files (ZIP)",
                 data=zip_bytes,
                 file_name=f"{result['case_id']}_packet.zip",
                 mime="application/zip",
@@ -610,15 +644,15 @@ def render_step_5_generate():
                 type="primary"
             )
 
-        st.info(f"💾 LOCAL CACHE: {result['output_directory']}")
+        st.info(f"Files also saved to: {result['output_directory']}")
 
         st.markdown("---")
 
         # DOCX Export option
-        st.markdown("### 📝 EDITABLE SOURCE EXPORT (DOCX)")
-        st.caption("High-fidelity Word documents for manual legal customization.")
+        st.markdown("### Get Editable Word Documents")
+        st.caption("Download as Word files (.docx) so you can edit them before sending.")
 
-        if st.button("🚀 INITIATE WORD GENERATION", use_container_width=True):
+        if st.button("Create Word Documents", use_container_width=True):
             try:
                 from app.docx_export import export_all_documents, is_docx_available
                 if is_docx_available():
@@ -636,10 +670,10 @@ def render_step_5_generate():
                     )
 
                     if docx_files:
-                        st.success(f"GENERATED {len(docx_files)} DOCUMENTS")
+                        st.success(f"Created {len(docx_files)} Word document(s)")
                         for filename, file_bytes in docx_files.items():
                             st.download_button(
-                                label=f"⬇️ {filename.upper()}",
+                                label=f"Download {filename}",
                                 data=file_bytes,
                                 file_name=filename,
                                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -653,10 +687,10 @@ def render_step_5_generate():
 
         st.markdown("---")
 
-        if st.button("🖨️ PRINT CASE SUMMARY", use_container_width=True):
+        if st.button("Print This Page", use_container_width=True):
             import streamlit.components.v1 as components
             components.html("<script>window.print();</script>", height=0)
-            st.info("Browser print dialog initiated.")
+            st.info("Print dialog should appear.")
 
     st.markdown("---")
 

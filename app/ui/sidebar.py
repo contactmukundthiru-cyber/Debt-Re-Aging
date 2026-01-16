@@ -25,27 +25,27 @@ def load_sample_case(sample_num: int, project_root: Path):
 def render_sidebar(project_root: Path):
     """Render the sidebar with navigation and help."""
     with st.sidebar:
-        # Professional header with logo placeholder
+        # Clean header
         st.markdown("""
-        <div style="text-align: center; padding: 10px 0 20px 0; border-bottom: 1px solid #e2e8f0;">
-            <div style="font-size: 1.1rem; font-weight: 600; color: #1e40af; margin-bottom: 2px;">
+        <div style="text-align: center; padding: 15px 0 20px 0; border-bottom: 1px solid #e2e8f0;">
+            <div style="font-size: 1.2rem; font-weight: 700; color: #1e40af; margin-bottom: 4px;">
                 Credit Report Analyzer
             </div>
-            <div style="font-size: 0.7rem; color: #64748b;">
-                Dispute Documentation Tool
+            <div style="font-size: 0.75rem; color: #64748b;">
+                Find errors. Generate dispute letters.
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("")
 
-        # Language selector - simple and clean
+        # Language selector
         settings_mgr = SettingsManager()
         current_lang = settings_mgr.settings.language
 
-        _, lang_col, _ = st.columns([1, 2, 1])
-        with lang_col:
-            lang_options = {"English": "en", "Español": "es"}
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            lang_options = {"English": "en", "Espanol": "es"}
             selected_lang = st.selectbox(
                 "Language",
                 options=list(lang_options.keys()),
@@ -58,84 +58,146 @@ def render_sidebar(project_root: Path):
 
         st.markdown("---")
 
-        # Mode selector - clean categories
+        # Main mode selector
         t = get_translations(current_lang)
 
         st.markdown("""
-        <div style="font-size: 0.75rem; color: #475569; font-weight: 600; margin-bottom: 8px;">
-            What would you like to do?
+        <div style="font-size: 0.85rem; color: #1e293b; font-weight: 600; margin-bottom: 12px;">
+            What do you need to do?
         </div>
         """, unsafe_allow_html=True)
 
-        # Group modes logically
+        # Primary actions - clearer options
         mode_options = {
-            "📄 Analyze a Report": t.nav_single_case,
-            "📑 Multiple Accounts": "Multi-Account Analysis",
-            "🔍 Compare Bureaus": t.nav_cross_bureau,
-            "📊 View Analytics": "Analytics Dashboard",
-            "📅 Track Deadlines": "Deadline Tracker",
-            "💼 Manage Cases": "Case Manager",
-            "👤 Client Self-Service": "Client Portal",
-            "⚙️ Settings": t.nav_settings,
+            "Check One Report": t.nav_single_case,
+            "Compare Reports Over Time": "Historical Delta Analysis",
+            "Build a Timeline (3+ Reports)": "Timeline Visualization",
+            "Compare Different Bureaus": t.nav_cross_bureau,
+            "Analyze Full Report (All Accounts)": "Multi-Account Analysis",
         }
 
         selected_display = st.radio(
-            "Select mode:",
+            "Select what to do:",
             list(mode_options.keys()),
             index=0,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            key="main_mode_selector"
         )
         st.session_state['app_mode'] = mode_options[selected_display]
 
+        # Info box for "Compare Over Time" option
+        if "Over Time" in selected_display:
+            st.markdown("""
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 0.8rem;">
+                <div style="color: #1e40af; font-weight: 600; margin-bottom: 6px;">
+                    What to upload:
+                </div>
+                <div style="color: #334155; line-height: 1.5;">
+                    Upload the <strong>same account</strong> from credit reports pulled at different times.
+                    <br><br>
+                    <strong>Example:</strong>
+                    <ul style="margin: 6px 0 0 0; padding-left: 18px;">
+                        <li>Report from 6 months ago</li>
+                        <li>Report from today</li>
+                    </ul>
+                    <div style="margin-top: 8px; color: #64748b; font-size: 0.75rem;">
+                        If dates changed between reports, that's evidence of manipulation.
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # Info box for "Build a Timeline" option
+        if "Timeline" in selected_display:
+            st.markdown("""
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 0.8rem;">
+                <div style="color: #166534; font-weight: 600; margin-bottom: 6px;">
+                    Build visual proof of re-aging:
+                </div>
+                <div style="color: #334155; line-height: 1.5;">
+                    Enter dates from <strong>3 or more reports</strong> over time to create a visual timeline.
+                    <br><br>
+                    <strong>Perfect for:</strong>
+                    <ul style="margin: 6px 0 0 0; padding-left: 18px;">
+                        <li>Showing how DOFD changed</li>
+                        <li>Documenting for attorneys</li>
+                        <li>CFPB complaint evidence</li>
+                    </ul>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
         st.markdown("---")
 
-        # Progress indicator - friendly language
-        st.markdown("""
-        <div style="font-size: 0.75rem; color: #475569; font-weight: 600; margin-bottom: 8px;">
-            Your Progress
-        </div>
-        """, unsafe_allow_html=True)
-
-        steps = [
-            (1, "Upload Report"),
-            (2, "Review Text"),
-            (3, "Verify Details"),
-            (4, "Check for Issues"),
-            (5, "Generate Letters")
-        ]
-
-        for idx, name in steps:
-            if idx == st.session_state.current_step:
-                st.markdown(f"""
-                <div style="background: #dbeafe; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; border-left: 3px solid #2563eb;">
-                    <span style="color: #1e40af; font-weight: 600;">Step {idx}: {name}</span>
-                </div>
-                """, unsafe_allow_html=True)
-            elif idx < st.session_state.current_step:
-                st.markdown(f"""
-                <div style="padding: 8px 12px; margin-bottom: 4px; color: #16a34a;">
-                    ✓ Step {idx}: {name}
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div style="padding: 8px 12px; margin-bottom: 4px; color: #94a3b8;">
-                    ○ Step {idx}: {name}
-                </div>
-                """, unsafe_allow_html=True)
+        # Tools section - collapsible
+        with st.expander("Tools & Management", expanded=False):
+            tool_buttons = [
+                ("Analytics Dashboard", "View dispute outcomes and stats"),
+                ("Furnisher Intelligence", "Track collector violation rates"),
+                ("Deadline Tracker", "Track 30-day response windows"),
+                ("Case Manager", "Save and load cases"),
+                ("Client Portal", "Simple mode for consumers"),
+                (t.nav_settings, "Configure options"),
+            ]
+            for mode, desc in tool_buttons:
+                if st.button(mode, key=f"tool_{mode}", use_container_width=True, help=desc):
+                    st.session_state['app_mode'] = mode
+                    st.rerun()
 
         st.markdown("---")
 
-        # Case actions - friendly buttons
+        # Progress indicator - only show for single case analysis
+        current_mode = st.session_state.get('app_mode', t.nav_single_case)
+        if current_mode == t.nav_single_case:
+            st.markdown("""
+            <div style="font-size: 0.85rem; color: #1e293b; font-weight: 600; margin-bottom: 10px;">
+                Your Progress
+            </div>
+            """, unsafe_allow_html=True)
+
+            steps = [
+                (1, "Upload", "Add your report"),
+                (2, "Review", "Check the text"),
+                (3, "Verify", "Confirm details"),
+                (4, "Check", "Find issues"),
+                (5, "Generate", "Get letters")
+            ]
+
+            current_step = st.session_state.get('current_step', 1)
+
+            for idx, name, desc in steps:
+                if idx == current_step:
+                    st.markdown(f"""
+                    <div style="background: #dbeafe; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid #2563eb;">
+                        <div style="color: #1e40af; font-weight: 600; font-size: 0.9rem;">Step {idx}: {name}</div>
+                        <div style="color: #3b82f6; font-size: 0.75rem;">{desc}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                elif idx < current_step:
+                    st.markdown(f"""
+                    <div style="padding: 6px 12px; margin-bottom: 4px; color: #16a34a; font-size: 0.85rem;">
+                        Done: {name}
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div style="padding: 6px 12px; margin-bottom: 4px; color: #94a3b8; font-size: 0.85rem;">
+                        {name}
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            st.markdown("---")
+
+        # Case actions
         st.markdown("""
-        <div style="font-size: 0.75rem; color: #475569; font-weight: 600; margin-bottom: 8px;">
-            Case Actions
+        <div style="font-size: 0.85rem; color: #1e293b; font-weight: 600; margin-bottom: 10px;">
+            Your Cases
         </div>
         """, unsafe_allow_html=True)
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("💾 Save", use_container_width=True, help="Save your current work"):
+            if st.button("Save", use_container_width=True, help="Save current work"):
                 from app.case_manager import save_session_to_case
                 try:
                     save_session_to_case(st.session_state)
@@ -144,7 +206,7 @@ def render_sidebar(project_root: Path):
                     st.error("Could not save")
 
         with col2:
-            if st.button("📂 Open", use_container_width=True, help="Open a saved case"):
+            if st.button("Open", use_container_width=True, help="Open saved case"):
                 st.session_state['show_load_dialog'] = True
 
         # Load dialog
@@ -153,93 +215,98 @@ def render_sidebar(project_root: Path):
             recent = case_mgr.list_cases(limit=5)
             if recent:
                 case_ids = [c['case_id'] for c in recent]
-                selected = st.selectbox("Select a saved case:", case_ids)
+                selected = st.selectbox("Select a case:", case_ids, key="load_case_select")
                 col1, col2 = st.columns(2)
                 with col1:
-                    if st.button("Open", use_container_width=True):
+                    if st.button("Open Case", key="open_case_btn", use_container_width=True):
                         if load_case_to_session(selected, st.session_state):
                             st.session_state['show_load_dialog'] = False
-                            st.success(f"Opened!")
+                            st.success("Opened!")
                             st.rerun()
                 with col2:
-                    if st.button("Cancel", use_container_width=True):
+                    if st.button("Cancel", key="cancel_load_btn", use_container_width=True):
                         st.session_state['show_load_dialog'] = False
                         st.rerun()
             else:
                 st.info("No saved cases yet")
-                if st.button("Cancel"):
+                if st.button("Close", key="close_empty_btn"):
                     st.session_state['show_load_dialog'] = False
                     st.rerun()
 
         st.markdown("---")
 
-        # Try sample cases - friendly invitation
-        with st.expander("🎓 Try a Sample Case", expanded=False):
+        # Try samples - compact
+        with st.expander("Try Sample Cases", expanded=False):
             st.markdown("""
             <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">
-                Practice with example cases to learn how the tool works.
+                Practice with examples to learn how it works.
             </div>
             """, unsafe_allow_html=True)
 
-            sample_options = [f"Sample Case {i}" for i in range(1, 4)]
-            selected_sample = st.selectbox(
-                "Choose an example:",
-                options=["Select..."] + sample_options,
-                label_visibility="collapsed"
-            )
-
-            if selected_sample and selected_sample != "Select...":
-                sample_num = int(selected_sample.split()[-1])
-                if st.button("Load Example", use_container_width=True):
-                    if load_sample_case(sample_num, project_root):
-                        st.success("Example loaded!")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                if st.button("1", key="sample1", help="Re-aging example"):
+                    if load_sample_case(1, project_root):
+                        st.rerun()
+            with col2:
+                if st.button("2", key="sample2", help="SOL example"):
+                    if load_sample_case(2, project_root):
+                        st.rerun()
+            with col3:
+                if st.button("3", key="sample3", help="Clean example"):
+                    if load_sample_case(3, project_root):
                         st.rerun()
 
-        st.markdown("---")
-
         # Help section
-        st.markdown("""
-        <div style="font-size: 0.75rem; color: #475569; font-weight: 600; margin-bottom: 8px;">
-            Help & Resources
-        </div>
-        """, unsafe_allow_html=True)
-
+        st.markdown("---")
         tabs = st.radio(
-            "Resources:",
-            ["Main Tool", "Help / About", "Rules Documentation", "Pilot Guide"],
-            label_visibility="collapsed"
+            "Help:",
+            ["Main Tool", "About & Website", "Help / About", "Rules Documentation", "Pilot Guide"],
+            label_visibility="collapsed",
+            key="help_tabs"
         )
 
-        # Start over - subtle, at bottom
-        st.markdown("---")
-        if st.button("🔄 Start New Case", use_container_width=True, type="secondary"):
+        # Start over
+        if st.button("Start New Case", use_container_width=True):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
 
-        # Footer with trust indicators
+        # Footer
         st.markdown("""
         <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0; text-align: center;">
-            <div style="font-size: 0.65rem; color: #94a3b8; margin-bottom: 4px;">
-                Version 1.0.0
+            <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px;">
+                v1.0.0 - 100% Private
             </div>
-            <div style="font-size: 0.6rem; color: #cbd5e1;">
-                100% Private · Runs Locally · No Data Uploaded
+            <div style="font-size: 0.65rem; color: #cbd5e1;">
+                All data stays on your computer
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Show issues found (only if relevant)
-        m_flags = [f for f in st.session_state.get('rule_flags', []) if f.get('rule_id', '').startswith('M')]
-        if m_flags:
-            st.markdown("---")
+        # Issues found indicator
+        high_flags = [f for f in st.session_state.get('rule_flags', []) if f.get('severity') == 'high']
+        medium_flags = [f for f in st.session_state.get('rule_flags', []) if f.get('severity') == 'medium']
+
+        if high_flags:
             st.markdown(f"""
-            <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px; padding: 10px; margin-top: 10px;">
-                <div style="color: #92400e; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">
-                    ⚠️ {len(m_flags)} Reporting Issue(s) Found
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-top: 15px;">
+                <div style="color: #dc2626; font-size: 0.9rem; font-weight: 600;">
+                    {len(high_flags)} Serious Issue(s) Found
                 </div>
-                <div style="font-size: 0.75rem; color: #78350f;">
+                <div style="font-size: 0.75rem; color: #991b1b; margin-top: 4px;">
                     See Step 4 for details
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        elif medium_flags:
+            st.markdown(f"""
+            <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px; margin-top: 15px;">
+                <div style="color: #92400e; font-size: 0.9rem; font-weight: 600;">
+                    {len(medium_flags)} Potential Issue(s)
+                </div>
+                <div style="font-size: 0.75rem; color: #78350f; margin-top: 4px;">
+                    Review in Step 4
                 </div>
             </div>
             """, unsafe_allow_html=True)

@@ -1,4 +1,4 @@
-# Debt Re-Aging Case Factory
+# Credit Report Analyzer
 ## Executive Summary for Decision Makers
 
 ### The Problem
@@ -16,7 +16,7 @@
 
 ### The Solution
 
-The **Debt Re-Aging Case Factory** automates violation detection and dispute letter generation:
+The **Credit Report Analyzer** automates violation detection and dispute letter generation:
 
 | Capability | Benefit |
 |------------|---------|
@@ -53,8 +53,8 @@ The **Debt Re-Aging Case Factory** automates violation detection and dispute let
 
 | Requirement | Details |
 |-------------|---------|
-| **Hardware** | Any Windows PC with 4GB RAM |
-| **Software** | Python 3.8+ or use standalone executable |
+| **Hardware** | Any Windows/Mac/Linux computer with 4GB RAM |
+| **Software** | Python 3.9+ or use Docker |
 | **Training** | 2-hour staff training session |
 | **Maintenance** | Minimal - self-contained application |
 
@@ -104,9 +104,9 @@ Optional support and customization available through partnership arrangements.
 
 For implementation support or partnership inquiries:
 
-- **Developer**: Mukund Thiru
+- **Developer**: [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
 - **Email**: contactmukundthiru1@gmail.com
-- **GitHub**: https://github.com/contactmukundthiru-cyber/Debt-Re-Aging
+- **GitHub**: [github.com/contactmukundthiru-cyber/Debt-Re-Aging](https://github.com/contactmukundthiru-cyber/Debt-Re-Aging)
 
 ---
 

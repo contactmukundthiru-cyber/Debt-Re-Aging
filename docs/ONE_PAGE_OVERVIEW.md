@@ -1,6 +1,6 @@
-# Debt Re-Aging Case Factory
+# Credit Report Analyzer
 
-## Automate Credit Report Error Detection
+## Find Errors. Generate Dispute Letters. Free.
 
 ---
 
@@ -46,7 +46,7 @@
 
 | Requirement | Details |
 |-------------|---------|
-| Computer | Windows 10+ or Linux |
+| Computer | Windows, Mac, or Linux |
 | Memory | 4GB RAM |
 | Cost | **Free** (open source) |
 | Training | 2 hours |
@@ -64,12 +64,27 @@ Organizations using similar tools report:
 
 ### Get Started
 
-1. Download from GitHub
-2. Run the installer
+**Windows:**
+1. Download ZIP from GitHub
+2. Double-click `START_APP.bat`
 3. Process your first case in 5 minutes
 
-**Contact:** contactmukundthiru1@gmail.com
+**Other platforms:**
+```bash
+pip install -r requirements.txt
+streamlit run app/main.py
+```
 
 ---
 
-*Built by Mukund Thiru | Free for organizations serving consumers*
+### Contact
+
+**Developer:** [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
+
+**Email:** contactmukundthiru1@gmail.com
+
+**GitHub:** [github.com/contactmukundthiru-cyber/Debt-Re-Aging](https://github.com/contactmukundthiru-cyber/Debt-Re-Aging)
+
+---
+
+*Free and open source. Built for consumers and the organizations that serve them.*

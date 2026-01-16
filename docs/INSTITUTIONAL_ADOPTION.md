@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-The **Debt Re-Aging Case Factory** is a free, open-source tool designed to help organizations identify illegal manipulation of dates on consumer credit reports. This guide provides everything you need to evaluate, pilot, deploy, and scale the tool within your organization.
+The **Credit Report Analyzer** is a free, open-source tool designed to help organizations identify illegal manipulation of dates on consumer credit reports. This guide provides everything you need to evaluate, pilot, deploy, and scale the tool within your organization.
 
 **Key Benefits:**
 - **Privacy-First**: 100% local processing, no data leaves your systems
@@ -483,11 +483,17 @@ See /docs/DATA_FORMATS.md
 
 ## Acknowledgments
 
-This tool was developed as an independent research project by Mukund Thiru, with input from consumer advocates, legal aid attorneys, and affected consumers.
+This tool was developed as an independent research project by [Mukund Thiru](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/), with input from consumer advocates, legal aid attorneys, and affected consumers.
 
 Special thanks to the pilot organizations who provided invaluable feedback during development.
 
 ---
 
-*Last Updated: January 2024*
+**Contact:** [contactmukundthiru1@gmail.com](mailto:contactmukundthiru1@gmail.com)
+
+**Portfolio:** [contactmukundthiru-cyber.github.io/Personal-Portfolio](https://contactmukundthiru-cyber.github.io/Personal-Portfolio/)
+
+---
+
+*Last Updated: January 2025*
 *Version: 2.0*
