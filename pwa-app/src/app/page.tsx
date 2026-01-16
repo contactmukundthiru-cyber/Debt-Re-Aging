@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { parseCreditReport, fieldsToSimple } from '../lib/parser';
 import { runRules, calculateRiskProfile, CreditFields, RuleFlag, RiskProfile } from '../lib/rules';
 import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, ConsumerInfo } from '../lib/generator';
@@ -29,7 +29,7 @@ Payment History: 30 60 90 120 CO`;
 
 const STEPS = ['Upload', 'Review', 'Verify', 'Analysis', 'Export'] as const;
 
-const FIELD_DEFINITIONS = [
+const FIELD_DEFINITIONS: readonly { key: string; label: string; required: boolean; isDate?: boolean }[] = [
   { key: 'originalCreditor', label: 'Original Creditor', required: false },
   { key: 'furnisherOrCollector', label: 'Furnisher / Collector', required: false },
   { key: 'accountType', label: 'Account Type', required: false },
@@ -41,16 +41,65 @@ const FIELD_DEFINITIONS = [
   { key: 'chargeOffDate', label: 'Charge-Off Date', required: false, isDate: true },
   { key: 'dateLastPayment', label: 'Last Payment Date', required: false, isDate: true },
   { key: 'estimatedRemovalDate', label: 'Estimated Removal Date', required: false, isDate: true },
-] as const;
+];
 
 const STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
 
 const DOCUMENTS = [
-  { type: 'bureau' as const, title: 'Bureau Dispute Letter', desc: 'For Experian, Equifax, TransUnion' },
-  { type: 'validation' as const, title: 'Debt Validation Letter', desc: 'FDCPA §809 request to collector' },
-  { type: 'cfpb' as const, title: 'CFPB Complaint Narrative', desc: 'Ready for consumerfinance.gov' },
-  { type: 'summary' as const, title: 'Case Summary', desc: 'Complete analysis documentation' },
+  { type: 'bureau' as const, title: 'Bureau Dispute Letter', desc: 'For Experian, Equifax, TransUnion', icon: 'B' },
+  { type: 'validation' as const, title: 'Debt Validation Letter', desc: 'FDCPA §809 request to collector', icon: 'V' },
+  { type: 'cfpb' as const, title: 'CFPB Complaint Narrative', desc: 'Ready for consumerfinance.gov', icon: 'C' },
+  { type: 'summary' as const, title: 'Case Summary', desc: 'Complete analysis documentation', icon: 'S' },
 ];
+
+// Score Ring Component
+function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
+  const strokeWidth = 8;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (score / 100) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#e8e8e8"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#111111"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="score-display text-3xl">{score}</span>
+      </div>
+    </div>
+  );
+}
+
+// Metric Card Component
+function MetricCard({ label, value, subtext }: { label: string; value: string; subtext?: string }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-label">{label}</div>
+      <div className="stat-value">{value}</div>
+      {subtext && <div className="text-xs text-neutral-500 mt-1">{subtext}</div>}
+    </div>
+  );
+}
 
 export default function Home() {
   const [step, setStep] = useState<Step>(1);
@@ -61,6 +110,14 @@ export default function Home() {
   const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
   const [consumer, setConsumer] = useState<ConsumerInfo>({});
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Computed stats
+  const issueStats = useMemo(() => {
+    const high = flags.filter(f => f.severity === 'high').length;
+    const medium = flags.filter(f => f.severity === 'medium').length;
+    const low = flags.filter(f => f.severity === 'low').length;
+    return { high, medium, low, total: flags.length };
+  }, [flags]);
 
   const handleFileUpload = useCallback(async (file: File) => {
     setIsProcessing(true);
@@ -152,70 +209,81 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col bg-white">
       {/* Header */}
-      <header className="border-b border-neutral-200 bg-white">
+      <header className="border-b border-neutral-200 bg-white sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <span className="text-label">Forensic Analysis</span>
-              <h1 className="text-lg font-semibold tracking-tight">Credit Report Analyzer</h1>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-neutral-900 flex items-center justify-center">
+                <span className="text-white text-xs font-semibold">CR</span>
+              </div>
+              <div>
+                <h1 className="text-base font-semibold tracking-tight leading-none">Credit Report Analyzer</h1>
+                <span className="text-xs text-neutral-500">Forensic Analysis Tool</span>
+              </div>
             </div>
-            <span className="mono text-xs text-neutral-400">v2.0</span>
+            <span className="mono text-[10px] text-neutral-400 px-2 py-1 bg-neutral-100">v2.1</span>
           </div>
         </div>
       </header>
 
       {/* Progress */}
       <nav className="border-b border-neutral-100 bg-white no-print" aria-label="Progress">
-        <div className="max-w-2xl mx-auto px-6 py-4">
-          <ol className="flex items-center justify-center gap-1">
-            {STEPS.map((label, i) => (
-              <li key={label} className="flex items-center">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`step-indicator ${
-                      step > i + 1 ? 'step-complete' : step === i + 1 ? 'step-active' : ''
-                    }`}
-                    aria-current={step === i + 1 ? 'step' : undefined}
-                  >
-                    {step > i + 1 ? '✓' : i + 1}
+        <div className="max-w-2xl mx-auto px-6 py-3">
+          <ol className="flex items-center justify-between">
+            {STEPS.map((label, i) => {
+              const isComplete = step > i + 1;
+              const isCurrent = step === i + 1;
+              return (
+                <li key={label} className="flex items-center flex-1 last:flex-none">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`step-indicator ${isComplete ? 'step-complete' : isCurrent ? 'step-active' : ''}`}
+                      aria-current={isCurrent ? 'step' : undefined}
+                    >
+                      {isComplete ? (
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        i + 1
+                      )}
+                    </div>
+                    <span className={`text-xs hidden sm:inline ${isCurrent ? 'text-neutral-900 font-medium' : isComplete ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                      {label}
+                    </span>
                   </div>
-                  <span className={`text-sm hidden sm:inline ${
-                    step >= i + 1 ? 'text-neutral-900' : 'text-neutral-400'
-                  }`}>
-                    {label}
-                  </span>
-                </div>
-                {i < STEPS.length - 1 && (
-                  <div className={`step-line mx-3 ${step > i + 1 ? 'step-line-active' : ''}`} />
-                )}
-              </li>
-            ))}
+                  {i < STEPS.length - 1 && (
+                    <div className={`flex-1 h-px mx-3 ${isComplete ? 'bg-neutral-900' : 'bg-neutral-200'}`} />
+                  )}
+                </li>
+              );
+            })}
           </ol>
         </div>
       </nav>
 
       {/* Content */}
-      <div className="flex-1 bg-white">
-        <div className="max-w-2xl mx-auto px-6 py-10">
+      <div className="flex-1">
+        <div className="max-w-2xl mx-auto px-6 py-8">
 
           {/* Step 1: Upload */}
           {step === 1 && (
             <section className="fade-in" aria-labelledby="upload-heading">
-              <header className="mb-8">
-                <h2 id="upload-heading">Upload Credit Report</h2>
-                <p className="text-sm text-neutral-500 mt-1">
-                  Paste account text or upload a file for forensic analysis.
+              <header className="mb-8 text-center">
+                <h2 id="upload-heading" className="text-xl mb-2">Upload Credit Report</h2>
+                <p className="text-sm text-neutral-500 max-w-md mx-auto">
+                  Paste the account section from your credit report or upload a text file for forensic analysis.
                 </p>
               </header>
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div>
-                  <label htmlFor="file-upload" className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label htmlFor="file-upload" className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
                     Upload File
                   </label>
-                  <label className="upload-zone" tabIndex={0}>
+                  <label className="upload-zone h-36 cursor-pointer" tabIndex={0}>
                     <input
                       id="file-upload"
                       type="file"
@@ -224,47 +292,57 @@ export default function Home() {
                       onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                       disabled={isProcessing}
                     />
-                    <span className="text-neutral-600 text-sm font-medium">
-                      {isProcessing ? 'Processing...' : 'Select file'}
-                    </span>
-                    <span className="text-neutral-400 text-xs mt-1">.txt format</span>
+                    {isProcessing ? (
+                      <div className="spinner" />
+                    ) : (
+                      <>
+                        <svg className="w-8 h-8 text-neutral-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        <span className="text-neutral-600 text-sm font-medium">Select file</span>
+                        <span className="text-neutral-400 text-xs mt-1">.txt format</span>
+                      </>
+                    )}
                   </label>
                 </div>
 
                 <div>
-                  <label htmlFor="paste-text" className="block text-sm font-medium text-neutral-700 mb-2">
+                  <label htmlFor="paste-text" className="block text-xs font-medium text-neutral-500 uppercase tracking-wide mb-2">
                     Paste Text
                   </label>
                   <textarea
                     id="paste-text"
-                    className="textarea h-[120px] text-sm"
+                    className="textarea h-36 text-sm"
                     placeholder="Paste account section here..."
                     value={extractedText}
                     onChange={(e) => setExtractedText(e.target.value)}
                   />
-                  <button
-                    type="button"
-                    className="btn-primary w-full mt-3"
-                    onClick={handleTextSubmit}
-                    disabled={!extractedText.trim()}
-                  >
-                    Continue
-                  </button>
                 </div>
               </div>
 
-              <div className="text-center mb-8">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+                <button
+                  type="button"
+                  className="btn-primary px-8"
+                  onClick={handleTextSubmit}
+                  disabled={!extractedText.trim()}
+                >
+                  Analyze Text
+                </button>
                 <button
                   type="button"
                   onClick={loadSample}
-                  className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+                  className="btn-secondary"
                 >
-                  Load sample data
+                  Load Sample Data
                 </button>
               </div>
 
-              <aside className="notice">
-                <strong>Privacy:</strong> All processing occurs locally. No data leaves your device.
+              <aside className="notice text-center">
+                <svg className="w-4 h-4 inline-block mr-2 -mt-0.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <strong>100% Private:</strong> All processing occurs locally in your browser. No data is ever transmitted.
               </aside>
             </section>
           )}
@@ -275,17 +353,17 @@ export default function Home() {
               <header className="mb-6">
                 <h2 id="review-heading">Review Extracted Text</h2>
                 <p className="text-sm text-neutral-500 mt-1">
-                  Verify the text is complete before analysis.
+                  Verify the text is complete and accurate before proceeding to analysis.
                 </p>
               </header>
 
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-2">
-                  <label htmlFor="review-text" className="text-sm font-medium text-neutral-700">
+                  <label htmlFor="review-text" className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
                     Source Text
                   </label>
-                  <span className="mono text-xs text-neutral-400">
-                    {extractedText.length.toLocaleString()} characters
+                  <span className="mono text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5">
+                    {extractedText.length.toLocaleString()} chars
                   </span>
                 </div>
                 <textarea
@@ -301,7 +379,7 @@ export default function Home() {
                   Back
                 </button>
                 <button type="button" className="btn-primary" onClick={processAndContinue}>
-                  Continue
+                  Parse Fields
                 </button>
               </div>
             </section>
@@ -313,57 +391,56 @@ export default function Home() {
               <header className="mb-6">
                 <h2 id="verify-heading">Verify Parsed Fields</h2>
                 <p className="text-sm text-neutral-500 mt-1">
-                  Correct any errors. Dates must be accurate for statute analysis.
+                  Review and correct any parsing errors. Accurate dates are essential for statute of limitations analysis.
                 </p>
               </header>
 
-              <div className="space-y-1 mb-6">
+              <div className="border border-neutral-200 divide-y divide-neutral-200 mb-6">
                 {FIELD_DEFINITIONS.map(({ key, label, required, isDate }) => (
-                  <div key={key} className="field-row">
+                  <div key={key} className="grid grid-cols-3 gap-4 items-center p-3">
                     <label htmlFor={`field-${key}`} className="text-sm text-neutral-600">
                       {label}
-                      {required && <span className="text-neutral-900 ml-0.5">*</span>}
+                      {required && <span className="text-red-500 ml-0.5">*</span>}
                     </label>
                     <input
                       id={`field-${key}`}
                       type="text"
-                      className="input"
-                      value={(editableFields as any)[key] || ''}
+                      className="input col-span-2 text-sm"
+                      value={(editableFields as Record<string, string>)[key] || ''}
                       onChange={(e) => setEditableFields(prev => ({
                         ...prev,
                         [key]: e.target.value
                       }))}
-                      placeholder={isDate ? 'YYYY-MM-DD' : ''}
+                      placeholder={isDate ? 'YYYY-MM-DD' : '—'}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="divider my-6" />
-
-              <div className="mb-6">
-                <h3 className="mb-4">Your Information</h3>
-                <p className="text-sm text-neutral-500 mb-4">Optional. Used to personalize dispute letters.</p>
+              <div className="border border-neutral-200 p-4 mb-6">
+                <h3 className="text-sm font-medium mb-3">Your Information <span className="text-neutral-400 font-normal">(Optional)</span></h3>
+                <p className="text-xs text-neutral-500 mb-4">Used to personalize dispute letters with your name and applicable state laws.</p>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="consumer-name" className="block text-sm text-neutral-600 mb-1">
+                    <label htmlFor="consumer-name" className="block text-xs text-neutral-500 uppercase tracking-wide mb-1">
                       Full Name
                     </label>
                     <input
                       id="consumer-name"
                       type="text"
-                      className="input"
+                      className="input text-sm"
                       value={consumer.name || ''}
                       onChange={(e) => setConsumer(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="John Doe"
                     />
                   </div>
                   <div>
-                    <label htmlFor="consumer-state" className="block text-sm text-neutral-600 mb-1">
+                    <label htmlFor="consumer-state" className="block text-xs text-neutral-500 uppercase tracking-wide mb-1">
                       State
                     </label>
                     <select
                       id="consumer-state"
-                      className="input"
+                      className="input text-sm"
                       value={consumer.state || ''}
                       onChange={(e) => {
                         setConsumer(prev => ({ ...prev, state: e.target.value }));
@@ -397,39 +474,53 @@ export default function Home() {
                 <div>
                   <h2 id="analysis-heading">Analysis Results</h2>
                   <p className="text-sm text-neutral-500 mt-1">
-                    {flags.length} {flags.length === 1 ? 'issue' : 'issues'} identified
+                    Forensic analysis complete
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="btn-secondary text-sm no-print"
+                  className="btn-secondary text-xs no-print"
                 >
-                  Print
+                  Print Report
                 </button>
               </header>
 
-              {/* Score Card */}
+              {/* Score Overview */}
               <div className="border border-neutral-200 p-6 mb-6">
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div>
-                    <span className="score-label">Case Strength</span>
-                    <div className="score-display mt-1">{riskProfile.overallScore}</div>
-                    <span className="text-sm text-neutral-400">of 100</span>
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <div className="text-center">
+                    <ScoreRing score={riskProfile.overallScore} size={100} />
+                    <div className="text-xs text-neutral-500 mt-2">Case Strength</div>
                   </div>
-                  <div className="space-y-3 sm:border-l sm:border-neutral-100 sm:pl-6">
-                    <div className="result-row">
-                      <span className="text-sm text-neutral-500">Risk Level</span>
-                      <span className="text-sm font-medium uppercase">{riskProfile.riskLevel}</span>
+                  <div className="flex-1 grid grid-cols-3 gap-4">
+                    <div className="text-center p-3 bg-neutral-50">
+                      <div className="text-2xl font-semibold text-neutral-900">{issueStats.high}</div>
+                      <div className="text-[10px] uppercase tracking-wide text-neutral-500">High</div>
                     </div>
-                    <div className="result-row">
-                      <span className="text-sm text-neutral-500">Dispute Strength</span>
-                      <span className="text-sm font-medium uppercase">{riskProfile.disputeStrength}</span>
+                    <div className="text-center p-3 bg-neutral-50">
+                      <div className="text-2xl font-semibold text-neutral-600">{issueStats.medium}</div>
+                      <div className="text-[10px] uppercase tracking-wide text-neutral-500">Medium</div>
                     </div>
-                    <div className="result-row">
-                      <span className="text-sm text-neutral-500">Litigation Potential</span>
-                      <span className="text-sm font-medium">{riskProfile.litigationPotential ? 'Yes' : 'No'}</span>
+                    <div className="text-center p-3 bg-neutral-50">
+                      <div className="text-2xl font-semibold text-neutral-400">{issueStats.low}</div>
+                      <div className="text-[10px] uppercase tracking-wide text-neutral-500">Low</div>
                     </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-neutral-200">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wide text-neutral-500 mb-1">Risk Level</div>
+                    <div className="font-medium uppercase">{riskProfile.riskLevel}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wide text-neutral-500 mb-1">Dispute Strength</div>
+                    <div className="font-medium uppercase">{riskProfile.disputeStrength}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-wide text-neutral-500 mb-1">Litigation</div>
+                    <div className="font-medium">{riskProfile.litigationPotential ? 'Potential' : 'Unlikely'}</div>
                   </div>
                 </div>
               </div>
@@ -437,23 +528,31 @@ export default function Home() {
               {/* Issues */}
               {flags.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="mb-4">Detected Issues</h3>
-                  <div className="space-y-4">
+                  <h3 className="text-sm font-medium mb-3">Detected Violations ({flags.length})</h3>
+                  <div className="space-y-3">
                     {flags.map((flag, i) => (
-                      <article key={i} className={`severity-${flag.severity} py-3`}>
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium text-neutral-900">{flag.ruleName}</h4>
-                          <span className={`badge ${
-                            flag.severity === 'high' ? 'badge-dark' :
-                            flag.severity === 'medium' ? 'badge-medium' : 'badge-light'
-                          }`}>
-                            {flag.severity}
-                          </span>
+                      <article key={i} className={`border border-neutral-200 ${
+                        flag.severity === 'high' ? 'border-l-4 border-l-neutral-900' :
+                        flag.severity === 'medium' ? 'border-l-4 border-l-neutral-500' : 'border-l-4 border-l-neutral-300'
+                      }`}>
+                        <div className="p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-medium text-neutral-900 text-sm">{flag.ruleName}</h4>
+                            <span className={`badge ${
+                              flag.severity === 'high' ? 'badge-dark' :
+                              flag.severity === 'medium' ? 'badge-medium' : 'badge-light'
+                            }`}>
+                              {flag.severity}
+                            </span>
+                          </div>
+                          <p className="text-sm text-neutral-600 mb-3">{flag.explanation}</p>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="mono text-[10px] px-2 py-1 bg-neutral-100 text-neutral-600">{flag.ruleId}</span>
+                            {flag.legalCitations.map((cite, j) => (
+                              <span key={j} className="mono text-[10px] px-2 py-1 bg-neutral-100 text-neutral-600">{cite}</span>
+                            ))}
+                          </div>
                         </div>
-                        <p className="text-sm text-neutral-600 mb-2">{flag.explanation}</p>
-                        <footer className="mono text-xs text-neutral-400">
-                          {flag.ruleId} · {flag.legalCitations.join(', ')}
-                        </footer>
                       </article>
                     ))}
                   </div>
@@ -461,17 +560,20 @@ export default function Home() {
               )}
 
               {flags.length === 0 && (
-                <div className="border border-neutral-200 p-6 mb-6 text-center">
-                  <p className="text-neutral-600">No obvious violations detected.</p>
-                  <p className="text-sm text-neutral-400 mt-1">Manual review recommended.</p>
+                <div className="empty-state mb-6">
+                  <svg className="w-10 h-10 mx-auto mb-3 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-neutral-600 font-medium">No obvious violations detected</p>
+                  <p className="text-sm text-neutral-400 mt-1">Manual review by a professional is still recommended.</p>
                 </div>
               )}
 
               {/* Recommendation */}
-              <aside className="notice mb-6">
-                <strong>Recommended Approach:</strong>
-                <p className="mt-1">{riskProfile.recommendedApproach}</p>
-              </aside>
+              <div className="notice mb-6">
+                <div className="text-xs font-medium uppercase tracking-wide text-neutral-500 mb-2">Recommended Approach</div>
+                <p className="text-neutral-700">{riskProfile.recommendedApproach}</p>
+              </div>
 
               <div className="flex justify-between gap-4">
                 <button type="button" className="btn-secondary" onClick={() => setStep(3)}>
@@ -487,30 +589,35 @@ export default function Home() {
           {/* Step 5: Export */}
           {step === 5 && (
             <section className="fade-in" aria-labelledby="export-heading">
-              <header className="mb-6">
+              <header className="mb-6 text-center">
                 <h2 id="export-heading">Export Documents</h2>
                 <p className="text-sm text-neutral-500 mt-1">
-                  Download dispute letters and documentation.
+                  Download dispute letters and case documentation.
                 </p>
               </header>
 
-              <div className="space-y-3 mb-6">
+              <div className="grid sm:grid-cols-2 gap-3 mb-6">
                 {DOCUMENTS.map((doc) => (
                   <button
                     type="button"
                     key={doc.type}
                     onClick={() => downloadLetter(doc.type)}
-                    className="doc-button"
+                    className="doc-button text-left p-4 flex gap-4 items-start"
                   >
-                    <span className="block font-medium text-neutral-900">{doc.title}</span>
-                    <span className="block text-sm text-neutral-500 mt-0.5">{doc.desc}</span>
+                    <div className="w-10 h-10 bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-semibold text-neutral-600">{doc.icon}</span>
+                    </div>
+                    <div>
+                      <span className="block font-medium text-neutral-900 text-sm">{doc.title}</span>
+                      <span className="block text-xs text-neutral-500 mt-0.5">{doc.desc}</span>
+                    </div>
                   </button>
                 ))}
               </div>
 
-              <aside className="notice mb-6">
-                <strong>Disclaimer:</strong> This tool provides information only, not legal advice.
-                Consult a qualified attorney for serious violations.
+              <aside className="notice text-center mb-6">
+                <strong>Legal Disclaimer:</strong> This tool provides information only and does not constitute legal advice.
+                Consult with a qualified attorney for serious violations or before taking legal action.
               </aside>
 
               <div className="flex justify-between gap-4">
@@ -527,11 +634,11 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-neutral-100 bg-white no-print">
-        <div className="max-w-2xl mx-auto px-6 py-5">
-          <div className="flex justify-between items-center text-xs text-neutral-400">
-            <span>Credit Report Analyzer</span>
-            <span>Client-side processing only</span>
+      <footer className="border-t border-neutral-100 bg-white no-print mt-auto">
+        <div className="max-w-2xl mx-auto px-6 py-4">
+          <div className="flex justify-between items-center text-[10px] text-neutral-400 uppercase tracking-wide">
+            <span>Credit Report Analyzer v2.1</span>
+            <span>Client-Side Processing Only</span>
           </div>
         </div>
       </footer>
