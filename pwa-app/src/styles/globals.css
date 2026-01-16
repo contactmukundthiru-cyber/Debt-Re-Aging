@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1e40af;
+  --color-primary-light: #3b82f6;
+  --color-severity-high: #dc2626;
+  --color-severity-medium: #f59e0b;
+  --color-severity-low: #22c55e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+/* Premium Card Styles */
+.card {
+  @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+  @apply transition-all duration-200;
+}
+
+.card:hover {
+  @apply shadow-md -translate-y-0.5;
+}
+
+/* Severity Badge Styles */
+.badge-high {
+  @apply bg-red-50 text-red-700 border border-red-200;
+}
+
+.badge-medium {
+  @apply bg-amber-50 text-amber-700 border border-amber-200;
+}
+
+.badge-low {
+  @apply bg-green-50 text-green-700 border border-green-200;
+}
+
+/* Alert Cards */
+.alert-high {
+  @apply bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4;
+}
+
+.alert-medium {
+  @apply bg-amber-50 border-l-4 border-l-amber-500 border border-amber-200 rounded-lg p-4;
+}
+
+.alert-low {
+  @apply bg-green-50 border-l-4 border-l-green-500 border border-green-200 rounded-lg p-4;
+}
+
+/* Button Styles */
+.btn-primary {
+  @apply bg-primary-800 text-white px-6 py-3 rounded-lg font-semibold;
+  @apply hover:bg-primary-700 transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold border border-gray-300;
+  @apply hover:bg-gray-50 transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+/* Input Styles */
+.input {
+  @apply w-full px-4 py-3 rounded-lg border border-gray-300 bg-white;
+  @apply focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none;
+  @apply transition-all duration-200;
+}
+
+.textarea {
+  @apply w-full px-4 py-3 rounded-lg border border-gray-300 bg-white resize-none;
+  @apply focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 focus:outline-none;
+  @apply transition-all duration-200;
+}
+
+/* Step Indicator */
+.step-indicator {
+  @apply flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm;
+  @apply transition-all duration-300;
+}
+
+.step-active {
+  @apply bg-primary-600 text-white shadow-lg shadow-primary-500/30;
+}
+
+.step-complete {
+  @apply bg-green-500 text-white;
+}
+
+.step-pending {
+  @apply bg-gray-200 text-gray-500;
+}
+
+/* Progress Bar */
+.progress-bar {
+  @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-gradient-to-r from-primary-600 to-primary-400;
+  @apply transition-all duration-500 ease-out;
+}
+
+/* File Upload Zone */
+.upload-zone {
+  @apply border-2 border-dashed border-gray-300 rounded-xl p-8;
+  @apply bg-gray-50 hover:bg-primary-50 hover:border-primary-400;
+  @apply transition-all duration-200 cursor-pointer;
+  @apply flex flex-col items-center justify-center text-center;
+}
+
+.upload-zone.dragging {
+  @apply bg-primary-50 border-primary-500;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+  50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0.1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-pulse-alert {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Print Styles */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+  .card { box-shadow: none; border: 1px solid #e5e7eb; }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .btn-primary, .btn-secondary {
+    @apply w-full;
+  }
+}
+
+/* Code/Monospace */
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+}

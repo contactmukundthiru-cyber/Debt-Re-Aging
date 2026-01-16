@@ -28,6 +28,17 @@ venv/
 ENV/
 env/
 .venv/
+myenv/
+
+# Local development scripts (not for deployment)
+CLICK_HERE_TO_START.txt
+CREATE_DESKTOP_SHORTCUT.bat
+START_APP.bat
+nul
+
+# Test files
+test_*.py
+!tests/test_*.py
 
 # IDE
 .idea/
