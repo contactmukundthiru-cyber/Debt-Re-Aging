@@ -1,78 +1,219 @@
-# Timeline Reconstruction & Re-aging Evidence Report
+# Timeline Evidence Report
+
+---
 
 **Case ID:** {{ case_id }}
 **Generated:** {{ generated_date | format_date }}
-**Consumer:** {{ consumer.name or 'N/A' }}
+**Consumer:** {{ consumer.name or '[Consumer Name]' }}
+**State:** {{ consumer.state or 'N/A' }}
 
 ---
 
-## Executive Summary of Findings
+## 1. Executive Summary
 
-This forensic report documents significant timeline inconsistencies identified in the credit reporting for the account listed below. Our analysis indicates a deviation from standard FCRA reporting requirements, specifically regarding the **Date of First Delinquency (DOFD)** and the resulting **Estimated Removal Date**.
+This report documents timeline inconsistencies and potential violations identified in credit reporting for the account detailed below. The analysis reveals {{ flags | length }} issue(s) that may constitute violations of the Fair Credit Reporting Act (FCRA).
 
-### Account Metadata
-- **Furnisher:** {{ fields.furnisher_or_collector or fields.original_creditor }}
-- **Type:** {{ fields.account_type }}
-- **Bureau:** {{ fields.bureau }}
+{% if risk_profile %}
+### Case Assessment
+
+| Metric | Value |
+|--------|-------|
+| **Case Strength Score** | {{ risk_profile.overall_score }}/100 |
+| **Risk Level** | {{ risk_profile.risk_level | upper }} |
+| **Dispute Strength** | {{ risk_profile.dispute_strength | upper }} |
+| **Litigation Potential** | {{ 'Yes' if risk_profile.litigation_potential else 'No' }} |
+
+{% if risk_profile.detected_patterns %}
+**Patterns Detected:**
+{% for pattern in risk_profile.detected_patterns %}
+- {{ pattern.pattern_name }} ({{ pattern.confidence_score }}% confidence)
+{% endfor %}
+{% endif %}
+{% endif %}
 
 ---
 
-## Timeline Reconstruction
+## 2. Account Information
 
-The following dates were extracted and verified from the reported data:
+| Field | Value |
+|-------|-------|
+| **Furnisher/Collector** | {{ fields.furnisher_or_collector or 'Not Reported' }} |
+| **Original Creditor** | {{ fields.original_creditor or 'Same as above' }} |
+| **Account Type** | {{ fields.account_type or 'Unknown' }} |
+| **Account Number (Last 4)** | {{ fields.account_number[-4:] if fields.account_number else 'N/A' }} |
+| **Current Balance** | {{ fields.current_balance or '$0.00' }} |
+| **Account Status** | {{ fields.account_status or 'Not Reported' }} |
 
-| Event | Date | Status |
-|-------|------|--------|
-| **Account Opened** | {{ fields.date_opened | format_date }} | Verified |
-| **Date of First Delinquency** | {{ fields.dofd | format_date if fields.dofd else 'NOT REPORTED' }} | {{ 'Anomalous' if not fields.dofd else 'Verified' }} |
-| **Last Reported/Updated** | {{ fields.date_reported_or_updated | format_date }} | Verified |
-| **Estimated Removal Date** | {{ fields.estimated_removal_date | format_date }} | **CONTESTED** |
+---
 
-### Mathematical Inconsistency Analysis
+## 3. Critical Dates Timeline
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        TIMELINE OF KEY DATES                        │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+| Date | Event | Notes |
+|------|-------|-------|
+{% if fields.date_opened %}| {{ fields.date_opened | format_date }} | **Account Opened** | As reported on credit file |
+{% endif %}{% if fields.dofd %}| {{ fields.dofd | format_date }} | **Date of First Delinquency (DOFD)** | CRITICAL - Starts 7-year clock |
+{% else %}| NOT REPORTED | **Date of First Delinquency (DOFD)** | **MISSING** - Required by FCRA |
+{% endif %}{% if fields.charge_off_date %}| {{ fields.charge_off_date | format_date }} | **Charge-Off Date** | Typically 180 days after DOFD |
+{% endif %}{% if fields.date_last_payment %}| {{ fields.date_last_payment | format_date }} | **Last Payment** | May affect SOL in some states |
+{% endif %}{% if fields.date_last_activity %}| {{ fields.date_last_activity | format_date }} | **Last Activity** | Should not be artificially refreshed |
+{% endif %}{% if fields.date_reported_or_updated %}| {{ fields.date_reported_or_updated | format_date }} | **Last Reported** | Most recent update to bureaus |
+{% endif %}{% if fields.estimated_removal_date %}| {{ fields.estimated_removal_date | format_date }} | **Estimated Removal** | **CONTESTED** if inconsistent |
+{% endif %}
+
+---
+
+## 4. Mathematical Analysis
+
+### Expected vs. Reported Removal Date
 
 {% if fields.dofd and fields.estimated_removal_date %}
-**Standard Calculation:**
-- DOFD: {{ fields.dofd | format_date }}
-- Legal Reporting Window: 7 Years + 180 Days
-- **Calculated Absolute Removal Date:** {{ fields.dofd | estimate_removal_date }}
+**Under FCRA § 1681c(a), negative information must be removed 7 years after the DOFD.**
 
-**Reported Calculation:**
-- **Reported Removal Date:** {{ fields.estimated_removal_date | format_date }}
-- **Variance:** {{ variance_days or 'N/A' }} Days
+| Calculation | Result |
+|-------------|--------|
+| Date of First Delinquency | {{ fields.dofd | format_date }} |
+| + 7 Years (Legal Limit) | = Removal Required |
+| **Expected Removal Date** | {{ fields.dofd | estimate_removal_date }} |
+| **Reported Removal Date** | {{ fields.estimated_removal_date | format_date }} |
+| **Discrepancy** | {{ variance_days or 0 }} days |
 
 {% if variance_days and variance_days > 30 %}
-**Conclusion:** The reported removal date is {{ variance_days }} days past the legal maximum. This constitutes evidence of potential **Debt Re-aging**.
+**⚠️ FINDING:** The reported removal date exceeds the legal maximum by **{{ variance_days }} days**. This indicates the 7-year clock may have been illegally reset (re-aged).
+{% elif variance_days and variance_days < -30 %}
+**NOTE:** The reported removal date is {{ (variance_days * -1) }} days earlier than expected.
+{% else %}
+**OK:** The removal date is within acceptable variance.
 {% endif %}
+{% else %}
+**⚠️ Unable to calculate:** Missing DOFD or removal date prevents mathematical verification.
 {% endif %}
 
 ---
 
-## Violation Catalog
+## 5. Violations Identified
 
+{% if flags %}
 {% for flag in flags %}
-### [{{ flag.rule_id }}] {{ flag.rule_name }}
-**Severity:** {{ flag.severity | upper }}
+### {{ loop.index }}. {{ flag.rule_name }}
 
-**Description:** {{ flag.explanation }}
+| Attribute | Value |
+|-----------|-------|
+| **Rule ID** | {{ flag.rule_id }} |
+| **Severity** | {{ flag.severity | upper }} |
 
-**Compliance Impact:** {{ flag.why_it_matters }}
+**What We Found:**
+{{ flag.explanation }}
 
-**Legal Citation:**
+**Why This Matters:**
+{{ flag.why_it_matters }}
+
+**Legal Basis:**
 {% for cite in flag.resolved_citations %}
-- **{{ cite.title }}**: {{ cite.text }}
+- **{{ cite.title }}**: "{{ cite.text }}"
+{% endfor %}
+
+**Evidence to Gather:**
+{% for item in flag.suggested_evidence %}
+- {{ item }}
 {% endfor %}
 
 ---
-{% endfor %}
 
-## Evidence Preservation Checklist
-
-To support the findings in this report, the following documents should be preserved:
-{% for item in flags[0].suggested_evidence if flags %}
-- [ ] {{ item }}
 {% endfor %}
-- [ ] Original Credit Report (Timestamped)
-- [ ] Certified Mail Receipts of Disputes
+{% else %}
+No violations were detected by the automated analysis. Manual review is still recommended.
+{% endif %}
 
 ---
-*This report was generated by the Debt Re-aging Case Factory for forensic documentation purposes. It is not legal advice.*
+
+## 6. Multi-Report Comparison
+
+{% if timeline_entries and timeline_entries | length >= 2 %}
+**The following shows how key dates changed across {{ timeline_entries | length }} credit reports:**
+
+| Report Date | DOFD | Date Opened | Removal Date |
+|-------------|------|-------------|--------------|
+{% for entry in timeline_entries %}| {{ entry.report_date }} | {{ entry.dofd or 'N/A' }} | {{ entry.date_opened or 'N/A' }} | {{ entry.removal_date or 'N/A' }} |
+{% endfor %}
+
+{% if dofd_changed %}
+**⚠️ CRITICAL FINDING:** The Date of First Delinquency changed between reports. This is strong evidence of illegal re-aging.
+{% endif %}
+
+{% if removal_shifted %}
+**⚠️ FINDING:** The removal date shifted forward, extending the reporting period beyond what FCRA allows.
+{% endif %}
+{% else %}
+*To show date changes over time, analyze multiple credit reports from different dates.*
+{% endif %}
+
+---
+
+## 7. Recommended Actions
+
+{% if risk_profile %}
+{{ risk_profile.recommended_approach }}
+{% else %}
+Based on the violations detected:
+
+1. **File Disputes** with all three credit bureaus citing specific rule violations
+2. **Send Debt Validation Request** to the furnisher/collector
+3. **Document Everything** - keep copies of all correspondence
+4. **Consider CFPB Complaint** for unresolved disputes
+5. **Consult Attorney** if violations are severe or systematic
+{% endif %}
+
+---
+
+## 8. Evidence Preservation Checklist
+
+To support these findings, preserve the following:
+
+- [ ] Original credit report (dated copy)
+- [ ] Screenshots of online credit file
+- [ ] All dispute letters sent (with certified mail receipts)
+- [ ] Bureau response letters
+- [ ] Furnisher/collector correspondence
+- [ ] Payment records (if applicable)
+- [ ] Previous credit reports (for comparison)
+- [ ] Any debt validation documentation received
+- [ ] Phone call logs and notes
+
+---
+
+## Appendix: Legal References
+
+### Fair Credit Reporting Act (FCRA)
+
+**15 U.S.C. § 1681c(a) - Information Excluded from Consumer Reports**
+> Negative information cannot be reported more than 7 years from the date of first delinquency.
+
+**15 U.S.C. § 1681e(b) - Accuracy Requirements**
+> Consumer reporting agencies must follow reasonable procedures to assure maximum possible accuracy.
+
+**15 U.S.C. § 1681s-2(a) - Furnisher Duties**
+> Furnishers must not report information known or believed to be inaccurate.
+
+**15 U.S.C. § 1681i - Dispute Reinvestigation**
+> Bureaus must investigate disputes within 30 days and correct or delete inaccurate information.
+
+### Fair Debt Collection Practices Act (FDCPA)
+
+**15 U.S.C. § 1692e - False Representations**
+> Debt collectors may not use false, deceptive, or misleading representations.
+
+---
+
+*This report was generated by the Credit Report Analyzer for documentation purposes.*
+*This is not legal advice. Consult an attorney for legal matters.*
+
+---
+
+**Report ID:** {{ case_id }}
+**Page 1 of 1**

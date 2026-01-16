@@ -194,8 +194,8 @@ def render_historical_delta_analysis():
                     st.success("Good: The DOFD is the same in both reports.")
 
                 # Check for frozen status
-                status_a = (fields_a.get('account_status') or '').lower()
-                status_b = (fields_b.get('account_status') or '').lower()
+                status_a = str(fields_a.get('account_status') or '').lower()
+                status_b = str(fields_b.get('account_status') or '').lower()
 
                 months_between = (date_b - date_a).days / 30
                 if months_between > 6 and status_a == status_b and "late" in status_a:
@@ -358,7 +358,7 @@ def analyze_timeline(entries):
     for i in range(1, len(sorted_entries)):
         prev = sorted_entries[i-1]
         curr = sorted_entries[i]
-        if prev['status'] and 'paid' in prev['status'].lower():
+        if prev.get('status') and 'paid' in str(prev['status']).lower():
             if curr['balance'] and curr['balance'] != '$0' and curr['balance'] != '0':
                 issues_found.append({
                     'severity': 'medium',

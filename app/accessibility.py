@@ -630,3 +630,334 @@ def format_for_screen_reader(text: str, context: str = "") -> str:
             text = text.replace(abbrev, full, 1)
 
     return text
+
+
+# ============ VOICE GUIDANCE SYSTEM ============
+
+STEP_GUIDANCE = {
+    1: {
+        'title': 'Step 1: Upload Your Credit Report',
+        'instructions': [
+            'Welcome to the Credit Report Analyzer.',
+            'In this step, you will upload your credit report for analysis.',
+            'You can upload a PDF file, an image file such as PNG or JPG, or paste text directly.',
+            'For best results, make sure your document is clear and readable.',
+            'Once uploaded, the system will extract the text automatically.',
+            'Click the Browse button to select a file, or use the Paste Text tab.'
+        ],
+        'tips': [
+            'Use a high quality scan or clear photo',
+            'Make sure all dates are visible',
+            'Include the full account section you want to analyze'
+        ]
+    },
+    2: {
+        'title': 'Step 2: Review Extracted Text',
+        'instructions': [
+            'The text has been extracted from your document.',
+            'Please review the text to make sure it looks correct.',
+            'If there are any errors, you can edit the text in the box below.',
+            'Look for important dates and account information.',
+            'When you are satisfied, click Continue to Verify.'
+        ],
+        'tips': [
+            'Check that dates are formatted correctly',
+            'Verify account numbers are accurate',
+            'Fix any obvious scanning errors'
+        ]
+    },
+    3: {
+        'title': 'Step 3: Verify Account Details',
+        'instructions': [
+            'We have identified key fields from your credit report.',
+            'Please verify each field is correct.',
+            'Green check marks indicate high confidence.',
+            'Yellow warning marks indicate you should verify.',
+            'Red marks indicate low confidence, please check carefully.',
+            'Enter your state to check statute of limitations.',
+            'When done, click Run Checks.'
+        ],
+        'tips': [
+            'The Date of First Delinquency is the most important date',
+            'Check that balances match your records',
+            'Your state affects statute of limitations'
+        ]
+    },
+    4: {
+        'title': 'Step 4: Review Issues Found',
+        'instructions': [
+            'We have analyzed your credit report for potential issues.',
+            'Each issue is shown with a severity level.',
+            'High severity issues are marked in red and are most important.',
+            'Medium severity issues are in yellow.',
+            'Click on each issue to see more details and what evidence to gather.',
+            'When ready, click Generate Dispute Packet.'
+        ],
+        'tips': [
+            'Focus on high severity issues first',
+            'Note which laws are cited for each violation',
+            'Gather the suggested evidence for your dispute'
+        ]
+    },
+    5: {
+        'title': 'Step 5: Generate Dispute Letters',
+        'instructions': [
+            'You are now ready to generate your dispute documentation.',
+            'Enter your name and address for the letters.',
+            'Click Generate Packet to create your dispute letters.',
+            'You will receive letters for the credit bureau and the furnisher.',
+            'Download as PDF or Word document.',
+            'Print and send by certified mail.'
+        ],
+        'tips': [
+            'Always send disputes by certified mail with return receipt',
+            'Keep copies of everything you send',
+            'Bureaus have 30 days to investigate'
+        ]
+    }
+}
+
+
+def get_voice_guidance_script(step: int) -> str:
+    """Get the voice guidance script for a step."""
+    if step not in STEP_GUIDANCE:
+        return ""
+
+    guidance = STEP_GUIDANCE[step]
+    script = f"{guidance['title']}. "
+    script += " ".join(guidance['instructions'])
+    script += " Here are some tips: "
+    script += ". ".join(guidance['tips'])
+    return script
+
+
+def get_voice_guidance_html(step: int, auto_play: bool = False) -> str:
+    """Generate HTML/JavaScript for voice guidance using Web Speech API."""
+    script = get_voice_guidance_script(step)
+    if not script:
+        return ""
+
+    # Escape quotes for JavaScript
+    script_escaped = script.replace("'", "\\'").replace('"', '\\"')
+
+    return f"""
+    <script>
+    // Voice Guidance System
+    const voiceGuidanceText = "{script_escaped}";
+    let speechSynthesis = window.speechSynthesis;
+    let currentUtterance = null;
+
+    function speakGuidance() {{
+        if ('speechSynthesis' in window) {{
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+
+            currentUtterance = new SpeechSynthesisUtterance(voiceGuidanceText);
+            currentUtterance.rate = 0.9;  // Slightly slower for clarity
+            currentUtterance.pitch = 1.0;
+            currentUtterance.volume = 1.0;
+
+            // Try to use a clear English voice
+            const voices = speechSynthesis.getVoices();
+            const englishVoice = voices.find(v => v.lang.startsWith('en-') && v.name.includes('Female'));
+            if (englishVoice) {{
+                currentUtterance.voice = englishVoice;
+            }}
+
+            speechSynthesis.speak(currentUtterance);
+        }} else {{
+            console.log('Text-to-speech not supported in this browser');
+        }}
+    }}
+
+    function stopGuidance() {{
+        if ('speechSynthesis' in window) {{
+            speechSynthesis.cancel();
+        }}
+    }}
+
+    function pauseGuidance() {{
+        if ('speechSynthesis' in window) {{
+            if (speechSynthesis.speaking && !speechSynthesis.paused) {{
+                speechSynthesis.pause();
+            }} else if (speechSynthesis.paused) {{
+                speechSynthesis.resume();
+            }}
+        }}
+    }}
+
+    // Auto-play if enabled
+    {"speakGuidance();" if auto_play else ""}
+    </script>
+    """
+
+
+def get_voice_controls_html() -> str:
+    """Generate HTML for voice guidance controls."""
+    return """
+    <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; margin: 10px 0;">
+        <div style="font-weight: 600; color: #0369a1; margin-bottom: 8px;">
+            Voice Guidance
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button onclick="speakGuidance()" style="background: #0ea5e9; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                Play Instructions
+            </button>
+            <button onclick="pauseGuidance()" style="background: #64748b; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                Pause / Resume
+            </button>
+            <button onclick="stopGuidance()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                Stop
+            </button>
+        </div>
+    </div>
+    """
+
+
+def render_voice_guidance(st, step: int, auto_play: bool = False):
+    """Render voice guidance controls for a step."""
+    import streamlit.components.v1 as components
+
+    # Get guidance content
+    if step not in STEP_GUIDANCE:
+        return
+
+    guidance = STEP_GUIDANCE[step]
+
+    # Display written instructions (always visible)
+    with st.expander("Step Instructions", expanded=False):
+        st.markdown(f"**{guidance['title']}**")
+        for instruction in guidance['instructions']:
+            st.markdown(f"- {instruction}")
+        st.markdown("**Tips:**")
+        for tip in guidance['tips']:
+            st.markdown(f"- {tip}")
+
+    # Add voice controls and script
+    voice_html = get_voice_controls_html() + get_voice_guidance_html(step, auto_play)
+    components.html(voice_html, height=100)
+
+
+def get_issue_audio_summary(flags: list) -> str:
+    """Generate audio-friendly summary of detected issues."""
+    if not flags:
+        return "No issues were detected in your credit report."
+
+    high = [f for f in flags if f.get('severity') == 'high']
+    medium = [f for f in flags if f.get('severity') == 'medium']
+    low = [f for f in flags if f.get('severity') == 'low']
+
+    summary = f"We found {len(flags)} issues in your credit report. "
+
+    if high:
+        summary += f"{len(high)} are high severity issues that need immediate attention. "
+        for flag in high[:2]:  # Limit to first 2 for brevity
+            summary += f"{flag.get('rule_name')}: {flag.get('explanation')[:100]}. "
+
+    if medium:
+        summary += f"{len(medium)} are medium severity issues. "
+
+    if low:
+        summary += f"{len(low)} are low severity issues. "
+
+    summary += "Review each issue and gather the suggested evidence for your dispute."
+
+    return summary
+
+
+def render_accessibility_settings(st):
+    """Render accessibility settings UI."""
+    st.markdown("""
+    <div style="margin-bottom: 20px;">
+        <h2 style="color: #1e40af; margin-bottom: 8px;">Accessibility Settings</h2>
+        <p style="color: #64748b; font-size: 0.95rem;">
+            Customize the app for your needs.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Get current settings
+    config = st.session_state.get('accessibility_config', AccessibilityConfig())
+
+    st.markdown("### Visual Settings")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        high_contrast = st.checkbox(
+            "High Contrast Mode",
+            value=config.high_contrast,
+            help="Increases color contrast for better visibility"
+        )
+
+        larger_text = st.checkbox(
+            "Larger Text",
+            value=config.larger_text,
+            help="Increases text size throughout the app"
+        )
+
+        reduced_motion = st.checkbox(
+            "Reduce Motion",
+            value=config.reduced_motion,
+            help="Reduces animations and transitions"
+        )
+
+    with col2:
+        screen_reader_mode = st.checkbox(
+            "Screen Reader Optimizations",
+            value=config.screen_reader_mode,
+            help="Adds extra context for screen readers"
+        )
+
+        focus_indicators = st.checkbox(
+            "Enhanced Focus Indicators",
+            value=config.focus_indicators,
+            help="Makes keyboard focus more visible"
+        )
+
+        keyboard_hints = st.checkbox(
+            "Show Keyboard Hints",
+            value=config.keyboard_hints,
+            help="Display keyboard shortcut reminders"
+        )
+
+    st.markdown("---")
+    st.markdown("### Voice Guidance")
+
+    voice_enabled = st.checkbox(
+        "Enable Voice Guidance",
+        value=st.session_state.get('voice_guidance_enabled', False),
+        help="Provides spoken instructions for each step"
+    )
+
+    if voice_enabled:
+        auto_play = st.checkbox(
+            "Auto-play on each step",
+            value=st.session_state.get('voice_auto_play', False),
+            help="Automatically read instructions when entering a new step"
+        )
+        st.session_state.voice_auto_play = auto_play
+
+    st.session_state.voice_guidance_enabled = voice_enabled
+
+    # Save settings
+    new_config = AccessibilityConfig(
+        high_contrast=high_contrast,
+        larger_text=larger_text,
+        screen_reader_mode=screen_reader_mode,
+        keyboard_hints=keyboard_hints,
+        reduced_motion=reduced_motion,
+        focus_indicators=focus_indicators
+    )
+
+    st.session_state.accessibility_config = new_config
+
+    if st.button("Apply Settings", type="primary"):
+        st.success("Accessibility settings saved!")
+        st.rerun()
+
+    st.markdown("---")
+
+    # Keyboard shortcuts reference
+    st.markdown("### Keyboard Shortcuts")
+    render_keyboard_shortcuts(st)

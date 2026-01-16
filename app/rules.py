@@ -482,7 +482,7 @@ class RuleEngine:
 
     def _check_rule_e1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
         """E1: Future date detection"""
-        date_fields = ['date_opened', 'date_reported_or_updated', 'dofd', 'estimated_removal_date',
+        date_fields = ['date_opened', 'date_reported_or_updated', 'dofd',
                        'date_last_activity', 'date_last_payment', 'charge_off_date']
         now = datetime.now()
 
@@ -1042,3 +1042,259 @@ def get_rule_summary() -> Dict[str, Any]:
         summary['by_category'][category] = summary['by_category'].get(category, 0) + 1
 
     return summary
+
+
+# ============ PATTERN SCORING SYSTEM ============
+
+# Corroborating pattern definitions - when rules fire together, they strengthen the case
+PATTERN_COMBOS = {
+    'DEFINITIVE_REAGING': {
+        'name': 'Definitive Re-Aging Evidence',
+        'required_rules': ['A2', 'B1'],  # Both timeline mismatch and DOFD after open
+        'optional_rules': ['K6', 'F2'],  # Clock drift, activity refresh
+        'min_required': 2,
+        'confidence_boost': 30,
+        'description': 'Multiple independent indicators confirm deliberate date manipulation'
+    },
+    'ZOMBIE_DEBT_REVIVAL': {
+        'name': 'Zombie Debt Revival Pattern',
+        'required_rules': ['J1'],
+        'optional_rules': ['S1', 'S2', 'F2'],  # SOL expired, SOL revival, activity refresh
+        'min_required': 1,
+        'confidence_boost': 25,
+        'description': 'Old debt showing signs of artificial revival'
+    },
+    'SYSTEMATIC_MANIPULATION': {
+        'name': 'Systematic Furnisher Manipulation',
+        'required_rules': [],
+        'optional_rules': ['BEH_01', 'BEH_02', 'DU1', 'J2'],  # Behavioral patterns
+        'min_required': 2,
+        'confidence_boost': 35,
+        'description': 'Evidence of programmatic/systematic reporting violations'
+    },
+    'FEE_STACKING_ABUSE': {
+        'name': 'Illegal Fee Stacking',
+        'required_rules': ['G1'],
+        'optional_rules': ['G2', 'K5', 'K7'],  # Transfer increase, minimum trap, interest violation
+        'min_required': 1,
+        'confidence_boost': 20,
+        'description': 'Excessive fees or interest charges beyond legal limits'
+    },
+    'MEDICAL_DEBT_VIOLATION': {
+        'name': 'Medical Debt Reporting Violation',
+        'required_rules': [],
+        'optional_rules': ['H1', 'H2', 'H3'],  # 365-day, paid still showing, under threshold
+        'min_required': 1,
+        'confidence_boost': 25,
+        'description': 'Violation of medical debt reporting regulations'
+    },
+    'DATA_INTEGRITY_FAILURE': {
+        'name': 'Data Integrity Failure',
+        'required_rules': [],
+        'optional_rules': ['E1', 'M1', 'M2', 'K1'],  # Future date, Metro2 errors, impossible sequence
+        'min_required': 2,
+        'confidence_boost': 20,
+        'description': 'Multiple data quality issues indicating systemic problems'
+    }
+}
+
+
+@dataclass
+class PatternScore:
+    """Represents a pattern detection score with confidence level."""
+    pattern_id: str
+    pattern_name: str
+    confidence_score: int  # 0-100
+    matched_rules: List[str]
+    description: str
+    legal_strength: str  # 'weak', 'moderate', 'strong', 'definitive'
+    recommended_action: str
+
+    def to_dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class RiskProfile:
+    """Aggregate risk profile for an account."""
+    overall_score: int  # 0-100 risk score
+    risk_level: str  # 'low', 'medium', 'high', 'critical'
+    detected_patterns: List[PatternScore]
+    all_flags: List[Dict[str, Any]]
+    dispute_strength: str  # 'weak', 'moderate', 'strong', 'compelling'
+    key_violations: List[str]
+    recommended_approach: str
+    litigation_potential: bool
+
+    def to_dict(self) -> Dict[str, Any]:
+        result = asdict(self)
+        result['detected_patterns'] = [p.to_dict() for p in self.detected_patterns]
+        return result
+
+
+class PatternScorer:
+    """
+    Advanced pattern scoring system that evaluates the strength of detected violations.
+    Calculates confidence scores based on corroborating evidence.
+    """
+
+    def __init__(self):
+        self.severity_weights = {'high': 25, 'medium': 15, 'low': 5}
+        self.category_weights = {
+            're-aging': 1.5,  # Core issue - weight more
+            'timeline': 1.4,
+            'sol': 1.3,
+            'medical': 1.2,
+            'fee_abuse': 1.1,
+            'default': 1.0
+        }
+
+    def calculate_base_score(self, flags: List[Dict[str, Any]]) -> int:
+        """Calculate base score from individual flags."""
+        if not flags:
+            return 0
+
+        score = 0
+        for flag in flags:
+            severity = flag.get('severity', 'medium')
+            rule_id = flag.get('rule_id', '')
+
+            # Base severity score
+            base = self.severity_weights.get(severity, 10)
+
+            # Apply category weight
+            category = self._get_rule_category(rule_id)
+            weight = self.category_weights.get(category, 1.0)
+
+            score += int(base * weight)
+
+        # Normalize to 0-100
+        return min(100, score)
+
+    def _get_rule_category(self, rule_id: str) -> str:
+        """Determine category from rule ID."""
+        if rule_id.startswith('A') or rule_id.startswith('K6'):
+            return 'timeline'
+        elif rule_id.startswith('B'):
+            return 're-aging'
+        elif rule_id.startswith('S'):
+            return 'sol'
+        elif rule_id.startswith('H'):
+            return 'medical'
+        elif rule_id.startswith('G'):
+            return 'fee_abuse'
+        return 'default'
+
+    def detect_patterns(self, flags: List[Dict[str, Any]]) -> List[PatternScore]:
+        """Detect corroborating patterns from fired rules."""
+        detected = []
+        flag_rule_ids = {f.get('rule_id') for f in flags}
+
+        for pattern_id, pattern in PATTERN_COMBOS.items():
+            # Check required rules
+            required_matched = all(r in flag_rule_ids for r in pattern['required_rules'])
+            if not required_matched and pattern['required_rules']:
+                continue
+
+            # Count optional matches
+            optional_matched = [r for r in pattern['optional_rules'] if r in flag_rule_ids]
+            total_matched = len(pattern['required_rules']) + len(optional_matched)
+
+            if total_matched >= pattern['min_required']:
+                # Calculate confidence
+                all_possible = len(pattern['required_rules']) + len(pattern['optional_rules'])
+                match_ratio = total_matched / max(all_possible, 1)
+                confidence = int(50 + (match_ratio * 40) + (pattern['confidence_boost'] * match_ratio))
+                confidence = min(100, confidence)
+
+                # Determine legal strength
+                if confidence >= 85:
+                    strength = 'definitive'
+                    action = 'File disputes immediately with all evidence. Consider CFPB complaint and attorney consultation.'
+                elif confidence >= 70:
+                    strength = 'strong'
+                    action = 'File formal disputes citing specific violations. Document everything.'
+                elif confidence >= 50:
+                    strength = 'moderate'
+                    action = 'File dispute with documentation. Request verification of all dates.'
+                else:
+                    strength = 'weak'
+                    action = 'Request validation and additional documentation before formal dispute.'
+
+                matched_rules = list(pattern['required_rules']) + optional_matched
+
+                detected.append(PatternScore(
+                    pattern_id=pattern_id,
+                    pattern_name=pattern['name'],
+                    confidence_score=confidence,
+                    matched_rules=matched_rules,
+                    description=pattern['description'],
+                    legal_strength=strength,
+                    recommended_action=action
+                ))
+
+        return sorted(detected, key=lambda x: x.confidence_score, reverse=True)
+
+    def generate_risk_profile(self, flags: List[Dict[str, Any]], fields: Dict[str, Any] = None) -> RiskProfile:
+        """Generate comprehensive risk profile for an account."""
+        base_score = self.calculate_base_score(flags)
+        patterns = self.detect_patterns(flags)
+
+        # Boost score based on patterns
+        pattern_boost = sum(p.confidence_score * 0.1 for p in patterns)
+        overall_score = min(100, base_score + int(pattern_boost))
+
+        # Determine risk level
+        if overall_score >= 80:
+            risk_level = 'critical'
+        elif overall_score >= 60:
+            risk_level = 'high'
+        elif overall_score >= 35:
+            risk_level = 'medium'
+        else:
+            risk_level = 'low'
+
+        # Determine dispute strength
+        high_severity_count = len([f for f in flags if f.get('severity') == 'high'])
+        if high_severity_count >= 3 or (patterns and patterns[0].legal_strength == 'definitive'):
+            dispute_strength = 'compelling'
+            approach = 'This case shows clear violations. File comprehensive disputes with all bureaus and the furnisher. Consider CFPB complaint and attorney consultation for potential FCRA lawsuit.'
+        elif high_severity_count >= 1 or (patterns and patterns[0].legal_strength in ['strong', 'definitive']):
+            dispute_strength = 'strong'
+            approach = 'Significant violations detected. File formal disputes citing specific rule violations. Document all evidence carefully.'
+        elif len(flags) >= 2:
+            dispute_strength = 'moderate'
+            approach = 'Multiple issues found. File disputes with bureaus requesting verification of dates and amounts.'
+        else:
+            dispute_strength = 'weak'
+            approach = 'Some concerns identified. Request debt validation before formal dispute. Gather additional documentation.'
+
+        # Identify key violations
+        key_violations = [f.get('rule_name', 'Unknown') for f in flags if f.get('severity') == 'high'][:3]
+
+        # Determine litigation potential
+        litigation_potential = (
+            high_severity_count >= 2 or
+            any(p.legal_strength in ['definitive', 'strong'] for p in patterns) or
+            any('willful' in str(f.get('explanation', '')).lower() for f in flags)
+        )
+
+        return RiskProfile(
+            overall_score=overall_score,
+            risk_level=risk_level,
+            detected_patterns=patterns,
+            all_flags=flags,
+            dispute_strength=dispute_strength,
+            key_violations=key_violations,
+            recommended_approach=approach,
+            litigation_potential=litigation_potential
+        )
+
+
+def calculate_pattern_score(flags: List[Dict[str, Any]], fields: Dict[str, Any] = None) -> Dict[str, Any]:
+    """
+    Convenience function to calculate pattern scores and risk profile.
+    """
+    scorer = PatternScorer()
+    profile = scorer.generate_risk_profile(flags, fields)
+    return profile.to_dict()

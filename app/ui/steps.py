@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from app.extraction import extract_text_from_bytes, get_extraction_quality_score
 from app.parser import parse_credit_report, fields_to_editable_dict
-from app.rules import run_rules
+from app.rules import run_rules, calculate_pattern_score
 from app.generator import generate_dispute_packet
 from app.state_sol import get_all_states
 from app.pdf_export import export_packet_to_pdf
@@ -399,29 +399,122 @@ def render_step_4_checks():
             flags = run_rules(verified_fields)
             st.session_state.rule_flags = flags
             st.session_state.rules_checked = True
+            # Calculate pattern score and risk profile
+            if flags:
+                risk_profile = calculate_pattern_score(flags, verified_fields)
+                st.session_state.risk_profile = risk_profile
 
     flags = st.session_state.rule_flags
+    risk_profile = st.session_state.get('risk_profile', {})
 
-    # Dispute strategy recommendation
-    if flags:
+    # Risk Profile Display (if available)
+    if risk_profile and flags:
+        overall_score = risk_profile.get('overall_score', 0)
+        risk_level = risk_profile.get('risk_level', 'low')
+        dispute_strength = risk_profile.get('dispute_strength', 'weak')
+        litigation_potential = risk_profile.get('litigation_potential', False)
+
+        # Risk level colors
+        risk_colors = {
+            'critical': ('#dc2626', '#fef2f2', '#991b1b'),
+            'high': ('#ea580c', '#fff7ed', '#9a3412'),
+            'medium': ('#d97706', '#fffbeb', '#92400e'),
+            'low': ('#16a34a', '#f0fdf4', '#166534')
+        }
+        bg_color, card_bg, text_color = risk_colors.get(risk_level, risk_colors['low'])
+
+        st.markdown(f"""
+        <div style="background: {card_bg}; border: 2px solid {bg_color}; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <div style="font-size: 0.8rem; color: {text_color}; text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">
+                        Case Strength Score
+                    </div>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: {bg_color}; line-height: 1;">
+                        {overall_score}/100
+                    </div>
+                    <div style="font-size: 0.9rem; color: {text_color}; margin-top: 4px;">
+                        Risk Level: <strong>{risk_level.upper()}</strong>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="background: {bg_color}; color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
+                        Dispute Strength: {dispute_strength.upper()}
+                    </div>
+                    {"<div style='margin-top: 8px; font-size: 0.8rem; color: " + text_color + ";'><strong>Litigation Potential</strong></div>" if litigation_potential else ""}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Detected patterns
+        patterns = risk_profile.get('detected_patterns', [])
+        if patterns:
+            st.markdown("### Detected Patterns")
+            for pattern in patterns:
+                confidence = pattern.get('confidence_score', 0)
+                strength = pattern.get('legal_strength', 'weak')
+                strength_colors = {'definitive': '#16a34a', 'strong': '#2563eb', 'moderate': '#d97706', 'weak': '#64748b'}
+
+                st.markdown(f"""
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; border-left: 4px solid {strength_colors.get(strength, '#64748b')};">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div style="font-weight: 700; color: #0f172a; font-size: 1rem;">{pattern.get('pattern_name', 'Unknown Pattern')}</div>
+                            <div style="color: #64748b; font-size: 0.85rem; margin-top: 4px;">{pattern.get('description', '')}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.2rem; font-weight: 700; color: {strength_colors.get(strength, '#64748b')};">{confidence}%</div>
+                            <div style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase;">{strength}</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+                        <div style="font-size: 0.8rem; color: #475569;"><strong>Action:</strong> {pattern.get('recommended_action', '')}</div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px;">Rules matched: {', '.join(pattern.get('matched_rules', []))}</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # Recommended approach
+        st.markdown("### Recommended Approach")
+        st.markdown(f"""
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+            <p style="font-size: 0.95rem; color: #334155; margin: 0;">{risk_profile.get('recommended_approach', '')}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Key violations
+        key_violations = risk_profile.get('key_violations', [])
+        if key_violations:
+            st.markdown(f"""
+            <div style="margin-top: 12px; padding: 12px; background: #fef2f2; border-radius: 6px;">
+                <div style="font-size: 0.8rem; color: #991b1b; font-weight: 600;">Key Violations:</div>
+                <div style="font-size: 0.85rem; color: #dc2626;">{' • '.join(key_violations)}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+    elif flags:
+        # Fallback to old display if no risk profile
         st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
         st.markdown("### Recommended Approach")
 
-        has_metro2 = any(f.get('rule_id', '').startswith('M') for f in flags)
-        has_reaging = any(f.get('rule_id', '').startswith('B') or f.get('rule_id', '') == 'K6' for f in flags)
+        has_metro2 = any(str(f.get('rule_id') or '').startswith('M') for f in flags)
+        has_reaging = any(str(f.get('rule_id') or '').startswith('B') or f.get('rule_id', '') == 'K6' for f in flags)
 
         if has_reaging:
             strategy_title = "Strong Case - Re-Aging Detected"
             strategy_desc = "We found signs that dates may have been changed illegally. Your dispute should focus on proving the correct Date of First Delinquency."
-            status_color = "#e11d48"  # rose-600
+            status_color = "#e11d48"
         elif has_metro2:
             strategy_title = "Technical Errors Found"
             strategy_desc = "The data reporting doesn't follow standard rules. Your dispute can challenge whether they're keeping accurate records."
-            status_color = "#d97706"  # amber-600
+            status_color = "#d97706"
         else:
             strategy_title = "Potential Issues Found"
             strategy_desc = "We found some things that don't look right. Request that they verify the specific details we flagged."
-            status_color = "#2563eb"  # blue-600
+            status_color = "#2563eb"
 
         st.markdown(f"""
         <div style="background: {status_color}; color: white; padding: 12px 16px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; margin-bottom: 12px; display: inline-block;">

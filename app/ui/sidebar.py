@@ -132,11 +132,14 @@ def render_sidebar(project_root: Path):
         # Tools section - collapsible
         with st.expander("Tools & Management", expanded=False):
             tool_buttons = [
+                ("CFPB Complaint Generator", "File official complaints"),
+                ("Evidence Packet Builder", "Generate legal evidence packages"),
                 ("Analytics Dashboard", "View dispute outcomes and stats"),
                 ("Furnisher Intelligence", "Track collector violation rates"),
                 ("Deadline Tracker", "Track 30-day response windows"),
                 ("Case Manager", "Save and load cases"),
                 ("Client Portal", "Simple mode for consumers"),
+                ("Accessibility", "Voice guidance and visual settings"),
                 (t.nav_settings, "Configure options"),
             ]
             for mode, desc in tool_buttons:

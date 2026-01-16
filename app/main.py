@@ -34,6 +34,9 @@ from app.analytics import render_analytics_dashboard
 from app.multi_account import render_multi_account_ui
 from app.client_portal import render_client_portal, inject_portal_css
 from app.error_handler import ErrorBoundary
+from app.cfpb_complaint import render_cfpb_generator
+from app.evidence_builder import render_evidence_builder
+from app.accessibility import render_accessibility_settings
 
 # Page configuration
 st.set_page_config(
@@ -130,6 +133,12 @@ def main():
     elif app_mode == "Furnisher Intelligence":
         from app.furnisher_intel import render_furnisher_intelligence
         render_furnisher_intelligence(st)
+    elif app_mode == "CFPB Complaint Generator":
+        render_cfpb_generator(st)
+    elif app_mode == "Evidence Packet Builder":
+        render_evidence_builder(st)
+    elif app_mode == "Accessibility":
+        render_accessibility_settings(st)
     elif app_mode == "Multi-Account Analysis":
         render_multi_account_ui(st)
     elif app_mode == "Furnisher Compliance":
