@@ -89,12 +89,54 @@ const RULE_DEFINITIONS: Record<string, any> = {
     suggestedEvidence: ['Prior credit reports', 'Original creditor DOFD verification'],
     legalCitations: ['FCRA_605_a', 'FCRA_605_c']
   },
+  K7: {
+    name: 'Excessive Interest (State Law Violation)',
+    severity: 'high',
+    whyItMatters: 'State laws cap the amount of interest that can be charged on delinquent debt.',
+    suggestedEvidence: ['Itemized statement of interest and fees'],
+    legalCitations: ['STATE_INTEREST_STATUTE']
+  },
   M1: {
     name: 'Missing Required DOFD',
     severity: 'medium',
     whyItMatters: 'Furnishers must report the DOFD for collection accounts under Metro 2 guidelines.',
     suggestedEvidence: ['Request DOFD verification from furnisher'],
     legalCitations: ['FCRA_623_a5', 'METRO2_GUIDE']
+  },
+  M2: {
+    name: 'Metro2: Transferred with Balance',
+    severity: 'high',
+    whyItMatters: 'If an account is transferred or sold, the balance MUST be reported as $0.',
+    suggestedEvidence: ['Transfer notice', 'New collector statement'],
+    legalCitations: ['METRO2_GUIDE', 'FCRA_623_a1']
+  },
+  H1: {
+    name: 'Medical Debt: < 365 Days',
+    severity: 'high',
+    whyItMatters: 'Medical debt cannot be reported until 365 days after the date of service.',
+    suggestedEvidence: ['Medical bill showing date of service'],
+    legalCitations: ['CFPB_MEDICAL_RULE']
+  },
+  H2: {
+    name: 'Medical Debt: < $500',
+    severity: 'high',
+    whyItMatters: 'Medical debts under $500 should not appear on credit reports.',
+    suggestedEvidence: ['Proof of balance amount'],
+    legalCitations: ['CFPB_MEDICAL_RULE']
+  },
+  E1: {
+    name: 'Future Date Reported',
+    severity: 'high',
+    whyItMatters: 'Dates in the future indicate systemic data corruption.',
+    suggestedEvidence: ['N/A - Logical error'],
+    legalCitations: ['FCRA_623_a1']
+  },
+  D1: {
+    name: 'Paid Status with Balance',
+    severity: 'high',
+    whyItMatters: 'If status is paid or settled, the balance must be $0.',
+    suggestedEvidence: ['Settlement letter', 'Payment receipt'],
+    legalCitations: ['FCRA_623_a1']
   },
   L1: {
     name: 'Status vs History Mismatch',
@@ -106,58 +148,67 @@ const RULE_DEFINITIONS: Record<string, any> = {
 };
 
 // State Statute of Limitations data
-const STATE_SOL: Record<string, { writtenContracts: number; openAccounts: number }> = {
-  'AL': { writtenContracts: 6, openAccounts: 6 },
-  'AK': { writtenContracts: 3, openAccounts: 3 },
-  'AZ': { writtenContracts: 6, openAccounts: 6 },
-  'AR': { writtenContracts: 5, openAccounts: 5 },
-  'CA': { writtenContracts: 4, openAccounts: 4 },
-  'CO': { writtenContracts: 6, openAccounts: 6 },
-  'CT': { writtenContracts: 6, openAccounts: 6 },
-  'DE': { writtenContracts: 3, openAccounts: 3 },
-  'FL': { writtenContracts: 5, openAccounts: 4 },
-  'GA': { writtenContracts: 6, openAccounts: 4 },
-  'HI': { writtenContracts: 6, openAccounts: 6 },
-  'ID': { writtenContracts: 5, openAccounts: 4 },
-  'IL': { writtenContracts: 5, openAccounts: 5 },
-  'IN': { writtenContracts: 6, openAccounts: 6 },
-  'IA': { writtenContracts: 5, openAccounts: 5 },
-  'KS': { writtenContracts: 5, openAccounts: 3 },
-  'KY': { writtenContracts: 5, openAccounts: 5 },
-  'LA': { writtenContracts: 3, openAccounts: 3 },
-  'ME': { writtenContracts: 6, openAccounts: 6 },
-  'MD': { writtenContracts: 3, openAccounts: 3 },
-  'MA': { writtenContracts: 6, openAccounts: 6 },
-  'MI': { writtenContracts: 6, openAccounts: 6 },
-  'MN': { writtenContracts: 6, openAccounts: 6 },
-  'MS': { writtenContracts: 3, openAccounts: 3 },
-  'MO': { writtenContracts: 5, openAccounts: 5 },
-  'MT': { writtenContracts: 5, openAccounts: 5 },
-  'NE': { writtenContracts: 5, openAccounts: 4 },
-  'NV': { writtenContracts: 6, openAccounts: 4 },
-  'NH': { writtenContracts: 3, openAccounts: 3 },
-  'NJ': { writtenContracts: 6, openAccounts: 6 },
-  'NM': { writtenContracts: 6, openAccounts: 4 },
-  'NY': { writtenContracts: 6, openAccounts: 6 },
-  'NC': { writtenContracts: 3, openAccounts: 3 },
-  'ND': { writtenContracts: 6, openAccounts: 6 },
-  'OH': { writtenContracts: 6, openAccounts: 6 },
-  'OK': { writtenContracts: 5, openAccounts: 3 },
-  'OR': { writtenContracts: 6, openAccounts: 6 },
-  'PA': { writtenContracts: 4, openAccounts: 4 },
-  'RI': { writtenContracts: 10, openAccounts: 10 },
-  'SC': { writtenContracts: 3, openAccounts: 3 },
-  'SD': { writtenContracts: 6, openAccounts: 6 },
-  'TN': { writtenContracts: 6, openAccounts: 6 },
-  'TX': { writtenContracts: 4, openAccounts: 4 },
-  'UT': { writtenContracts: 6, openAccounts: 4 },
-  'VT': { writtenContracts: 6, openAccounts: 6 },
-  'VA': { writtenContracts: 5, openAccounts: 3 },
-  'WA': { writtenContracts: 6, openAccounts: 3 },
-  'WV': { writtenContracts: 10, openAccounts: 5 },
-  'WI': { writtenContracts: 6, openAccounts: 6 },
-  'WY': { writtenContracts: 8, openAccounts: 8 },
-  'DC': { writtenContracts: 3, openAccounts: 3 }
+interface StateSolData {
+  writtenContracts: number;
+  oralContracts: number;
+  promissoryNotes: number;
+  openAccounts: number;
+  judgmentInterestCap: number;
+  medicalInterestCap: number;
+}
+
+const STATE_SOL: Record<string, StateSolData> = {
+  'AL': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.075, medicalInterestCap: 0.08 },
+  'AK': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.105, medicalInterestCap: 0.05 },
+  'AZ': { writtenContracts: 6, oralContracts: 3, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.10, medicalInterestCap: 0.03 },
+  'AR': { writtenContracts: 5, oralContracts: 5, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.10, medicalInterestCap: 0.06 },
+  'CA': { writtenContracts: 4, oralContracts: 2, promissoryNotes: 4, openAccounts: 4, judgmentInterestCap: 0.10, medicalInterestCap: 0.05 },
+  'CO': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'CT': { writtenContracts: 6, oralContracts: 3, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.10, medicalInterestCap: 0.06 },
+  'DE': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.10, medicalInterestCap: 0.05 },
+  'FL': { writtenContracts: 5, oralContracts: 4, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.09, medicalInterestCap: 0.09 },
+  'GA': { writtenContracts: 6, oralContracts: 4, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.07, medicalInterestCap: 0.07 },
+  'HI': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.10, medicalInterestCap: 0.10 },
+  'ID': { writtenContracts: 5, oralContracts: 4, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.12, medicalInterestCap: 0.12 },
+  'IL': { writtenContracts: 5, oralContracts: 5, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.09, medicalInterestCap: 0.05 },
+  'IN': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'IA': { writtenContracts: 5, oralContracts: 5, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.05, medicalInterestCap: 0.05 },
+  'KS': { writtenContracts: 5, oralContracts: 3, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.10, medicalInterestCap: 0.10 },
+  'KY': { writtenContracts: 5, oralContracts: 5, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'LA': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'ME': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'MD': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.10, medicalInterestCap: 0.06 },
+  'MA': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.12, medicalInterestCap: 0.06 },
+  'MI': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.07, medicalInterestCap: 0.07 },
+  'MN': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.06, medicalInterestCap: 0.04 },
+  'MS': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'MO': { writtenContracts: 5, oralContracts: 5, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.09, medicalInterestCap: 0.09 },
+  'MT': { writtenContracts: 5, oralContracts: 5, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.10, medicalInterestCap: 0.10 },
+  'NE': { writtenContracts: 5, oralContracts: 4, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
+  'NV': { writtenContracts: 6, oralContracts: 4, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.08, medicalInterestCap: 0.00 },
+  'NH': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'NJ': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
+  'NM': { writtenContracts: 6, oralContracts: 4, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'NY': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.09, medicalInterestCap: 0.02 },
+  'NC': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'ND': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
+  'OH': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.05, medicalInterestCap: 0.05 },
+  'OK': { writtenContracts: 5, oralContracts: 3, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
+  'OR': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.09, medicalInterestCap: 0.09 },
+  'PA': { writtenContracts: 4, oralContracts: 4, promissoryNotes: 4, openAccounts: 4, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
+  'RI': { writtenContracts: 10, oralContracts: 10, promissoryNotes: 10, openAccounts: 10, judgmentInterestCap: 0.12, medicalInterestCap: 0.12 },
+  'SC': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
+  'SD': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.10, medicalInterestCap: 0.10 },
+  'TN': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.10, medicalInterestCap: 0.10 },
+  'TX': { writtenContracts: 4, oralContracts: 4, promissoryNotes: 4, openAccounts: 4, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
+  'UT': { writtenContracts: 6, oralContracts: 4, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.10, medicalInterestCap: 0.10 },
+  'VT': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.12, medicalInterestCap: 0.12 },
+  'VA': { writtenContracts: 5, oralContracts: 3, promissoryNotes: 5, openAccounts: 5, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
+  'WA': { writtenContracts: 6, oralContracts: 3, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.12, medicalInterestCap: 0.09 },
+  'WV': { writtenContracts: 6, oralContracts: 5, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.07, medicalInterestCap: 0.07 },
+  'WI': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.05, medicalInterestCap: 0.05 },
+  'WY': { writtenContracts: 8, oralContracts: 8, promissoryNotes: 8, openAccounts: 8, judgmentInterestCap: 0.07, medicalInterestCap: 0.07 },
+  'DC': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 }
 };
 
 /**
@@ -237,6 +288,8 @@ export function runRules(fields: CreditFields): RuleFlag[] {
   const removalDate = parseDate(fields.estimatedRemovalDate);
   const lastPayment = parseDate(fields.dateLastPayment);
   const today = new Date();
+  const status = (fields.accountStatus || '').toLowerCase();
+  const history = (fields.paymentHistory || '').toUpperCase();
 
   // B1: DOFD before account opening
   if (dofd && dateOpened && dofd < dateOpened) {
@@ -263,6 +316,78 @@ export function runRules(fields: CreditFields): RuleFlag[] {
       `The DOFD (${fields.dofd}) is AFTER the charge-off date (${fields.chargeOffDate}). Delinquency must occur before charge-off.`,
       { dofd: fields.dofd, chargeOffDate: fields.chargeOffDate }
     ));
+  }
+
+  // E1: Future dates
+  const dateFields: (keyof CreditFields)[] = ['dateOpened', 'dateReportedOrUpdated', 'dofd', 'chargeOffDate', 'dateLastPayment'];
+  for (const f of dateFields) {
+    const d = parseDate(fields[f] as string);
+    if (d && d > new Date(today.getTime() + 86400000)) {
+      flags.push(createFlag('E1',
+        `The ${f} is reported as ${fields[f]}, which is in the future. This is a clear data integrity violation.`,
+        { field: f, value: fields[f] }
+      ));
+    }
+  }
+
+  // D1: Paid status with balance
+  if (status && fields.currentBalance) {
+    const isPaid = ['paid', 'settled', 'zero balance'].some(s => status.includes(s));
+    const bal = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
+    if (isPaid && bal > 0) {
+      flags.push(createFlag('D1',
+        `Account status is "${fields.accountStatus}" but shows a balance of $${bal.toFixed(2)}. Paid/settled accounts must show $0 balance.`,
+        { status: fields.accountStatus, balance: fields.currentBalance }
+      ));
+    }
+  }
+
+  // H1/H2/H3: Medical Debt
+  const isMedical = (fields.accountType || '').toLowerCase().includes('medical') || 
+                    (fields.furnisherOrCollector || '').toLowerCase().includes('health') ||
+                    (fields.furnisherOrCollector || '').toLowerCase().includes('hospital');
+  
+  if (isMedical && fields.currentBalance) {
+    const bal = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
+    if (!isNaN(bal) && bal > 0 && bal < 500) {
+      flags.push(createFlag('H2',
+        `This medical debt has a balance of $${bal.toFixed(2)}, which is under the $500 threshold for credit reporting.`,
+        { balance: fields.currentBalance }
+      ));
+    }
+  }
+
+  // M2: Transferred with balance
+  if (status && (status.includes('transfer') || status.includes('sold'))) {
+    const bal = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+    if (bal > 0) {
+      flags.push(createFlag('M2',
+        `Account is marked as "${fields.accountStatus}" but still shows a balance. Transferred or sold accounts must be reported with $0 balance.`,
+        { status: fields.accountStatus, balance: fields.currentBalance }
+      ));
+    }
+  }
+
+  // K7: Interest Rate Violation
+  if (fields.stateCode && fields.currentBalance && fields.originalAmount && dofd) {
+    const sol = STATE_SOL[fields.stateCode.toUpperCase()];
+    if (sol) {
+      const curr = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
+      const orig = parseFloat(fields.originalAmount.replace(/[$,]/g, ''));
+      const yearsPassed = (today.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+      
+      if (orig > 0 && curr > orig && yearsPassed > 0.5) {
+        const annualRate = ((curr - orig) / orig) / yearsPassed;
+        const cap = isMedical ? sol.medicalInterestCap : sol.judgmentInterestCap;
+        
+        if (annualRate > cap) {
+          flags.push(createFlag('K7',
+            `Forensic Interest Audit: Implied annual rate of ${(annualRate*100).toFixed(1)}% exceeds the ${fields.stateCode} legal cap of ${(cap*100).toFixed(1)}%.`,
+            { annualRate: (annualRate*100).toFixed(1), legalCap: (cap*100).toFixed(1) }
+          ));
+        }
+      }
+    }
   }
 
   // K1: Balance increase after charge-off
@@ -302,9 +427,6 @@ export function runRules(fields: CreditFields): RuleFlag[] {
   }
 
   // L1: Status vs Payment History mismatch
-  const status = (fields.accountStatus || '').toLowerCase();
-  const history = (fields.paymentHistory || '').toUpperCase();
-
   if (status && history) {
     const isCleanStatus = ['current', 'paid', 'on time'].some(s => status.includes(s));
     const hasRecentLates = ['30', '60', '90', '120', '150', '180'].some(late =>
