@@ -2,7 +2,7 @@
 echo Creating desktop shortcut...
 
 set SCRIPT_DIR=%~dp0
-set SHORTCUT_NAME=Debt Re-Aging Case Factory
+set SHORTCUT_NAME=Credit Report Analyzer
 
 :: Create VBS script to make shortcut
 echo Set oWS = WScript.CreateObject("WScript.Shell") > "%temp%\CreateShortcut.vbs"
@@ -10,7 +10,7 @@ echo sLinkFile = oWS.SpecialFolders("Desktop") ^& "\%SHORTCUT_NAME%.lnk" >> "%te
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%temp%\CreateShortcut.vbs"
 echo oLink.TargetPath = "%SCRIPT_DIR%START_APP.bat" >> "%temp%\CreateShortcut.vbs"
 echo oLink.WorkingDirectory = "%SCRIPT_DIR%" >> "%temp%\CreateShortcut.vbs"
-echo oLink.Description = "Launch Debt Re-Aging Case Factory" >> "%temp%\CreateShortcut.vbs"
+echo oLink.Description = "Launch Credit Report Analyzer" >> "%temp%\CreateShortcut.vbs"
 echo oLink.Save >> "%temp%\CreateShortcut.vbs"
 
 :: Run the VBS script
@@ -20,7 +20,7 @@ del "%temp%\CreateShortcut.vbs"
 echo.
 echo ========================================
 echo  Desktop shortcut created!
-echo  Look for "Debt Re-Aging Case Factory"
+echo  Look for "Credit Report Analyzer"
 echo  on your desktop.
 echo ========================================
 echo.

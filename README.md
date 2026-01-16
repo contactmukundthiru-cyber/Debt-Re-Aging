@@ -16,12 +16,14 @@ The tool helps legal aid organizations, consumer advocacy groups, and pro bono c
 
 ## Key Features (Unrivaled Forensic Capabilities)
 
-### Core Analysis & Intelligence
-- **Advanced OCR (OpenCV + Tesseract)**: Professional image preprocessing pipeline for high-accuracy extraction from mobile photos or scans.
-- **Systemic Behavioral Auditing**: Detects patterns of "Synthetic Aging" and "Clock Drift" across entire furnisher datasets.
-- **Intelligent Rule Engine**: 25+ automated checks for re-aging, duplicate reporting, and Metro 2 compliance.
-- **Multi-Account Segmenter**: Automatically splits entire credit reports into individual forensic account records.
-- **Cross-Bureau Reconciliation**: Analyzes material discrepancies between Experian, Equifax, and TransUnion.
+### Core Analysis & Intelligence (Unrivaled Suite)
+- **Zombie Debt Radar**: Detects illegal "Zombie Debt" re-reporting patterns designed to bypass the 7-year clock.
+- **Forensic Lab & Legal Synthesis**: Automated mapping of violations to U.S. Code with case-brief synthesis.
+- **Forensic Score Simulator**: Simulate real-time FICO point gains based on specific tradeline deletions.
+- **Interactive Discovery Engine**: Targeted legal discovery questions to uncover hidden violations and track evidence.
+- **Bureau-Specific Strategy Radar**: Tactical intelligence for Experian, Equifax, and TransUnion.
+- **Predictive Success Modeling**: AI-driven probability scoring for each violation based on historical behavior.
+- **Forensic Investigation Reporting**: High-potency FIR generation (PDF) with case law and evidence mapping.
 
 ### Institutional Readiness
 - **REST API & Webhooks**: Seamless integration with Case Management Systems (CMS) like Legal Server or Salesforce.

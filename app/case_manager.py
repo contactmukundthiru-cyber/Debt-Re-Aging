@@ -652,3 +652,17 @@ def render_case_manager_ui(st):
                     col1.metric("High Severity Flags", issue['high_severity_count'])
                     col2.write(f"**Primary Violation Pattern**: {issue['most_common_violation']}")
                     col2.warning("Potential for Class Action or CFPB Systemic Referral")
+        
+        # Export option
+        st.markdown("---")
+        if systemic_issues:
+            import pandas as pd
+            df = pd.DataFrame(systemic_issues)
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                "Export Audit Data (CSV)",
+                csv,
+                "institutional_behavioral_audit.csv",
+                "text/csv",
+                key='download-csv'
+            )

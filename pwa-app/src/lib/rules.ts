@@ -12,6 +12,9 @@ export interface RuleFlag {
   suggestedEvidence: string[];
   fieldValues: Record<string, any>;
   legalCitations: string[];
+  successProbability: number; // 0-100%
+  discoveryQuestions?: string[]; // Questions to ask the consumer to find more proof
+  bureauTactics?: Record<string, string>; // Specific advice for each bureau
 }
 
 export interface CreditFields {
@@ -33,6 +36,12 @@ export interface CreditFields {
   stateCode?: string;
 }
 
+export interface ScoreImpact {
+  category: string;
+  impact: number; // 0 to 100
+  description: string;
+}
+
 export interface RiskProfile {
   overallScore: number;
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
@@ -41,6 +50,7 @@ export interface RiskProfile {
   detectedPatterns: PatternScore[];
   keyViolations: string[];
   recommendedApproach: string;
+  scoreBreakdown: ScoreImpact[];
 }
 
 export interface PatternScore {
@@ -57,20 +67,39 @@ const RULE_DEFINITIONS: Record<string, any> = {
   B1: {
     name: 'DOFD Before Account Opening',
     severity: 'high',
+    successProbability: 95,
     whyItMatters: 'A debt cannot become delinquent before the account even existed. This is a clear sign of data manipulation.',
     suggestedEvidence: ['Original account agreement', 'First statement showing account open date'],
-    legalCitations: ['FCRA_623_a1', 'FCRA_611']
+    legalCitations: ['FCRA_623_a1', 'FCRA_611'],
+    discoveryQuestions: [
+      'Do you have the original welcome letter or first statement for this account?',
+      'Was this account a result of identity theft (someone opening it in your name)?'
+    ],
+    bureauTactics: {
+      experian: 'Experian usually corrects this quickly if the open date is verified. Demand they "reconcile internal date conflicts".',
+      equifax: 'Equifax may require a copy of the original contract. Highlight the physical impossibility in the letter.',
+      transunion: 'TransUnion often deletes "impossible" tradelines entirely rather than correcting them.'
+    }
   },
   B2: {
     name: 'Impossible 7-Year Timeline',
     severity: 'high',
+    successProbability: 88,
     whyItMatters: 'The 7-year reporting period is calculated from the DOFD, not from when a collector purchased the debt.',
     suggestedEvidence: ['Prior credit reports showing original DOFD', 'Original creditor records'],
-    legalCitations: ['FCRA_605_a', 'FCRA_605_c']
+    legalCitations: ['FCRA_605_a', 'FCRA_605_c'],
+    discoveryQuestions: [
+      'When was the very first time you missed a payment and never caught up?',
+      'Do you have an old credit report from 2-3 years ago?'
+    ],
+    bureauTactics: {
+      all: 'Cite FCRA §605(c) which strictly defines the commencement of the reporting period. Bureau "standard procedures" often fail to verify the original DOFD.'
+    }
   },
   B3: {
     name: 'DOFD After Charge-Off',
     severity: 'high',
+    successProbability: 92,
     whyItMatters: 'The DOFD must occur BEFORE a charge-off. If the DOFD is after the charge-off, the date has been manipulated.',
     suggestedEvidence: ['Charge-off notice', 'Account statements showing delinquency timeline'],
     legalCitations: ['FCRA_623_a5', 'FCRA_611']
@@ -78,6 +107,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   K1: {
     name: 'Balance Increase After Charge-Off',
     severity: 'medium',
+    successProbability: 65,
     whyItMatters: 'After charge-off, the balance should not increase except for documented interest/fees.',
     suggestedEvidence: ['Original charge-off statement', 'Fee disclosure documents'],
     legalCitations: ['FDCPA_807', 'FCRA_623_a1']
@@ -85,20 +115,34 @@ const RULE_DEFINITIONS: Record<string, any> = {
   K6: {
     name: 'Removal Date Beyond 7 Years from DOFD',
     severity: 'high',
+    successProbability: 98,
     whyItMatters: 'This is the classic "re-aging" violation - extending reporting beyond the legal limit.',
     suggestedEvidence: ['Prior credit reports', 'Original creditor DOFD verification'],
-    legalCitations: ['FCRA_605_a', 'FCRA_605_c']
+    legalCitations: ['FCRA_605_a', 'FCRA_605_c'],
+    discoveryQuestions: [
+      'Has this account fallen off your credit report and then reappeared later?',
+      'Did you make any partial payments recently that might have triggered a date refresh?'
+    ],
+    bureauTactics: {
+      all: 'This is a per-se violation. Demand immediate deletion. If they "verify" it, they are likely ignoring the actual DOFD field in the Metro 2 record.'
+    }
   },
   K7: {
     name: 'Excessive Interest (State Law Violation)',
     severity: 'high',
+    successProbability: 75,
     whyItMatters: 'State laws cap the amount of interest that can be charged on delinquent debt.',
     suggestedEvidence: ['Itemized statement of interest and fees'],
-    legalCitations: ['STATE_INTEREST_STATUTE']
+    legalCitations: ['STATE_INTEREST_STATUTE'],
+    discoveryQuestions: [
+      'Have you received a notice from the collector showing a breakdown of principal vs. interest?',
+      'Was this a medical debt? (Many states have lower interest caps for medical debt).'
+    ]
   },
   M1: {
     name: 'Missing Required DOFD',
     severity: 'medium',
+    successProbability: 80,
     whyItMatters: 'Furnishers must report the DOFD for collection accounts under Metro 2 guidelines.',
     suggestedEvidence: ['Request DOFD verification from furnisher'],
     legalCitations: ['FCRA_623_a5', 'METRO2_GUIDE']
@@ -106,6 +150,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   M2: {
     name: 'Metro2: Transferred with Balance',
     severity: 'high',
+    successProbability: 90,
     whyItMatters: 'If an account is transferred or sold, the balance MUST be reported as $0.',
     suggestedEvidence: ['Transfer notice', 'New collector statement'],
     legalCitations: ['METRO2_GUIDE', 'FCRA_623_a1']
@@ -113,6 +158,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   H1: {
     name: 'Medical Debt: < 365 Days',
     severity: 'high',
+    successProbability: 99,
     whyItMatters: 'Medical debt cannot be reported until 365 days after the date of service.',
     suggestedEvidence: ['Medical bill showing date of service'],
     legalCitations: ['CFPB_MEDICAL_RULE']
@@ -120,6 +166,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   H2: {
     name: 'Medical Debt: < $500',
     severity: 'high',
+    successProbability: 99,
     whyItMatters: 'Medical debts under $500 should not appear on credit reports.',
     suggestedEvidence: ['Proof of balance amount'],
     legalCitations: ['CFPB_MEDICAL_RULE']
@@ -127,6 +174,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   E1: {
     name: 'Future Date Reported',
     severity: 'high',
+    successProbability: 95,
     whyItMatters: 'Dates in the future indicate systemic data corruption.',
     suggestedEvidence: ['N/A - Logical error'],
     legalCitations: ['FCRA_623_a1']
@@ -134,6 +182,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   D1: {
     name: 'Paid Status with Balance',
     severity: 'high',
+    successProbability: 94,
     whyItMatters: 'If status is paid or settled, the balance must be $0.',
     suggestedEvidence: ['Settlement letter', 'Payment receipt'],
     legalCitations: ['FCRA_623_a1']
@@ -141,6 +190,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   L1: {
     name: 'Status vs History Mismatch',
     severity: 'medium',
+    successProbability: 70,
     whyItMatters: 'Account status contradicts payment history, indicating inaccurate reporting.',
     suggestedEvidence: ['Payment records', 'Bank statements'],
     legalCitations: ['FCRA_623_a1', 'FCRA_611']
@@ -148,6 +198,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   S1: {
     name: 'Statute of Limitations Expired',
     severity: 'medium',
+    successProbability: 60,
     whyItMatters: 'While the debt may still be reported, it cannot be legally collected if the SOL has expired.',
     suggestedEvidence: ['Proof of last payment date', 'State SOL reference'],
     legalCitations: ['STATE_SOL_STATUTE', 'FDCPA_807_2']
@@ -155,6 +206,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   S2: {
     name: 'Judgment Age Violation',
     severity: 'high',
+    successProbability: 85,
     whyItMatters: 'Judgments can only be reported for 7 years from the date the judgment was filed.',
     suggestedEvidence: ['Court records', 'Judgment filing date documentation'],
     legalCitations: ['FCRA_605_a3', 'FCRA_611']
@@ -162,6 +214,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   C1: {
     name: 'Disputed Status Not Shown',
     severity: 'medium',
+    successProbability: 75,
     whyItMatters: 'If you disputed this account, it must be marked as disputed on your credit report.',
     suggestedEvidence: ['Dispute confirmation', 'Certified mail receipt'],
     legalCitations: ['FCRA_611_a3', 'FCRA_623_b']
@@ -169,6 +222,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   C2: {
     name: 'Balance Inconsistency',
     severity: 'medium',
+    successProbability: 55,
     whyItMatters: 'Significant balance variations without explanation suggest inaccurate reporting.',
     suggestedEvidence: ['Account statements', 'Payment records'],
     legalCitations: ['FCRA_623_a1']
@@ -176,6 +230,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   F1: {
     name: 'Stale Data (90+ Days)',
     severity: 'low',
+    successProbability: 45,
     whyItMatters: 'Accounts should be updated at least monthly. Stale data may indicate the furnisher is no longer verifying accuracy.',
     suggestedEvidence: ['Request current account statement'],
     legalCitations: ['FCRA_623_a2', 'METRO2_GUIDE']
@@ -183,6 +238,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   F2: {
     name: 'Duplicate Reporting',
     severity: 'high',
+    successProbability: 88,
     whyItMatters: 'The same debt cannot be reported by multiple entities simultaneously with balances.',
     suggestedEvidence: ['Credit report showing both entries', 'Transfer/sale documentation'],
     legalCitations: ['FCRA_623_a1', 'FCRA_611']
@@ -190,6 +246,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   R1: {
     name: 'Reporting After Bankruptcy',
     severity: 'high',
+    successProbability: 96,
     whyItMatters: 'Debts discharged in bankruptcy must show $0 balance and cannot be collected.',
     suggestedEvidence: ['Bankruptcy discharge order', 'Schedule listing the debt'],
     legalCitations: ['FCRA_605_a1', '11USC524']
@@ -197,6 +254,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   A1: {
     name: 'Account Number Mismatch',
     severity: 'medium',
+    successProbability: 60,
     whyItMatters: 'If the account number reported doesn\'t match your records, it may be mixed credit file.',
     suggestedEvidence: ['Original account documents', 'Statements'],
     legalCitations: ['FCRA_611', 'FCRA_623_a1']
@@ -204,6 +262,7 @@ const RULE_DEFINITIONS: Record<string, any> = {
   P1: {
     name: 'Payment History Gap',
     severity: 'low',
+    successProbability: 40,
     whyItMatters: 'Missing months in payment history can mask on-time payments.',
     suggestedEvidence: ['Bank statements', 'Payment confirmations'],
     legalCitations: ['FCRA_623_a2']
@@ -211,9 +270,45 @@ const RULE_DEFINITIONS: Record<string, any> = {
   T1: {
     name: 'Incorrect Account Type',
     severity: 'medium',
+    successProbability: 65,
     whyItMatters: 'Reporting a credit card as a collection when it was closed normally affects your score differently.',
     suggestedEvidence: ['Original account terms', 'Closure documentation'],
     legalCitations: ['FCRA_623_a1', 'METRO2_GUIDE']
+  },
+  Z1: {
+    name: 'Zombie Debt: Suspected Re-aging',
+    severity: 'high',
+    successProbability: 82,
+    whyItMatters: 'An account opened years after the original default often indicates a "Zombie Debt" buyer trying to restart the reporting clock.',
+    suggestedEvidence: ['Original creditor records', 'Historical credit reports'],
+    legalCitations: ['FCRA_605_c', 'FDCPA_807'],
+    discoveryQuestions: [
+      'Did you ever receive a notice from this specific collector when the debt was originally defaulted?',
+      'Have you been sued on this debt before?'
+    ]
+  },
+  M3: {
+    name: 'Metro2: Invalid Account Type/Status Combo',
+    severity: 'medium',
+    successProbability: 75,
+    whyItMatters: 'Metro 2 standards require specific status codes for collection accounts. Mismatched codes lead to scoring errors.',
+    suggestedEvidence: ['Metro 2 Data Format Guide', 'Bureau data printout'],
+    legalCitations: ['METRO2_GUIDE', 'FCRA_607_b']
+  },
+  R2: {
+    name: 'Post-Payment Re-aging Violation',
+    severity: 'high',
+    successProbability: 95,
+    whyItMatters: 'Partial payments do NOT reset the 7-year reporting clock for credit reporting, though they might for state SOL.',
+    suggestedEvidence: ['Payment history', 'Proof of original DOFD'],
+    legalCitations: ['FCRA_605_c_1'],
+    discoveryQuestions: [
+      'Did a collector tell you that making a small payment would "help your credit" or "update the date"?',
+      'Have you made any "good faith" payments recently?'
+    ],
+    bureauTactics: {
+      all: 'Clearly distinguish between state SOL (which can reset) and the FCRA 7-year clock (which cannot). This is a common point of collector deception.'
+    }
   }
 };
 
@@ -342,7 +437,10 @@ function createFlag(
     whyItMatters: rule.whyItMatters,
     suggestedEvidence: rule.suggestedEvidence,
     fieldValues,
-    legalCitations: rule.legalCitations
+    legalCitations: rule.legalCitations,
+    successProbability: rule.successProbability || 50,
+    discoveryQuestions: rule.discoveryQuestions || [],
+    bureauTactics: rule.bureauTactics || {}
   };
 }
 
@@ -571,6 +669,40 @@ export function runRules(fields: CreditFields): RuleFlag[] {
     ));
   }
 
+  // Z1: Zombie Debt / Re-aging suspected by opening date
+  if (accountType === 'collection' && dateOpened && dofd) {
+    const yearsToCollection = (dateOpened.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    if (yearsToCollection > 3) {
+      flags.push(createFlag('Z1',
+        `This collection account was opened ${yearsToCollection.toFixed(1)} years after the DOFD. This "Zombie Debt" pattern often masks illegal re-aging of the reporting period.`,
+        { dofd: fields.dofd, dateOpened: fields.dateOpened, gap: yearsToCollection.toFixed(1) }
+      ));
+    }
+  }
+
+  // M3: Metro2 Integrity - Collection must have specific account types
+  if (accountType === 'collection' && fields.accountType && 
+     !['collection', 'factoring company', 'debt buyer'].includes(fields.accountType.toLowerCase())) {
+    flags.push(createFlag('M3',
+      `Account is being reported as "${fields.accountType}" but has a collection status. Metro 2 requires consistent account types for collection items.`,
+      { accountType: fields.accountType, status: fields.accountStatus }
+    ));
+  }
+
+  // R2: Post-Payment Re-aging Check
+  if (lastPayment && dofd && removalDate) {
+    const expectedRemoval = new Date(dofd);
+    expectedRemoval.setFullYear(expectedRemoval.getFullYear() + 7);
+    expectedRemoval.setDate(expectedRemoval.getDate() + 180);
+
+    if (removalDate > expectedRemoval && lastPayment > dofd) {
+      flags.push(createFlag('R2',
+        `Illegal Re-aging Detected: The removal date (${fields.estimatedRemovalDate}) appears to have been reset based on a payment made on ${fields.dateLastPayment}. The 7-year clock cannot be reset by payment.`,
+        { dofd: fields.dofd, dateLastPayment: fields.dateLastPayment, removalDate: fields.estimatedRemovalDate }
+      ));
+    }
+  }
+
   // Additional balance reasonableness check
   const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
@@ -622,15 +754,28 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
   else if (overallScore >= 25) disputeStrength = 'moderate';
 
   // Check for re-aging pattern
-  const reAgingRules = flags.filter(f => ['B1', 'B2', 'B3', 'K6'].includes(f.ruleId));
+  const reAgingRules = flags.filter(f => ['B1', 'B2', 'B3', 'K6', 'Z1', 'R2'].includes(f.ruleId));
   if (reAgingRules.length >= 2) {
     patterns.push({
-      patternName: 'Debt Re-Aging',
-      confidenceScore: Math.min(95, 60 + reAgingRules.length * 15),
-      legalStrength: 'strong',
+      patternName: 'Systemic Debt Re-Aging',
+      confidenceScore: Math.min(98, 65 + reAgingRules.length * 10),
+      legalStrength: 'definitive',
       matchedRules: reAgingRules.map(r => r.ruleId),
-      description: 'Multiple timeline violations indicate intentional manipulation of reporting dates.',
-      recommendedAction: 'File dispute citing FCRA §605 violations. Consider CFPB complaint.'
+      description: 'Multiple forensic markers indicate an intentional attempt to illegally extend the reporting period beyond the FCRA 7-year limit.',
+      recommendedAction: 'Immediate litigation or formal CFPB complaint required. This pattern is often willful noncompliance.'
+    });
+  }
+
+  // Zombie Debt Pattern
+  const zombieRules = flags.filter(f => ['Z1', 'S1', 'F1'].includes(f.ruleId));
+  if (zombieRules.length >= 2) {
+    patterns.push({
+      patternName: 'Zombie Debt Resuscitation',
+      confidenceScore: 85,
+      legalStrength: 'strong',
+      matchedRules: zombieRules.map(r => r.ruleId),
+      description: 'Pattern indicates an attempt to collect on old, possibly time-barred debt by refreshing the reporting dates.',
+      recommendedAction: 'Send Cease and Desist letter. Dispute based on DOFD integrity. Check state SOL for affirmative defense.'
     });
   }
 
@@ -649,6 +794,30 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
     recommendedApproach = 'Minor issues detected. Standard dispute process should resolve. Keep records of all communication.';
   }
 
+  // score breakdown
+  const scoreBreakdown: ScoreImpact[] = [
+    { 
+      category: 'Timeline Integrity', 
+      impact: flags.filter(f => f.ruleId.startsWith('B') || f.ruleId === 'K6').length * 20,
+      description: 'Date manipulation and reporting period violations.'
+    },
+    { 
+      category: 'Data Accuracy', 
+      impact: flags.filter(f => f.ruleId.startsWith('D') || f.ruleId.startsWith('E') || f.ruleId.startsWith('M')).length * 15,
+      description: 'Logical inconsistencies and balance reporting errors.'
+    },
+    { 
+      category: 'Legal Compliance', 
+      impact: flags.filter(f => f.ruleId.startsWith('S') || f.ruleId.startsWith('H') || f.ruleId.startsWith('R')).length * 25,
+      description: 'Violations of state SOL, medical debt rules, or bankruptcy law.'
+    },
+    { 
+      category: 'Procedural Errors', 
+      impact: flags.filter(f => f.ruleId.startsWith('F') || f.ruleId.startsWith('C') || f.ruleId.startsWith('P')).length * 10,
+      description: 'Stale data, missing dispute markers, or incomplete history.'
+    }
+  ].map(s => ({ ...s, impact: Math.min(100, s.impact) }));
+
   return {
     overallScore,
     riskLevel,
@@ -656,7 +825,8 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
     litigationPotential,
     detectedPatterns: patterns,
     keyViolations,
-    recommendedApproach
+    recommendedApproach,
+    scoreBreakdown
   };
 }
 

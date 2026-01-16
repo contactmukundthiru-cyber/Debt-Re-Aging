@@ -1,9 +1,9 @@
 @echo off
-title Debt Re-Aging Case Factory
+title Credit Report Analyzer
 
 echo.
 echo  ========================================
-echo   DEBT RE-AGING CASE FACTORY
+echo   CREDIT REPORT ANALYZER
 echo   Starting application...
 echo  ========================================
 echo.

@@ -142,6 +142,45 @@ export const STATE_LAWS: Record<string, StateLawProfile> = {
     specialNotes: ['Fair Business Practices Act provides some protections', 'No state FDCPA equivalent'],
     regulatoryBody: { name: 'Georgia Governor\'s Office of Consumer Protection', url: 'https://consumer.georgia.gov' }
   },
+  AZ: {
+    code: 'AZ',
+    name: 'Arizona',
+    sol: { writtenContracts: 6, oralContracts: 3, promissoryNotes: 6, openAccounts: 6 },
+    interestCaps: { judgments: 10.0, medical: 3.0, consumer: 10.0 },
+    consumerProtections: {
+      hasMiniCFPA: false, hasDebtBuyerLaw: false, hasMedicalDebtProtections: true,
+      hasIdentityTheftProtections: true, hasPrivateRightOfAction: true
+    },
+    keyStatutes: ['A.R.S. § 12-548 (SOL)', 'A.R.S. § 44-1521 (Consumer Fraud)'],
+    specialNotes: ['Prop 209 (2022) lowered medical interest rates to 3%', 'Strong consumer fraud statute'],
+    regulatoryBody: { name: 'Arizona Attorney General', url: 'https://azag.gov' }
+  },
+  NJ: {
+    code: 'NJ',
+    name: 'New Jersey',
+    sol: { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6 },
+    interestCaps: { judgments: 6.0, medical: 6.0, consumer: 6.0 },
+    consumerProtections: {
+      hasMiniCFPA: false, hasDebtBuyerLaw: false, hasMedicalDebtProtections: false,
+      hasIdentityTheftProtections: true, hasPrivateRightOfAction: true
+    },
+    keyStatutes: ['N.J.S.A. 2A:14-1 (SOL)', 'N.J.S.A. 56:8-1 (Consumer Fraud Act)'],
+    specialNotes: ['CFA is one of the strongest in the nation', 'Treble damages and attorney fees'],
+    regulatoryBody: { name: 'NJ Division of Consumer Affairs', url: 'https://njconsumeraffairs.gov' }
+  },
+  PA: {
+    code: 'PA',
+    name: 'Pennsylvania',
+    sol: { writtenContracts: 4, oralContracts: 4, promissoryNotes: 4, openAccounts: 4 },
+    interestCaps: { judgments: 6.0, medical: 6.0, consumer: 6.0 },
+    consumerProtections: {
+      hasMiniCFPA: true, hasDebtBuyerLaw: false, hasMedicalDebtProtections: false,
+      hasIdentityTheftProtections: true, hasPrivateRightOfAction: true
+    },
+    keyStatutes: ['42 Pa. C.S. § 5525 (SOL)', '73 P.S. § 201-1 (UTPCPL)'],
+    specialNotes: ['Fair Credit Extension Uniformity Act (FCEUA)', 'Strong wage garnishment protections'],
+    regulatoryBody: { name: 'PA Attorney General', url: 'https://attorneygeneral.gov' }
+  },
   IL: {
     code: 'IL',
     name: 'Illinois',

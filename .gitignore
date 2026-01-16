@@ -98,3 +98,11 @@ coverage.xml
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Node / PWA
+**/node_modules/
+**/pwa-app/.next/
+**/pwa-app/out/
+**/pwa-app/build/
+.npm
+.eslintcache

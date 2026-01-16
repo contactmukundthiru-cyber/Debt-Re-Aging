@@ -1,5 +1,5 @@
 ===============================================
-   HOW TO START THE DEBT RE-AGING TOOL
+   HOW TO START CREDIT REPORT ANALYZER
 ===============================================
 
 STEP 1: Double-click "START_APP.bat"

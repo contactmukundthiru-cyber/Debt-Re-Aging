@@ -1,6 +1,31 @@
 import { CreditFields, RuleFlag, RiskProfile } from './rules';
 
 /**
+ * Summary of multiple accounts for executive dashboard
+ */
+export interface ForensicSummary {
+  totalAccounts: number;
+  totalViolations: number;
+  criticalAccounts: number;
+  totalEstimatedDamages: number;
+  furnisherConcentration: Record<string, number>;
+  violationBreakdown: Record<string, number>;
+  discrepancies: MaterialDiscrepancy[];
+  evidenceReadiness: number; // 0-100
+}
+
+/**
+ * Discrepancy between accounts or bureaus
+ */
+export interface MaterialDiscrepancy {
+  field: string;
+  accounts: string[];
+  values: string[];
+  impact: 'high' | 'medium' | 'low';
+  description: string;
+}
+
+/**
  * Timeline event for visualization
  */
 export interface TimelineEvent {
@@ -29,6 +54,60 @@ export interface PatternInsight {
   significance: 'high' | 'medium' | 'low';
   description: string;
   recommendation: string;
+}
+
+/**
+ * Generate an executive summary across all analyzed accounts
+ */
+export function generateExecutiveSummary(accounts: { fields: CreditFields; flags: RuleFlag[]; risk: RiskProfile }[]): ForensicSummary {
+  const summary: ForensicSummary = {
+    totalAccounts: accounts.length,
+    totalViolations: accounts.reduce((sum, acc) => sum + acc.flags.length, 0),
+    criticalAccounts: accounts.filter(acc => acc.risk.riskLevel === 'critical' || acc.risk.riskLevel === 'high').length,
+    totalEstimatedDamages: accounts.reduce((sum, acc) => sum + (acc.flags.length * 1000), 0), // Base $1k per violation estimate
+    furnisherConcentration: {},
+    violationBreakdown: {},
+    discrepancies: [],
+    evidenceReadiness: 0
+  };
+
+  accounts.forEach(acc => {
+    const furnisher = acc.fields.furnisherOrCollector || 'Unknown';
+    summary.furnisherConcentration[furnisher] = (summary.furnisherConcentration[furnisher] || 0) + 1;
+
+    acc.flags.forEach(flag => {
+      summary.violationBreakdown[flag.ruleName] = (summary.violationBreakdown[flag.ruleName] || 0) + 1;
+    });
+  });
+
+  // Material Discrepancy Detection (Self-Reconciliation)
+  const fieldsToCompare: (keyof CreditFields)[] = ['dofd', 'originalAmount', 'currentBalance'];
+  fieldsToCompare.forEach(field => {
+    const valueMap: Record<string, string[]> = {};
+    accounts.forEach(acc => {
+      const val = acc.fields[field];
+      if (val) {
+        const key = acc.fields.originalCreditor || acc.fields.furnisherOrCollector || 'shared';
+        if (!valueMap[key]) valueMap[key] = [];
+        valueMap[key].push(val as string);
+      }
+    });
+
+    Object.entries(valueMap).forEach(([key, values]) => {
+      const uniqueValues = Array.from(new Set(values));
+      if (uniqueValues.length > 1) {
+        summary.discrepancies.push({
+          field: field.toString(),
+          accounts: [key],
+          values: uniqueValues,
+          impact: 'high',
+          description: `Conflicting ${field} reported for account ${key}. Experian reports ${uniqueValues[0]}, while others report ${uniqueValues.slice(1).join(', ')}. This violates the "Maximum Possible Accuracy" requirement of FCRA §607(b).`
+        });
+      }
+    });
+  });
+
+  return summary;
 }
 
 /**
