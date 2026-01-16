@@ -358,5 +358,29 @@
     "why_it_matters": "Under Metro2 standards, once a debt is sold or transferred, the original furnisher MUST report a $0 balance. Reporting a balance on a sold debt causes duplicate debt reporting and violates the FCRA requirement for accuracy.",
     "suggested_evidence": ["Notice of debt sale", "Final account statement"],
     "legal_citations": ["METRO2", "FCRA_623_a1", "FCRA_616"]
+  },
+  "K6": {
+    "name": "Forensic Clock Drift Detection",
+    "severity": "high",
+    "description": "The reporting clock appears to be based on the account open date rather than the delinquency date.",
+    "why_it_matters": "This is a sophisticated re-aging tactic where collectors 'drift' the reporting window by using the acquisition date as the starting point for the 7-year clock. This is a direct violation of FCRA § 605(c).",
+    "suggested_evidence": ["Original creditor records", "Prior credit reports"],
+    "legal_citations": ["FCRA_605_c", "FCRA_623_a5"]
+  },
+  "K7": {
+    "name": "Excessive Interest Violation",
+    "severity": "medium",
+    "description": "The implied interest rate exceeds state legal caps for medical or judgment debt.",
+    "why_it_matters": "Collectors often apply high interest rates that exceed state-specific caps (usury laws). Reporting or collecting an illegal amount is a violation of the FDCPA and state consumer protection laws.",
+    "suggested_evidence": ["Itemized balance breakdown", "State interest rate statutes"],
+    "legal_citations": ["FDCPA_807_2A", "FDCPA_808_1"]
+  },
+  "L1": {
+    "name": "Lexical Consistency Violation",
+    "severity": "medium",
+    "description": "The reported account status contradicts the detailed payment history.",
+    "why_it_matters": "A credit report must be internally consistent. If an account is reported as 'Current' while showing lates in the history, it proves the furnisher is reporting inaccurate data, which is a violation of the FCRA.",
+    "suggested_evidence": ["Account statements", "Payment history records"],
+    "legal_citations": ["FCRA_623_a1"]
   }
 }

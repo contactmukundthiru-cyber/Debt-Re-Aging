@@ -327,6 +327,10 @@ class RuleEngine:
             flag = check(fields)
             if flag: flags.append(flag)
 
+        # Lexical & Logic Consistency (L-series)
+        flag = self._check_rule_l1(fields)
+        if flag: flags.append(flag)
+
         return flags
 
     def check_cross_bureau(self, bureau_data: List[Dict[str, Any]]) -> List[RuleFlag]:
@@ -925,6 +929,23 @@ class RuleEngine:
                         f"Metro2 Compliance Violation: Account status '{status.upper()}' requires a $0 balance reporting. Furnisher is incorrectly reporting a balance of ${balance:,.2f} on a transferred/sold tradeline.",
                         {'status': status, 'reported_balance': balance})
             except: pass
+        return None
+
+    def _check_rule_l1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """L1: Lexical Consistency: Status vs History"""
+        status = str(fields.get('account_status') or '').lower()
+        history = str(fields.get('payment_history') or '').upper()
+        
+        if not status or not history: return None
+        
+        # If status is "current" or "paid", history shouldn't have recent lates
+        is_clean_status = any(s in status for s in ['current', 'paid', 'on time'])
+        has_recent_lates = any(late in history[:5] for late in ['30', '60', '90', '120', '150', '180'])
+        
+        if is_clean_status and has_recent_lates:
+            return self._create_flag('L1',
+                f"Lexical Inconsistency: Account status is '{status.upper()}', but recent payment history shows delinquency markers ({history[:10]}...). This contradictory reporting violates the FCRA accuracy requirement.",
+                {'status': status, 'payment_history': history})
         return None
 
     def _check_rule_s1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:

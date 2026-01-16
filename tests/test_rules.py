@@ -863,13 +863,13 @@ class TestRuleDefinitions:
             assert rule['severity'] in valid_severities, f"Rule {rule_id} has invalid severity"
 
     def test_rule_count(self):
-        """Verify we have 24 rules defined."""
-        assert len(RULE_DEFINITIONS) == 24
+        """Verify we have the correct number of rules defined."""
+        assert len(RULE_DEFINITIONS) == 29
 
     def test_get_rule_summary(self):
         """Test rule summary function."""
         summary = get_rule_summary()
-        assert summary['total_rules'] == 24
+        assert summary['total_rules'] == 29
         assert 'by_severity' in summary
         assert 'by_category' in summary
 

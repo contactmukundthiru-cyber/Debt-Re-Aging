@@ -31,20 +31,29 @@ class ParsedFields:
     account_type: ExtractedField = None
     account_status: ExtractedField = None
     current_balance: ExtractedField = None
+    original_amount: ExtractedField = None
     date_opened: ExtractedField = None
     date_reported_or_updated: ExtractedField = None
     dofd: ExtractedField = None
+    charge_off_date: ExtractedField = None
+    date_last_payment: ExtractedField = None
+    date_last_activity: ExtractedField = None
     estimated_removal_date: ExtractedField = None
+    payment_history: ExtractedField = None
     bureau: ExtractedField = None
     raw_text: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         result = {}
-        for key in ['original_creditor', 'furnisher_or_collector', 'account_type',
-                    'account_status', 'current_balance',
-                    'date_opened', 'date_reported_or_updated', 'dofd',
-                    'estimated_removal_date', 'bureau']:
+        all_fields = [
+            'original_creditor', 'furnisher_or_collector', 'account_type',
+            'account_status', 'current_balance', 'original_amount',
+            'date_opened', 'date_reported_or_updated', 'dofd',
+            'charge_off_date', 'date_last_payment', 'date_last_activity',
+            'estimated_removal_date', 'payment_history', 'bureau'
+        ]
+        for key in all_fields:
             field_obj = getattr(self, key)
             if field_obj:
                 result[key] = {
@@ -59,10 +68,14 @@ class ParsedFields:
     def to_verified_dict(self) -> Dict[str, str]:
         """Convert to simple key-value dict of verified values."""
         result = {}
-        for key in ['original_creditor', 'furnisher_or_collector', 'account_type',
-                    'account_status', 'current_balance',
-                    'date_opened', 'date_reported_or_updated', 'dofd',
-                    'estimated_removal_date', 'bureau']:
+        all_fields = [
+            'original_creditor', 'furnisher_or_collector', 'account_type',
+            'account_status', 'current_balance', 'original_amount',
+            'date_opened', 'date_reported_or_updated', 'dofd',
+            'charge_off_date', 'date_last_payment', 'date_last_activity',
+            'estimated_removal_date', 'payment_history', 'bureau'
+        ]
+        for key in all_fields:
             field_obj = getattr(self, key)
             result[key] = field_obj.value if field_obj else None
         return result
@@ -114,6 +127,13 @@ class CreditReportParser:
             re.compile(r'amount\s*(?:due|owed)[:\s]+\$?([\d,]+\.?\d*)', re.IGNORECASE),
         ]
 
+        # Original amount patterns
+        self.original_amount_patterns = [
+            re.compile(r'original\s*amount[:\s]+\$?([\d,]+\.?\d*)', re.IGNORECASE),
+            re.compile(r'amount\s*placed\s*for\s*collection[:\s]+\$?([\d,]+\.?\d*)', re.IGNORECASE),
+            re.compile(r'high\s*credit[:\s]+\$?([\d,]+\.?\d*)', re.IGNORECASE),
+        ]
+
         # Field label patterns with associated date extraction
         self.date_field_patterns = {
             'date_opened': [
@@ -131,6 +151,18 @@ class CreditReportParser:
                 re.compile(r'DOFD[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
                 re.compile(r'first\s*delinquent[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
                 re.compile(r'delinquent\s*since[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
+            ],
+            'charge_off_date': [
+                re.compile(r'charge[\s\-_]?off\s*date[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
+                re.compile(r'date\s*charged\s*off[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
+            ],
+            'date_last_payment': [
+                re.compile(r'date\s*(?:of\s*)?last\s*payment[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
+                re.compile(r'last\s*payment\s*date[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
+            ],
+            'date_last_activity': [
+                re.compile(r'date\s*(?:of\s*)?last\s*activity[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
+                re.compile(r'last\s*activity\s*date[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
             ],
             'estimated_removal_date': [
                 re.compile(r'(?:estimated\s*)?remov(?:al|e)[:\s]+(' + DATE_PATTERN + ')', re.VERBOSE | re.IGNORECASE),
@@ -176,10 +208,16 @@ class CreditReportParser:
         # Extract current balance
         result.current_balance = self._extract_balance(text)
 
+        # Extract original amount
+        result.original_amount = self._extract_original_amount(text)
+
         # Extract date fields
         for field_name, patterns in self.date_field_patterns.items():
             extracted = self._extract_date_field(text, patterns)
             setattr(result, field_name, extracted)
+
+        # Extract payment history
+        result.payment_history = self._extract_payment_history(text)
 
         # Extract creditor/furnisher
         result.original_creditor = self._extract_creditor(text)
@@ -284,6 +322,37 @@ class CreditReportParser:
                     start_pos=match.start(),
                     end_pos=match.end()
                 )
+        return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
+
+    def _extract_original_amount(self, text: str) -> ExtractedField:
+        """Extract original amount."""
+        for pattern in self.original_amount_patterns:
+            match = pattern.search(text)
+            if match:
+                amount_str = match.group(1).replace(',', '')
+                return ExtractedField(
+                    value=amount_str,
+                    confidence='High',
+                    source_text=match.group(),
+                    start_pos=match.start(),
+                    end_pos=match.end()
+                )
+        return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
+
+    def _extract_payment_history(self, text: str) -> ExtractedField:
+        """Extract payment history string."""
+        # Look for sequences like 30 60 90 C C C or similar
+        history_pattern = re.compile(r'(?:payment\s*history|history)[:\s]+([C0-9\s\-]{5,})', re.IGNORECASE)
+        match = history_pattern.search(text)
+        if match:
+            history = match.group(1).strip()
+            return ExtractedField(
+                value=history,
+                confidence='Medium',
+                source_text=match.group(),
+                start_pos=match.start(),
+                end_pos=match.end()
+            )
         return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
 
     def _extract_date_field(self, text: str, patterns: List[re.Pattern]) -> ExtractedField:
@@ -429,9 +498,10 @@ def fields_to_editable_dict(parsed: ParsedFields) -> Dict[str, Dict[str, Any]]:
     result = {}
     field_names = [
         'original_creditor', 'furnisher_or_collector', 'account_type',
-        'account_status', 'current_balance',
+        'account_status', 'current_balance', 'original_amount',
         'date_opened', 'date_reported_or_updated', 'dofd',
-        'estimated_removal_date', 'bureau'
+        'charge_off_date', 'date_last_payment', 'date_last_activity',
+        'estimated_removal_date', 'payment_history', 'bureau'
     ]
 
     for name in field_names:

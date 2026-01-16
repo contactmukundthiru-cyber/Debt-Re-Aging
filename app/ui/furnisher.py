@@ -4,40 +4,40 @@ from datetime import datetime
 from app.metro2 import Metro2Validator, Metro2BaseSegment
 
 def render_furnisher_mode():
-    """Render the Compliance Auditor mode for furnishers."""
+    """Render the Compliance Auditor mode for furnishers in premium style."""
+    st.markdown('<p class="section-header">INDUSTRY COMPLIANCE — PRE-REPORTING QC</p>', unsafe_allow_html=True)
+    
     st.markdown("""
-    <div style="margin-bottom: 20px;">
-        <h2 style="color: #1e40af; margin-bottom: 8px;">Furnisher Compliance Check</h2>
-        <p style="color: #64748b; font-size: 0.95rem;">
-            For credit card issuers and debt buyers: audit your Metro2 files before submission.
-        </p>
+    <div class="notice-banner">
+        <strong>Enterprise Auditor:</strong> This terminal validates Metro2 (426-spec) segments for internal consistency 
+        and CDIA standards before bureau submission.
     </div>
     """, unsafe_allow_html=True)
-
-    st.info("""
-    **For Industry Professionals:** This tool checks Metro2 submission files for
-    re-aging violations and field errors before you send them to the bureaus.
-    """)
 
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
-        st.subheader("Upload Metro2 File")
-        uploaded_file = st.file_uploader("Upload Metro2 (.dat, .txt, .raw)", type=['dat', 'txt', 'raw'])
+        st.markdown('<div class="premium-card">', unsafe_allow_html=True)
+        st.markdown('<h3 style="margin-top: 0;">Data Ingestion</h3>', unsafe_allow_html=True)
+        
+        uploaded_file = st.file_uploader("Batch Upload Metro2 (.dat, .txt)", type=['dat', 'txt'])
+        st.markdown('<p style="text-align: center; color: #64748b; font-size: 0.8rem; margin: 1rem 0;">OR</p>', unsafe_allow_html=True)
+        raw_input = st.text_area("Individual Segment Input (426 chars)", height=100, help="Paste a single Metro2 Base Segment here.")
 
-        raw_input = st.text_area("Or paste a Metro2 Base Segment (426 characters)", height=100)
-
-        if st.button("Check for Compliance Issues", type="primary"):
+        if st.button("Initiate Compliance Scrub", type="primary", use_container_width=True):
             process_metro2_input(uploaded_file, raw_input)
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="forensic-card">', unsafe_allow_html=True)
-        st.subheader("Compliance Standards")
-        st.metric("Tolerance Threshold", "0.01%")
-        st.metric("Re-Aging Risk", "LOW")
-        st.info("Regular auditing helps maintain FCRA compliance and safe harbor protection.")
+        st.markdown('<div class="premium-card">', unsafe_allow_html=True)
+        st.markdown('<h3 style="margin-top: 0;">Risk Metrics</h3>', unsafe_allow_html=True)
+        st.metric("TOLERANCE", "0.01%")
+        st.metric("RE-AGING RISK", "RECOGNIZED")
+        st.markdown("""
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+            Auditing aligns with 15 U.S.C. § 1681s-2 safe harbor provisions for data accuracy.
+        </div>
+        """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
 def process_metro2_input(uploaded_file, raw_text):
