@@ -144,6 +144,76 @@ const RULE_DEFINITIONS: Record<string, any> = {
     whyItMatters: 'Account status contradicts payment history, indicating inaccurate reporting.',
     suggestedEvidence: ['Payment records', 'Bank statements'],
     legalCitations: ['FCRA_623_a1', 'FCRA_611']
+  },
+  S1: {
+    name: 'Statute of Limitations Expired',
+    severity: 'medium',
+    whyItMatters: 'While the debt may still be reported, it cannot be legally collected if the SOL has expired.',
+    suggestedEvidence: ['Proof of last payment date', 'State SOL reference'],
+    legalCitations: ['STATE_SOL_STATUTE', 'FDCPA_807_2']
+  },
+  S2: {
+    name: 'Judgment Age Violation',
+    severity: 'high',
+    whyItMatters: 'Judgments can only be reported for 7 years from the date the judgment was filed.',
+    suggestedEvidence: ['Court records', 'Judgment filing date documentation'],
+    legalCitations: ['FCRA_605_a3', 'FCRA_611']
+  },
+  C1: {
+    name: 'Disputed Status Not Shown',
+    severity: 'medium',
+    whyItMatters: 'If you disputed this account, it must be marked as disputed on your credit report.',
+    suggestedEvidence: ['Dispute confirmation', 'Certified mail receipt'],
+    legalCitations: ['FCRA_611_a3', 'FCRA_623_b']
+  },
+  C2: {
+    name: 'Balance Inconsistency',
+    severity: 'medium',
+    whyItMatters: 'Significant balance variations without explanation suggest inaccurate reporting.',
+    suggestedEvidence: ['Account statements', 'Payment records'],
+    legalCitations: ['FCRA_623_a1']
+  },
+  F1: {
+    name: 'Stale Data (90+ Days)',
+    severity: 'low',
+    whyItMatters: 'Accounts should be updated at least monthly. Stale data may indicate the furnisher is no longer verifying accuracy.',
+    suggestedEvidence: ['Request current account statement'],
+    legalCitations: ['FCRA_623_a2', 'METRO2_GUIDE']
+  },
+  F2: {
+    name: 'Duplicate Reporting',
+    severity: 'high',
+    whyItMatters: 'The same debt cannot be reported by multiple entities simultaneously with balances.',
+    suggestedEvidence: ['Credit report showing both entries', 'Transfer/sale documentation'],
+    legalCitations: ['FCRA_623_a1', 'FCRA_611']
+  },
+  R1: {
+    name: 'Reporting After Bankruptcy',
+    severity: 'high',
+    whyItMatters: 'Debts discharged in bankruptcy must show $0 balance and cannot be collected.',
+    suggestedEvidence: ['Bankruptcy discharge order', 'Schedule listing the debt'],
+    legalCitations: ['FCRA_605_a1', '11USC524']
+  },
+  A1: {
+    name: 'Account Number Mismatch',
+    severity: 'medium',
+    whyItMatters: 'If the account number reported doesn\'t match your records, it may be mixed credit file.',
+    suggestedEvidence: ['Original account documents', 'Statements'],
+    legalCitations: ['FCRA_611', 'FCRA_623_a1']
+  },
+  P1: {
+    name: 'Payment History Gap',
+    severity: 'low',
+    whyItMatters: 'Missing months in payment history can mask on-time payments.',
+    suggestedEvidence: ['Bank statements', 'Payment confirmations'],
+    legalCitations: ['FCRA_623_a2']
+  },
+  T1: {
+    name: 'Incorrect Account Type',
+    severity: 'medium',
+    whyItMatters: 'Reporting a credit card as a collection when it was closed normally affects your score differently.',
+    suggestedEvidence: ['Original account terms', 'Closure documentation'],
+    legalCitations: ['FCRA_623_a1', 'METRO2_GUIDE']
   }
 };
 
@@ -455,6 +525,62 @@ export function runRules(fields: CreditFields): RuleFlag[] {
         ));
       }
     }
+  }
+
+  // S2: Judgment age check (if account type is judgment)
+  if (accountType.includes('judgment') && dofd) {
+    const judgmentExpiry = new Date(dofd);
+    judgmentExpiry.setFullYear(judgmentExpiry.getFullYear() + 7);
+
+    if (today > judgmentExpiry) {
+      flags.push(createFlag('S2',
+        `This judgment appears to be older than 7 years from the filing date and should be removed from your credit report.`,
+        { accountType: fields.accountType, dofd: fields.dofd }
+      ));
+    }
+  }
+
+  // F1: Stale data check (last reported > 90 days ago)
+  const lastReported = parseDate(fields.dateReportedOrUpdated);
+  if (lastReported) {
+    const daysSinceUpdate = Math.floor((today.getTime() - lastReported.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysSinceUpdate > 90) {
+      flags.push(createFlag('F1',
+        `This account hasn't been updated in ${daysSinceUpdate} days. Furnishers should update at least monthly.`,
+        { dateReportedOrUpdated: fields.dateReportedOrUpdated, daysSinceUpdate }
+      ));
+    }
+  }
+
+  // P1: Payment history gaps
+  if (history && history.length > 12) {
+    const hasGaps = /[^COXR0123456789\s]{3,}/.test(history);
+    if (hasGaps) {
+      flags.push(createFlag('P1',
+        'Payment history appears to have gaps or missing data, which may not accurately reflect your payment behavior.',
+        { paymentHistory: history.substring(0, 24) }
+      ));
+    }
+  }
+
+  // T1: Account type misclassification check
+  if (accountType === 'collection' && status.includes('current')) {
+    flags.push(createFlag('T1',
+      'Account is classified as a collection but shows "current" status. This may be a misclassified account.',
+      { accountType: fields.accountType, accountStatus: fields.accountStatus }
+    ));
+  }
+
+  // Additional balance reasonableness check
+  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
+
+  // C2: Major balance discrepancy (if balance is way higher than reasonable)
+  if (original > 0 && current > original * 3) {
+    flags.push(createFlag('C2',
+      `The current balance ($${current.toFixed(2)}) is ${((current / original) * 100).toFixed(0)}% of the original amount ($${original.toFixed(2)}), suggesting excessive fees or interest accumulation.`,
+      { currentBalance: fields.currentBalance, originalAmount: fields.originalAmount }
+    ));
   }
 
   return flags;
