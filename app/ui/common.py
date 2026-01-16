@@ -227,6 +227,144 @@ def inject_custom_css():
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
+
+    /* ========== PURPOSEFUL MICRO-INTERACTIONS ========== */
+
+    /* Smooth page transitions */
+    .main .block-container {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card hover lift effect - subtle depth change */
+    .premium-card, .forensic-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .premium-card:hover, .forensic-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Severity cards pulse animation for attention */
+    .severity-high {
+        animation: subtlePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes subtlePulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        50% { box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1); }
+    }
+
+    /* Progress indicator transitions */
+    [data-testid="stProgress"] > div > div {
+        transition: width 0.4s ease-out;
+    }
+
+    /* Expander smooth open/close */
+    [data-testid="stExpander"] {
+        transition: all 0.2s ease;
+    }
+
+    [data-testid="stExpander"]:hover {
+        background-color: #f8fafc;
+        border-radius: 8px;
+    }
+
+    /* Radio button selection feedback */
+    [data-testid="stRadio"] label {
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+        border-radius: 6px;
+        padding: 4px 8px;
+        margin: 2px 0;
+    }
+
+    [data-testid="stRadio"] label:hover {
+        background-color: #f1f5f9;
+    }
+
+    /* Download button special styling */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
+        color: white !important;
+        border: none !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .stDownloadButton > button:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+    }
+
+    /* Success message animation */
+    .stSuccess {
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Loading spinner enhancement */
+    .stSpinner > div {
+        border-color: #3b82f6 transparent transparent transparent !important;
+    }
+
+    /* Tab selection indicator */
+    .stTabs [data-baseweb="tab"] {
+        transition: all 0.15s ease;
+    }
+
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #f1f5f9;
+    }
+
+    .stTabs [aria-selected="true"] {
+        border-bottom: 2px solid #2563eb !important;
+    }
+
+    /* File uploader drop zone */
+    [data-testid="stFileUploader"] {
+        transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    [data-testid="stFileUploader"]:hover {
+        border-color: #3b82f6 !important;
+        background-color: #eff6ff !important;
+    }
+
+    /* Selectbox dropdown animation */
+    [data-baseweb="select"] {
+        transition: border-color 0.15s ease;
+    }
+
+    [data-baseweb="select"]:focus-within {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+
+    /* Risk score number animation */
+    .risk-score-value {
+        transition: transform 0.3s ease;
+    }
+
+    .risk-score-value:hover {
+        transform: scale(1.05);
+    }
+
+    /* Reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -240,22 +378,21 @@ def show_disclaimer_banner():
     """, unsafe_allow_html=True)
 
 def show_credit_banner():
-    """Display the professional header."""
+    """Display the forensic lab/attribution header with high-end typography."""
     st.markdown("""
-    <div class="credit-banner">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 4px;">
-                    Credit Report Analysis Tool
-                </div>
-                <div style="font-size: 0.85rem; color: #1e293b;">
-                    Developed by <a href="https://contactmukundthiru-cyber.github.io/Personal-Portfolio/" target="_blank" style="color: #2563eb; text-decoration: none;"><strong>Mukund Thiru</strong></a> · Helping consumers fight credit report errors
-                </div>
+    <div style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #2563eb; font-weight: 600; margin-bottom: 4px; letter-spacing: 0.1em; text-transform: uppercase;">
+                Forensic Analysis System
             </div>
-            <div>
-                <span style="font-size: 0.7rem; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; color: #64748b;">
-                    v1.0.0
-                </span>
+            <h1 style="margin: 0; font-size: 1.75rem; letter-spacing: -0.03em;">Credit Report Analyzer</h1>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #94a3b8; margin-bottom: 2px;">
+                STABLE_BUILD: v2.5.1
+            </div>
+            <div style="font-size: 0.75rem; color: #475569; font-weight: 500;">
+                <a href="https://contactmukundthiru-cyber.github.io/Personal-Portfolio/" target="_blank" style="color: inherit; text-decoration: none;">Developed by Mukund Thiru</a>
             </div>
         </div>
     </div>

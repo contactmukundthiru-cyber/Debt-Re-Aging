@@ -129,21 +129,51 @@ def render_sidebar(project_root: Path):
 
         st.markdown("---")
 
-        # Tools section - collapsible
-        with st.expander("Tools & Management", expanded=False):
-            tool_buttons = [
-                ("CFPB Complaint Generator", "File official complaints"),
-                ("Evidence Packet Builder", "Generate legal evidence packages"),
-                ("Analytics Dashboard", "View dispute outcomes and stats"),
-                ("Furnisher Intelligence", "Track collector violation rates"),
-                ("Deadline Tracker", "Track 30-day response windows"),
-                ("Case Manager", "Save and load cases"),
-                ("Client Portal", "Simple mode for consumers"),
-                ("Accessibility", "Voice guidance and visual settings"),
-                (t.nav_settings, "Configure options"),
+        # Legal Action Tools - Most important for users
+        with st.expander("Legal Action Tools", expanded=False):
+            st.markdown("""
+            <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">
+                Generate official documents
+            </div>
+            """, unsafe_allow_html=True)
+
+            legal_tools = [
+                ("CFPB Complaint Generator", "File complaint with CFPB"),
+                ("Evidence Packet Builder", "Package for attorneys"),
             ]
-            for mode, desc in tool_buttons:
-                if st.button(mode, key=f"tool_{mode}", use_container_width=True, help=desc):
+            for mode, desc in legal_tools:
+                if st.button(mode, key=f"legal_{mode}", use_container_width=True, help=desc):
+                    st.session_state['app_mode'] = mode
+                    st.rerun()
+
+        # Analytics & Tracking
+        with st.expander("Analytics & Tracking", expanded=False):
+            st.markdown("""
+            <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px;">
+                Monitor progress and patterns
+            </div>
+            """, unsafe_allow_html=True)
+
+            analytics_tools = [
+                ("Analytics Dashboard", "Dispute outcomes"),
+                ("Furnisher Intelligence", "Violation patterns"),
+                ("Deadline Tracker", "30-day windows"),
+            ]
+            for mode, desc in analytics_tools:
+                if st.button(mode, key=f"analytics_{mode}", use_container_width=True, help=desc):
+                    st.session_state['app_mode'] = mode
+                    st.rerun()
+
+        # Settings & Accessibility
+        with st.expander("Settings", expanded=False):
+            settings_tools = [
+                ("Case Manager", "Saved cases"),
+                ("Client Portal", "Simple mode"),
+                ("Accessibility", "Voice & display"),
+                (t.nav_settings, "Preferences"),
+            ]
+            for mode, desc in settings_tools:
+                if st.button(mode, key=f"settings_{mode}", use_container_width=True, help=desc):
                     st.session_state['app_mode'] = mode
                     st.rerun()
 
@@ -260,17 +290,24 @@ def render_sidebar(project_root: Path):
                     if load_sample_case(3, project_root):
                         st.rerun()
 
-        # Help section
-        st.markdown("---")
-        tabs = st.radio(
-            "Help:",
+        # Mode selector tabs for info
+        st.markdown(f"""
+        <div style="margin-top: 20px; margin-bottom: 5px;">
+            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Resources</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        tabs = st.selectbox(
+            "View Documentation:",
             ["Main Tool", "About & Website", "Help / About", "Rules Documentation", "Pilot Guide"],
             label_visibility="collapsed",
-            key="help_tabs"
+            key="help_tabs_select"
         )
 
+        st.markdown('<div style="margin-top: 10px;"></div>', unsafe_allow_html=True)
+        
         # Start over
-        if st.button("Start New Case", use_container_width=True):
+        if st.button("Initialize New Session", use_container_width=True, type="secondary"):
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
             st.rerun()
