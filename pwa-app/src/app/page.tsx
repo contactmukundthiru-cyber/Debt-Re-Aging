@@ -204,6 +204,27 @@ const ACCOUNT_TYPES = ['Collection', 'Charge-off', 'Credit Card', 'Installment L
 
 const STATUSES = ['Open', 'Closed', 'Paid', 'Settled', 'Transferred', 'Sold', 'Charged Off', 'In Collections'];
 
+// Analysis tabs configuration
+const ANALYSIS_TABS = [
+  { id: 'violations', label: 'Violations' },
+  { id: 'patterns', label: 'Patterns' },
+  { id: 'scoreimpact', label: 'Score Impact' },
+  { id: 'countdown', label: 'Deadlines' },
+  { id: 'collector', label: 'Collector Intel' },
+  { id: 'metro2', label: 'Metro 2' },
+  { id: 'deltas', label: 'Forensic Diff' },
+  { id: 'timeline', label: 'Timeline' },
+  { id: 'caselaw', label: 'Case Law' },
+  { id: 'breakdown', label: 'Score Breakdown' },
+  { id: 'lettereditor', label: 'Letter Editor' },
+  { id: 'legalshield', label: 'Legal Shield' },
+  { id: 'discovery', label: 'Forensic Discovery' },
+  { id: 'lab', label: 'Forensic Lab' },
+  { id: 'actions', label: 'Action Items' },
+] as const;
+
+type TabId = typeof ANALYSIS_TABS[number]['id'];
+
 export default function CreditReportAnalyzer() {
   const [step, setStep] = useState<Step>(1);
   const [rawText, setRawText] = useState('');
@@ -227,6 +248,7 @@ export default function CreditReportAnalyzer() {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<AnalysisRecord[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   // Revolutionary feature states
   const [language, setLang] = useState<Language>('en');
@@ -346,6 +368,38 @@ export default function CreditReportAnalyzer() {
     medium: flags.filter(f => f.severity === 'medium'),
     low: flags.filter(f => f.severity === 'low'),
   }), [flags]);
+
+  // Tab keyboard navigation handler
+  const handleTabKeyDown = useCallback((e: React.KeyboardEvent, currentTab: TabId) => {
+    const currentIndex = ANALYSIS_TABS.findIndex(t => t.id === currentTab);
+    let newIndex = currentIndex;
+
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      newIndex = currentIndex < ANALYSIS_TABS.length - 1 ? currentIndex + 1 : 0;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      newIndex = currentIndex > 0 ? currentIndex - 1 : ANALYSIS_TABS.length - 1;
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      newIndex = 0;
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      newIndex = ANALYSIS_TABS.length - 1;
+    }
+
+    if (newIndex !== currentIndex) {
+      const newTab = ANALYSIS_TABS[newIndex].id;
+      setActiveTab(newTab);
+      // Focus the new tab button
+      setTimeout(() => {
+        const buttons = tabsRef.current?.querySelectorAll('button[role="tab"]');
+        if (buttons && buttons[newIndex]) {
+          (buttons[newIndex] as HTMLButtonElement).focus();
+        }
+      }, 0);
+    }
+  }, []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1447,35 +1501,49 @@ export default function CreditReportAnalyzer() {
 
               {/* Tabs */}
               <div className="border-b border-gray-200 mb-6 no-print">
-                <div className="flex gap-4 overflow-x-auto pb-px">
-                  {(['violations', 'patterns', 'scoreimpact', 'countdown', 'collector', 'metro2', 'deltas', 'timeline', 'caselaw', 'breakdown', 'lettereditor', 'legalshield', 'discovery', 'lab', 'actions'] as const).map(tab => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setActiveTab(tab)}
-                      className={`pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                        activeTab === tab
-                          ? 'border-gray-900 text-gray-900 dark:border-white dark:text-white'
-                          : 'border-transparent text-gray-500 hover:text-gray-700'
-                      }`}
-                    >
-                      {tab === 'violations' && `${translate('analysis.violations')} (${flags.length})`}
-                      {tab === 'patterns' && `${translate('analysis.patterns')} (${analytics?.patterns.length || 0})`}
-                      {tab === 'scoreimpact' && `Score Impact`}
-                      {tab === 'countdown' && `Deadlines`}
-                      {tab === 'collector' && `Collector Intel`}
-                      {tab === 'metro2' && `Metro 2`}
-                      {tab === 'deltas' && `Forensic Diff (${deltas.length})`}
-                      {tab === 'timeline' && translate('analysis.timeline')}
-                      {tab === 'caselaw' && `${translate('analysis.caseLaw')} (${relevantCaseLaw.length})`}
-                      {tab === 'breakdown' && translate('analysis.scoreBreakdown')}
-                      {tab === 'lettereditor' && 'Letter Editor'}
-                      {tab === 'legalshield' && 'Legal Shield'}
-                      {tab === 'discovery' && 'Forensic Discovery'}
-                      {tab === 'lab' && 'Forensic Lab'}
-                      {tab === 'actions' && translate('analysis.actionItems')}
-                    </button>
-                  ))}
+                <div
+                  ref={tabsRef}
+                  className="flex gap-4 overflow-x-auto pb-px"
+                  role="tablist"
+                  aria-label="Analysis results tabs"
+                >
+                  {ANALYSIS_TABS.map((tab, index) => {
+                    const isSelected = activeTab === tab.id;
+                    // Get count for tabs that show counts
+                    const getTabLabel = () => {
+                      switch (tab.id) {
+                        case 'violations': return `${translate('analysis.violations')} (${flags.length})`;
+                        case 'patterns': return `${translate('analysis.patterns')} (${analytics?.patterns.length || 0})`;
+                        case 'deltas': return `Forensic Diff (${deltas.length})`;
+                        case 'caselaw': return `${translate('analysis.caseLaw')} (${relevantCaseLaw.length})`;
+                        case 'timeline': return translate('analysis.timeline');
+                        case 'breakdown': return translate('analysis.scoreBreakdown');
+                        case 'actions': return translate('analysis.actionItems');
+                        default: return tab.label;
+                      }
+                    };
+
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        role="tab"
+                        id={`tab-${tab.id}`}
+                        aria-selected={isSelected}
+                        aria-controls={`tabpanel-${tab.id}`}
+                        tabIndex={isSelected ? 0 : -1}
+                        onClick={() => setActiveTab(tab.id)}
+                        onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
+                        className={`pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                          isSelected
+                            ? 'border-gray-900 text-gray-900 dark:border-white dark:text-white'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        {getTabLabel()}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
