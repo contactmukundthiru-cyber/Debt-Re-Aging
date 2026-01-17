@@ -246,6 +246,26 @@ export default function CreditReportAnalyzer() {
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
+  // Loading state for analysis
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Date validation helper
+  const isValidDate = useCallback((dateStr: string): boolean => {
+    if (!dateStr) return true; // Empty is OK for optional fields
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateStr)) return false;
+    const date = new Date(dateStr);
+    return !isNaN(date.getTime()) && date.toISOString().slice(0, 10) === dateStr;
+  }, []);
+
+  // Get validation status for a date field
+  const getDateValidation = useCallback((value: string | undefined, required: boolean): { valid: boolean; message: string } => {
+    if (!value && required) return { valid: false, message: 'Required field' };
+    if (!value) return { valid: true, message: '' };
+    if (!isValidDate(value)) return { valid: false, message: 'Use YYYY-MM-DD format' };
+    return { valid: true, message: '' };
+  }, [isValidDate]);
+
   // Show toast helper
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setToast({ message, type });
@@ -429,7 +449,12 @@ export default function CreditReportAnalyzer() {
     setStep(2);
   }, []);
 
-  const runAnalysis = useCallback(() => {
+  const runAnalysis = useCallback(async () => {
+    setIsAnalyzing(true);
+
+    // Small delay to show loading state for UX
+    await new Promise(resolve => setTimeout(resolve, 300));
+
     try {
       // Core analysis
       const detectedFlags = runRules(editableFields);
@@ -498,6 +523,8 @@ export default function CreditReportAnalyzer() {
     } catch (error) {
       console.error('Analysis failed:', error);
       showToast('Analysis failed. Please check your input data.', 'error');
+    } finally {
+      setIsAnalyzing(false);
     }
   }, [editableFields, fileName, consumer.state, showToast]);
 
@@ -1163,35 +1190,66 @@ export default function CreditReportAnalyzer() {
                   <p className="body-sm text-gray-500 mt-0.5">These dates determine violations. Enter as YYYY-MM-DD.</p>
                 </div>
                 <div className="p-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {FIELD_CONFIG.filter(f => f.section === 'dates').map(field => (
-                    <div key={field.key} className="relative">
-                      <label
-                        htmlFor={field.key}
-                        className="field-label flex items-center gap-1 cursor-help"
-                        onMouseEnter={() => setShowHelp(field.key)}
-                        onMouseLeave={() => setShowHelp(null)}
-                      >
-                        {field.label}
-                        {field.required && <span className="text-red-500">*</span>}
-                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </label>
-                      {showHelp === field.key && field.help && (
-                        <div className="absolute z-10 left-0 top-full mt-1 p-2 bg-gray-900 text-white text-xs rounded shadow-lg max-w-xs">
-                          {field.help}
+                  {FIELD_CONFIG.filter(f => f.section === 'dates').map(field => {
+                    const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
+                    const validation = getDateValidation(fieldValue, !!field.required);
+
+                    return (
+                      <div key={field.key} className="relative">
+                        <label
+                          htmlFor={field.key}
+                          className="field-label flex items-center gap-1 cursor-help"
+                          onMouseEnter={() => setShowHelp(field.key)}
+                          onMouseLeave={() => setShowHelp(null)}
+                        >
+                          {field.label}
+                          {field.required && <span className="text-red-500">*</span>}
+                          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </label>
+                        {showHelp === field.key && field.help && (
+                          <div className="absolute z-10 left-0 top-full mt-1 p-2 bg-gray-900 text-white text-xs rounded shadow-lg max-w-xs">
+                            {field.help}
+                          </div>
+                        )}
+                        <div className="relative">
+                          <input
+                            id={field.key}
+                            type="text"
+                            className={`input font-mono pr-8 ${
+                              !validation.valid
+                                ? 'border-red-300 bg-red-50/50 focus:border-red-500'
+                                : fieldValue && validation.valid
+                                  ? 'border-green-300 bg-green-50/50'
+                                  : ''
+                            }`}
+                            value={fieldValue}
+                            onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                            placeholder="YYYY-MM-DD"
+                            aria-invalid={!validation.valid ? "true" : "false"}
+                            aria-describedby={!validation.valid ? `${field.key}-error` : undefined}
+                          />
+                          {fieldValue && (
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2">
+                              {validation.valid ? (
+                                <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              )}
+                            </span>
+                          )}
                         </div>
-                      )}
-                      <input
-                        id={field.key}
-                        type="text"
-                        className={`input font-mono ${field.required && !editableFields[field.key as keyof CreditFields] ? 'border-amber-300 bg-amber-50/50' : ''}`}
-                        value={(editableFields as Record<string, string>)[field.key] || ''}
-                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                        placeholder="YYYY-MM-DD"
-                      />
-                    </div>
-                  ))}
+                        {!validation.valid && validation.message && (
+                          <p id={`${field.key}-error`} className="text-xs text-red-500 mt-1">{validation.message}</p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1241,9 +1299,21 @@ export default function CreditReportAnalyzer() {
               </div>
 
               <div className="flex justify-between">
-                <button type="button" className="btn btn-secondary" onClick={() => setStep(2)}>Back</button>
-                <button type="button" className="btn btn-primary" onClick={runAnalysis}>
-                  Run Analysis
+                <button type="button" className="btn btn-secondary" onClick={() => setStep(2)} disabled={isAnalyzing}>Back</button>
+                <button
+                  type="button"
+                  className="btn btn-primary min-w-[140px]"
+                  onClick={runAnalysis}
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <div className="spinner w-4 h-4 border-2 border-white/30 border-t-white" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Run Analysis'
+                  )}
                 </button>
               </div>
             </div>
@@ -1573,8 +1643,12 @@ export default function CreditReportAnalyzer() {
                         </p>
                       </div>
                     )) : (
-                      <div className="panel-inset p-8 text-center">
-                        <p className="body-sm text-gray-500">No significant patterns detected.</p>
+                      <div className="panel-inset p-12 text-center">
+                        <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <h3 className="heading-md mb-1">No Patterns Detected</h3>
+                        <p className="body-sm text-gray-500">No significant reporting patterns were identified in this account.</p>
                       </div>
                     )}
                   </div>
@@ -1605,8 +1679,12 @@ export default function CreditReportAnalyzer() {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-8">
-                        <p className="body-sm text-gray-500">No timeline events to display.</p>
+                      <div className="panel-inset p-12 text-center">
+                        <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <h3 className="heading-md mb-1">No Timeline Events</h3>
+                        <p className="body-sm text-gray-500">Add dates to your account data to see a chronological timeline.</p>
                       </div>
                     )}
                   </div>
@@ -1635,7 +1713,11 @@ export default function CreditReportAnalyzer() {
                       </div>
                     )) : (
                       <div className="panel-inset p-12 text-center">
-                        <p className="body-sm text-gray-500">No specific case law matches detected for these violations.</p>
+                        <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                        </svg>
+                        <h3 className="heading-md mb-1">No Case Law Matches</h3>
+                        <p className="body-sm text-gray-500">No specific legal precedents were found for the detected violations.</p>
                       </div>
                     )}
                   </div>
