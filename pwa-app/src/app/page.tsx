@@ -243,6 +243,32 @@ export default function CreditReportAnalyzer() {
   const [darkMode, setDarkMode] = useState(false);
   const [editableLetter, setEditableLetter] = useState<string>('');
 
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  // Show toast helper
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  }, []);
+
+  // Utility function for downloading files
+  const downloadFile = useCallback((content: string, filename: string, mimeType: string = 'text/plain') => {
+    try {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded ${filename}`, 'success');
+    } catch (error) {
+      console.error('Download failed:', error);
+      showToast('Download failed. Please try again.', 'error');
+    }
+  }, [showToast]);
+
   // Load history, disputes, and language on mount
   useEffect(() => {
     setHistory(getHistory());
@@ -404,44 +430,76 @@ export default function CreditReportAnalyzer() {
   }, []);
 
   const runAnalysis = useCallback(() => {
-    const detectedFlags = runRules(editableFields);
-    setFlags(detectedFlags);
-    const profile = calculateRiskProfile(detectedFlags, editableFields);
-    setRiskProfile(profile);
+    try {
+      // Core analysis
+      const detectedFlags = runRules(editableFields);
+      setFlags(detectedFlags);
+      const profile = calculateRiskProfile(detectedFlags, editableFields);
+      setRiskProfile(profile);
 
-    // Fetch relevant case law
-    const law = getRelevantCaseLaw(detectedFlags.map(f => f.ruleId));
-    setRelevantCaseLaw(law);
+      // Fetch relevant case law
+      const law = getRelevantCaseLaw(detectedFlags.map(f => f.ruleId));
+      setRelevantCaseLaw(law);
 
-    // Revolutionary features computation
-    // 1. Score Impact Estimation
-    const currentScore = 620; // Default estimate
-    const impact = estimateScoreImpact(editableFields, detectedFlags, currentScore);
-    setScoreImpact(impact);
+      // Revolutionary features computation with individual error handling
+      // 1. Score Impact Estimation
+      try {
+        const currentScore = 620; // Default estimate
+        const impact = estimateScoreImpact(editableFields, detectedFlags, currentScore);
+        setScoreImpact(impact);
+      } catch (e) {
+        console.warn('Score impact estimation failed:', e);
+      }
 
-    // 2. Deadline Tracking
-    const tracker = buildDeadlineTracker(editableFields);
-    setDeadlines(tracker);
+      // 2. Deadline Tracking
+      try {
+        const tracker = buildDeadlineTracker(editableFields);
+        setDeadlines(tracker);
+      } catch (e) {
+        console.warn('Deadline tracking failed:', e);
+      }
 
-    // 3. Collector Intelligence
-    const collector = findCollector(editableFields.furnisherOrCollector || '');
-    setCollectorMatch(collector);
+      // 3. Collector Intelligence
+      try {
+        const collector = findCollector(editableFields.furnisherOrCollector || '');
+        setCollectorMatch(collector);
+      } catch (e) {
+        console.warn('Collector lookup failed:', e);
+      }
 
-    // 4. Metro 2 Validation
-    const metro2Result = validateMetro2(editableFields);
-    setMetro2Validation(metro2Result);
+      // 4. Metro 2 Validation
+      try {
+        const metro2Result = validateMetro2(editableFields);
+        setMetro2Validation(metro2Result);
+      } catch (e) {
+        console.warn('Metro 2 validation failed:', e);
+      }
 
-    // 5. Damage Estimation
-    const damages = calculateDamages(detectedFlags, editableFields);
-    setDamageEstimate(damages);
+      // 5. Damage Estimation
+      try {
+        const damages = calculateDamages(detectedFlags, editableFields);
+        setDamageEstimate(damages);
+      } catch (e) {
+        console.warn('Damage estimation failed:', e);
+      }
 
-    setActiveTab('violations');
-    setStep(4);
+      setActiveTab('violations');
+      setStep(4);
 
-    // Save to history
-    saveAnalysis(editableFields, detectedFlags, profile, fileName || undefined);
-    setHistory(getHistory());
-  }, [editableFields, fileName, consumer.state]);
+      // Save to history
+      try {
+        saveAnalysis(editableFields, detectedFlags, profile, fileName || undefined);
+        setHistory(getHistory());
+      } catch (e) {
+        console.warn('Failed to save to history:', e);
+      }
+
+      showToast(`Analysis complete: ${detectedFlags.length} violations found`, detectedFlags.length > 0 ? 'info' : 'success');
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      showToast('Analysis failed. Please check your input data.', 'error');
+    }
+  }, [editableFields, fileName, consumer.state, showToast]);
 
   const loadFromHistory = useCallback((record: AnalysisRecord) => {
     if (step === 4 && editableFields.dofd) {
@@ -527,6 +585,51 @@ export default function CreditReportAnalyzer() {
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-300 ${darkMode ? 'dark bg-white' : 'bg-white'}`}>
+      {/* Skip to main content link for accessibility */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-[100] px-4 py-3 rounded-lg shadow-lg transition-all duration-300 animate-slide-in flex items-center gap-3 ${
+            toast.type === 'error' ? 'bg-red-600 text-white' :
+            toast.type === 'success' ? 'bg-green-600 text-white' :
+            'bg-gray-900 text-white'
+          }`}
+          role="alert"
+          aria-live="polite"
+        >
+          {toast.type === 'error' && (
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+          {toast.type === 'success' && (
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+          {toast.type === 'info' && (
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="ml-2 hover:opacity-80"
+            aria-label="Dismiss notification"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <header className="border-b border-gray-200 bg-white sticky top-0 z-50 transition-colors">
         <div className="container py-4 sm:py-6">
@@ -632,7 +735,7 @@ export default function CreditReportAnalyzer() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 py-8 sm:py-12">
+      <main id="main-content" className="flex-1 py-8 sm:py-12" role="main" aria-label="Credit Report Analysis">
         <div className="container">
 
           {/* Step 1: Input */}
