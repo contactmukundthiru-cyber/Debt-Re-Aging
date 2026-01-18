@@ -21,6 +21,10 @@ interface Step1InputProps {
   setShowHistory: (val: boolean) => void;
   loadFromHistory: (record: AnalysisRecord) => void;
   removeFromHistory: (id: string, e: React.MouseEvent) => void;
+  historyFileInputRef: React.RefObject<HTMLInputElement>;
+  exportHistory: () => void;
+  importHistory: (file: File) => void;
+  clearHistory: () => void;
 }
 
 export const Step1Input: React.FC<Step1InputProps> = ({
@@ -41,6 +45,10 @@ export const Step1Input: React.FC<Step1InputProps> = ({
   setShowHistory,
   loadFromHistory,
   removeFromHistory,
+  historyFileInputRef,
+  exportHistory,
+  importHistory,
+  clearHistory,
 }) => {
   return (
     <div className="fade-in max-w-4xl mx-auto">
@@ -57,7 +65,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
         <div>
           <p className="label mb-2 flex items-center gap-2 dark:text-gray-300">
             <span>Upload File</span>
-            <span className="text-xs text-gray-400 font-normal">PDF, Image, or Text</span>
+            <span className="text-xs text-gray-400 font-normal">PDF, Image, or Text · Max 20MB</span>
           </p>
           <div
             className="upload-area cursor-pointer dark:bg-gray-900 dark:border-gray-700"
@@ -65,6 +73,15 @@ export const Step1Input: React.FC<Step1InputProps> = ({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-busy={isProcessing}
           >
             <input
               ref={fileInputRef}
@@ -79,7 +96,9 @@ export const Step1Input: React.FC<Step1InputProps> = ({
             {isProcessing ? (
               <div className="text-center py-4">
                 <div className="spinner mx-auto mb-3" />
-                <p className="body-sm text-gray-600 dark:text-gray-400 mb-2">{progressText}</p>
+                <p className="body-sm text-gray-600 dark:text-gray-400 mb-2" aria-live="polite">
+                  {progressText}
+                </p>
                 <div className="w-48 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mx-auto">
                   <div
                     className="h-full bg-gray-900 dark:bg-white transition-all duration-300"
@@ -97,6 +116,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               </>
             )}
           </div>
+          <p className="text-xs text-gray-400 mt-2">Scanned PDFs run OCR and may take longer. For best results, upload clear images.</p>
         </div>
 
         {/* Text Input */}
@@ -143,8 +163,8 @@ export const Step1Input: React.FC<Step1InputProps> = ({
       </div>
 
       {/* Analysis History */}
-      {history.length > 0 && (
-        <div className="max-w-xl mx-auto">
+      <div className="max-w-xl mx-auto">
+        {history.length > 0 && (
           <button
             type="button"
             onClick={() => setShowHistory(!showHistory)}
@@ -164,8 +184,9 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
+        )}
 
-          {showHistory && (
+        {showHistory && history.length > 0 && (
             <div className="border border-t-0 border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
               {history.slice(0, 5).map((record) => (
                 <button
@@ -199,8 +220,52 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               ))}
             </div>
           )}
+
+        <div className={`mt-3 ${history.length === 0 ? 'panel-inset p-4' : ''}`}>
+          <div className="flex flex-wrap gap-2 justify-between items-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">History Tools</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                onClick={exportHistory}
+                disabled={history.length === 0}
+              >
+                Backup JSON
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                onClick={() => historyFileInputRef.current?.click()}
+              >
+                Import JSON
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary text-xs text-red-600 dark:text-red-400 dark:bg-gray-800 dark:border-gray-700"
+                onClick={clearHistory}
+                disabled={history.length === 0}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+          <input
+            ref={historyFileInputRef}
+            type="file"
+            accept=".json,application/json"
+            className="sr-only"
+            aria-label="Import history JSON"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                importHistory(file);
+              }
+              e.currentTarget.value = '';
+            }}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 };

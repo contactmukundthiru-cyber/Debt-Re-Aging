@@ -6,7 +6,14 @@ import { RuleFlag, RiskProfile, CreditFields } from '../../lib/rules';
 import { CaseLaw } from '../../lib/caselaw';
 import { TimelineEvent, PatternInsight } from '../../lib/analytics';
 import { DeltaResult } from '../../lib/delta';
-import { generateBureauLetter, generateValidationLetter, ConsumerInfo } from '../../lib/generator';
+import {
+  generateBureauLetter,
+  generateValidationLetter,
+  generateFurnisherLetter,
+  generateCeaseDesistLetter,
+  generateIntentToSueLetter,
+  ConsumerInfo
+} from '../../lib/generator';
 
 // Tab Components
 import ViolationsTab from './analysis/ViolationsTab';
@@ -135,9 +142,9 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
       const generators: Record<string, () => string> = {
         bureau: () => generateBureauLetter(editableFields, flags, consumer),
         validation: () => generateValidationLetter(editableFields, flags, consumer),
-        furnisher: () => generateBureauLetter(editableFields, flags, consumer), // Placeholder
-        cease_desist: () => generateBureauLetter(editableFields, flags, consumer), // Placeholder
-        intent_to_sue: () => generateBureauLetter(editableFields, flags, consumer), // Placeholder
+        furnisher: () => generateFurnisherLetter(editableFields, flags, consumer),
+        cease_desist: () => generateCeaseDesistLetter(editableFields, flags, consumer),
+        intent_to_sue: () => generateIntentToSueLetter(editableFields, flags, consumer, riskProfile),
       };
 
       const generator = generators[selectedLetterType];
@@ -145,7 +152,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
         setEditableLetter(generator());
       }
     }
-  }, [selectedLetterType, flags, editableFields, consumer, setEditableLetter]);
+  }, [selectedLetterType, flags, editableFields, consumer, riskProfile, setEditableLetter]);
 
   const totalPossibleEvidence = Array.from(new Set(flags.flatMap(f => f.suggestedEvidence))).length;
   const checkedEvidenceCount = Object.keys(discoveryAnswers).filter(k => k.startsWith('ev-') && discoveryAnswers[k] === 'checked').length;

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Free tool to detect illegal debt re-aging and FCRA/FDCPA violations in your credit report. Generate dispute letters automatically.',
   keywords: ['credit report', 'FCRA', 'FDCPA', 'debt re-aging', 'dispute letter', 'credit repair'],
   authors: [{ name: 'Credit Report Analyzer' }],
-  manifest: '/manifest.json',
+  manifest: 'manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -32,11 +32,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="icon" href={`${basePath}/favicon.svg`} sizes="any" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href={`${basePath}/icons/icon.svg`} />
+        <link rel="manifest" href={`${basePath}/manifest.json`} />
       </head>
       <body className="antialiased">
         <Providers>{children}</Providers>

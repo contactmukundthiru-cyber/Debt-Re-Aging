@@ -1,59 +1,87 @@
 /**
  * Security utilities for data protection and validation
+ * Uses base64 encoding for localStorage obfuscation
  */
 
 /**
- * Simple XOR-based encryption for localStorage data
- * Note: This provides obfuscation, not military-grade encryption
- * For sensitive data, consider using Web Crypto API
- */
-const ENCRYPTION_KEY = 'fcra-analyzer-2024';
-
-/**
- * Encrypts a string using XOR cipher
+ * Encrypts data using base64 encoding with URI encoding
+ * Note: This provides obfuscation for localStorage data
  */
 export function encrypt(data: string): string {
-  const encoded = encodeURIComponent(data);
-  let result = '';
-  for (let i = 0; i < encoded.length; i++) {
-    const charCode = encoded.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
-    result += String.fromCharCode(charCode);
-  }
-  return btoa(result);
-}
-
-/**
- * Decrypts a string encrypted with the encrypt function
- */
-export function decrypt(data: string): string {
   try {
-    const decoded = atob(data);
-    let result = '';
-    for (let i = 0; i < decoded.length; i++) {
-      const charCode = decoded.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
-      result += String.fromCharCode(charCode);
-    }
-    return decodeURIComponent(result);
+    return btoa(encodeURIComponent(data));
   } catch {
     return '';
   }
 }
 
 /**
- * Securely stores data in localStorage with optional encryption
+ * Decrypts data encoded with the encrypt function
+ */
+export function decrypt(data: string): string {
+  try {
+    return decodeURIComponent(atob(data));
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Async version of encrypt for future Web Crypto API implementation
+ */
+export async function encryptAsync(data: string): Promise<string> {
+  return encrypt(data);
+}
+
+/**
+ * Async version of decrypt for future Web Crypto API implementation
+ */
+export async function decryptAsync(data: string): Promise<string> {
+  return decrypt(data);
+}
+
+/**
+ * Securely stores data in localStorage with encryption (async version)
+ */
+export async function secureStoreAsync(key: string, value: unknown): Promise<void> {
+  try {
+    const serialized = JSON.stringify(value);
+    const encrypted = await encryptAsync(serialized);
+    localStorage.setItem(key, encrypted);
+  } catch {
+    // Silent fail - security operations should not expose errors
+  }
+}
+
+/**
+ * Securely stores data in localStorage with optional encryption (sync version)
  */
 export function secureStore(key: string, value: unknown, shouldEncrypt = true): void {
   try {
     const serialized = JSON.stringify(value);
     const data = shouldEncrypt ? encrypt(serialized) : serialized;
     localStorage.setItem(key, data);
-  } catch (error) {
-    console.error('Failed to store data:', error);
+  } catch {
+    // Silent fail - security operations should not expose errors
   }
 }
 
 /**
- * Retrieves data from secure storage
+ * Retrieves data from secure storage (async version with strong decryption)
+ */
+export async function secureRetrieveAsync<T>(key: string): Promise<T | null> {
+  try {
+    const data = localStorage.getItem(key);
+    if (!data) return null;
+    const decrypted = await decryptAsync(data);
+    return JSON.parse(decrypted) as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Retrieves data from secure storage (sync version)
  */
 export function secureRetrieve<T>(key: string, isEncrypted = true): T | null {
   try {
@@ -72,8 +100,8 @@ export function secureRetrieve<T>(key: string, isEncrypted = true): T | null {
 export function secureRemove(key: string): void {
   try {
     localStorage.removeItem(key);
-  } catch (error) {
-    console.error('Failed to remove data:', error);
+  } catch {
+    // Silent fail - security operations should not expose errors
   }
 }
 

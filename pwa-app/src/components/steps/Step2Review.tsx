@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { CreditFields, RuleFlag, RiskProfile } from '../../lib/rules';
 import { ForensicSummary } from '../../lib/analytics';
 import { Step } from '../../lib/constants';
@@ -41,6 +41,40 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   fieldsToSimple,
   parseCreditReport,
 }) => {
+  const [sortKey, setSortKey] = useState<'risk' | 'violations' | 'balance' | 'name'>('risk');
+
+  const parseBalance = (value?: string) => {
+    if (!value) return 0;
+    const cleaned = value.replace(/[^0-9.-]/g, '');
+    const parsed = Number.parseFloat(cleaned);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const sortedAccounts = useMemo(() => {
+    const cloned = [...analyzedAccounts];
+    cloned.sort((a, b) => {
+      if (sortKey === 'violations') {
+        return b.flags.length - a.flags.length;
+      }
+      if (sortKey === 'balance') {
+        return parseBalance(b.fields.currentBalance) - parseBalance(a.fields.currentBalance);
+      }
+      if (sortKey === 'name') {
+        const aName = a.fields.furnisherOrCollector || a.fields.originalCreditor || '';
+        const bName = b.fields.furnisherOrCollector || b.fields.originalCreditor || '';
+        return aName.localeCompare(bName);
+      }
+      return b.risk.overallScore - a.risk.overallScore;
+    });
+    return cloned;
+  }, [analyzedAccounts, sortKey]);
+
+  const analyzeAccount = (account: AnalyzedAccount) => {
+    setEditableFields(account.fields);
+    setRawText(account.rawText);
+    setStep(3);
+  };
+
   return (
     <div className="fade-in max-w-4xl mx-auto">
       <div className="mb-6">
@@ -119,37 +153,66 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
       )}
 
       {analyzedAccounts.length > 1 ? (
-        <div className="grid gap-4 mb-8">
-          {analyzedAccounts.map((acc) => (
-            <button
-              key={acc.id}
-              onClick={() => {
-                setEditableFields(acc.fields);
-                setRawText(acc.rawText);
-                setStep(3);
-              }}
-              className="panel p-4 text-left hover:border-gray-900 transition-all group dark:bg-gray-900 dark:border-gray-800 dark:hover:border-white"
-            >
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="heading-md mb-1 dark:text-white">
-                    {acc.fields.furnisherOrCollector || acc.fields.originalCreditor || 'Unknown Account'}
-                  </p>
-                  <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400">
-                    <span>Balance: ${acc.fields.currentBalance || '0.00'}</span>
-                    <span>Type: {acc.fields.accountType || 'N/A'}</span>
-                    <span className={`font-medium ${acc.flags.length > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                      {acc.flags.length} potential violations
-                    </span>
-                  </div>
-                </div>
-                <svg className="w-5 h-5 text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+        <>
+          <div className="panel p-4 mb-4 dark:bg-gray-900 dark:border-gray-800">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="label text-gray-500 dark:text-gray-400">Account Triage</p>
+                <p className="body-sm text-gray-600 dark:text-gray-400">
+                  Sort by risk or violations, then choose the tradeline to analyze.
+                </p>
               </div>
-            </button>
-          ))}
-        </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-500 dark:text-gray-400">Sort</label>
+                <select
+                  className="text-xs border border-gray-200 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                  value={sortKey}
+                  onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
+                >
+                  <option value="risk">Highest Risk</option>
+                  <option value="violations">Most Violations</option>
+                  <option value="balance">Highest Balance</option>
+                  <option value="name">Name (A–Z)</option>
+                </select>
+                <button
+                  type="button"
+                  className="btn btn-secondary text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                  onClick={() => analyzeAccount(sortedAccounts[0])}
+                  disabled={sortedAccounts.length === 0}
+                >
+                  Analyze Top Risk
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-4 mb-8">
+            {sortedAccounts.map((acc) => (
+              <button
+                key={acc.id}
+                onClick={() => analyzeAccount(acc)}
+                className="panel p-4 text-left hover:border-gray-900 transition-all group dark:bg-gray-900 dark:border-gray-800 dark:hover:border-white"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="heading-md mb-1 dark:text-white">
+                      {acc.fields.furnisherOrCollector || acc.fields.originalCreditor || 'Unknown Account'}
+                    </p>
+                    <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400">
+                      <span>Balance: ${acc.fields.currentBalance || '0.00'}</span>
+                      <span>Type: {acc.fields.accountType || 'N/A'}</span>
+                      <span className={`font-medium ${acc.flags.length > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                        {acc.flags.length} potential violations
+                      </span>
+                    </div>
+                  </div>
+                  <svg className="w-5 h-5 text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
       ) : (
         <>
           {fileName && (

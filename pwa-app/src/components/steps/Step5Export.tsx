@@ -34,6 +34,8 @@ interface Step5ExportProps {
   buildAttorneyPackage: Function;
   formatAttorneyPackage: Function;
   formatCurrency: (amount: number) => string;
+  downloadAnalysisJson: () => void;
+  downloadCaseBundle: () => void;
 }
 
 const Step5Export: React.FC<Step5ExportProps> = ({
@@ -54,7 +56,9 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   formatEvidencePackage,
   buildAttorneyPackage,
   formatAttorneyPackage,
-  formatCurrency
+  formatCurrency,
+  downloadAnalysisJson,
+  downloadCaseBundle
 }) => {
   return (
     <div className="fade-in max-w-4xl mx-auto">
@@ -177,6 +181,36 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                 </div>
                 <span className="text-[10px] font-bold text-gray-400 border border-gray-200 dark:border-gray-600 px-1 rounded">TXT</span>
               </button>
+            </div>
+            <div className="panel p-5 dark:bg-gray-800 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h3 className="heading-md mb-1 dark:text-white">Export Analysis Data</h3>
+                  <p className="body-sm text-gray-500 dark:text-gray-400">Download a JSON snapshot for records or integrations.</p>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary dark:bg-gray-900 dark:text-white dark:border-gray-700"
+                  onClick={downloadAnalysisJson}
+                >
+                  Download JSON
+                </button>
+              </div>
+            </div>
+            <div className="panel p-5 dark:bg-gray-800 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h3 className="heading-md mb-1 dark:text-white">Complete Case Bundle</h3>
+                  <p className="body-sm text-gray-500 dark:text-gray-400">All letters + evidence + attorney export in one TXT file.</p>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={downloadCaseBundle}
+                >
+                  Download Bundle
+                </button>
+              </div>
             </div>
           </div>
         )}

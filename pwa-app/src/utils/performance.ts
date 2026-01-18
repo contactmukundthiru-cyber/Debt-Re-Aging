@@ -2,6 +2,8 @@
  * Performance optimization utilities
  */
 
+import { logger } from './logger';
+
 /**
  * Memoization cache with LRU eviction
  */
@@ -123,7 +125,7 @@ export function measureTime<T>(fn: () => T, label?: string): T {
   const result = fn();
   const end = performance.now();
   if (label) {
-    console.log(`[${label}] Execution time: ${(end - start).toFixed(2)}ms`);
+    logger.debug(`[${label}] Execution time: ${(end - start).toFixed(2)}ms`, undefined, 'Performance');
   }
   return result;
 }
@@ -136,7 +138,7 @@ export async function measureTimeAsync<T>(fn: () => Promise<T>, label?: string):
   const result = await fn();
   const end = performance.now();
   if (label) {
-    console.log(`[${label}] Execution time: ${(end - start).toFixed(2)}ms`);
+    logger.debug(`[${label}] Execution time: ${(end - start).toFixed(2)}ms`, undefined, 'Performance');
   }
   return result;
 }
@@ -326,11 +328,11 @@ export class Profiler {
   measure(name: string, startMark: string): number {
     const start = this.marks.get(startMark);
     if (start === undefined) {
-      console.warn(`Mark "${startMark}" not found`);
+      logger.warn(`Mark "${startMark}" not found`, undefined, 'Profiler');
       return 0;
     }
     const duration = performance.now() - start;
-    console.log(`[Profiler] ${name}: ${duration.toFixed(2)}ms`);
+    logger.debug(`[Profiler] ${name}: ${duration.toFixed(2)}ms`, undefined, 'Performance');
     return duration;
   }
 

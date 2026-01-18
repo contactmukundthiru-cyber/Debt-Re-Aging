@@ -21,6 +21,10 @@ export const Header: React.FC<HeaderProps> = ({
   reset,
   translate
 }) => {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const websiteRoot = basePath.replace(/\/pwa-app\/?$/, '');
+  const websiteHref = websiteRoot ? `${websiteRoot}/` : '/';
+
   return (
     <header className="border-b border-gray-200 bg-white dark:bg-gray-950 dark:border-gray-800 sticky top-0 z-50 transition-colors">
       <div className="container py-4 sm:py-6">
@@ -30,6 +34,13 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 className="heading-lg tracking-tight dark:text-white">Credit Report Analyzer</h1>
           </div>
           <div className="flex items-center gap-4">
+            <a
+              href={websiteHref}
+              className="text-xs font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors no-print"
+              aria-label="Open project website"
+            >
+              Project Website
+            </a>
             {/* Dark Mode Toggle */}
             <button
               type="button"

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Debt Re-Aging">
+  <rect width="128" height="128" fill="#0f172a"/>
+  <circle cx="64" cy="64" r="46" fill="#22c55e" opacity="0.14"/>
+  <path d="M36 50h56M36 64h42M36 78h28" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M42 92l12 12 32-32" stroke="#22c55e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

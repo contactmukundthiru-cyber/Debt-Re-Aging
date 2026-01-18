@@ -374,10 +374,266 @@ ${risk.keyViolations.length > 0 ? risk.keyViolations.map(v => `- ${v}`).join('\n
 }
 
 /**
+ * Generate furnisher/collector letter (more aggressive than bureau)
+ */
+export function generateFurnisherLetter(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  consumer: ConsumerInfo
+): string {
+  const today = new Date().toISOString().split('T')[0];
+  const creditorName = fields.furnisherOrCollector || fields.originalCreditor || '[FURNISHER NAME]';
+  const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
+
+  let violations = '';
+  for (const flag of flags) {
+    violations += `\n• ${flag.ruleName} (${flag.ruleId}): ${flag.explanation}\n`;
+    violations += `  Legal Basis: ${flag.legalCitations.join(', ')}\n`;
+  }
+
+  const hasReagingFlags = flags.some(f => ['B1', 'B2', 'B3', 'K6', 'K7'].includes(f.ruleId));
+  const hasFDCPAFlags = flags.some(f => f.legalCitations.some(c => c.includes('FDCPA')));
+
+  return `${consumer.name || '[YOUR NAME]'}
+${consumer.address || '[YOUR ADDRESS]'}
+
+${today}
+
+${creditorName}
+[Furnisher Address]
+
+RE: FORMAL NOTICE OF DISPUTED INFORMATION AND DEMAND FOR CORRECTION
+Account Allegedly from: ${originalCreditor}
+${fields.currentBalance ? `Disputed Amount: $${fields.currentBalance}` : ''}
+
+SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
+
+Dear Sir/Madam:
+
+I am writing as a formal notice under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681s-2, regarding your duty as a furnisher of information to credit reporting agencies.
+
+My investigation has revealed the following FCRA and/or FDCPA violations associated with your reporting of the above-referenced account:
+${violations}
+
+LEGAL OBLIGATIONS YOU ARE VIOLATING:
+
+1. Under FCRA § 623(a)(1)(A), you may not furnish information to a consumer reporting agency that you know or have reasonable cause to believe is inaccurate.
+
+2. Under FCRA § 623(a)(2), after being notified of a dispute, you must investigate and report the results to the credit bureaus.
+
+3. Under FCRA § 623(b), upon receipt of notice from a CRA that information is disputed, you must conduct an investigation and modify, delete, or verify the information.
+${hasReagingFlags ? `
+NOTICE OF ILLEGAL RE-AGING:
+The date discrepancies identified above indicate that your company may be engaged in illegal "debt re-aging" - the practice of reporting false dates to extend the 7-year reporting period under FCRA § 605. This constitutes:
+• Willful noncompliance with FCRA (subject to statutory damages of $100-$1,000 per violation plus punitive damages)
+• Potential fraud and unfair debt collection practices
+` : ''}
+${hasFDCPAFlags ? `
+FDCPA VIOLATIONS:
+Your conduct also appears to violate the Fair Debt Collection Practices Act, including but not limited to:
+• 15 U.S.C. § 1692e - False or misleading representations
+• 15 U.S.C. § 1692f - Unfair practices
+` : ''}
+
+DEMAND FOR IMMEDIATE ACTION:
+
+Within 30 days of receipt of this letter, you must:
+
+1. Permanently delete this inaccurate tradeline from all three major credit bureaus (Equifax, Experian, TransUnion)
+2. Provide me with written confirmation of deletion
+3. Cease and desist from re-inserting or re-reporting this account without valid documentation proving accuracy
+
+NOTICE OF PRESERVED RIGHTS:
+
+This letter is sent without prejudice to any legal claims I may have. If you fail to comply, I reserve the right to:
+• File complaints with the CFPB, FTC, and state attorney general
+• Pursue statutory damages under FCRA (up to $1,000 per willful violation)
+• Seek actual damages for harm to my credit standing
+• Pursue punitive damages and attorney's fees
+
+Your response is required within 30 days.
+
+Sincerely,
+
+${consumer.name || '[YOUR SIGNATURE]'}
+
+Enclosures: Credit report excerpt showing disputed tradeline
+CC: [Your Records]
+`;
+}
+
+/**
+ * Generate cease and desist letter
+ */
+export function generateCeaseDesistLetter(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  consumer: ConsumerInfo
+): string {
+  const today = new Date().toISOString().split('T')[0];
+  const creditorName = fields.furnisherOrCollector || '[DEBT COLLECTOR NAME]';
+  const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
+
+  return `${consumer.name || '[YOUR NAME]'}
+${consumer.address || '[YOUR ADDRESS]'}
+
+${today}
+
+${creditorName}
+[Collector Address]
+
+RE: CEASE AND DESIST COMMUNICATION
+Alleged Debt from: ${originalCreditor}
+${fields.currentBalance ? `Amount Claimed: $${fields.currentBalance}` : ''}
+
+SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
+
+Dear Sir/Madam:
+
+Pursuant to my rights under the Fair Debt Collection Practices Act (FDCPA), 15 U.S.C. § 1692c(c), I am formally demanding that you CEASE AND DESIST all further communications with me regarding the alleged debt referenced above.
+
+EFFECTIVE IMMEDIATELY, you must:
+
+1. STOP all telephone calls to me, my family members, and my place of employment
+2. STOP all written correspondence except as permitted by law
+3. STOP all credit bureau reporting until you can validate this debt with original documentation
+
+NOTICE OF PRIOR VIOLATIONS:
+
+Your previous collection activities have already resulted in the following potential FDCPA and FCRA violations:
+${flags.map(f => `• ${f.ruleName}: ${f.explanation}`).join('\n')}
+
+PERMITTED COMMUNICATIONS ONLY:
+
+Under 15 U.S.C. § 1692c(c), after receipt of this cease and desist notice, you may only contact me to:
+1. Advise that collection efforts are being terminated
+2. Notify me that you may invoke specific legal remedies
+3. Notify me that you are invoking a specific legal remedy
+
+Any communication outside these narrow exceptions will constitute a violation of federal law.
+
+WARNING:
+
+Any further contact in violation of this cease and desist order will be documented and used as evidence in legal proceedings. Violations of the FDCPA are subject to:
+• Statutory damages up to $1,000 per violation
+• Actual damages for emotional distress and credit harm
+• Class action liability up to $500,000
+• Payment of consumer's attorney's fees
+
+REQUIRED ACKNOWLEDGMENT:
+
+Please confirm in writing within 10 days that you have received this cease and desist notice and will comply with its terms.
+
+This letter is sent without prejudice to my legal rights, all of which are expressly reserved.
+
+Sincerely,
+
+${consumer.name || '[YOUR SIGNATURE]'}
+
+CC: [Your Records]
+`;
+}
+
+/**
+ * Generate intent to sue letter
+ */
+export function generateIntentToSueLetter(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  consumer: ConsumerInfo,
+  riskProfile?: RiskProfile
+): string {
+  const today = new Date().toISOString().split('T')[0];
+  const creditorName = fields.furnisherOrCollector || fields.originalCreditor || '[COMPANY NAME]';
+
+  const highSeverityFlags = flags.filter(f => f.severity === 'high');
+  const totalPotentialDamages = flags.length * 1000; // $1000 per willful FCRA violation
+
+  return `${consumer.name || '[YOUR NAME]'}
+${consumer.address || '[YOUR ADDRESS]'}
+
+${today}
+
+${creditorName}
+[Company Address]
+
+VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
+
+RE: FINAL NOTICE OF INTENT TO FILE LAWSUIT
+DEMAND FOR IMMEDIATE RESOLUTION
+
+Dear Sir/Madam:
+
+PLEASE GOVERN YOURSELF ACCORDINGLY.
+
+This letter serves as formal notice that unless the matters set forth below are resolved within FIFTEEN (15) DAYS of your receipt of this letter, I intend to file a civil lawsuit against your company in federal court for violations of the Fair Credit Reporting Act (15 U.S.C. § 1681 et seq.) and the Fair Debt Collection Practices Act (15 U.S.C. § 1692 et seq.).
+
+DOCUMENTED VIOLATIONS:
+
+My investigation has documented the following ${highSeverityFlags.length} HIGH-SEVERITY and ${flags.length - highSeverityFlags.length} additional violations:
+
+${flags.map((f, i) => `${i + 1}. ${f.ruleId} - ${f.ruleName}
+   Severity: ${f.severity.toUpperCase()}
+   Finding: ${f.explanation}
+   Legal Citations: ${f.legalCitations.join(', ')}
+   Success Probability: ${f.successProbability}%
+`).join('\n')}
+
+DAMAGES SOUGHT:
+
+If legal action becomes necessary, I will seek:
+
+1. STATUTORY DAMAGES under 15 U.S.C. § 1681n(a)(1)(A):
+   - $100 to $1,000 per willful violation
+   - Potential damages: $${totalPotentialDamages.toLocaleString()} (based on ${flags.length} documented violations)
+
+2. ACTUAL DAMAGES for:
+   - Credit score deterioration
+   - Denial of credit applications
+   - Higher interest rates paid
+   - Emotional distress and reputational harm
+
+3. PUNITIVE DAMAGES under 15 U.S.C. § 1681n(a)(2):
+   - For willful noncompliance, courts may award punitive damages without limitation
+
+4. ATTORNEY'S FEES AND COSTS under 15 U.S.C. § 1681n(a)(3)
+
+CASE STRENGTH ASSESSMENT:
+${riskProfile ? `
+My forensic analysis shows:
+• Overall Case Score: ${riskProfile.overallScore}/100
+• Dispute Strength: ${riskProfile.disputeStrength.toUpperCase()}
+• Litigation Potential: ${riskProfile.litigationPotential ? 'HIGH' : 'MODERATE'}
+` : ''}
+SETTLEMENT DEMAND:
+
+To avoid the expense and inconvenience of litigation for both parties, I am prepared to resolve this matter if you:
+
+1. IMMEDIATELY delete all disputed information from all three credit bureaus
+2. Provide written confirmation of permanent deletion within 15 days
+3. Agree to cease all collection activities
+4. Pay settlement damages of $____________ (to be negotiated)
+
+DEADLINE:
+
+You have FIFTEEN (15) DAYS from receipt of this letter to respond with an acceptable resolution. Absent a satisfactory response, I will proceed with legal action without further notice.
+
+This letter may be used as evidence of your prior knowledge of these violations. Your failure to act will be characterized as willful noncompliance.
+
+Sincerely,
+
+${consumer.name || '[YOUR SIGNATURE]'}
+
+CC: [Attorney/Records]
+    Consumer Financial Protection Bureau (pending complaint)
+`;
+}
+
+/**
  * Generate CFPB complaint narrative
  */
 export function generateCFPBNarrative(
-  fields: CreditFields, 
+  fields: CreditFields,
   flags: RuleFlag[],
   discoveryAnswers: Record<string, string> = {}
 ): string {

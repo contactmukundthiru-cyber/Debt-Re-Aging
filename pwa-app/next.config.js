@@ -1,3 +1,11 @@
+const repoName = process.env.GITHUB_REPOSITORY
+  ? process.env.GITHUB_REPOSITORY.split('/')[1]
+  : '';
+const defaultBasePath = process.env.GITHUB_ACTIONS && repoName
+  ? `/${repoName}/pwa-app`
+  : '';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || defaultBasePath;
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
@@ -21,9 +29,17 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
+  trailingSlash: true,
   images: {
     unoptimized: true,
   },
+  ...(basePath
+    ? {
+        basePath,
+        assetPrefix: basePath,
+      }
+    : {}),
 };
 
 module.exports = withPWA(nextConfig);

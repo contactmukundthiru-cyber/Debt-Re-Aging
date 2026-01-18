@@ -5,7 +5,7 @@ import { parseCreditReport, fieldsToSimple } from '../lib/parser';
 import { runRules, calculateRiskProfile, CreditFields, RuleFlag, RiskProfile } from '../lib/rules';
 import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, ConsumerInfo, generatePDFLetter, generateForensicReport } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
-import { isPDF, extractPDFText } from '../lib/pdf';
+import { isPDF, extractPDFText, extractPDFTextViaOCR } from '../lib/pdf';
 import { compareReports, DeltaResult } from '../lib/delta';
 import { getRelevantCaseLaw, CaseLaw } from '../lib/caselaw';
 import { generateStateGuidance, getStateLaws } from '../lib/state-laws';
@@ -26,6 +26,9 @@ import {
   getHistory,
   getAnalysis,
   deleteAnalysis,
+  exportHistory,
+  importHistory,
+  clearHistory,
   formatTimestamp,
   AnalysisRecord
 } from '../lib/storage';
@@ -171,6 +174,7 @@ Payment History: 30 60 90 120 CO`;
 // Analysis tabs configuration (TabId type imported from constants)
 
 export default function CreditReportAnalyzer() {
+  const maxUploadSizeMB = 20;
   const [step, setStep] = useState<Step>(1);
   const [rawText, setRawText] = useState('');
   const [editableFields, setEditableFields] = useState<CreditFields>({});
@@ -193,6 +197,7 @@ export default function CreditReportAnalyzer() {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<AnalysisRecord[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const historyFileInputRef = useRef<HTMLInputElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
 
   // Revolutionary feature states
@@ -261,6 +266,56 @@ export default function CreditReportAnalyzer() {
     };
   }, [flags, riskProfile, editableFields]);
 
+  const analyzeText = useCallback((text: string, sourceFileName?: string) => {
+    setRawText(text);
+    if (sourceFileName) {
+      setFileName(sourceFileName);
+    }
+    setFlags([]);
+    setRiskProfile(null);
+    setDeltas([]);
+    setRelevantCaseLaw([]);
+    setScoreImpact(null);
+    setDeadlines(null);
+    setCollectorMatch(null);
+    setMetro2Validation(null);
+    setDamageEstimate(null);
+    setSelectedLetterType('bureau');
+    setEditableLetter('');
+    setExportTab('letters');
+    setActiveTab('violations');
+    setSelectedAccountId(null);
+
+    if (text.trim().length < 40) {
+      showToast('Input looks short. Paste the full account section for best results.', 'info');
+    }
+
+    const accounts = parseMultipleAccounts(text);
+    if (accounts.length > 1) {
+      const analyzed = accounts.map(acc => {
+        const accountFlags = runRules(acc.fields);
+        return {
+          id: acc.id,
+          rawText: acc.rawText,
+          fields: acc.fields,
+          flags: accountFlags,
+          risk: calculateRiskProfile(accountFlags, acc.fields)
+        };
+      });
+      setAnalyzedAccounts(analyzed);
+      setExecutiveSummary(generateExecutiveSummary(analyzed));
+      setFlags(analyzed.flatMap(acc => acc.flags));
+      setStep(2);
+      return;
+    }
+
+    setAnalyzedAccounts([]);
+    setExecutiveSummary(null);
+    const parsed = parseCreditReport(text);
+    setEditableFields(fieldsToSimple(parsed));
+    setStep(2);
+  }, [showToast]);
+
   // Keyboard shortcuts - processText is defined later via useCallback
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -272,9 +327,7 @@ export default function CreditReportAnalyzer() {
         if (e.key === 'Enter' && step === 1 && rawText.trim()) {
           e.preventDefault();
           // Inline processText logic to avoid circular dependency
-          const parsed = parseCreditReport(rawText);
-          setEditableFields(fieldsToSimple(parsed));
-          setStep(2);
+          analyzeText(rawText);
         }
         if (e.key === 'p' && step === 4) {
           e.preventDefault();
@@ -284,7 +337,7 @@ export default function CreditReportAnalyzer() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [step, rawText]);
+  }, [step, rawText, analyzeText]);
 
   const handleFileUpload = useCallback(async (file: File) => {
     setIsProcessing(true);
@@ -292,11 +345,25 @@ export default function CreditReportAnalyzer() {
     setFileName(file.name);
 
     try {
+      if (file.size > maxUploadSizeMB * 1024 * 1024) {
+        throw new Error(`File exceeds ${maxUploadSizeMB}MB limit`);
+      }
+
       let text = '';
 
       if (isPDF(file)) {
         setProgressText('Extracting PDF text...');
-        text = await extractPDFText(file, (p) => setProgress(Math.round(p * 100)));
+        try {
+          text = await extractPDFText(file, (p) => setProgress(Math.round(p * 100)));
+        } catch (error) {
+          const message = error instanceof Error ? error.message : '';
+          if (message.toLowerCase().includes('no selectable text')) {
+            setProgressText('Running OCR on scanned PDF...');
+            text = await extractPDFTextViaOCR(file, (p) => setProgress(Math.round(p * 100)));
+          } else {
+            throw error;
+          }
+        }
       } else if (isImage(file)) {
         setProgressText('Running OCR...');
         text = await performOCR(file, (p) => setProgress(Math.round(p * 100)));
@@ -306,34 +373,18 @@ export default function CreditReportAnalyzer() {
         setProgress(100);
       }
 
-      setRawText(text);
-      
-      const accounts = parseMultipleAccounts(text);
-      if (accounts.length > 1) {
-        const analyzed = accounts.map(acc => ({
-          id: acc.id,
-          rawText: acc.rawText,
-          fields: acc.fields,
-          flags: runRules(acc.fields),
-          risk: calculateRiskProfile(runRules(acc.fields), acc.fields)
-        }));
-        setAnalyzedAccounts(analyzed);
-        setExecutiveSummary(generateExecutiveSummary(analyzed));
-        setStep(2); // Step 2 will now show account selection if multiple found
-      } else {
-        const parsed = parseCreditReport(text);
-        setEditableFields(fieldsToSimple(parsed));
-        setStep(2);
-      }
+      analyzeText(text, file.name);
     } catch (error) {
       console.error('Processing error:', error);
-      setProgressText('Error processing file');
+      const message = error instanceof Error ? error.message : 'Unable to process the file.';
+      setProgressText(message);
+      showToast(message, 'error');
     } finally {
       setIsProcessing(false);
       setProgress(0);
       setProgressText('');
     }
-  }, []);
+  }, [analyzeText, showToast, maxUploadSizeMB]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -353,18 +404,12 @@ export default function CreditReportAnalyzer() {
 
   const processText = useCallback(() => {
     if (!rawText.trim()) return;
-    const parsed = parseCreditReport(rawText);
-    setEditableFields(fieldsToSimple(parsed));
-    setStep(2);
-  }, [rawText]);
+    analyzeText(rawText, fileName ?? 'pasted-text.txt');
+  }, [rawText, analyzeText, fileName]);
 
   const loadSample = useCallback(() => {
-    setRawText(SAMPLE_TEXT);
-    setFileName('sample_data.txt');
-    const parsed = parseCreditReport(SAMPLE_TEXT);
-    setEditableFields(fieldsToSimple(parsed));
-    setStep(2);
-  }, []);
+    analyzeText(SAMPLE_TEXT, 'sample_data.txt');
+  }, [analyzeText]);
 
   const runAnalysis = useCallback(async () => {
     setIsAnalyzing(true);
@@ -470,6 +515,37 @@ export default function CreditReportAnalyzer() {
     setHistory(getHistory());
   }, []);
 
+  const handleExportHistory = useCallback(() => {
+    const data = exportHistory();
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `credit-analyzer-history-${stamp}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleImportHistory = useCallback(async (file: File) => {
+    try {
+      const text = await file.text();
+      const added = importHistory(text);
+      setHistory(getHistory());
+      showToast(`Imported ${added} record${added === 1 ? '' : 's'}.`, added > 0 ? 'success' : 'info');
+    } catch (error) {
+      console.error('History import failed:', error);
+      showToast('Unable to import history file.', 'error');
+    }
+  }, [showToast]);
+
+  const handleClearHistory = useCallback(() => {
+    clearHistory();
+    setHistory([]);
+    setShowHistory(false);
+    showToast('History cleared.', 'info');
+  }, [showToast]);
+
   const downloadDocument = useCallback((type: 'bureau' | 'validation' | 'cfpb' | 'summary', format: 'pdf' | 'txt' = 'pdf') => {
     const generators: Record<string, () => { content: string; filename: string; mimeType: string }> = {
       bureau: () => ({
@@ -509,6 +585,79 @@ export default function CreditReportAnalyzer() {
     }
   }, [editableFields, flags, consumer, riskProfile, discoveryAnswers]);
 
+  const downloadTextFile = useCallback((content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const downloadAnalysisJson = useCallback(() => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      fileName,
+      consumer,
+      fields: editableFields,
+      flags,
+      riskProfile,
+      discoveryAnswers,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'credit-analysis.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  }, [consumer, discoveryAnswers, editableFields, fileName, flags, riskProfile]);
+
+  const downloadCaseBundle = useCallback(() => {
+    const consumerDetails = {
+      name: consumer.name || '',
+      address: consumer.address || '',
+      city: '',
+      state: consumer.state || '',
+      zip: ''
+    };
+
+    const sections = [
+      { title: 'Bureau Dispute Letter', content: generateBureauLetter(editableFields, flags, consumer) },
+      { title: 'Debt Validation Request', content: generateValidationLetter(editableFields, flags, consumer) },
+      { title: 'CFPB Complaint Narrative', content: generateCFPBNarrative(editableFields, flags, discoveryAnswers) },
+      { title: 'Case Summary', content: generateCaseSummary(editableFields, flags, riskProfile!) },
+      { title: 'Cease and Desist Letter', content: generateCeaseDesistLetter(editableFields, consumerDetails, flags.map(f => f.explanation)) },
+      { title: 'Intent to Sue Letter', content: generateIntentToSueLetter(editableFields, flags, consumerDetails) },
+      { title: 'Evidence Package', content: formatEvidencePackage(buildEvidencePackage(editableFields, flags, riskProfile!, consumerDetails.name, consumerDetails.state)) },
+      { title: 'Attorney Package', content: formatAttorneyPackage(buildAttorneyPackage(editableFields, flags, riskProfile!, consumerDetails)) }
+    ];
+
+    const bundle = sections
+      .map(section => `===== ${section.title} =====\n\n${section.content}`)
+      .join('\n\n\n');
+
+    downloadTextFile(bundle, 'credit-case-bundle.txt');
+  }, [
+    consumer,
+    discoveryAnswers,
+    editableFields,
+    flags,
+    riskProfile,
+    generateBureauLetter,
+    generateValidationLetter,
+    generateCFPBNarrative,
+    generateCaseSummary,
+    generateCeaseDesistLetter,
+    generateIntentToSueLetter,
+    buildEvidencePackage,
+    formatEvidencePackage,
+    buildAttorneyPackage,
+    formatAttorneyPackage,
+    downloadTextFile
+  ]);
+
   const reset = useCallback(() => {
     setStep(1);
     setRawText('');
@@ -528,7 +677,7 @@ export default function CreditReportAnalyzer() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${darkMode ? 'dark bg-white' : 'bg-white'}`}>
+    <div className={`min-h-screen flex flex-col transition-colors duration-300 bg-white dark:bg-gray-950 ${darkMode ? 'dark' : ''}`}>
       {/* Skip to main content link for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -616,6 +765,10 @@ export default function CreditReportAnalyzer() {
               setShowHistory={setShowHistory}
               loadFromHistory={loadFromHistory}
               removeFromHistory={removeFromHistory}
+              historyFileInputRef={historyFileInputRef}
+              exportHistory={handleExportHistory}
+              importHistory={handleImportHistory}
+              clearHistory={handleClearHistory}
             />
           )}
 
@@ -727,6 +880,8 @@ export default function CreditReportAnalyzer() {
               buildAttorneyPackage={buildAttorneyPackage}
               formatAttorneyPackage={formatAttorneyPackage}
               formatCurrency={formatCurrency}
+              downloadAnalysisJson={downloadAnalysisJson}
+              downloadCaseBundle={downloadCaseBundle}
             />
           )}
 
