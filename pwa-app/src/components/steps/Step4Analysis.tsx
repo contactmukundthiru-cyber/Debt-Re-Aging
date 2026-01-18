@@ -1,7 +1,8 @@
 'use strict';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ANALYSIS_TABS, TabId, LetterType } from '../../lib/constants';
+import { GuideOverlay } from '../GuideOverlay';
 import { RuleFlag, RiskProfile, CreditFields } from '../../lib/rules';
 import { CaseLaw } from '../../lib/caselaw';
 import { TimelineEvent, PatternInsight } from '../../lib/analytics';
@@ -114,6 +115,8 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
   setEditableLetter,
   generatePDFLetter
 }) => {
+  const [showGuide, setShowGuide] = useState(true);
+
   const issuesByPriority = {
     high: flags.filter(f => f.severity === 'high'),
     medium: flags.filter(f => f.severity === 'medium'),
@@ -306,6 +309,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
                 type="button"
                 role="tab"
                 id={`tab-${tab.id}`}
+                data-tab={tab.id}
                 aria-selected={isSelected}
                 onClick={() => setActiveTab(tab.id)}
                 onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
@@ -371,55 +375,6 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
 
         {activeTab === 'narrative' && <NarrativeTab flags={flags} editableFields={editableFields} />}
 
-        {activeTab === 'actions' && analytics && (
-          <MasterActionPlanTab
-            actions={analytics.actions}
-            setActiveTab={setActiveTab}
-            onExport={() => setActiveTab('lettereditor')}
-          />
-        )}
-
-        {activeTab === 'scoresim' && (
-          <ScoreSimulatorTab
-            flags={flags}
-            fields={editableFields}
-            riskProfile={riskProfile}
-          />
-        )}
-
-        {activeTab === 'timeline' && analytics && <TimelineTab timeline={analytics.timeline} />}
-
-        {activeTab === 'evidence' && <EvidenceManagerTab caseId="current-case" />}
-
-        {activeTab === 'workflow' && <WorkflowTrackerTab caseId="current-case" />}
-
-        {activeTab === 'voice' && <VoiceTranscriptionTab />}
-
-        {activeTab === 'caselaw' && <CaseLawTab relevantCaseLaw={relevantCaseLaw} />}
-
-        {activeTab === 'deltas' && <DeltasTab deltas={deltas} />}
-
-        {activeTab === 'discovery' && (
-          <DiscoveryTab
-            flags={flags}
-            discoveryAnswers={discoveryAnswers}
-            setDiscoveryAnswers={setDiscoveryAnswers}
-            setActiveTab={setActiveTab}
-          />
-        )}
-
-        {activeTab === 'lab' && <ForensicLabTab flags={flags} />}
-
-        {activeTab === 'lettereditor' && (
-          <LetterEditorTab
-            selectedLetterType={selectedLetterType}
-            setSelectedLetterType={setSelectedLetterType}
-            editableLetter={editableLetter}
-            setEditableLetter={setEditableLetter}
-            generatePDF={generatePDFLetter}
-          />
-        )}
-
         {activeTab === 'actions' && (
           <MasterActionPlanTab
             actions={analytics?.actions.map((item, i) => ({
@@ -433,6 +388,8 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
           />
         )}
       </div>
+
+      {showGuide && <GuideOverlay onClose={() => setShowGuide(false)} />}
     </div>
   );
 };

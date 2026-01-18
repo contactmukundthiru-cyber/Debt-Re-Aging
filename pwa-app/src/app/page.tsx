@@ -190,7 +190,7 @@ export default function CreditReportAnalyzer() {
   const [deltas, setDeltas] = useState<DeltaResult[]>([]);
   const [relevantCaseLaw, setRelevantCaseLaw] = useState<CaseLaw[]>([]);
   const [discoveryAnswers, setDiscoveryAnswers] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<TabId>('violations');
+  const [activeTab, setActiveTab] = useState<TabId>('actions');
   const [activeParsedFields, setActiveParsedFields] = useState<ParsedFields | null>(null);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState<string | null>(null);
@@ -433,6 +433,9 @@ export default function CreditReportAnalyzer() {
         text = await file.text();
         setProgress(100);
       }
+
+      // Ensure scanner animation plays for at least 1.5s for that "sophisticated" feel
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       analyzeText(text, file.name);
     } catch (error) {

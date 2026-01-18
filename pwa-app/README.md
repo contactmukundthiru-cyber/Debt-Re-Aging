@@ -1,50 +1,50 @@
-# Credit Report Analyzer - PWA
+# Credit Report Analyzer - Forensic PWA
 
-A Progressive Web App for detecting FCRA/FDCPA violations and illegal debt re-aging in credit reports.
+A professional-grade Progressive Web App (PWA) designed for deep forensic analysis of credit reports. It detects sophisticated FCRA/FDCPA violations, illegal debt re-aging, and Metro 2® formatting errors that standard credit repair tools miss.
 
-## Features
+## 🚀 Key Features
 
-- **100% Client-Side Processing** - Your data never leaves your device
-- **Offline Capable** - Works without internet after first load
-- **Installable** - Add to home screen on mobile/desktop
-- **FCRA/FDCPA Detection** - 20+ rules for detecting violations
-- **Dispute Letter Generation** - Auto-generate bureau and validation letters
-- **Risk Assessment** - Score-based analysis of case strength
+### 🔍 Advanced Forensic Core
+- **Liability Radar**: Instantly calculates estimated statutory damages (FCRA/FDCPA) and assigns a "Litigation Readiness" score.
+- **Metro 2® Forensic Audit**: Reconstructs the raw data segments used by bureaus to identify deep structural errors and mapping failures often hidden from consumer-facing reports.
+- **Pattern Recognition**: AI-enhanced logic detects 25+ complex violation patterns including "Zombie Debt," "Systemic Re-aging," and "Collector Misconduct."
 
-## Tech Stack
+### ♟️ Tactical & Legal Tools
+- **Tactical Simulator**: Models the internal decision trees of credit bureaus and collectors to predict the "Path of Least Resistance" for deletion.
+- **Master Action Plan**: Automatically generates a prioritized execution roadmap (Immediate, Recommended, Optional) based on the specific forensic profile of the file.
+- **Legal Escalation Engine**: Drafts advanced legal documents including Affidavits of Fact and Notices of Intent to Sue (NOI).
+- **Statute of Limitations (SOL) Tracker**: State-specific SOL calculations for litigation risk assessment.
 
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type-safe code
-- **Tailwind CSS** - Utility-first styling
-- **next-pwa** - PWA functionality
-- **Tesseract.js** - Client-side OCR (optional)
+### 🛡️ Privacy & Architecture
+- **100% Client-Side Processing**: Your sensitive financial data **never** leaves your device. All analysis occurs locally in your browser.
+- **Offline Capable**: Fully functional without an internet connection after initial load.
+- **No External Tracking**: Zero third-party analytics or data collection.
 
-## Quick Deploy to Vercel
+## 🛠️ Tech Stack
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/credit-report-analyzer-pwa)
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript (Strict Mode)
+- **Styling**: Tailwind CSS with custom forensic-dashboard aesthetics
+- **PWA**: `next-pwa` for offline support and installability
+- **State**: React Hooks & Context for high-performance local state management
 
-1. Click the button above
-2. Connect your GitHub account
-3. Deploy!
-
-Your PWA will be live at `https://your-project.vercel.app`
-
-## Manual Deployment
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
+## 📦 Quick Start
 
 ### Install & Run Locally
 
 ```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/credit-report-analyzer-pwa.git
+
+# Install dependencies
 cd pwa-app
 npm install
+
+# Run the development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) to start the analyzer.
 
 ### Build for Production
 
@@ -52,61 +52,20 @@ Open [http://localhost:3000](http://localhost:3000)
 npm run build
 ```
 
-The static site is exported to the `out/` directory.
+The static site is exported to the `out/` directory, ready for drag-and-drop deployment to Netlify, Vercel, or any static host.
 
-### Deploy to Any Static Host
+## 🏛️ For Institutions & Professionals
 
-Since this is a static export, you can deploy to:
+This tool is architecture-ready for adoption by law firms and credit repair organizations:
 
-- **Vercel** (recommended)
-- **Netlify**
-- **GitHub Pages**
-- **Cloudflare Pages**
-- **AWS S3 + CloudFront**
+1.  **Forensic Diffing**: Compare reports over time to track changes and identify "re-insertion" violations automatically.
+2.  **White Label Ready**: Easily customize branding variables in `tailwind.config.js` and `globals.css`.
+3.  **Embeddable**: Designed to run within secure iframes or as a standalone client portal.
 
-Just upload the `out/` directory.
+## ⚠️ Legal Disclaimer
 
-## For Institutions
-
-This app is designed for easy institutional adoption:
-
-### Embedding Options
-
-1. **Direct Link** - Link to the hosted PWA
-2. **iframe** - Embed in your site (remove X-Frame-Options header)
-3. **White Label** - Fork and customize branding
-
-### Customization
-
-Edit these files to customize:
-
-- `public/manifest.json` - App name, colors, icons
-- `src/styles/globals.css` - Colors and styling
-- `src/app/layout.tsx` - Metadata and SEO
-
-### API Integration (Optional)
-
-The app is fully client-side, but you can add API endpoints in `src/app/api/` for:
-
-- Saving cases to a database
-- Analytics tracking
-- User authentication
-
-## Privacy & Security
-
-- **No Server Processing** - All analysis happens in the browser
-- **No Data Collection** - We don't track or store user data
-- **No External Requests** - Works completely offline
-- **Open Source** - Audit the code yourself
-
-## Legal Disclaimer
-
-This tool provides information only and does not constitute legal advice. Users should consult with a qualified attorney for legal matters.
+**This software is for educational and informational purposes only.** It does not constitute legal advice. The "Liability Radar" and "Statute Tracker" provide estimates based on general statutory rules and may not reflect specific case law in your jurisdiction. Always consult with a qualified consumer protection attorney for legal matters.
 
 ## License
 
 MIT License - Free for personal and institutional use.
-
-## Support
-
-For issues or feature requests, please open a GitHub issue.

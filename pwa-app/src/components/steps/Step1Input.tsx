@@ -85,18 +85,49 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               <p className="text-[10px] text-slate-400 uppercase tracking-widest">Secure • Local • Private</p>
             </div>
           </div>
+          import {ForensicScanner} from '../ForensicScanner';
+
+          // ... (in the component)
+
           <div
-            className="upload-area flex-grow min-h-[240px] rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-50/5 dark:hover:bg-emerald-500/5 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative overflow-hidden"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onClick={() => fileInputRef.current?.click()}
-            role="button"
-            tabIndex={0}
-            aria-busy={isProcessing}
+            className="flex-grow flex flex-col items-center justify-center p-0 group relative"
           >
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+            {isProcessing ? (
+              <ForensicScanner progress={progress} stage={progressText} />
+            ) : (
+              <div
+                className="w-full min-h-[300px] flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-50/5 dark:hover:bg-emerald-500/5 transition-all cursor-pointer relative overflow-hidden"
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+
+                <div className="relative z-10 text-center">
+                  <div className="w-24 h-24 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/10 transition-all shadow-xl">
+                    <svg className="w-12 h-12 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+
+                  <button
+                    className="mb-4 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/20 active:scale-95 transition-all flex items-center gap-2 mx-auto"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12h.01M9 16h6M12 12V8m0 4h.01M12 12v4" /></svg>
+                    INITIATE SCAN
+                  </button>
+
+                  <p className="text-sm text-slate-500 mb-2">or drag & drop credit report file</p>
+                  <p className="text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full inline-block">Supports PDF, PNG, JPG, TXT</p>
+                </div>
+              </div>
+            )}
 
             <input
               ref={fileInputRef}
@@ -106,26 +137,6 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
               disabled={isProcessing}
             />
-            {isProcessing ? (
-              <div className="text-center relative z-10">
-                <div className="w-16 h-16 rounded-full border-4 border-slate-200 dark:border-slate-800 border-t-emerald-500 animate-spin mx-auto mb-6" />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">{progressText}</p>
-                <div className="w-48 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mx-auto">
-                  <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-300 rounded-full" style={{ width: `${progress}%` }} />
-                </div>
-              </div>
-            ) : (
-              <div className="relative z-10 text-center">
-                <div className="w-20 h-20 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/10 transition-all shadow-lg">
-                  <svg className="w-10 h-10 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <p className="text-lg font-bold mb-2 dark:text-white group-hover:text-emerald-500 transition-colors">Secure Upload</p>
-                <p className="text-sm text-slate-500 mb-4">PDF, Images, or Text Files</p>
-                <p className="text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full inline-block">Processed locally via WebAssembly sandbox</p>
-              </div>
-            )}
           </div>
         </div>
 
