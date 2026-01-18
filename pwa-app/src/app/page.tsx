@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { parseCreditReport, fieldsToSimple } from '../lib/parser';
+import { parseCreditReport, fieldsToSimple, parseMultipleAccounts, ParsedFields } from '../lib/parser';
 import { runRules, calculateRiskProfile, CreditFields, RuleFlag, RiskProfile } from '../lib/rules';
 import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, ConsumerInfo, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
@@ -116,6 +116,16 @@ import Step6Track from '../components/steps/Step6Track';
 import { FIELD_CONFIG, STATES, ACCOUNT_TYPES, STATUSES, STEPS, ANALYSIS_TABS, Step, LetterType, TabId } from '../lib/constants';
 import { getDateValidation, getDateOrderIssues } from '../lib/validation';
 
+// Institutional & Quality Components
+import {
+  InstitutionalBanner,
+  Onboarding,
+  KeyboardShortcuts,
+  useKeyboardShortcuts
+} from '../components';
+import { saveSession, loadSession, clearSession, createAutoSaver } from '../lib/session-recovery';
+
+
 import {
   loadDisputes,
   createDispute,
@@ -139,25 +149,11 @@ interface AnalyzedAccount {
   id: string;
   rawText: string;
   fields: CreditFields;
+  parsedFields?: ParsedFields;
   flags: RuleFlag[];
   risk: RiskProfile;
 }
 
-// Parse multiple accounts from a credit report
-function parseMultipleAccounts(text: string): { id: string; rawText: string; fields: CreditFields }[] {
-  const accountSections = text.split(/(?=Account\s+(?:Information|#|Number):|TRADELINE|Account\s+Name:)/i);
-
-  return accountSections
-    .filter(section => section.trim().length > 50)
-    .map((section, index) => {
-      const parsed = parseCreditReport(section);
-      return {
-        id: `account-${index}`,
-        rawText: section,
-        fields: fieldsToSimple(parsed)
-      };
-    });
-}
 
 const SAMPLE_TEXT = `Account Information:
 Creditor: PORTFOLIO RECOVERY ASSOC
@@ -193,7 +189,8 @@ export default function CreditReportAnalyzer() {
   const [deltas, setDeltas] = useState<DeltaResult[]>([]);
   const [relevantCaseLaw, setRelevantCaseLaw] = useState<CaseLaw[]>([]);
   const [discoveryAnswers, setDiscoveryAnswers] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<'violations' | 'patterns' | 'deltas' | 'timeline' | 'breakdown' | 'actions' | 'caselaw' | 'scoreimpact' | 'countdown' | 'collector' | 'metro2' | 'lettereditor' | 'legalshield' | 'discovery' | 'lab'>('violations');
+  const [activeTab, setActiveTab] = useState<TabId>('violations');
+  const [activeParsedFields, setActiveParsedFields] = useState<ParsedFields | null>(null);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
@@ -218,6 +215,12 @@ export default function CreditReportAnalyzer() {
   const [editableLetter, setEditableLetter] = useState<string>('');
   const [isBundling, setIsBundling] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
+  const {
+    isOpen: isShortcutsOpen,
+    toggle: toggleShortcuts,
+    close: closeShortcuts
+  } = useKeyboardShortcuts();
+
 
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -241,12 +244,45 @@ export default function CreditReportAnalyzer() {
     if (storedGuide !== null) {
       setShowGuide(storedGuide === 'true');
     }
-    
+
     // Check system preference
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setDarkMode(true);
     }
+
+    // Try to recover session
+    const saved = loadSession();
+    if (saved && step === 1) {
+      const confirmed = window.confirm(`Restore your previous working session? (Started ${new Date(saved.timestamp).toLocaleTimeString()})`);
+      if (confirmed) {
+        setStep(saved.step as Step);
+        setRawText(saved.rawText);
+        setEditableFields(saved.editableFields);
+        setConsumer(saved.consumerInfo);
+        setDiscoveryAnswers(saved.discoveryAnswers);
+      } else {
+        clearSession();
+      }
+    }
   }, []);
+
+  // Auto-save session
+  useEffect(() => {
+    const saver = createAutoSaver(() => ({
+      step,
+      rawText,
+      editableFields,
+      consumerInfo: consumer,
+      discoveryAnswers,
+    }));
+
+    if (step > 1) {
+      saver.start();
+    }
+
+    return () => saver.stop();
+  }, [step, rawText, editableFields, consumer, discoveryAnswers]);
+
 
   useEffect(() => {
     if (darkMode) {
@@ -306,6 +342,7 @@ export default function CreditReportAnalyzer() {
           id: acc.id,
           rawText: acc.rawText,
           fields: acc.fields,
+          parsedFields: acc.parsedFields,
           flags: accountFlags,
           risk: calculateRiskProfile(accountFlags, acc.fields)
         };
@@ -320,6 +357,7 @@ export default function CreditReportAnalyzer() {
     setAnalyzedAccounts([]);
     setExecutiveSummary(null);
     const parsed = parseCreditReport(text);
+    setActiveParsedFields(parsed);
     setEditableFields(fieldsToSimple(parsed));
     setStep(2);
   }, [showToast]);
@@ -525,7 +563,7 @@ export default function CreditReportAnalyzer() {
       setShowHistory(false);
       return;
     }
-    
+
     setEditableFields(record.fields);
     setFlags(record.flags);
     setRiskProfile(record.riskProfile);
@@ -597,7 +635,7 @@ export default function CreditReportAnalyzer() {
     };
 
     const { content, filename } = generators[type]();
-    
+
     if (format === 'pdf') {
       generatePDFLetter(content, filename);
     } else {
@@ -785,17 +823,22 @@ export default function CreditReportAnalyzer() {
         Skip to main content
       </a>
 
+      {/* Institutional Onboarding & Banner */}
+      <Onboarding onComplete={() => showToast('Welcome! Check the shortcuts by pressing ?', 'info')} />
+      <InstitutionalBanner />
+      <KeyboardShortcuts isOpen={isShortcutsOpen} onClose={closeShortcuts} />
+
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed top-4 right-4 z-[100] px-4 py-3 rounded-lg shadow-lg transition-all duration-300 animate-slide-in flex items-center gap-3 ${
-            toast.type === 'error' ? 'bg-red-600 text-white' :
-            toast.type === 'success' ? 'bg-green-600 text-white' :
-            'bg-gray-900 text-white'
-          }`}
+          className={`fixed top-4 right-4 z-[100] px-4 py-3 rounded-lg shadow-premium backdrop-blur-md transition-all duration-300 animate-slide-in flex items-center gap-3 ${toast.type === 'error' ? 'bg-red-600/90 text-white' :
+            toast.type === 'success' ? 'bg-emerald-600/90 text-white' :
+              'bg-slate-900/90 text-white'
+            }`}
           role="alert"
           aria-live="polite"
         >
+
           {toast.type === 'error' && (
             <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -919,6 +962,7 @@ export default function CreditReportAnalyzer() {
               rawText={rawText}
               setRawText={setRawText}
               setEditableFields={setEditableFields}
+              setActiveParsedFields={setActiveParsedFields}
               setStep={setStep}
               fieldsToSimple={fieldsToSimple}
               parseCreditReport={parseCreditReport}
@@ -930,6 +974,8 @@ export default function CreditReportAnalyzer() {
             <Step3Verify
               editableFields={editableFields}
               setEditableFields={setEditableFields}
+              activeParsedFields={activeParsedFields}
+              rawText={rawText}
               consumer={consumer}
               setConsumer={setConsumer}
               runAnalysis={runAnalysis}

@@ -22,10 +22,11 @@ import PatternsTab from './analysis/PatternsTab';
 import TimelineTab from './analysis/TimelineTab';
 import CaseLawTab from './analysis/CaseLawTab';
 import ScoreBreakdownTab from './analysis/ScoreBreakdownTab';
-import LegalShieldTab from './analysis/LegalShieldTab';
 import LetterEditorTab from './analysis/LetterEditorTab';
 import DiscoveryTab from './analysis/DiscoveryTab';
 import ForensicLabTab from './analysis/ForensicLabTab';
+import NarrativeTab from './analysis/NarrativeTab';
+
 
 interface AnalyticsMetric {
   value: string | number;
@@ -55,6 +56,7 @@ interface Step4AnalysisProps {
   setDiscoveryAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   activeTab: TabId;
   setActiveTab: React.Dispatch<React.SetStateAction<TabId>>;
+
   expandedCard: number | null;
   setExpandedCard: (id: number | null) => void;
   deltas: DeltaResult[];
@@ -161,121 +163,123 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
   return (
     <div className="fade-in">
       {/* Evidence Readiness Header */}
-      <div className="mb-6 p-4 panel border-l-4 border-l-gray-900 dark:border-l-white bg-gray-50/50 dark:bg-gray-800/30 flex items-center justify-between shadow-sm">
-        <div>
-          <h3 className="heading-sm text-[10px] mb-1 dark:text-gray-400 uppercase tracking-tighter">Litigation Evidence Readiness</h3>
-          <div className="flex items-center gap-3">
-            <div className="w-48 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all duration-1000 ${readiness > 80 ? 'bg-green-500' : readiness > 40 ? 'bg-blue-500' : 'bg-gray-900 dark:bg-white'}`} 
-                style={{ width: `${readiness}%` }} 
-              />
+      <div className="mb-10 p-6 glass-panel flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-emerald-900/5">
+        <div className="flex items-center gap-6 w-full md:w-auto">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+            <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+          </div>
+          <div className="flex-grow">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 mb-2">Litigation Readiness Score</h3>
+            <div className="flex items-center gap-4">
+              <div className="flex-grow h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-1000 ease-out ${readiness > 80 ? 'bg-emerald-500' : readiness > 40 ? 'bg-blue-500' : 'bg-slate-900 dark:bg-white'}`}
+                  style={{ width: `${readiness}%` }}
+                />
+              </div>
+              <span className="text-lg font-bold tabular-nums dark:text-white">{readiness}%</span>
             </div>
-            <span className="mono text-xs font-bold dark:text-white">{readiness}%</span>
           </div>
         </div>
-        <button 
+        <button
           onClick={() => setActiveTab('discovery')}
-          className="btn btn-ghost text-[10px] uppercase tracking-widest py-1 px-3 border border-gray-200 dark:border-gray-700 rounded hover:bg-white dark:hover:bg-gray-800 dark:text-white"
+          className="btn btn-secondary !py-2.5 !px-6 !text-[10px] !uppercase !tracking-widest !font-bold !rounded-xl !border-slate-200 dark:!border-slate-800"
         >
-          Audit Evidence
+          Conduct Audit
         </button>
       </div>
 
       {/* Summary Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-end gap-6 mb-10">
         <div>
-          <h2 className="heading-lg mb-1 dark:text-white">Analysis Results</h2>
-          <p className="body-md text-gray-600 dark:text-gray-400">
-            {flags.length} {flags.length === 1 ? 'violation' : 'violations'} detected
+          <h2 className="text-4xl font-bold tracking-tight mb-2 dark:text-white">Forensic Analysis Report</h2>
+          <p className="text-slate-500 flex items-center gap-2 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Scan complete: {flags.length} potential violations identified
           </p>
         </div>
-        <div className="flex gap-2 no-print">
+        <div className="flex gap-3 no-print">
           <button
             type="button"
             onClick={() => generateForensicReport(editableFields, flags, riskProfile, relevantCaseLaw, consumer, discoveryAnswers)}
-            className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white shadow-lg transform transition-transform hover:scale-105"
+            className="btn btn-primary !h-12 !px-8 !rounded-xl bg-slate-900 border-none shadow-xl shadow-slate-900/20 hover:scale-[1.02] transition-transform flex items-center gap-2"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Forensic Investigation Report (PDF)
-          </button>
-          <button 
-            type="button" 
-            onClick={() => window.print()} 
-            className="btn btn-secondary shadow-sm dark:border-gray-700 dark:text-white dark:hover:bg-gray-800"
-          >
-            <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            Print
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+            Export Dossier
           </button>
         </div>
       </div>
 
       {/* Score Dashboard */}
-      <div className="grid lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid lg:grid-cols-3 gap-6 mb-10">
         {/* Main Score */}
-        <div className="panel-elevated p-6 lg:col-span-1 dark:bg-gray-800 dark:border-gray-700">
-          <p className="label text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-widest text-[10px]">Case Strength</p>
-          <div className="flex items-end gap-2 mb-4">
-            <span className="text-5xl font-light tracking-tight dark:text-white">{riskProfile.overallScore}</span>
-            <span className="text-gray-400 dark:text-gray-500 mb-2">/100</span>
+        <div className="premium-card p-8 lg:col-span-1 flex flex-col items-center text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6">Aggregate Strength</p>
+          <div className="relative w-32 h-32 flex items-center justify-center mb-6">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="2"></circle>
+              <circle cx="18" cy="18" r="16" fill="none" className="stroke-emerald-500 transition-all duration-1000" strokeWidth="2" strokeDasharray={`${riskProfile.overallScore}, 100`} strokeLinecap="round"></circle>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-4xl font-bold dark:text-white tabular-nums">{riskProfile.overallScore}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Points</span>
+            </div>
           </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-              <span className="text-gray-500 dark:text-gray-400">Risk Level</span>
-              <span className={`font-medium uppercase text-xs tracking-wider ${
-                riskProfile.riskLevel === 'critical' ? 'text-red-500' : 
-                riskProfile.riskLevel === 'high' ? 'text-orange-500' : 'text-gray-900 dark:text-blue-400'
-              }`}>{riskProfile.riskLevel}</span>
-            </div>
-            <div className="flex justify-between py-1.5 border-b border-gray-100 dark:border-gray-700">
-              <span className="text-gray-500 dark:text-gray-400">Dispute Strength</span>
-              <span className="font-medium uppercase text-xs tracking-wider dark:text-white">{riskProfile.disputeStrength}</span>
-            </div>
-            <div className="flex justify-between py-1.5">
-              <span className="text-gray-500 dark:text-gray-400">Litigation Potential</span>
-              <span className="font-medium dark:text-white">{riskProfile.litigationPotential ? 'Yes' : 'No'}</span>
+          <div className="w-full space-y-3">
+            <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Risk Index</span>
+              <span className={`text-xs font-bold uppercase tracking-widest ${riskProfile.riskLevel === 'critical' ? 'text-red-500' :
+                riskProfile.riskLevel === 'high' ? 'text-orange-500' : 'text-emerald-500'
+                }`}>{riskProfile.riskLevel}</span>
             </div>
           </div>
         </div>
 
         {/* Issue Breakdown */}
-        <div className="panel p-6 lg:col-span-1 dark:bg-gray-800/50 dark:border-gray-700">
-          <p className="label text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-widest text-[10px]">Issues by Severity</p>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <span className="flex-1 text-sm dark:text-gray-300">High Severity</span>
-              <span className="heading-md dark:text-white">{issuesByPriority.high.length}</span>
+        <div className="premium-card p-8 lg:col-span-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Violation Matrix</p>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                <span className="text-red-500">Critical (FCRA)</span>
+                <span className="dark:text-white">{issuesByPriority.high.length}</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-red-500" style={{ width: `${(issuesByPriority.high.length / flags.length) * 100}%` }}></div>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-amber-500" />
-              <span className="flex-1 text-sm dark:text-gray-300">Medium</span>
-              <span className="heading-md dark:text-white">{issuesByPriority.medium.length}</span>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                <span className="text-amber-500">Substantial</span>
+                <span className="dark:text-white">{issuesByPriority.medium.length}</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500" style={{ width: `${(issuesByPriority.medium.length / flags.length) * 100}%` }}></div>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
-              <span className="flex-1 text-sm dark:text-gray-300">Low</span>
-              <span className="heading-md dark:text-white">{issuesByPriority.low.length}</span>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+                <span className="text-slate-400">Contextual</span>
+                <span className="dark:text-white">{issuesByPriority.low.length}</span>
+              </div>
+              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full bg-slate-400" style={{ width: `${(issuesByPriority.low.length / flags.length) * 100}%` }}></div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Metrics */}
         {analytics && (
-          <div className="panel p-6 lg:col-span-1 dark:bg-gray-800/50 dark:border-gray-700">
-            <p className="label text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-widest text-[10px]">Forensic Metrics</p>
-            <div className="space-y-2">
-              {Object.entries(analytics.metrics).map(([key, item]) => (
-                <div key={key} className="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-gray-700 last:border-0">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">{key}</span>
-                  <span className={`font-mono text-sm ${
-                    item.status === 'critical' ? 'text-red-600' :
-                    item.status === 'warning' ? 'text-amber-600' : 'text-gray-900 dark:text-white'
-                  }`}>
+          <div className="premium-card p-8 lg:col-span-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Forensic Telemetry</p>
+            <div className="space-y-4">
+              {Object.entries(analytics.metrics).slice(0, 4).map(([key, item]) => (
+                <div key={key} className="flex items-center justify-between pb-3 border-b border-slate-50 dark:border-slate-800 last:border-0 last:pb-0">
+                  <span className="text-xs font-medium text-slate-500">{key}</span>
+                  <span className={`text-xs font-bold font-mono tracking-tight ${item.status === 'critical' ? 'text-red-500' :
+                    item.status === 'warning' ? 'text-amber-500' : 'text-slate-900 dark:text-emerald-400'
+                    }`}>
                     {item.value}
                   </span>
                 </div>
@@ -298,7 +302,9 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
             const getTabLabel = () => {
               switch (tab.id) {
                 case 'violations': return `${translate('analysis.violations')} (${flags.length})`;
+                case 'narrative': return `Case Narrative`;
                 case 'patterns': return `${translate('analysis.patterns')} (${analytics?.patterns.length || 0})`;
+
                 case 'deltas': return `Forensic Diff (${deltas.length})`;
                 case 'caselaw': return `${translate('analysis.caseLaw')} (${relevantCaseLaw.length})`;
                 case 'timeline': return translate('analysis.timeline');
@@ -319,11 +325,10 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
                 tabIndex={isSelected ? 0 : -1}
                 onClick={() => setActiveTab(tab.id)}
                 onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
-                className={`pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  isSelected
-                    ? 'border-gray-900 text-gray-900 dark:border-white dark:text-white'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
+                className={`pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${isSelected
+                  ? 'border-gray-900 text-gray-900 dark:border-white dark:text-white'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                  }`}
               >
                 {getTabLabel()}
               </button>
@@ -335,21 +340,23 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
       {/* Tab Content */}
       <div className="mb-8 min-h-[400px]">
         {activeTab === 'violations' && (
-          <ViolationsTab 
-            flags={flags} 
-            expandedCard={expandedCard} 
-            setExpandedCard={setExpandedCard} 
-            translate={translate} 
+          <ViolationsTab
+            flags={flags}
+            expandedCard={expandedCard}
+            setExpandedCard={setExpandedCard}
+            translate={translate}
           />
         )}
+        {activeTab === 'narrative' && <NarrativeTab flags={flags} editableFields={editableFields} />}
         {activeTab === 'deltas' && <DeltasTab deltas={deltas} />}
+
         {activeTab === 'patterns' && analytics && <PatternsTab patterns={analytics.patterns} />}
         {activeTab === 'timeline' && analytics && <TimelineTab timeline={analytics.timeline} />}
         {activeTab === 'caselaw' && <CaseLawTab relevantCaseLaw={relevantCaseLaw} />}
         {activeTab === 'breakdown' && <ScoreBreakdownTab riskProfile={riskProfile} />}
-        {activeTab === 'legalshield' && <LegalShieldTab editableFields={editableFields} />}
         {activeTab === 'lettereditor' && (
-          <LetterEditorTab 
+
+          <LetterEditorTab
             selectedLetterType={selectedLetterType}
             setSelectedLetterType={setSelectedLetterType}
             editableLetter={editableLetter}
@@ -358,7 +365,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
           />
         )}
         {activeTab === 'discovery' && (
-          <DiscoveryTab 
+          <DiscoveryTab
             flags={flags}
             discoveryAnswers={discoveryAnswers}
             setDiscoveryAnswers={setDiscoveryAnswers}

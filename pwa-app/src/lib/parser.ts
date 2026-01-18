@@ -20,6 +20,7 @@ export interface ParsedFields {
 export interface ParsedAccount {
   id: string;
   fields: CreditFields;
+  parsedFields?: ParsedFields;
   rawText: string;
   bureau?: string;
   confidence: number;
@@ -340,7 +341,7 @@ export function parseCreditReport(text: string): ParsedFields {
 
         // Monetary field cleanup
         if (fieldName.includes('balance') || fieldName.includes('Amount') ||
-            fieldName.includes('Limit') || fieldName === 'creditLimit') {
+          fieldName.includes('Limit') || fieldName === 'creditLimit') {
           const numMatch = value.match(/[\d,]+\.?\d*/);
           if (numMatch) {
             value = numMatch[0];
@@ -353,7 +354,7 @@ export function parseCreditReport(text: string): ParsedFields {
           confidence = 'High';
           value = value.replace(/\s+/g, '');
           value = value.toLowerCase() === 'transunion' ? 'TransUnion' :
-                  value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+            value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
         }
 
         // Account type standardization
@@ -413,6 +414,7 @@ export function parseMultipleAccounts(text: string): ParsedAccount[] {
       accounts.push({
         id: `account-${i + 1}`,
         fields,
+        parsedFields: parsed,
         rawText: section.substring(0, 500),
         bureau: parsed.bureau?.value,
         confidence: quality.score

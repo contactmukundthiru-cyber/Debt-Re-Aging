@@ -9,6 +9,7 @@ import { ParsedFields } from '../../lib/parser';
 interface AnalyzedAccount {
   id: string;
   fields: CreditFields;
+  parsedFields?: ParsedFields;
   flags: RuleFlag[];
   risk: RiskProfile;
   rawText: string;
@@ -23,6 +24,7 @@ interface Step2ReviewProps {
   rawText: string;
   setRawText: (text: string) => void;
   setEditableFields: (fields: CreditFields) => void;
+  setActiveParsedFields: (fields: ParsedFields | null) => void;
   setStep: (step: Step) => void;
   fieldsToSimple: (fields: ParsedFields) => CreditFields;
   parseCreditReport: (text: string) => ParsedFields;
@@ -37,6 +39,7 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   rawText,
   setRawText,
   setEditableFields,
+  setActiveParsedFields,
   setStep,
   fieldsToSimple,
   parseCreditReport,
@@ -55,9 +58,9 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
     const query = searchTerm.trim().toLowerCase();
     const filtered = query
       ? analyzedAccounts.filter(acc => {
-          const name = (acc.fields.furnisherOrCollector || acc.fields.originalCreditor || '').toLowerCase();
-          return name.includes(query);
-        })
+        const name = (acc.fields.furnisherOrCollector || acc.fields.originalCreditor || '').toLowerCase();
+        return name.includes(query);
+      })
       : analyzedAccounts;
     const cloned = [...filtered];
     cloned.sort((a, b) => {
@@ -79,77 +82,59 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
 
   const analyzeAccount = (account: AnalyzedAccount) => {
     setEditableFields(account.fields);
+    setActiveParsedFields(account.parsedFields || null);
     setRawText(account.rawText);
     setStep(3);
   };
 
   return (
     <div className="fade-in max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h2 className="heading-lg mb-2 dark:text-white">
-          {analyzedAccounts.length > 1 ? 'Select Accounts to Analyze' : 'Review Extracted Text'}
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold tracking-tight mb-2 dark:text-white">
+          {analyzedAccounts.length > 1 ? 'Account Forensic Triage' : 'Review Extracted Evidence'}
         </h2>
-        <p className="body-md text-gray-600 dark:text-gray-400">
-          {analyzedAccounts.length > 1 
-            ? `We found ${analyzedAccounts.length} accounts in your report. Select one to proceed with forensic analysis.`
-            : 'Verify the text was extracted correctly. Edit if needed.'}
+        <p className="text-slate-500 font-medium">
+          {analyzedAccounts.length > 1
+            ? `Forensic engine isolated ${analyzedAccounts.length} distinct tradelines. Select a high-risk target for deep analysis.`
+            : 'Verify the OCR/Extraction integrity before launching forensic analysis.'}
         </p>
       </div>
 
       {analyzedAccounts.length > 1 && executiveSummary && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="panel p-4 bg-gray-900 text-white dark:bg-white dark:text-gray-900">
-            <p className="label text-gray-400 dark:text-gray-500 mb-1">Total Found</p>
-            <p className="text-3xl font-bold">{executiveSummary.totalAccounts}</p>
-            <p className="text-[10px] mt-1 text-gray-500">Accounts segmented</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+          <div className="premium-card p-5 bg-slate-900 border-none text-white shadow-xl shadow-slate-900/10">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Tradelines</p>
+            <p className="text-4xl font-bold tabular-nums">{executiveSummary.totalAccounts}</p>
           </div>
-          <div className="panel p-4 border-red-100 bg-red-50/30 dark:bg-red-900/10">
-            <p className="label text-red-500 mb-1">Violations</p>
-            <p className="text-3xl font-bold text-red-600">{executiveSummary.totalViolations}</p>
-            <p className="text-[10px] mt-1 text-red-400">Potential FCRA counts</p>
+          <div className="premium-card p-5 border-none shadow-xl shadow-red-900/5 bg-red-50/50 dark:bg-red-950/20">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">Violations</p>
+            <p className="text-4xl font-bold tabular-nums text-red-600 dark:text-red-400">{executiveSummary.totalViolations}</p>
           </div>
-          <div className="panel p-4 border-amber-100 bg-amber-50/30 dark:bg-amber-900/10">
-            <p className="label text-amber-500 mb-1">Critical</p>
-            <p className="text-3xl font-bold text-amber-600">{executiveSummary.criticalAccounts}</p>
-            <p className="text-[10px] mt-1 text-amber-400">High-risk tradelines</p>
+          <div className="premium-card p-5 border-none shadow-xl shadow-amber-900/5 bg-amber-50/50 dark:bg-amber-950/20">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">High Risk</p>
+            <p className="text-4xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{executiveSummary.criticalAccounts}</p>
           </div>
-          <div className="panel p-4 border-green-100 bg-green-50/30 dark:bg-green-900/10">
-            <p className="label text-green-500 mb-1">Est. Damages</p>
-            <p className="text-2xl font-bold text-green-600">${executiveSummary.totalEstimatedDamages.toLocaleString()}</p>
-            <p className="text-[10px] mt-1 text-green-400">Liability projection</p>
+          <div className="premium-card p-5 border-none shadow-xl shadow-emerald-900/5 bg-emerald-50/50 dark:bg-emerald-950/20">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-2">Est. Recovery</p>
+            <p className="text-3xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">${executiveSummary.totalEstimatedDamages.toLocaleString()}</p>
           </div>
-          
-          {/* Forensic Readiness Card */}
-          {(() => {
-            const totalPossible = Array.from(new Set(flags.flatMap(f => f.suggestedEvidence))).length;
-            const checkedCount = Object.keys(discoveryAnswers).filter(k => k.startsWith('ev-') && discoveryAnswers[k] === 'checked').length;
-            const readiness = totalPossible > 0 ? Math.round((checkedCount / totalPossible) * 100) : 0;
-            
-            return (
-              <div className="panel p-4 border-blue-100 bg-blue-50/30 dark:bg-blue-900/10">
-                <p className="label text-blue-500 mb-1">Discovery Progress</p>
-                <p className="text-2xl font-bold text-blue-600">{readiness}%</p>
-                <p className="text-[10px] mt-1 text-blue-400">Evidence verified</p>
-              </div>
-            );
-          })()}
 
           {executiveSummary.discrepancies.length > 0 && (
-            <div className="md:col-span-4 panel p-4 border-amber-200 bg-amber-50/50 dark:bg-amber-900/20">
-              <div className="flex items-center gap-2 mb-3">
-                <svg className="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <h4 className="heading-sm text-amber-900 dark:text-amber-200">Material Discrepancies Detected</h4>
+            <div className="md:col-span-4 glass-panel p-6 border-amber-200 dark:border-amber-900/50 bg-amber-50/30">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200 uppercase tracking-widest">Cross-Bureau Inconsistencies Detected</h4>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 {executiveSummary.discrepancies.map((d, i) => (
-                  <div key={i} className="bg-white/50 dark:bg-black/20 p-3 rounded border border-amber-100 dark:border-amber-800/30">
-                    <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-tighter mb-1">{d.field}</p>
-                    <p className="body-sm text-amber-700 dark:text-amber-400 mb-2">{d.description}</p>
+                  <div key={i} className="bg-white/60 dark:bg-slate-900/40 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                    <p className="text-[10px] font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-1">{d.field}</p>
+                    <p className="text-xs text-amber-700 dark:text-amber-300 mb-3">{d.description}</p>
                     <div className="flex flex-wrap gap-2">
                       {d.values.map((v, j) => (
-                        <span key={j} className="mono text-[10px] bg-amber-100 dark:bg-amber-900/50 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-200">{v}</span>
+                        <span key={j} className="text-[10px] font-bold bg-amber-100/50 dark:bg-amber-900/30 px-2 py-1 rounded-md border border-amber-200/50 dark:border-amber-800/30 text-amber-800 dark:text-amber-200 tabular-nums">{v}</span>
                       ))}
                     </div>
                   </div>
@@ -162,114 +147,117 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
 
       {analyzedAccounts.length > 1 ? (
         <>
-          <div className="panel p-4 mb-4 dark:bg-gray-900 dark:border-gray-800">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="premium-card p-6 mb-8 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
               <div>
-                <p className="label text-gray-500 dark:text-gray-400">Account Triage</p>
-                <p className="body-sm text-gray-600 dark:text-gray-400">
-                  Sort by risk or violations, then choose the tradeline to analyze.
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Target Prioritization</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Select a tradeline for deep forensic mapping.
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-3">
                 <input
                   type="text"
-                  className="text-xs border border-gray-200 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
-                  placeholder="Search creditor..."
+                  className="w-48 h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 dark:text-white text-xs"
+                  placeholder="Filter by creditor..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <label className="text-xs text-gray-500 dark:text-gray-400">Sort</label>
                 <select
-                  className="text-xs border border-gray-200 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                  className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 dark:text-white text-xs appearance-none cursor-pointer pr-8"
                   value={sortKey}
                   onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
                 >
-                  <option value="risk">Highest Risk</option>
-                  <option value="violations">Most Violations</option>
+                  <option value="risk">High Risk First</option>
+                  <option value="violations">Violation Count</option>
                   <option value="balance">Highest Balance</option>
-                  <option value="name">Name (A–Z)</option>
                 </select>
-                <button
-                  type="button"
-                  className="btn btn-secondary text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  onClick={() => analyzeAccount(sortedAccounts[0])}
-                  disabled={sortedAccounts.length === 0}
-                >
-                  Analyze Top Risk
-                </button>
               </div>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Showing {sortedAccounts.length} of {analyzedAccounts.length} accounts.
-            </p>
           </div>
-          <div className="grid gap-4 mb-8">
+
+          <div className="grid gap-4 mb-10">
             {sortedAccounts.map((acc) => (
               <button
                 key={acc.id}
                 onClick={() => analyzeAccount(acc)}
-                className="panel p-4 text-left hover:border-gray-900 transition-all group dark:bg-gray-900 dark:border-gray-800 dark:hover:border-white"
+                className="premium-card p-6 text-left hover:border-emerald-500/30 transition-all group relative overflow-hidden bg-white/50 dark:bg-slate-900/50"
               >
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center relative z-10">
                   <div>
-                    <p className="heading-md mb-1 dark:text-white">
-                      {acc.fields.furnisherOrCollector || acc.fields.originalCreditor || 'Unknown Account'}
-                    </p>
-                    <div className="flex gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span>Balance: ${acc.fields.currentBalance || '0.00'}</span>
-                      <span>Type: {acc.fields.accountType || 'N/A'}</span>
-                      <span className={`font-medium ${acc.flags.length > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                        {acc.flags.length} potential violations
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`w-2 h-2 rounded-full ${acc.flags.length > 0 ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                      <p className="text-xl font-bold dark:text-white tracking-tight">
+                        {acc.fields.furnisherOrCollector || acc.fields.originalCreditor || 'Unknown Entity'}
+                      </p>
+                    </div>
+                    <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      <span className="flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> ${acc.fields.currentBalance || '0.00'}</span>
+                      <span className="flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg> {acc.fields.accountType || 'N/A'}</span>
+                      <span className={`flex items-center gap-1.5 ${acc.flags.length > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                        {acc.flags.length} Potential Infractions
                       </span>
                     </div>
                   </div>
-                  <svg className="w-5 h-5 text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" /></svg>
+                  </div>
                 </div>
               </button>
             ))}
-            {sortedAccounts.length === 0 && (
-              <div className="panel p-4 text-sm text-gray-500 dark:text-gray-400">
-                No accounts match your search.
-              </div>
-            )}
           </div>
         </>
       ) : (
-        <>
-          {fileName && (
-            <div className="panel-inset p-3 mb-4 flex items-center gap-3 dark:bg-gray-900 dark:border-gray-800">
-              <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span className="body-sm font-medium dark:text-gray-300">{fileName}</span>
-              <span className="mono text-xs text-gray-400 ml-auto">{rawText.length.toLocaleString()} chars</span>
+        <div className="premium-card p-8 mb-8 bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-500/5 rounded-full blur-3xl -mr-32 -mt-32" />
+          <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-slate-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <div>
+                <h3 className="text-xs font-bold dark:text-white uppercase tracking-widest">{fileName || 'Manual Source Extraction'}</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-tighter">Raw Data Stream | {rawText.length.toLocaleString()} Chars</p>
+              </div>
             </div>
-          )}
-
-          <div className="mb-6">
-            <textarea
-              className="textarea h-80 font-mono text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
-              value={rawText}
-              onChange={(e) => setRawText(e.target.value)}
-              placeholder="Extracted text will appear here..."
-            />
+            <button
+              onClick={() => setRawText('')}
+              className="text-[10px] font-bold text-slate-400 tracking-widest border-b border-slate-200 dark:border-slate-800 hover:text-rose-500 hover:border-rose-500 transition-all uppercase"
+            >
+              Clear Buffer
+            </button>
           </div>
-        </>
+
+          <textarea
+            className="w-full h-80 bg-white/50 dark:bg-slate-950/50 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 font-mono text-xs leading-relaxed text-slate-600 dark:text-slate-400 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-inner resize-none relative z-10 custom-scrollbar"
+            value={rawText}
+            onChange={(e) => setRawText(e.target.value)}
+            placeholder="Extracted text will appear here. You can manually refine the data buffer if required..."
+          />
+        </div>
       )}
 
-      <div className="flex justify-between">
-        <button type="button" className="btn btn-secondary dark:bg-gray-800 dark:text-white dark:border-gray-700" onClick={() => setStep(1)}>
-          Back
+      <div className="flex justify-between items-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 mb-12">
+        <button
+          type="button"
+          className="btn btn-secondary !py-4 !px-12 !rounded-2xl dark:text-white"
+          onClick={() => setStep(1)}
+        >
+          Back to Input
         </button>
         {analyzedAccounts.length <= 1 && (
-          <button type="button" className="btn btn-primary" onClick={() => {
-            const parsed = parseCreditReport(rawText);
-            setEditableFields(fieldsToSimple(parsed));
-            setStep(3);
-          }}>
-            Continue to Verify
+          <button
+            type="button"
+            className="btn btn-primary !py-4 !px-12 !rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-95 transition-transform"
+            onClick={() => {
+              const parsed = parseCreditReport(rawText);
+              setActiveParsedFields(parsed);
+              setEditableFields(fieldsToSimple(parsed));
+              setStep(3);
+            }}
+          >
+            Launch Forensic Scan
           </button>
         )}
       </div>

@@ -12,11 +12,12 @@ export interface SessionData {
     timestamp: number;
     step: number;
     rawText: string;
-    editableFields: Record<string, string>;
-    consumerInfo: Record<string, string>;
+    editableFields: any;
+    consumerInfo: any;
     discoveryAnswers: Record<string, string>;
     version: string;
 }
+
 
 const VERSION = '4.4.0';
 

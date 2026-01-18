@@ -85,11 +85,10 @@ const Step5Export: React.FC<Step5ExportProps> = ({
               key={tab}
               type="button"
               onClick={() => setExportTab(tab)}
-              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
-                exportTab === tab
+              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${exportTab === tab
                   ? 'border-gray-900 text-gray-900 dark:border-white dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-              }`}
+                }`}
             >
               {tab === 'letters' && 'Dispute Letters'}
               {tab === 'cfpb' && 'CFPB Complaint'}
@@ -106,9 +105,9 @@ const Step5Export: React.FC<Step5ExportProps> = ({
         {exportTab === 'letters' && (
           <div className="space-y-6">
             <div className="grid sm:grid-cols-2 gap-4">
-              <button 
-                type="button" 
-                className="doc-card group dark:bg-gray-800 dark:border-gray-700 hover:shadow-md transition-shadow" 
+              <button
+                type="button"
+                className="doc-card group dark:bg-gray-800 dark:border-gray-700 hover:shadow-md transition-shadow"
                 onClick={() => downloadDocument('bureau', 'pdf')}
               >
                 <div className="doc-icon group-hover:bg-gray-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-gray-900 transition-colors">B</div>
@@ -119,9 +118,9 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                 <span className="text-[10px] font-bold text-gray-400 border border-gray-200 dark:border-gray-600 px-1 rounded">PDF</span>
               </button>
 
-              <button 
-                type="button" 
-                className="doc-card group dark:bg-gray-800 dark:border-gray-700 hover:shadow-md transition-shadow" 
+              <button
+                type="button"
+                className="doc-card group dark:bg-gray-800 dark:border-gray-700 hover:shadow-md transition-shadow"
                 onClick={() => downloadDocument('validation', 'pdf')}
               >
                 <div className="doc-icon group-hover:bg-gray-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-gray-900 transition-colors">V</div>
@@ -190,52 +189,45 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                 <span className="text-[10px] font-bold text-gray-400 border border-gray-200 dark:border-gray-600 px-1 rounded">TXT</span>
               </button>
             </div>
-            <div className="panel p-5 dark:bg-gray-800 dark:border-gray-700">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <h3 className="heading-md mb-1 dark:text-white">Export Analysis Data</h3>
-                  <p className="body-sm text-gray-500 dark:text-gray-400">Download a JSON snapshot for records or integrations.</p>
+            <div className="premium-card p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 bg-slate-50/50 dark:bg-slate-900/30">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-secondary dark:bg-gray-900 dark:text-white dark:border-gray-700"
-                  onClick={downloadAnalysisJson}
-                >
-                  Download JSON
-                </button>
-              </div>
-            </div>
-            <div className="panel p-5 dark:bg-gray-800 dark:border-gray-700">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <h3 className="heading-md mb-1 dark:text-white">Complete Case Bundle</h3>
-                  <p className="body-sm text-gray-500 dark:text-gray-400">All letters + evidence + attorney export in one TXT file.</p>
+                  <h3 className="text-lg font-bold dark:text-white">Analysis Snapshot</h3>
+                  <p className="text-sm text-slate-500">Download the full raw audit data in JSON format.</p>
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={downloadCaseBundle}
-                >
-                  Download Bundle
-                </button>
               </div>
+              <button
+                type="button"
+                className="btn btn-secondary !rounded-xl !py-3 !px-6 dark:border-slate-700 dark:text-white"
+                onClick={downloadAnalysisJson}
+              >
+                Download Snapshot
+              </button>
             </div>
-            <div className="panel p-5 dark:bg-gray-800 dark:border-gray-700">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+            <div className="premium-card p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 bg-emerald-500/5 border-emerald-500/10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-500">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                </div>
                 <div>
-                  <h3 className="heading-md mb-1 dark:text-white">Case Bundle ZIP</h3>
-                  <p className="body-sm text-gray-500 dark:text-gray-400">TXT files, metadata JSON, and core PDFs in one ZIP.</p>
+                  <h3 className="text-lg font-bold dark:text-white">Institutional Handoff Bundle</h3>
+                  <p className="text-sm text-slate-500">Compressed archive containing all legal artifacts and evidence.</p>
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-secondary dark:bg-gray-900 dark:text-white dark:border-gray-700"
-                  onClick={downloadCaseBundleZip}
-                  disabled={isBundling}
-                >
-                  {isBundling ? 'Preparing ZIP...' : 'Download ZIP'}
-                </button>
               </div>
+              <button
+                type="button"
+                className="btn btn-primary !rounded-xl !py-3 !px-6 shadow-xl shadow-emerald-900/10"
+                onClick={downloadCaseBundleZip}
+                disabled={isBundling}
+              >
+                {isBundling ? 'Compiling Artifacts...' : 'Download ZIP Bundle'}
+              </button>
             </div>
+
           </div>
         )}
 
@@ -442,16 +434,16 @@ const Step5Export: React.FC<Step5ExportProps> = ({
       </div>
 
       <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-100 dark:border-gray-700">
-        <button 
-          type="button" 
-          className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700" 
+        <button
+          type="button"
+          className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
           onClick={() => setStep(4)}
         >
           Back
         </button>
-        <button 
-          type="button" 
-          className="btn btn-primary shadow-lg shadow-blue-500/20" 
+        <button
+          type="button"
+          className="btn btn-primary shadow-lg shadow-blue-500/20"
           onClick={() => setStep(6)}
         >
           Track Disputes

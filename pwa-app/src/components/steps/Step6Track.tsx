@@ -85,31 +85,33 @@ const Step6Track: React.FC<Step6TrackProps> = ({
       {/* Stats Overview */}
       {disputeStats && (
         <div className="grid sm:grid-cols-4 gap-4 mb-8">
-          <div className="panel p-4 text-center dark:bg-gray-800 dark:border-gray-700">
-            <p className="label text-gray-500 dark:text-gray-400 text-xs mb-1">Total</p>
-            <p className="heading-lg dark:text-white">{disputeStats.total}</p>
+          <div className="premium-card p-6 text-center bg-white dark:bg-slate-900/50">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">Total</p>
+            <p className="text-3xl font-bold dark:text-white">{disputeStats.total}</p>
           </div>
-          <div className="panel p-4 text-center dark:bg-gray-800 dark:border-gray-700">
-            <p className="label text-blue-500 dark:text-blue-400 text-xs mb-1">Active</p>
-            <p className="heading-lg dark:text-white">{disputeStats.active}</p>
+          <div className="premium-card p-6 text-center border-blue-500/10 bg-blue-500/5">
+            <p className="text-[10px] uppercase tracking-widest text-blue-500 font-bold mb-1">Active</p>
+            <p className="text-3xl font-bold dark:text-white">{disputeStats.active}</p>
           </div>
-          <div className="panel p-4 text-center dark:bg-gray-800 dark:border-gray-700">
-            <p className="label text-green-500 dark:text-green-400 text-xs mb-1">Resolved</p>
-            <p className="heading-lg dark:text-white">{disputeStats.resolved}</p>
+          <div className="premium-card p-6 text-center border-emerald-500/10 bg-emerald-500/5">
+            <p className="text-[10px] uppercase tracking-widest text-emerald-500 font-bold mb-1">Resolved</p>
+            <p className="text-3xl font-bold dark:text-white">{disputeStats.resolved}</p>
           </div>
-          <div className="panel p-4 text-center dark:bg-gray-800 dark:border-gray-700">
-            <p className="label text-red-500 dark:text-red-400 text-xs mb-1">Success Rate</p>
-            <p className="heading-lg dark:text-white">{disputeStats.successRate}%</p>
+          <div className="premium-card p-6 text-center border-amber-500/10 bg-amber-500/5">
+            <p className="text-[10px] uppercase tracking-widest text-amber-500 font-bold mb-1">Success</p>
+            <p className="text-3xl font-bold dark:text-white">{disputeStats.successRate}%</p>
           </div>
         </div>
       )}
 
+
       {/* List */}
-      <div className="panel p-0 overflow-hidden dark:bg-gray-800 dark:border-gray-700 shadow-sm">
-        <div className="bg-gray-50 dark:bg-gray-700/50 p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-          <h3 className="heading-sm dark:text-white">Active Disputes</h3>
-          <span className="badge badge-dark">{disputes.length} Total</span>
+      <div className="premium-card !p-0 overflow-hidden bg-white/50 dark:bg-slate-900/30">
+        <div className="bg-slate-50 dark:bg-slate-800/50 p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Active Records</h3>
+          <span className="text-[10px] font-bold px-2 py-1 rounded bg-slate-900 text-white dark:bg-white dark:text-slate-900">{disputes.length} CASES</span>
         </div>
+
         {disputes.length > 0 ? (
           <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {disputes.map((dispute) => (
@@ -117,11 +119,10 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        ['draft', 'submitted', 'investigating'].includes(dispute.status) ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                        dispute.status === 'resolved_favorable' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                      }`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${['draft', 'submitted', 'investigating'].includes(dispute.status) ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                          dispute.status === 'resolved_favorable' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                        }`}>
                         {dispute.status}
                       </span>
                       <span className="mono text-[10px] text-gray-400">Created {new Date(dispute.createdAt).toLocaleDateString()}</span>
@@ -165,16 +166,16 @@ const Step6Track: React.FC<Step6TrackProps> = ({
       </div>
 
       <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-100 dark:border-gray-700">
-        <button 
-          type="button" 
-          className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700" 
+        <button
+          type="button"
+          className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
           onClick={() => setStep(5)}
         >
           Back
         </button>
-        <button 
-          type="button" 
-          className="btn btn-primary shadow-lg shadow-blue-500/20" 
+        <button
+          type="button"
+          className="btn btn-primary shadow-lg shadow-blue-500/20"
           onClick={reset}
         >
           Start New Analysis

@@ -39,13 +39,14 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-4">
-            {/* Global Actions */}
-            <nav className="hidden md:flex items-center gap-6 mr-4">
-              <a href={websiteHref} className="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">Documentation</a>
-              <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" className="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">Source</a>
-            </nav>
+            {/* Privacy Shield */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/20">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Zero-Trust Local Audit</span>
+            </div>
 
             <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
+
 
             {/* Dark Mode Toggle */}
             <button

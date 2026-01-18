@@ -15,7 +15,7 @@ export const FIELD_CONFIG = [
   { key: 'estimatedRemovalDate', label: 'Est. Removal Date', section: 'dates', isDate: true, help: 'When it should fall off your report' },
 ];
 
-export const STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
+export const STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC'];
 
 export const ACCOUNT_TYPES = ['Collection', 'Charge-off', 'Credit Card', 'Installment Loan', 'Medical', 'Mortgage', 'Auto Loan', 'Student Loan', 'Personal Loan', 'Utility'];
 
@@ -23,6 +23,7 @@ export const STATUSES = ['Open', 'Closed', 'Paid', 'Settled', 'Transferred', 'So
 
 export const ANALYSIS_TABS = [
   { id: 'violations', label: 'Violations' },
+  { id: 'narrative', label: 'Case Narrative' },
   { id: 'patterns', label: 'Patterns' },
   { id: 'scoreimpact', label: 'Score Impact' },
   { id: 'countdown', label: 'Deadlines' },
@@ -33,11 +34,11 @@ export const ANALYSIS_TABS = [
   { id: 'caselaw', label: 'Case Law' },
   { id: 'breakdown', label: 'Score Breakdown' },
   { id: 'lettereditor', label: 'Letter Editor' },
-  { id: 'legalshield', label: 'Legal Shield' },
   { id: 'discovery', label: 'Forensic Discovery' },
   { id: 'lab', label: 'Forensic Lab' },
   { id: 'actions', label: 'Action Items' },
 ] as const;
+
 
 export type TabId = typeof ANALYSIS_TABS[number]['id'];
 export type Step = 1 | 2 | 3 | 4 | 5 | 6;

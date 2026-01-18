@@ -9,74 +9,110 @@ interface ScoreBreakdownTabProps {
 
 const ScoreBreakdownTab: React.FC<ScoreBreakdownTabProps> = ({ riskProfile }) => {
   return (
-    <div className="fade-in space-y-6">
-      <div className="grid sm:grid-cols-2 gap-4">
-        {riskProfile.scoreBreakdown.map((cat, i) => (
-          <div key={i} className="panel p-5 border-gray-100 dark:border-gray-800 dark:bg-gray-800/50">
-            <div className="flex justify-between items-center mb-3">
-              <h4 className="heading-sm text-gray-900 dark:text-white">{cat.category}</h4>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                cat.impact > 50 ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400' :
-                cat.impact > 20 ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400' : 'bg-gray-50 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-              }`}>
-                Impact: {cat.impact}%
-              </span>
-            </div>
-            <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-3">
-              <div
-                className={`h-full transition-all duration-1000 ${
-                  cat.impact > 50 ? 'bg-red-500' :
-                  cat.impact > 20 ? 'bg-amber-500' : 'bg-green-500'
-                }`}
-                style={{ width: `${cat.impact}%` }}
-              />
-            </div>
-            <p className="body-sm text-gray-500 dark:text-gray-400">{cat.description}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Overall Risk Gauge */}
-      <div className="panel p-6 bg-gray-50/30 dark:bg-gray-800/20 border-dashed dark:border-gray-700">
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className="relative w-32 h-32 flex-shrink-0">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+    <div className="fade-in space-y-8">
+      {/* Risk Level Summary Card */}
+      <div className="premium-card p-8 bg-slate-50/50 dark:bg-slate-900/30 border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col md:flex-row items-center gap-10">
+          <div className="relative w-40 h-40 flex-shrink-0 group">
+            <div className="absolute inset-0 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500" />
+            <svg className="w-full h-full transform -rotate-90 relative z-10" viewBox="0 0 100 100">
               <circle
-                className="text-gray-200 dark:text-gray-700 stroke-current"
-                strokeWidth="8"
+                className="text-slate-200 dark:text-slate-800 stroke-current"
+                strokeWidth="6"
                 fill="transparent"
-                r="40"
+                r="42"
                 cx="50"
                 cy="50"
               />
               <circle
-                className={`stroke-current transition-all duration-1000 ${
-                  riskProfile.riskLevel === 'critical' ? 'text-red-600' :
+                className={`stroke-current transition-all duration-1000 ${riskProfile.riskLevel === 'critical' ? 'text-rose-500' :
                   riskProfile.riskLevel === 'high' ? 'text-orange-500' :
-                  riskProfile.riskLevel === 'medium' ? 'text-amber-500' : 'text-green-500'
-                }`}
-                strokeWidth="8"
-                strokeDasharray={251.2}
-                strokeDashoffset={251.2 - (251.2 * riskProfile.overallScore) / 100}
+                    riskProfile.riskLevel === 'medium' ? 'text-amber-500' : 'text-emerald-500'
+                  }`}
+                strokeWidth="6"
+                strokeDasharray={263.8}
+                strokeDashoffset={263.8 - (263.8 * riskProfile.overallScore) / 100}
                 strokeLinecap="round"
                 fill="transparent"
-                r="40"
+                r="42"
                 cx="50"
                 cy="50"
               />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center flex-col">
-              <span className="text-2xl font-bold dark:text-white">{riskProfile.overallScore}</span>
-              <span className="text-[8px] uppercase tracking-widest text-gray-400 dark:text-gray-500">Risk Index</span>
+            <div className="absolute inset-0 flex items-center justify-center flex-col z-10">
+              <span className="text-4xl font-bold tracking-tight dark:text-white">{riskProfile.overallScore}</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Index</span>
             </div>
           </div>
-          <div className="flex-1 text-center md:text-left">
-            <h3 className="heading-md mb-2 dark:text-white">Dispute Strength: <span className="text-gray-900 dark:text-blue-400 underline decoration-2">{riskProfile.disputeStrength.toUpperCase()}</span></h3>
-            <p className="body-sm text-gray-600 dark:text-gray-400 max-w-lg">
+
+          <div className="flex-1 space-y-4 text-center md:text-left">
+            <div>
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${riskProfile.riskLevel === 'critical' ? 'bg-red-500' : 'bg-emerald-500'
+                  }`} />
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Dispute Viability Profile</h3>
+              </div>
+              <h2 className="text-3xl font-bold tracking-tight dark:text-white">
+                Strength: <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">{riskProfile.disputeStrength.toUpperCase()}</span>
+              </h2>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
               {riskProfile.recommendedApproach}
             </p>
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
+              <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-200 dark:border-slate-700">FCRA COMPLIANT</span>
+              <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-slate-200 dark:border-slate-700">FORENSIC READY</span>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Category Breakdown Grid */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {riskProfile.scoreBreakdown.map((cat, i) => {
+          const isHigh = cat.impact > 60;
+          const isMed = cat.impact > 30;
+
+          return (
+            <div key={i} className="premium-card p-6 bg-white dark:bg-slate-950 flex flex-col group transition-all hover:-translate-y-1">
+              <div className="flex justify-between items-start mb-6">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isHigh ? 'bg-rose-500/10 text-rose-500' : isMed ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'
+                  }`}>
+                  {cat.category === 'Statutory' ? (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.168.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                  ) : cat.category === 'Accuracy' ? (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Impact Score</p>
+                  <p className={`text-xl font-bold ${isHigh ? 'text-rose-500' : isMed ? 'text-amber-500' : 'text-emerald-500'}`}>{cat.impact}%</p>
+                </div>
+              </div>
+
+              <h4 className="text-sm font-bold dark:text-white mb-2 group-hover:text-blue-500 transition-colors uppercase tracking-tight">{cat.category} Analysis</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6 flex-1 italic">
+                {cat.description}
+              </p>
+
+              <div className="space-y-3">
+                <div className="h-1 bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-1000 ${isHigh ? 'bg-rose-500' : isMed ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`}
+                    style={{ width: `${cat.impact}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center text-[8px] font-bold text-slate-400 uppercase tracking-widest">
+                  <span>Standard</span>
+                  <span>Forensic Conflict</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

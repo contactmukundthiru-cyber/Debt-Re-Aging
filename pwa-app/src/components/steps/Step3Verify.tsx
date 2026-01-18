@@ -4,10 +4,13 @@ import React from 'react';
 import { FIELD_CONFIG, ACCOUNT_TYPES, STATUSES, STATES, Step } from '../../lib/constants';
 import { getDateValidation, getCurrencyValidation, getDateOrderIssues } from '../../lib/validation';
 import { CreditFields } from '../../lib/rules';
+import { ParsedFields, getExtractionQuality } from '../../lib/parser';
 
 interface Step3VerifyProps {
   editableFields: Partial<CreditFields>;
   setEditableFields: React.Dispatch<React.SetStateAction<Partial<CreditFields>>>;
+  activeParsedFields: ParsedFields | null;
+  rawText: string;
   consumer: { name?: string; address?: string; state?: string };
   setConsumer: React.Dispatch<React.SetStateAction<{ name?: string; address?: string; state?: string }>>;
   runAnalysis: () => void;
@@ -20,6 +23,8 @@ interface Step3VerifyProps {
 const Step3Verify: React.FC<Step3VerifyProps> = ({
   editableFields,
   setEditableFields,
+  activeParsedFields,
+  rawText,
   consumer,
   setConsumer,
   runAnalysis,
@@ -28,8 +33,10 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
   showHelp,
   setShowHelp,
 }) => {
+  const [showWorkbench, setShowWorkbench] = React.useState(false);
   const dateFields = FIELD_CONFIG.filter(f => f.section === 'dates');
   const amountFields = FIELD_CONFIG.filter(f => f.section === 'amounts');
+
   const dateIssues = dateFields
     .map(field => {
       const value = (editableFields as Record<string, string>)[field.key] || '';
@@ -62,295 +69,284 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
   const logicalBlocking = logicalIssues.filter(issue => issue.severity === 'blocking');
   const canAnalyze = blockingIssues.length === 0 && logicalBlocking.length === 0;
 
+  const quality = activeParsedFields ? getExtractionQuality(activeParsedFields) : null;
+
   return (
     <div className="fade-in max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h2 className="heading-lg mb-2 dark:text-white">Verify Account Details</h2>
-        <p className="body-md text-gray-600 dark:text-gray-400">
-          Accurate dates are critical for violation detection. Hover over labels for guidance.
-        </p>
+      <div className="mb-8 flex items-end justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight mb-2 dark:text-white">Verify Forensic Indicators</h2>
+          <p className="text-slate-500 font-medium">Accurate data points are essential for institutional-grade violation mapping.</p>
+        </div>
+        <button
+          onClick={() => setShowWorkbench(!showWorkbench)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all ${showWorkbench
+            ? 'bg-slate-900 text-white border-slate-900 shadow-lg'
+            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
+            }`}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+          Forensic Workbench
+        </button>
       </div>
 
-      {/* Account Info Section */}
-      <div className="panel mb-4 dark:bg-gray-800/50 dark:border-gray-700">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800">
-          <p className="heading-sm dark:text-white">Account Information</p>
-        </div>
-        <div className="p-4 grid sm:grid-cols-2 gap-4">
-          {FIELD_CONFIG.filter(f => f.section === 'account').map(field => (
-            <div key={field.key} className="relative">
-              <label
-                htmlFor={field.key}
-                className="field-label flex items-center gap-1 cursor-help dark:text-gray-300"
-                onMouseEnter={() => setShowHelp(field.key)}
-                onMouseLeave={() => setShowHelp(null)}
-              >
-                {field.label}
-                <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </label>
-              {showHelp === field.key && field.help && (
-                <div className="absolute z-10 left-0 top-full mt-1 p-2 bg-gray-900 dark:bg-black text-white text-xs rounded shadow-lg max-w-xs transition-opacity">
-                  {field.help}
-                </div>
-              )}
-              {field.key === 'accountType' ? (
-                <select
-                  id={field.key}
-                  className="input dark:bg-gray-900 dark:border-gray-700 dark:text-white"
-                  value={(editableFields as Record<string, string>)[field.key] || ''}
-                  onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                >
-                  <option value="">Select type...</option>
-                  {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              ) : field.key === 'accountStatus' ? (
-                <select
-                  id={field.key}
-                  className="input dark:bg-gray-900 dark:border-gray-700 dark:text-white"
-                  value={(editableFields as Record<string, string>)[field.key] || ''}
-                  onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                >
-                  <option value="">Select status...</option>
-                  {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              ) : (
-                <input
-                  id={field.key}
-                  type="text"
-                  className="input dark:bg-gray-900 dark:border-gray-700 dark:text-white"
-                  value={(editableFields as Record<string, string>)[field.key] || ''}
-                  onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                />
-              )}
+      {quality && (
+        <div className="mb-10 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="relative w-12 h-12 flex items-center justify-center">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-200 dark:stroke-slate-800" strokeWidth="3"></circle>
+                <circle cx="18" cy="18" r="16" fill="none" className="stroke-emerald-500" strokeWidth="3" strokeDasharray={`${quality.score}, 100`}></circle>
+              </svg>
+              <span className="absolute text-[10px] font-bold tabular-nums dark:text-white">{quality.score}%</span>
             </div>
-          ))}
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Extraction Confidence</p>
+              <p className="text-xs font-bold dark:text-emerald-400">{quality.description}</p>
+            </div>
+          </div>
+          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
+          <div className="flex-grow flex flex-wrap gap-2">
+            {quality.details.map((detail, i) => (
+              <span key={i} className="px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-[10px] text-slate-500 font-medium">
+                {detail}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Amounts Section */}
-      <div className="panel mb-4 dark:bg-gray-800/50 dark:border-gray-700">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800">
-          <p className="heading-sm dark:text-white">Financial Amounts</p>
-          <p className="body-sm text-gray-500 dark:text-gray-400 mt-0.5">Enter numbers only; commas and $ are OK.</p>
-        </div>
-        <div className="p-4 grid sm:grid-cols-3 gap-4">
-          {FIELD_CONFIG.filter(f => f.section === 'amounts').map(field => {
-            const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
-            const validation = getCurrencyValidation(fieldValue);
-
-            return (
-              <div key={field.key} className="relative">
-                <label
-                  htmlFor={field.key}
-                  className="field-label flex items-center gap-1 cursor-help dark:text-gray-300"
-                  onMouseEnter={() => setShowHelp(field.key)}
-                  onMouseLeave={() => setShowHelp(null)}
-                >
-                  {field.label}
-                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </label>
-                {showHelp === field.key && field.help && (
-                  <div className="absolute z-10 left-0 top-full mt-1 p-2 bg-gray-900 dark:bg-black text-white text-xs rounded shadow-lg max-w-xs">
-                    {field.help}
-                  </div>
-                )}
-                <input
-                  id={field.key}
-                  type="text"
-                  className={`input font-mono dark:bg-gray-900 dark:text-white ${
-                    !validation.valid
-                      ? 'border-red-300 bg-red-50/50 focus:border-red-500 dark:border-red-900 dark:bg-red-950/20'
-                      : fieldValue && validation.valid
-                        ? 'border-green-300 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20'
-                        : 'dark:border-gray-700'
-                  }`}
-                  value={fieldValue}
-                  onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                  placeholder="$0.00"
-                  aria-invalid={!validation.valid ? "true" : "false"}
-                  aria-describedby={!validation.valid ? `${field.key}-error` : undefined}
-                />
-                {!validation.valid && validation.message && (
-                  <p id={`${field.key}-error`} className="text-xs text-red-500 mt-1">{validation.message}</p>
-                )}
+      <div className={`transition-all duration-500 grid gap-8 ${showWorkbench ? 'lg:grid-cols-[1fr_400px]' : 'grid-cols-1'}`}>
+        <div className="space-y-8">
+          {/* Account Info Section */}
+          <div className="premium-card overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Dates Section */}
-      <div className="panel mb-4 dark:bg-gray-800/50 dark:border-gray-700">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800">
-          <p className="heading-sm dark:text-white">Critical Dates</p>
-          <p className="body-sm text-gray-500 dark:text-gray-400 mt-0.5">These dates determine violations. Enter as YYYY-MM-DD.</p>
-        </div>
-        <div className="p-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FIELD_CONFIG.filter(f => f.section === 'dates').map(field => {
-            const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
-            const validation = getDateValidation(fieldValue, !!field.required);
-
-            return (
-              <div key={field.key} className="relative">
-                <label
-                  htmlFor={field.key}
-                  className="field-label flex items-center gap-1 cursor-help dark:text-gray-300"
-                  onMouseEnter={() => setShowHelp(field.key)}
-                  onMouseLeave={() => setShowHelp(null)}
-                >
-                  {field.label}
-                  {field.required && <span className="text-red-500">*</span>}
-                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </label>
-                {showHelp === field.key && field.help && (
-                  <div className="absolute z-10 left-0 top-full mt-1 p-2 bg-gray-900 dark:bg-black text-white text-xs rounded shadow-lg max-w-xs">
-                    {field.help}
-                  </div>
-                )}
-                <div className="relative">
-                  <input
-                    id={field.key}
-                    type="text"
-                    className={`input font-mono pr-8 dark:bg-gray-900 dark:text-white ${
-                      !validation.valid
-                        ? 'border-red-300 bg-red-50/50 focus:border-red-500 dark:border-red-900 dark:bg-red-950/20'
-                        : fieldValue && validation.valid
-                          ? 'border-green-300 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20'
-                          : 'dark:border-gray-700'
-                    }`}
-                    value={fieldValue}
-                    onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                    placeholder="YYYY-MM-DD"
-                    aria-invalid={!validation.valid ? "true" : "false"}
-                    aria-describedby={!validation.valid ? `${field.key}-error` : undefined}
-                  />
-                  {fieldValue && (
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2">
-                      {validation.valid ? (
-                        <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+              <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Identity & Account Meta</p>
+            </div>
+            <div className="p-8 grid sm:grid-cols-2 gap-8">
+              {FIELD_CONFIG.filter(f => f.section === 'account').map(field => (
+                <div key={field.key} className="relative group">
+                  <label
+                    htmlFor={field.key}
+                    className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-2 cursor-help group-hover:text-emerald-500 transition-colors"
+                    onMouseEnter={() => setShowHelp(field.key)}
+                    onMouseLeave={() => setShowHelp(null)}
+                  >
+                    {field.label}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+                  </label>
+                  {showHelp === field.key && field.help && (
+                    <div className="absolute z-50 left-0 bottom-full mb-2 p-3 glass-panel bg-slate-900 text-white text-[10px] font-medium max-w-xs shadow-2xl">
+                      {field.help}
+                    </div>
+                  )}
+                  {field.key === 'accountType' ? (
+                    <select
+                      id={field.key}
+                      className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-slate-950 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all appearance-none cursor-pointer ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10' : 'border-slate-200 dark:border-slate-800'
+                        }`}
+                      value={(editableFields as Record<string, string>)[field.key] || ''}
+                      onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                    >
+                      <option value="">Select Category...</option>
+                      {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  ) : field.key === 'accountStatus' ? (
+                    <select
+                      id={field.key}
+                      className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-slate-950 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all appearance-none cursor-pointer ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10' : 'border-slate-200 dark:border-slate-800'
+                        }`}
+                      value={(editableFields as Record<string, string>)[field.key] || ''}
+                      onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                    >
+                      <option value="">Select Status...</option>
+                      {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  ) : (
+                    <div className="relative">
+                      <input
+                        id={field.key}
+                        type="text"
+                        className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-slate-950 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-inner ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10' : 'border-slate-200 dark:border-slate-800'
+                          }`}
+                        value={(editableFields as Record<string, string>)[field.key] || ''}
+                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                      />
+                      {activeParsedFields?.[field.key]?.confidence === 'Low' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-amber-500" title="Low confidence extraction - please verify">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                        </div>
                       )}
-                    </span>
+                    </div>
                   )}
                 </div>
-                {!validation.valid && validation.message && (
-                  <p id={`${field.key}-error`} className="text-xs text-red-500 mt-1">{validation.message}</p>
-                )}
+              ))}
+            </div>
+          </div>
+
+          {/* Amounts & Dates Section */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Financial Section */}
+            <div className="premium-card overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Financial Quantifiers</p>
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <div className="p-6 space-y-6">
+                {FIELD_CONFIG.filter(f => f.section === 'amounts').map(field => {
+                  const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
+                  const validation = getCurrencyValidation(fieldValue);
+                  return (
+                    <div key={field.key} className="relative group">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block">{field.label}</label>
+                      <input
+                        type="text"
+                        className={`w-full h-10 px-4 rounded-xl border font-mono text-sm transition-all ${!validation.valid ? 'border-red-500 bg-red-50/30' : 'border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white'
+                          }`}
+                        value={fieldValue}
+                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                        placeholder="$0.00"
+                      />
+                      {!validation.valid && <p className="text-[10px] text-red-500 mt-1 font-bold">{validation.message}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-      {/* Consumer Info */}
-      <div className="panel mb-6 dark:bg-gray-800/50 dark:border-gray-700">
-        <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800">
-          <p className="heading-sm dark:text-white">Your Information</p>
-          <p className="body-sm text-gray-500 dark:text-gray-400 mt-0.5">Optional. Used for personalized dispute letters.</p>
-        </div>
-        <div className="p-4 grid sm:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="consumer-name" className="field-label dark:text-gray-300">Full Name</label>
-            <input
-              id="consumer-name"
-              type="text"
-              className="input dark:bg-gray-900 dark:border-gray-700 dark:text-white"
-              value={consumer.name || ''}
-              onChange={(e) => setConsumer(prev => ({ ...prev, name: e.target.value }))}
-            />
+            {/* Date Section */}
+            <div className="premium-card overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Forensic Chronology</p>
+              </div>
+              <div className="p-6 space-y-6">
+                {FIELD_CONFIG.filter(f => f.section === 'dates').map(field => {
+                  const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
+                  const validation = getDateValidation(fieldValue, !!field.required);
+                  return (
+                    <div key={field.key} className="relative group">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block flex items-center justify-between">
+                        <span>{field.label} {field.required && <span className="text-red-500">*</span>}</span>
+                        {fieldValue && validation.valid && <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" /></svg>}
+                      </label>
+                      <input
+                        type="text"
+                        className={`w-full h-10 px-4 rounded-xl border font-mono text-sm transition-all ${!validation.valid ? 'border-red-500 bg-red-50/30' : 'border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white'
+                          }`}
+                        value={fieldValue}
+                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                        placeholder="YYYY-MM-DD"
+                      />
+                      {!validation.valid && <p className="text-[10px] text-red-500 mt-1 font-bold">{validation.message}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          <div>
-            <label htmlFor="consumer-address" className="field-label dark:text-gray-300">Address</label>
-            <input
-              id="consumer-address"
-              type="text"
-              className="input dark:bg-gray-900 dark:border-gray-700 dark:text-white"
-              value={consumer.address || ''}
-              onChange={(e) => setConsumer(prev => ({ ...prev, address: e.target.value }))}
-            />
+
+          {/* Consumer Info */}
+          <div className="premium-card overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              </div>
+              <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Consumer Attribution</p>
+            </div>
+            <div className="p-8 grid sm:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Legal Name</label>
+                <input
+                  type="text"
+                  className="w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm"
+                  value={consumer.name || ''}
+                  onChange={(e) => setConsumer(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Address</label>
+                <input
+                  type="text"
+                  className="w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm"
+                  value={consumer.address || ''}
+                  onChange={(e) => setConsumer(prev => ({ ...prev, address: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">State Jurisdiction</label>
+                <select
+                  className="w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm appearance-none"
+                  value={consumer.state || ''}
+                  onChange={(e) => {
+                    setConsumer(prev => ({ ...prev, state: e.target.value }));
+                    setEditableFields(prev => ({ ...prev, stateCode: e.target.value }));
+                  }}
+                >
+                  <option value="">Select...</option>
+                  {STATES.map(st => <option key={st} value={st}>{st}</option>)}
+                </select>
+              </div>
+            </div>
           </div>
-          <div>
-            <label htmlFor="consumer-state" className="field-label dark:text-gray-300">State</label>
-            <select
-              id="consumer-state"
-              className="input dark:bg-gray-900 dark:border-gray-700 dark:text-white"
-              value={consumer.state || ''}
-              onChange={(e) => {
-                setConsumer(prev => ({ ...prev, state: e.target.value }));
-                setEditableFields(prev => ({ ...prev, stateCode: e.target.value }));
-              }}
+
+          <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <button
+              type="button"
+              className="btn btn-secondary !py-3 !px-8 !rounded-xl"
+              onClick={() => setStep(2)}
+              disabled={isAnalyzing}
             >
-              <option value="">Select...</option>
-              {STATES.map(st => <option key={st} value={st}>{st}</option>)}
-            </select>
+              Back to Triage
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary !h-14 !px-12 !rounded-xl shadow-xl shadow-emerald-500/10 flex items-center gap-3 active:scale-95 transition-transform"
+              onClick={runAnalysis}
+              disabled={isAnalyzing || !canAnalyze}
+            >
+              {isAnalyzing ? (
+                <>
+                  <div className="spinner w-5 h-5 border-2 border-white/30 border-t-white" />
+                  <span>Analyzing Heuristics...</span>
+                </>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                  <span>Initiate Forensic Scan</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
-      </div>
 
-      {(dateIssues.length > 0 || amountIssues.length > 0 || logicalIssues.length > 0) && (
-        <div className="notice max-w-4xl mx-auto mb-6 border-amber-200 bg-amber-50/60 dark:bg-amber-900/10 dark:border-amber-900/30" aria-live="polite">
-          <p className="heading-sm text-amber-800 dark:text-amber-200 mb-2">Validation Check</p>
-          {(blockingIssues.length > 0 || logicalBlocking.length > 0) && (
-            <p className="body-sm text-amber-700 dark:text-amber-300 mb-2">
-              Required fields need attention before analysis.
-            </p>
-          )}
-          <ul className="text-sm text-amber-700 dark:text-amber-300 list-disc list-inside space-y-1">
-            {dateIssues.map(issue => (
-              <li key={`date-${issue.key}`}>{issue.label}: {issue.message}</li>
-            ))}
-            {amountIssues.map(issue => (
-              <li key={`amount-${issue.key}`}>{issue.label}: {issue.message}</li>
-            ))}
-            {logicalIssues.map((issue, index) => (
-              <li key={`logic-${issue.field}-${index}`}>
-                {issue.message}{issue.severity === 'blocking' ? ' (blocking)' : ''}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {!canAnalyze && (
-        <p className="text-sm text-amber-600 dark:text-amber-300 mb-3">
-          Complete required fields to run analysis.
-        </p>
-      )}
-      <div className="flex justify-between">
-        <button 
-          type="button" 
-          className="btn btn-secondary dark:border-gray-700 dark:text-white dark:hover:bg-gray-800" 
-          onClick={() => setStep(2)} 
-          disabled={isAnalyzing}
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          className="btn btn-primary min-w-[140px]"
-          onClick={runAnalysis}
-          disabled={isAnalyzing || !canAnalyze}
-        >
-          {isAnalyzing ? (
-            <>
-              <div className="spinner w-4 h-4 border-2 border-white/30 border-t-white mr-2" />
-              Analyzing...
-            </>
-          ) : (
-            'Run Analysis'
-          )}
-        </button>
+        {showWorkbench && (
+          <div className="lg:sticky lg:top-8 h-fit space-y-4 fade-in">
+            <div className="premium-card p-6 bg-slate-900 border-none text-white h-[calc(100vh-160px)] flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Forensic Source Evidence</p>
+                <button onClick={() => setShowWorkbench(false)} className="text-slate-500 hover:text-white">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <textarea
+                className="flex-grow w-full bg-slate-950/50 border border-slate-800 rounded-xl p-6 font-mono text-xs leading-relaxed text-slate-300 resize-none focus:ring-1 focus:ring-emerald-500/30 transition-all"
+                value={rawText}
+                readOnly
+              />
+              <p className="text-[9px] text-slate-500 mt-4 leading-normal italic text-center">
+                Review source data for OCR discrepancies while verifying fields on the left.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
