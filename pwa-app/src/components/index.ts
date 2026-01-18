@@ -1,5 +1,6 @@
 /**
  * Component exports
+ * Credit Report Analyzer - v4.4.0
  */
 
 // Error handling
@@ -18,3 +19,8 @@ export {
   NoSearchResultsState,
   NoHistoryState,
 } from './EmptyState';
+
+// Institutional components
+export { InstitutionalBanner } from './InstitutionalBanner';
+export { Onboarding } from './Onboarding';
+export { KeyboardShortcuts, useKeyboardShortcuts } from './KeyboardShortcuts';

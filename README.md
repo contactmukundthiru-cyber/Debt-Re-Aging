@@ -1,8 +1,16 @@
 # Debt Re-Aging Case Factory
 
+**Version 4.4.0 | Institutional Handoff Release**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)](.github/workflows/tests.yml)
+[![Security](https://img.shields.io/badge/Security-Zero--Trust-green.svg)](docs/SECURITY_WHITEPAPER.md)
+
 **Timeline Inconsistency Detection + Dispute Packet Generator**
 
 A privacy-preserving, local-only tool for detecting potential debt re-aging, Statute of Limitations (SOL) violations, and duplicate reporting in credit reports, generating professional dispute documentation.
+
+> 🏛️ **Enterprise-Ready**: This tool is designed for legal aid organizations, consumer advocacy groups, and pro bono clinics. See the [Institutional Handoff Guide](docs/INSTITUTIONAL_HANDOFF.md) for deployment information.
 
 ---
 

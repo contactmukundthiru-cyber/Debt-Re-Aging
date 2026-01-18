@@ -36,6 +36,10 @@ interface Step5ExportProps {
   formatCurrency: (amount: number) => string;
   downloadAnalysisJson: () => void;
   downloadCaseBundle: () => void;
+  downloadCaseBundleZip: () => void;
+  isBundling: boolean;
+  downloadTextFile: (content: string, filename: string) => void;
+  downloadPdfFile: (content: string, filename: string) => void;
 }
 
 const Step5Export: React.FC<Step5ExportProps> = ({
@@ -58,7 +62,11 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   formatAttorneyPackage,
   formatCurrency,
   downloadAnalysisJson,
-  downloadCaseBundle
+  downloadCaseBundle,
+  downloadCaseBundleZip,
+  isBundling,
+  downloadTextFile,
+  downloadPdfFile
 }) => {
   return (
     <div className="fade-in max-w-4xl mx-auto">
@@ -212,6 +220,22 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                 </button>
               </div>
             </div>
+            <div className="panel p-5 dark:bg-gray-800 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h3 className="heading-md mb-1 dark:text-white">Case Bundle ZIP</h3>
+                  <p className="body-sm text-gray-500 dark:text-gray-400">TXT files, metadata JSON, and core PDFs in one ZIP.</p>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary dark:bg-gray-900 dark:text-white dark:border-gray-700"
+                  onClick={downloadCaseBundleZip}
+                  disabled={isBundling}
+                >
+                  {isBundling ? 'Preparing ZIP...' : 'Download ZIP'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -263,23 +287,58 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                 Compile all analysis results, violations, and supporting information into a
                 professional evidence package suitable for legal proceedings.
               </p>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    const pkg = buildEvidencePackage(editableFields, flags, riskProfile!, consumer.name || '', consumer.state || '');
+                    const content = formatEvidencePackage(pkg);
+                    downloadTextFile(content, 'evidence_package.txt');
+                  }}
+                >
+                  Download TXT
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+                  onClick={() => {
+                    const pkg = buildEvidencePackage(editableFields, flags, riskProfile!, consumer.name || '', consumer.state || '');
+                    const content = formatEvidencePackage(pkg);
+                    downloadPdfFile(content, 'evidence_package.pdf');
+                  }}
+                >
+                  Download PDF
+                </button>
+              </div>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
                 onClick={() => {
                   const pkg = buildEvidencePackage(editableFields, flags, riskProfile!, consumer.name || '', consumer.state || '');
                   const content = formatEvidencePackage(pkg);
-                  const blob = new Blob([content], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = 'evidence_package.txt';
-                  link.click();
-                  URL.revokeObjectURL(url);
+                  downloadPdfFile(content, 'evidence_package.pdf');
                 }}
               >
-                Generate Evidence Package
+                Download PDF
               </button>
+            </div>
+            <div className="panel p-6 dark:bg-gray-800 dark:border-gray-700">
+              <h4 className="heading-sm mb-2 dark:text-white">Evidence Checklist</h4>
+              <p className="body-sm text-gray-600 dark:text-gray-400 mb-4">
+                Cross-check suggested evidence against your verified items before filing.
+              </p>
+              <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                {Array.from(new Set(flags.flatMap(f => f.suggestedEvidence))).slice(0, 6).map((item, index) => (
+                  <div key={`${item}-${index}`} className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+                {Array.from(new Set(flags.flatMap(f => f.suggestedEvidence))).length > 6 && (
+                  <p className="text-xs text-gray-500">More evidence items available in the Discovery tab.</p>
+                )}
+              </div>
             </div>
 
             {damageEstimate && (
@@ -313,34 +372,52 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                 Generate a comprehensive package for attorney consultation including case analysis,
                 violation summary, collector intelligence, and fee structure analysis.
               </p>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => {
-                  const pkg = buildAttorneyPackage(
-                    editableFields,
-                    flags,
-                    riskProfile!,
-                    {
-                      name: consumer.name || '',
-                      address: consumer.address || '',
-                      city: '',
-                      state: consumer.state || '',
-                      zip: ''
-                    }
-                  );
-                  const content = formatAttorneyPackage(pkg);
-                  const blob = new Blob([content], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = 'attorney_consultation_package.txt';
-                  link.click();
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                Generate Attorney Package
-              </button>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    const pkg = buildAttorneyPackage(
+                      editableFields,
+                      flags,
+                      riskProfile!,
+                      {
+                        name: consumer.name || '',
+                        address: consumer.address || '',
+                        city: '',
+                        state: consumer.state || '',
+                        zip: ''
+                      }
+                    );
+                    const content = formatAttorneyPackage(pkg);
+                    downloadTextFile(content, 'attorney_consultation_package.txt');
+                  }}
+                >
+                  Download TXT
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+                  onClick={() => {
+                    const pkg = buildAttorneyPackage(
+                      editableFields,
+                      flags,
+                      riskProfile!,
+                      {
+                        name: consumer.name || '',
+                        address: consumer.address || '',
+                        city: '',
+                        state: consumer.state || '',
+                        zip: ''
+                      }
+                    );
+                    const content = formatAttorneyPackage(pkg);
+                    downloadPdfFile(content, 'attorney_consultation_package.pdf');
+                  }}
+                >
+                  Download PDF
+                </button>
+              </div>
             </div>
 
             <div className="panel p-6 dark:bg-gray-800 dark:border-gray-700">

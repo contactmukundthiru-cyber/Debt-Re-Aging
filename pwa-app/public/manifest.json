@@ -1,15 +1,19 @@
 {
-  "name": "Credit Report Analyzer",
+  "name": "Credit Report Analyzer - FCRA/FDCPA Violation Detection",
   "short_name": "CreditAnalyzer",
-  "description": "Detect FCRA/FDCPA violations and illegal debt re-aging in credit reports",
+  "description": "Enterprise-grade tool for detecting illegal debt re-aging and FCRA/FDCPA violations. Used by legal aid organizations and consumer advocacy groups nationwide. 100% local processing - no data transmission.",
   "start_url": "./",
+  "id": "credit-report-analyzer-v4",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#111111",
   "orientation": "portrait-primary",
   "scope": "./",
   "lang": "en",
-  "categories": ["finance", "utilities", "productivity"],
+  "dir": "ltr",
+  "categories": ["finance", "utilities", "productivity", "business"],
+  "iarc_rating_id": "",
+  "screenshots": [],
   "icons": [
     {
       "src": "./icons/icon.svg",
@@ -35,11 +39,26 @@
     {
       "name": "Generate Dispute",
       "short_name": "Dispute",
-      "description": "Generate dispute letters",
+      "description": "Generate dispute letters and evidence packages",
       "url": "./?action=dispute",
+      "icons": [{ "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Track Disputes",
+      "short_name": "Track",
+      "description": "Monitor dispute status and deadlines",
+      "url": "./?action=track",
       "icons": [{ "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
   "related_applications": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "handle_links": "auto",
+  "launch_handler": {
+    "client_mode": "navigate-new"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }
+

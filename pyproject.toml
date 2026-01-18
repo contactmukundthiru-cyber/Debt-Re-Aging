@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "credit-report-analyzer"
-version = "1.0.0"
+version = "4.4.0"
 authors = [
   { name="Mukund Thiru", email="contactmukundthiru1@gmail.com" },
 ]

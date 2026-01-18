@@ -29,16 +29,25 @@ export function generatePDFLetter(content: string, filename: string) {
 }
 
 /**
- * Generate a comprehensive Forensic Investigation Report
+ * Generate a PDF blob from plain text content.
  */
-export function generateForensicReport(
-  fields: CreditFields, 
-  flags: RuleFlag[], 
-  risk: RiskProfile, 
+export function generatePDFBlob(content: string): Blob {
+  const doc = new jsPDF();
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  const splitText = doc.splitTextToSize(content, 180);
+  doc.text(splitText, 15, 20);
+  return doc.output('blob');
+}
+
+function buildForensicReportDoc(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  risk: RiskProfile,
   caseLaw: CaseLaw[],
   consumer: ConsumerInfo,
   discoveryAnswers: Record<string, string>
-) {
+): jsPDF {
   const doc = new jsPDF();
   let y = 20;
 
@@ -169,7 +178,37 @@ export function generateForensicReport(
     doc.text(`Page ${i} of ${pageCount}`, 190, 290, { align: 'right' });
   }
 
+  return doc;
+}
+
+/**
+ * Generate a comprehensive Forensic Investigation Report
+ */
+export function generateForensicReport(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  risk: RiskProfile,
+  caseLaw: CaseLaw[],
+  consumer: ConsumerInfo,
+  discoveryAnswers: Record<string, string>
+) {
+  const doc = buildForensicReportDoc(fields, flags, risk, caseLaw, consumer, discoveryAnswers);
   doc.save(`Forensic_Report_${fields.furnisherOrCollector?.replace(/\s+/g, '_') || 'Account'}.pdf`);
+}
+
+/**
+ * Generate a forensic report PDF blob.
+ */
+export function generateForensicReportBlob(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  risk: RiskProfile,
+  caseLaw: CaseLaw[],
+  consumer: ConsumerInfo,
+  discoveryAnswers: Record<string, string>
+): Blob {
+  const doc = buildForensicReportDoc(fields, flags, risk, caseLaw, consumer, discoveryAnswers);
+  return doc.output('blob');
 }
 
 /**

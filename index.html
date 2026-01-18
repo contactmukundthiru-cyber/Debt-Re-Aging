@@ -6,119 +6,107 @@
     <title>Debt Re-Aging Case Factory - Credit Report Forensic Analysis</title>
     <meta name="description" content="Professional open-source tool for legal aid organizations to detect illegal debt re-aging and FCRA violations. Process credit reports locally and privately.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.2);
             --slate-50: #f8fafc;
             --slate-100: #f1f5f9;
             --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
             --slate-400: #94a3b8;
             --slate-600: #475569;
             --slate-700: #334155;
+            --slate-800: #1e293b;
             --slate-900: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --font-main: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+            --font-serif: 'Fraunces', serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            font-family: var(--font-main);
             background: #fff;
-            color: var(--slate-700);
+            color: var(--slate-800);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-        /* Header */
+        /* Smooth Section Transitions */
+        section { opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        section.visible { opacity: 1; transform: translateY(0); }
+
+        /* Header Enhancement */
         header {
-            padding: 24px 0;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(8px);
+            padding: 20px 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             position: sticky;
             top: 0;
-            z-index: 50;
+            z-index: 100;
             border-bottom: 1px solid var(--slate-100);
+            transition: all 0.3s ease;
         }
 
-        header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        header.scrolled { padding: 12px 0; border-bottom: 1px solid var(--slate-200); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
 
         .logo {
-            font-weight: 700;
-            font-size: 18px;
+            font-family: var(--font-serif);
+            font-weight: 800;
+            font-size: 20px;
             text-decoration: none;
             color: var(--slate-900);
-            letter-spacing: -0.02em;
-        }
-
-        nav {
+            letter-spacing: -0.01em;
             display: flex;
             align-items: center;
-            gap: 32px;
+            gap: 8px;
         }
 
+        nav { display: flex; align-items: center; gap: 32px; }
         nav a {
             text-decoration: none;
             color: var(--slate-600);
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             transition: color 0.2s;
+            position: relative;
         }
-
         nav a:hover { color: var(--slate-900); }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-
-        /* Hero */
-        .hero {
-            padding: 100px 0 80px;
-            text-align: center;
-            background: radial-gradient(circle at top center, #f1f5f9 0%, #fff 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before,
-        .hero::after {
-            content: "";
+        nav a::after {
+            content: '';
             position: absolute;
-            width: 420px;
-            height: 420px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.18), rgba(37, 99, 235, 0));
-            filter: blur(2px);
-            z-index: 0;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
         }
+        nav a:hover::after { width: 100%; }
 
-        .hero::before {
-            top: -140px;
-            left: -120px;
-        }
-
-        .hero::after {
-            bottom: -180px;
-            right: -140px;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0));
-        }
-
-        .hero .container {
+        /* Hero Revamp */
+        .hero {
+            padding: 140px 0 100px;
+            text-align: center;
+            background: radial-gradient(circle at 50% 0%, #f1f5f9 0%, #ffffff 70%);
             position: relative;
-            z-index: 1;
         }
 
         .hero h1 {
-            font-size: 56px;
+            font-family: var(--font-serif);
+            font-size: clamp(40px, 8vw, 72px);
             font-weight: 800;
-            line-height: 1.1;
+            line-height: 1.05;
             margin-bottom: 24px;
             color: var(--slate-900);
             letter-spacing: -0.03em;
@@ -127,40 +115,34 @@
         .hero p {
             font-size: 20px;
             color: var(--slate-600);
-            max-width: 640px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 48px;
+            max-width: 700px;
+            margin: 0 auto 48px;
         }
 
         .btn {
-            display: inline-block;
-            padding: 16px 32px;
-            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 36px;
+            border-radius: 14px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             border: none;
+            gap: 10px;
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--slate-900);
             color: #fff;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -2px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
         }
-
         .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+            transform: translateY(-2px);
+            background: var(--primary-light);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3);
         }
 
         .btn-secondary {
@@ -168,299 +150,115 @@
             color: var(--slate-900);
             border: 1px solid var(--slate-200);
         }
-
         .btn-secondary:hover {
             background: var(--slate-50);
             border-color: var(--slate-300);
+            transform: translateY(-2px);
         }
 
-        .trust-badges {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--slate-600);
-        }
-
-        .trust-badges span {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .trust-badges svg {
-            width: 18px;
-            height: 18px;
-            color: var(--primary);
-        }
-
-        /* Platform Grid */
-        .platform-section {
-            padding: 80px 0;
-            background: #fff;
-        }
-
-        .steps-section {
-            padding: 80px 0;
-            background: var(--slate-50);
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-
-        .step-card {
-            background: #fff;
-            border-radius: 18px;
-            border: 1px solid var(--slate-200);
-            padding: 28px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-        }
-
-        .step-card span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            background: var(--slate-900);
-            color: #fff;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .step-card h3 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--slate-900);
-        }
-
-        .step-card p {
-            font-size: 14px;
-            color: var(--slate-600);
-        }
-
-        .platform-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            margin-top: 48px;
-        }
-
+        /* Platform Cards */
+        .platform-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; margin-top: 60px; }
         .platform-card {
-            padding: 40px;
-            border-radius: 24px;
+            background: #fff;
+            padding: 48px;
+            border-radius: 32px;
             border: 1px solid var(--slate-200);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
         }
-
         .platform-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
         }
 
-        .platform-card h3 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: var(--slate-900);
-        }
-
-        .platform-card p {
-            font-size: 16px;
-            color: var(--slate-600);
-            margin-bottom: 24px;
-            flex-grow: 1;
-        }
-
-        .feature-list {
-            list-style: none;
-            margin-bottom: 32px;
-        }
+        .platform-card h3 { font-family: var(--font-serif); font-size: 28px; margin-bottom: 20px; }
 
         .feature-list li {
-            font-size: 14px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .feature-list li::before {
-            content: "✓";
-            color: #10b981;
-            font-weight: 700;
-        }
-
-        /* FAQ */
-        .faq-section {
-            padding: 80px 0;
-            background: var(--slate-50);
-        }
-
-        .faq-grid {
-            max-width: 700px;
-            margin: 48px auto 0;
-        }
-
-        .faq-item {
-            margin-bottom: 16px;
-            background: #fff;
-            border-radius: 12px;
-            border: 1px solid var(--slate-200);
-            overflow: hidden;
-        }
-
-        .faq-item summary {
-            padding: 20px 24px;
-            font-weight: 600;
-            cursor: pointer;
             list-style: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .faq-item summary::after {
-            content: "+";
-            font-size: 20px;
-            color: var(--slate-400);
-        }
-
-        .faq-item[open] summary::after {
-            content: "−";
-        }
-
-        .faq-content {
-            padding: 0 24px 20px;
+            padding-left: 28px;
+            position: relative;
+            margin-bottom: 12px;
             font-size: 15px;
             color: var(--slate-600);
         }
-
-        /* Footer */
-        footer {
-            padding: 60px 0 40px;
-            border-top: 1px solid var(--slate-200);
-            text-align: center;
+        .feature-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 800;
         }
 
-        .footer-logo {
-            font-weight: 700;
-            color: var(--slate-900);
-            margin-bottom: 16px;
-            display: block;
-        }
-
-        .footer-links {
-            margin-bottom: 32px;
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-        }
-
-        .footer-links a {
-            text-decoration: none;
-            color: var(--slate-600);
-            font-size: 14px;
-        }
-
-        .footer-author {
-            font-size: 13px;
-            color: var(--slate-400);
-        }
-
+        /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 40px; }
+            .hero { padding: 80px 0 60px; }
             .platform-grid { grid-template-columns: 1fr; }
-            .steps-grid { grid-template-columns: 1fr; }
             nav { display: none; }
-            .trust-badges { flex-direction: column; gap: 16px; align-items: center; }
         }
     </style>
 </head>
 <body>
-    <header>
+    <header id="site-header">
         <div class="container">
-            <a href="#" class="logo">Debt Re-Aging Case Factory</a>
+            <a href="#" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Debt Re-Aging<span>Case Factory</span>
+            </a>
             <nav>
                 <a href="#platforms">Platforms</a>
-                <a href="#how-it-works">Features</a>
+                <a href="#how-it-works">Process</a>
                 <a href="#faq">FAQ</a>
-                <a href="./pwa-app/">Web App</a>
-                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" class="btn btn-secondary btn-small">GitHub</a>
+                <a href="./pwa-app/">Launch Portal</a>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" class="btn btn-secondary btn-small">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    Source
+                </a>
             </nav>
         </div>
     </header>
 
-    <section class="hero">
+    <section class="hero reveal">
         <div class="container">
-            <h1>Forensic Analysis for<br>Credit Reporting Errors.</h1>
-            <p>A professional toolkit to detect illegal debt re-aging, SOL violations, and systemic reporting errors. Used by legal aid and consumer advocates.</p>
-            <div class="hero-buttons">
-                <a href="#platforms" class="btn btn-primary">Choose Your Platform</a>
-                <a href="./pwa-app/" class="btn btn-secondary">Launch Web App</a>
-                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" class="btn btn-secondary">Documentation</a>
-            </div>
-            <div class="trust-badges">
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                    100% Private & Local
-                </span>
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    Instant Analysis
-                </span>
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Zero Cost
-                </span>
+            <span style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 16px; display: block;">Open-Source Credit Forensics</span>
+            <h1>The Gold Standard for<br>Report Correction.</h1>
+            <p>Institutional-grade forensic toolkit designed to detect illegal debt re-aging, SOL violations, and systemic reporting errors locally on your machine.</p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="./pwa-app/" class="btn btn-primary">Launch Web Portal</a>
+                <a href="#platforms" class="btn btn-secondary">System Comparison</a>
             </div>
         </div>
     </section>
 
     <section class="platform-section" id="platforms">
         <div class="container">
-            <h2 style="text-align: center; font-size: 32px; font-weight: 800; color: var(--slate-900); margin-bottom: 48px;">Choose Your Analytical Power</h2>
+            <h2 style="text-align: center; font-family: var(--font-serif); font-size: 42px; margin-bottom: 60px;">Analytical Power Comparison</h2>
             <div class="platform-grid">
-                <!-- PWA / Web App -->
-                <div class="platform-card">
-                    <div style="margin-bottom: 24px;">
-                        <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;">INSTANT ANALYSIS</span>
-                    </div>
+                <div class="platform-card" style="border-top: 4px solid var(--accent);">
                     <h3>Forensic Web Portal</h3>
-                    <p>The fastest way to verify a single report. Built for speed and individual case verification.</p>
-                    <ul class="feature-list">
-                        <li><strong>Multi-Format OCR</strong>: Instant processing of PDF, images, and text.</li>
-                        <li><strong>Live Violation Scoring</strong>: Real-time calculation of risk and dispute strength.</li>
-                        <li><strong>Multi-Account Triage</strong>: Detect and rank multiple tradelines in one upload.</li>
-                        <li><strong>Mobile Forensic Suite</strong>: Carry a full law library and analytical engine in your pocket.</li>
-                        <li><strong>Offline Execution</strong>: No internet required after first load.</li>
+                    <p style="color: var(--slate-600); margin-bottom: 32px;">Agile, private, and instant. The quickest way to verify a single case from any device.</p>
+                    <ul class="feature-list" style="flex-grow: 1;">
+                        <li><strong>Multi-Format OCR</strong>: Immediate extraction from PDF/Images.</li>
+                        <li><strong>Violation Scoring</strong>: Real-time risk and dispute probability.</li>
+                        <li><strong>Evidence ZIP</strong>: One-click export of letters and metadata.</li>
+                        <li><strong>Zero Connection</strong>: Runs 100% locally in your sandbox.</li>
                     </ul>
-                    <a href="./pwa-app/" class="btn btn-primary" style="text-align: center;">Open Web Portal</a>
+                    <a href="./pwa-app/" class="btn btn-primary" style="margin-top: 32px;">Open Web Portal</a>
                 </div>
 
-                <!-- Full Suite -->
                 <div class="platform-card">
-                    <div style="margin-bottom: 24px;">
-                        <span style="background: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;">INSTITUTIONAL GRADE</span>
-                    </div>
-                    <h3>Enterprise Desktop Suite</h3>
-                    <p>The gold standard for legal clinics. Designed for high-volume case management and systemic auditing.</p>
-                    <ul class="feature-list">
-                        <li><strong>Systemic Behavioral Audit</strong>: Prove willful violations across multiple accounts.</li>
-                        <li><strong>CMS Integration</strong>: Seamless sync with Legal Server, Salesforce, and Clio.</li>
-                        <li><strong>Case Law Mapping</strong>: Automated citation of relevant FCRA/FDCPA precedents.</li>
-                        <li><strong>Full Database Persistence</strong>: Historical tracking of dispute outcomes.</li>
+                    <h3>Enterprise Suite</h3>
+                    <p style="color: var(--slate-600); margin-bottom: 32px;">For legal clinics and high-volume advocates. Built for long-term database management.</p>
+                    <ul class="feature-list" style="flex-grow: 1;">
+                        <li><strong>CMS Orchestration</strong>: Sync with LegalServer and Salesforce.</li>
+                        <li><strong>Systemic Auditing</strong>: Cross-reference trends across thousands of cases.</li>
+                        <li><strong>Full SQL Database</strong>: Persistent storage for litigation tracking.</li>
+                        <li><strong>Custom Workflows</strong>: API-first design for internal automation.</li>
                     </ul>
-                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md" class="btn btn-secondary" style="text-align: center;">Deploy Enterprise Suite</a>
+                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md" class="btn btn-secondary" style="margin-top: 32px;">Technical Specs</a>
                 </div>
             </div>
         </div>
@@ -489,6 +287,21 @@
             </div>
             <div style="display: flex; justify-content: center; margin-top: 32px;">
                 <a href="./pwa-app/" class="btn btn-primary">Open the Web App</a>
+            </div>
+        </div>
+    </section>
+
+    <section style="padding: 70px 0; background: var(--slate-50);">
+        <div class="container">
+            <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+                <h2 style="font-size: 30px; color: var(--slate-900); margin-bottom: 12px;">Export Everything, Instantly</h2>
+                <p style="color: var(--slate-600); margin-bottom: 24px;">
+                    Generate PDF letters, evidence packages, attorney briefs, and a complete ZIP bundle with one click.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <a href="./pwa-app/" class="btn btn-secondary">See Exports in the Web App</a>
+                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md" class="btn btn-secondary">Download Desktop Suite</a>
+                </div>
             </div>
         </div>
     </section>
@@ -532,6 +345,44 @@
         </div>
     </section>
 
+    <section style="padding: 100px 0; background: var(--slate-900); color: #fff;">
+        <div class="container">
+            <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                <h2 style="font-family: var(--font-serif); font-size: 42px; margin-bottom: 24px;">Privacy as a Core Directive</h2>
+                <p style="color: var(--slate-400); font-size: 18px; margin-bottom: 40px;">Unlike commercial services, the Case Factory never sees your data. All forensic analysis remains strictly within your browser's private memory or your local server instance.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: left;">
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 12px;">Zero Cloud Sync</h4>
+                        <p style="font-size: 14px; color: var(--slate-400);">No accounts. No databases. No tracking. Your client's privacy is absolute.</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 12px;">WASM Processing</h4>
+                        <p style="font-size: 14px; color: var(--slate-400);">Complex logic executes at near-native speeds directly in your client's browser.</p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--accent); margin-bottom: 12px;">Open Audit</h4>
+                        <p style="font-size: 14px; color: var(--slate-400);">Every line of code is open for jurisdictional security review and institutional approval.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="padding: 70px 0; background: #fff;">
+        <div class="container" style="display: grid; gap: 24px; align-items: center;">
+            <div style="text-align: center;">
+                <h2 style="font-size: 30px; color: var(--slate-900); margin-bottom: 12px;">Ready to run a forensic check?</h2>
+                <p style="color: var(--slate-600); max-width: 640px; margin: 0 auto 24px;">
+                    Launch the web app for instant analysis or deploy the desktop suite for full-scale case management.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <a href="./pwa-app/" class="btn btn-primary">Open Web App</a>
+                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md" class="btn btn-secondary">Deploy Desktop Suite</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="faq-section" id="faq">
         <div class="container">
             <h2 style="text-align: center; font-size: 32px; font-weight: 800; color: var(--slate-900);">Common Questions</h2>
@@ -554,23 +405,57 @@
                         It specializes in detecting "debt re-aging" (when collectors illegally refresh the 7-year reporting clock), statute of limitations violations, duplicate reporting by multiple collectors, and medical debt reporting violations.
                     </div>
                 </details>
+                <details class="faq-item">
+                    <summary>Does the web app work offline?</summary>
+                    <div class="faq-content">
+                        Yes. After the first load, the web app runs fully offline and processes everything locally on your device.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>What should I upload?</summary>
+                    <div class="faq-content">
+                        Upload a PDF, image, or paste the account section from your credit report. Scanned PDFs will run OCR automatically.
+                    </div>
+                </details>
             </div>
         </div>
     </section>
 
-    <footer>
-        <div class="container">
-            <span class="footer-logo">Debt Re-Aging Case Factory</span>
-            <div class="footer-links">
-                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging">GitHub</a>
-                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/issues">Report Issue</a>
-                <a href="mailto:contactmukundthiru1@gmail.com">Contact</a>
+    <footer style="padding: 80px 0; background: #fff; border-top: 1px solid var(--slate-200);">
+        <div class="container" style="text-align: center;">
+            <div class="logo" style="justify-content: center; margin-bottom: 24px;">Debt Re-Aging<span>Case Factory</span></div>
+            <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 32px;">
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Platform</a>
+                <a href="mailto:contactmukundthiru1@gmail.com" style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Contact</a>
+                <a href="#" style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Documentation</a>
             </div>
-            <p class="footer-author">Built with care by Mukund Thiru for the consumer advocacy community.</p>
+            <p style="font-size: 13px; color: var(--slate-400);">© 2026 Developed for the consumer legal aid community.</p>
         </div>
     </footer>
-</body>
-</html>
 
+    <script>
+        // Intersection Observer for Scroll Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Header Scroll Effect
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('site-header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    </script>
 </body>
 </html>

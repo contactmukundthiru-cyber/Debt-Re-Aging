@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { parseCreditReport, fieldsToSimple } from '../lib/parser';
 import { runRules, calculateRiskProfile, CreditFields, RuleFlag, RiskProfile } from '../lib/rules';
-import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, ConsumerInfo, generatePDFLetter, generateForensicReport } from '../lib/generator';
+import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, ConsumerInfo, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
 import { isPDF, extractPDFText, extractPDFTextViaOCR } from '../lib/pdf';
 import { compareReports, DeltaResult } from '../lib/delta';
@@ -55,6 +55,8 @@ import {
   formatEvidencePackage,
   DamageEstimate
 } from '../lib/evidence-builder';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import {
   estimateScoreImpact,
   getScoreCategory,
@@ -112,7 +114,7 @@ import Step4Analysis from '../components/steps/Step4Analysis';
 import Step5Export from '../components/steps/Step5Export';
 import Step6Track from '../components/steps/Step6Track';
 import { FIELD_CONFIG, STATES, ACCOUNT_TYPES, STATUSES, STEPS, ANALYSIS_TABS, Step, LetterType, TabId } from '../lib/constants';
-import { getDateValidation } from '../lib/validation';
+import { getDateValidation, getDateOrderIssues } from '../lib/validation';
 
 import {
   loadDisputes,
@@ -214,6 +216,8 @@ export default function CreditReportAnalyzer() {
   const [exportTab, setExportTab] = useState<'letters' | 'cfpb' | 'evidence' | 'attorney'>('letters');
   const [darkMode, setDarkMode] = useState(false);
   const [editableLetter, setEditableLetter] = useState<string>('');
+  const [isBundling, setIsBundling] = useState(false);
+  const [showGuide, setShowGuide] = useState(true);
 
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -233,6 +237,10 @@ export default function CreditReportAnalyzer() {
     setDisputes(loadDisputes());
     setDisputeStats(getDisputeStats());
     setLang(getLanguage());
+    const storedGuide = typeof window !== 'undefined' ? localStorage.getItem('cra_show_guide') : null;
+    if (storedGuide !== null) {
+      setShowGuide(storedGuide === 'true');
+    }
     
     // Check system preference
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -418,6 +426,24 @@ export default function CreditReportAnalyzer() {
     await new Promise(resolve => setTimeout(resolve, 300));
 
     try {
+      const requiredDateFields = FIELD_CONFIG.filter(f => f.section === 'dates' && f.required);
+      const requiredIssues = requiredDateFields
+        .map(field => {
+          const value = (editableFields as Record<string, string>)[field.key] || '';
+          const validation = getDateValidation(value, true);
+          return { field: field.key, valid: validation.valid, message: validation.message };
+        })
+        .filter(issue => !issue.valid);
+
+      const orderIssues = getDateOrderIssues(editableFields as Record<string, string | undefined>)
+        .filter(issue => issue.severity === 'blocking');
+
+      if (requiredIssues.length > 0 || orderIssues.length > 0) {
+        showToast('Fix required date fields before analysis.', 'error');
+        setIsAnalyzing(false);
+        return;
+      }
+
       // Core analysis
       const detectedFlags = runRules(editableFields);
       setFlags(detectedFlags);
@@ -595,6 +621,11 @@ export default function CreditReportAnalyzer() {
     URL.revokeObjectURL(url);
   }, []);
 
+  const downloadPdfFile = useCallback((content: string, filename: string) => {
+    const blob = generatePDFBlob(content);
+    saveAs(blob, filename);
+  }, []);
+
   const downloadAnalysisJson = useCallback(() => {
     const payload = {
       exportedAt: new Date().toISOString(),
@@ -614,7 +645,7 @@ export default function CreditReportAnalyzer() {
     URL.revokeObjectURL(url);
   }, [consumer, discoveryAnswers, editableFields, fileName, flags, riskProfile]);
 
-  const downloadCaseBundle = useCallback(() => {
+  const buildCaseBundleSections = useCallback(() => {
     const consumerDetails = {
       name: consumer.name || '',
       address: consumer.address || '',
@@ -623,7 +654,7 @@ export default function CreditReportAnalyzer() {
       zip: ''
     };
 
-    const sections = [
+    return [
       { title: 'Bureau Dispute Letter', content: generateBureauLetter(editableFields, flags, consumer) },
       { title: 'Debt Validation Request', content: generateValidationLetter(editableFields, flags, consumer) },
       { title: 'CFPB Complaint Narrative', content: generateCFPBNarrative(editableFields, flags, discoveryAnswers) },
@@ -633,12 +664,6 @@ export default function CreditReportAnalyzer() {
       { title: 'Evidence Package', content: formatEvidencePackage(buildEvidencePackage(editableFields, flags, riskProfile!, consumerDetails.name, consumerDetails.state)) },
       { title: 'Attorney Package', content: formatAttorneyPackage(buildAttorneyPackage(editableFields, flags, riskProfile!, consumerDetails)) }
     ];
-
-    const bundle = sections
-      .map(section => `===== ${section.title} =====\n\n${section.content}`)
-      .join('\n\n\n');
-
-    downloadTextFile(bundle, 'credit-case-bundle.txt');
   }, [
     consumer,
     discoveryAnswers,
@@ -654,9 +679,74 @@ export default function CreditReportAnalyzer() {
     buildEvidencePackage,
     formatEvidencePackage,
     buildAttorneyPackage,
-    formatAttorneyPackage,
-    downloadTextFile
+    formatAttorneyPackage
   ]);
+
+  const downloadCaseBundle = useCallback(() => {
+    const sections = buildCaseBundleSections();
+    const bundle = sections
+      .map(section => `===== ${section.title} =====\n\n${section.content}`)
+      .join('\n\n\n');
+
+    downloadTextFile(bundle, 'credit-case-bundle.txt');
+  }, [buildCaseBundleSections, downloadTextFile]);
+
+  const downloadCaseBundleZip = useCallback(async () => {
+    if (isBundling) return;
+    setIsBundling(true);
+    showToast('Preparing case bundle ZIP...', 'info');
+
+    try {
+      const sections = buildCaseBundleSections();
+      const zip = new JSZip();
+      sections.forEach((section) => {
+        const safeName = section.title.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+        zip.file(`${safeName}.txt`, section.content);
+      });
+      const pdfFolder = zip.folder('pdf');
+      if (pdfFolder) {
+        sections.forEach((section) => {
+          const safeName = section.title.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+          pdfFolder.file(`${safeName}.pdf`, generatePDFBlob(section.content));
+        });
+        if (riskProfile) {
+          pdfFolder.file(
+            'forensic_investigation_report.pdf',
+            generateForensicReportBlob(editableFields, flags, riskProfile, relevantCaseLaw, consumer, discoveryAnswers)
+          );
+        }
+      }
+      zip.file('README.txt', [
+        'Credit Report Analyzer - Case Bundle',
+        `Exported: ${new Date().toLocaleString()}`,
+        '',
+        'Contents:',
+        '- TXT files: human-readable letters and packages',
+        '- pdf/: PDF versions of each document',
+        '- case-metadata.json: structured data snapshot',
+        '',
+        'All processing is local to your device.'
+      ].join('\n'));
+      zip.file('case-metadata.json', JSON.stringify({
+        exportedAt: new Date().toISOString(),
+        fileName,
+        consumer,
+        fields: editableFields,
+        flags,
+        riskProfile,
+        discoveryAnswers
+      }, null, 2));
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      saveAs(blob, 'credit-case-bundle.zip');
+      showToast('ZIP ready for download.', 'success');
+    } catch (error) {
+      console.error('ZIP generation failed:', error);
+      showToast('Failed to generate ZIP. Please try again.', 'error');
+    } finally {
+      setIsBundling(false);
+    }
+  }, [buildCaseBundleSections, consumer, discoveryAnswers, editableFields, fileName, flags, isBundling, relevantCaseLaw, riskProfile, showToast]);
 
   const reset = useCallback(() => {
     setStep(1);
@@ -675,6 +765,18 @@ export default function CreditReportAnalyzer() {
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
+
+  const stepTip = useMemo(() => {
+    const tips: Record<Step, { title: string; body: string }> = {
+      1: { title: 'Step 1: Input', body: 'Upload or paste the account section. Scanned PDFs will run OCR automatically.' },
+      2: { title: 'Step 2: Review', body: 'Verify the extracted text or select the highest-risk tradeline.' },
+      3: { title: 'Step 3: Verify', body: 'Confirm key fields to improve accuracy before analysis.' },
+      4: { title: 'Step 4: Analyze', body: 'Review violations, timelines, and evidence readiness.' },
+      5: { title: 'Step 5: Export', body: 'Generate letters, evidence packages, and full case bundles.' },
+      6: { title: 'Step 6: Track', body: 'Track disputes, timelines, and outcomes.' }
+    };
+    return tips[step];
+  }, [step]);
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-300 bg-white dark:bg-gray-950 ${darkMode ? 'dark' : ''}`}>
@@ -744,6 +846,39 @@ export default function CreditReportAnalyzer() {
       {/* Main Content */}
       <main id="main-content" className="flex-1 py-8 sm:py-12" role="main" aria-label="Credit Report Analysis">
         <div className="container">
+          {showGuide ? (
+            <div className="panel-inset p-4 mb-6 dark:bg-gray-900 dark:border-gray-800">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="label text-gray-500 dark:text-gray-400">{stepTip.title}</p>
+                  <p className="body-sm text-gray-600 dark:text-gray-400">{stepTip.body}</p>
+                </div>
+                <button
+                  type="button"
+                  className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  onClick={() => {
+                    setShowGuide(false);
+                    localStorage.setItem('cra_show_guide', 'false');
+                  }}
+                >
+                  Hide guide
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6">
+              <button
+                type="button"
+                className="text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                onClick={() => {
+                  setShowGuide(true);
+                  localStorage.setItem('cra_show_guide', 'true');
+                }}
+              >
+                Show step guide
+              </button>
+            </div>
+          )}
 
           {/* Step 1: Input */}
           {step === 1 && (
@@ -753,6 +888,7 @@ export default function CreditReportAnalyzer() {
               progress={progress}
               rawText={rawText}
               setRawText={setRawText}
+              fileName={fileName}
               fileInputRef={fileInputRef}
               handleFileUpload={handleFileUpload}
               handleDrop={handleDrop}
@@ -882,6 +1018,10 @@ export default function CreditReportAnalyzer() {
               formatCurrency={formatCurrency}
               downloadAnalysisJson={downloadAnalysisJson}
               downloadCaseBundle={downloadCaseBundle}
+              downloadCaseBundleZip={downloadCaseBundleZip}
+              isBundling={isBundling}
+              downloadTextFile={downloadTextFile}
+              downloadPdfFile={downloadPdfFile}
             />
           )}
 

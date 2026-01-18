@@ -42,6 +42,7 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   parseCreditReport,
 }) => {
   const [sortKey, setSortKey] = useState<'risk' | 'violations' | 'balance' | 'name'>('risk');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const parseBalance = (value?: string) => {
     if (!value) return 0;
@@ -51,7 +52,14 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   };
 
   const sortedAccounts = useMemo(() => {
-    const cloned = [...analyzedAccounts];
+    const query = searchTerm.trim().toLowerCase();
+    const filtered = query
+      ? analyzedAccounts.filter(acc => {
+          const name = (acc.fields.furnisherOrCollector || acc.fields.originalCreditor || '').toLowerCase();
+          return name.includes(query);
+        })
+      : analyzedAccounts;
+    const cloned = [...filtered];
     cloned.sort((a, b) => {
       if (sortKey === 'violations') {
         return b.flags.length - a.flags.length;
@@ -67,7 +75,7 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
       return b.risk.overallScore - a.risk.overallScore;
     });
     return cloned;
-  }, [analyzedAccounts, sortKey]);
+  }, [analyzedAccounts, sortKey, searchTerm]);
 
   const analyzeAccount = (account: AnalyzedAccount) => {
     setEditableFields(account.fields);
@@ -162,7 +170,14 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
                   Sort by risk or violations, then choose the tradeline to analyze.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="text"
+                  className="text-xs border border-gray-200 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
+                  placeholder="Search creditor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
                 <label className="text-xs text-gray-500 dark:text-gray-400">Sort</label>
                 <select
                   className="text-xs border border-gray-200 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
@@ -184,6 +199,9 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
                 </button>
               </div>
             </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              Showing {sortedAccounts.length} of {analyzedAccounts.length} accounts.
+            </p>
           </div>
           <div className="grid gap-4 mb-8">
             {sortedAccounts.map((acc) => (
@@ -211,6 +229,11 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
                 </div>
               </button>
             ))}
+            {sortedAccounts.length === 0 && (
+              <div className="panel p-4 text-sm text-gray-500 dark:text-gray-400">
+                No accounts match your search.
+              </div>
+            )}
           </div>
         </>
       ) : (

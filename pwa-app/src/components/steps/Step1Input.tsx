@@ -9,6 +9,7 @@ interface Step1InputProps {
   progress: number;
   rawText: string;
   setRawText: (text: string) => void;
+  fileName: string | null;
   fileInputRef: React.RefObject<HTMLInputElement>;
   handleFileUpload: (file: File) => void;
   handleDrop: (e: React.DragEvent) => void;
@@ -33,6 +34,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
   progress,
   rawText,
   setRawText,
+  fileName,
   fileInputRef,
   handleFileUpload,
   handleDrop,
@@ -50,6 +52,9 @@ export const Step1Input: React.FC<Step1InputProps> = ({
   importHistory,
   clearHistory,
 }) => {
+  const textLength = rawText.trim().length;
+  const hasEnoughText = textLength > 200;
+
   return (
     <div className="fade-in max-w-4xl mx-auto">
       <div className="text-center mb-10">
@@ -60,25 +65,19 @@ export const Step1Input: React.FC<Step1InputProps> = ({
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      <div className="grid md:grid-cols-2 gap-8 mb-10">
         {/* File Upload */}
-        <div>
-          <p className="label mb-2 flex items-center gap-2 dark:text-gray-300">
-            <span>Upload File</span>
-            <span className="text-xs text-gray-400 font-normal">PDF, Image, or Text · Max 20MB</span>
+        <div className="premium-card p-6 flex flex-col">
+          <p className="label mb-4 flex items-center gap-2 dark:text-emerald-400 text-emerald-600">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+            <span>Forensic Evidence Upload</span>
           </p>
           <div
-            className="upload-area cursor-pointer dark:bg-gray-900 dark:border-gray-700"
+            className="upload-area flex-grow min-h-[220px] rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-50/10 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onClick={() => fileInputRef.current?.click()}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }
-            }}
             role="button"
             tabIndex={0}
             aria-busy={isProcessing}
@@ -88,77 +87,89 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               type="file"
               accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.webp,.bmp,.tiff"
               className="sr-only"
-              aria-label="Upload credit report file"
-              title="Upload credit report file"
               onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
               disabled={isProcessing}
             />
             {isProcessing ? (
-              <div className="text-center py-4">
-                <div className="spinner mx-auto mb-3" />
-                <p className="body-sm text-gray-600 dark:text-gray-400 mb-2" aria-live="polite">
-                  {progressText}
-                </p>
-                <div className="w-48 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mx-auto">
-                  <div
-                    className="h-full bg-gray-900 dark:bg-white transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
+              <div className="text-center">
+                <div className="spinner mx-auto mb-4 border-emerald-500" />
+                <p className="body-sm text-slate-600 dark:text-slate-400 animate-pulse">{progressText}</p>
+                <div className="w-48 h-1 bg-slate-100 dark:bg-slate-800 rounded-full mt-4 overflow-hidden mx-auto">
+                  <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${progress}%` }} />
                 </div>
               </div>
             ) : (
               <>
-                <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <p className="heading-sm mb-1 dark:text-white">Drop file or click to browse</p>
-                <p className="body-sm text-gray-500 dark:text-gray-400">PDF, PNG, JPG, TXT supported</p>
+                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <p className="heading-sm mb-1 dark:text-white">Secure Upload</p>
+                <p className="body-sm text-slate-500 text-center">PDF, Images, or Text<br />Processed locally and privately</p>
               </>
             )}
           </div>
-          <p className="text-xs text-gray-400 mt-2">Scanned PDFs run OCR and may take longer. For best results, upload clear images.</p>
+          <p className="text-[10px] text-slate-400 mt-4 leading-tight italic text-center">Automated OCR detects scanned fields via WebAssembly sandbox.</p>
         </div>
 
         {/* Text Input */}
-        <div>
-          <p className="label mb-2 dark:text-gray-300">Paste Text</p>
+        <div className="premium-card p-6 flex flex-col">
+          <p className="label mb-4 flex items-center gap-2 text-slate-500">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
+            <span>Direct Text Analysis</span>
+          </p>
           <textarea
-            className="textarea h-[180px] font-mono text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
-            placeholder="Paste the account section from your credit report here..."
+            className="textarea flex-grow min-h-[220px] rounded-2xl border-slate-200 dark:border-slate-800 dark:bg-slate-900/50 p-6 font-mono text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none shadow-inner"
+            placeholder="Paste raw credit report data here..."
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary px-10 py-4 h-auto shadow-emerald-900/10 hover:shadow-emerald-500/20"
           onClick={processText}
           disabled={!rawText.trim()}
         >
           Analyze Report
-          <kbd className="ml-2 text-xs opacity-60 hidden sm:inline">⌘↵</kbd>
+          <kbd className="ml-3 text-[10px] bg-white/10 px-1.5 py-0.5 rounded border border-white/20 hidden sm:inline">⌘↵</kbd>
         </button>
         <button
           type="button"
-          className="btn btn-secondary dark:bg-gray-800 dark:text-white dark:border-gray-700"
+          className="btn btn-secondary px-10 py-4 h-auto dark:bg-slate-900 dark:text-white dark:border-slate-800 hover:border-slate-300"
           onClick={loadSample}
         >
-          Load Sample Data
+          Try Sample Data
         </button>
       </div>
 
-      <div className="notice max-w-xl mx-auto mb-8 dark:bg-gray-900 dark:border-gray-800">
-        <div className="flex items-start gap-3">
-          <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <p className="body-sm dark:text-gray-400">
-            <span className="font-medium dark:text-gray-300">100% Private:</span> All processing happens in your browser.
-            Your data never leaves your device.
-          </p>
+      <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="glass-panel p-6 bg-slate-50/50 border-slate-200 dark:bg-slate-900/30">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            </div>
+            <div>
+              <p className="heading-sm mb-1 dark:text-white">Privacy Architecture</p>
+              <p className="body-sm text-slate-500">Every byte of data stays on your machine. We use on-device compute for zero-latency, zero-risk analysis.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-panel p-6 bg-slate-50/50 border-slate-200 dark:bg-slate-900/30">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <div>
+              <p className="heading-sm mb-1 dark:text-white">Institutional Grade</p>
+              <p className="body-sm text-slate-500">Uses 24+ core forensic heuristics to map report inconsistencies against federal data standards.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -168,17 +179,17 @@ export const Step1Input: React.FC<Step1InputProps> = ({
           <button
             type="button"
             onClick={() => setShowHistory(!showHistory)}
-            className="w-full flex items-center justify-between p-4 panel-inset hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="w-full flex items-center justify-between p-4 premium-card !rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="heading-sm dark:text-white">Recent Analyses</span>
-              <span className="text-xs text-gray-400 font-normal">({history.length})</span>
+              <span className="text-xs text-slate-400 font-normal">({history.length})</span>
             </div>
             <svg
-              className={`w-5 h-5 text-gray-400 transition-transform ${showHistory ? 'rotate-180' : ''}`}
+              className={`w-5 h-5 text-slate-400 transition-transform ${showHistory ? 'rotate-180' : ''}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -187,68 +198,66 @@ export const Step1Input: React.FC<Step1InputProps> = ({
         )}
 
         {showHistory && history.length > 0 && (
-            <div className="border border-t-0 border-gray-100 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
-              {history.slice(0, 5).map((record) => (
+          <div className="mt-2 premium-card !rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+            {history.slice(0, 5).map((record) => (
+              <button
+                key={record.id}
+                type="button"
+                onClick={() => loadFromHistory(record)}
+                className="w-full flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
+              >
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                  <span className="text-lg font-light dark:text-white">{record.riskProfile.overallScore}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="body-sm font-medium truncate dark:text-gray-200">
+                    {record.fields.furnisherOrCollector || record.fields.originalCreditor || 'Unknown Account'}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {formatTimestamp(record.timestamp)} · {record.flags.length} violations
+                  </p>
+                </div>
                 <button
-                  key={record.id}
                   type="button"
-                  onClick={() => loadFromHistory(record)}
-                  className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors text-left group"
+                  onClick={(e) => removeFromHistory(record.id, e)}
+                  className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all"
+                  title="Delete"
                 >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    <span className="text-lg font-light dark:text-white">{record.riskProfile.overallScore}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="body-sm font-medium truncate dark:text-gray-200">
-                      {record.fields.furnisherOrCollector || record.fields.originalCreditor || 'Unknown Account'}
-                    </p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">
-                      {formatTimestamp(record.timestamp)} · {record.flags.length} violations
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => removeFromHistory(record.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all"
-                    title="Delete"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
-              ))}
-            </div>
-          )}
+              </button>
+            ))}
+          </div>
+        )}
 
-        <div className={`mt-3 ${history.length === 0 ? 'panel-inset p-4' : ''}`}>
-          <div className="flex flex-wrap gap-2 justify-between items-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">History Tools</p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn btn-secondary text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                onClick={exportHistory}
-                disabled={history.length === 0}
-              >
-                Backup JSON
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                onClick={() => historyFileInputRef.current?.click()}
-              >
-                Import JSON
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary text-xs text-red-600 dark:text-red-400 dark:bg-gray-800 dark:border-gray-700"
-                onClick={clearHistory}
-                disabled={history.length === 0}
-              >
-                Clear
-              </button>
-            </div>
+        <div className="mt-8 flex items-center justify-between gap-4 py-4 border-t border-slate-100 dark:border-slate-800">
+          <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Persistence Engine</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="text-[10px] uppercase tracking-widest font-bold text-slate-500 hover:text-emerald-500 transition-colors"
+              onClick={exportHistory}
+            >
+              Export
+            </button>
+            <span className="text-slate-200">|</span>
+            <button
+              type="button"
+              className="text-[10px] uppercase tracking-widest font-bold text-slate-500 hover:text-emerald-500 transition-colors"
+              onClick={() => historyFileInputRef.current?.click()}
+            >
+              Import
+            </button>
+            <span className="text-slate-200">|</span>
+            <button
+              type="button"
+              className="text-[10px] uppercase tracking-widest font-bold text-red-400 hover:text-red-600 transition-colors"
+              onClick={clearHistory}
+            >
+              Purge
+            </button>
           </div>
           <input
             ref={historyFileInputRef}
