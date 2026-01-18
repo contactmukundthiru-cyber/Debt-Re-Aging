@@ -44,14 +44,14 @@ export const InstitutionalBanner: React.FC<InstitutionalBannerProps> = ({ onDism
 
   return (
     <div
-      className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-3 px-4 relative z-50"
+      className="bg-slate-900 border-b border-emerald-500/30 text-white py-3 px-4 relative z-50 shadow-2xl"
       role="banner"
       aria-label="Institutional information banner"
     >
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-start gap-3">
           <svg
-            className="w-5 h-5 flex-shrink-0 mt-0.5"
+            className="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -65,14 +65,14 @@ export const InstitutionalBanner: React.FC<InstitutionalBannerProps> = ({ onDism
           </svg>
           <div>
             <p className="text-sm font-medium">
-              <strong>Enterprise-Ready:</strong> This tool is designed for legal aid organizations 
+              <strong>Enterprise-Ready:</strong> This tool is designed for legal aid organizations
               and consumer advocacy groups.
             </p>
-            <p className="text-xs text-blue-100 mt-1">
-              All processing is 100% local. No data leaves your device. 
+            <p className="text-xs text-slate-400 mt-1">
+              All processing is 100% local. No data leaves your device.
               <a
                 href="docs/SECURITY_WHITEPAPER.md"
-                className="underline hover:text-white ml-1"
+                className="underline hover:text-emerald-400 ml-1 transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
               >

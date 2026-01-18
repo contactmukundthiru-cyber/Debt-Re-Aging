@@ -23,7 +23,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
         title: 'Welcome to Credit Report Analyzer',
         description: 'This forensic-grade tool helps detect illegal debt re-aging and FCRA/FDCPA violations in credit reports. Used by legal aid organizations nationwide.',
         icon: (
-            <svg className="w-12 h-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-12 h-12 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
         ),
@@ -33,7 +33,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
         title: '100% Private & Local',
         description: 'All processing happens in your browser. No data is ever sent to external servers. Perfect for handling sensitive client information in attorney-client contexts.',
         icon: (
-            <svg className="w-12 h-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-12 h-12 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
         ),
@@ -43,7 +43,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
         title: 'Simple 6-Step Workflow',
         description: '1) Upload credit report → 2) Review extracted text → 3) Verify key dates → 4) View analysis → 5) Generate documents → 6) Track disputes. Each step guides you through the process.',
         icon: (
-            <svg className="w-12 h-12 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-12 h-12 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
         ),
@@ -53,7 +53,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
         title: 'Professional Documents',
         description: 'Generate bureau dispute letters, debt validation requests, CFPB complaint narratives, evidence packages, and attorney consultation bundles—all with proper legal citations.',
         icon: (
-            <svg className="w-12 h-12 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-12 h-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
         ),
@@ -157,7 +157,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) =>
                     {ONBOARDING_STEPS.map((_, index) => (
                         <div
                             key={index}
-                            className={`h-1 flex-1 rounded-full transition-colors ${index <= currentStep ? 'bg-blue-500' : 'bg-gray-200 dark:bg-gray-700'
+                            className={`h-1 flex-1 rounded-full transition-colors ${index <= currentStep ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-slate-200 dark:bg-slate-800'
                                 }`}
                         />
                     ))}
@@ -201,7 +201,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, onSkip }) =>
                         <button
                             type="button"
                             onClick={handleNext}
-                            className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            className="px-6 py-2.5 text-sm font-bold uppercase tracking-widest text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-950 rounded-xl transition-all active:scale-95 shadow-lg shadow-slate-900/10"
                         >
                             {isLastStep ? 'Get Started' : 'Next'}
                         </button>
