@@ -1,11 +1,22 @@
+"""
+Analytics UI components for the Debt Re-Aging Case Factory.
+Provides visualizations for cross-bureau comparison, batch processing, and historical deltas.
+"""
 import streamlit as st
 from app.rules import RuleEngine
 from app.metrics import MetricsTracker
 import pandas as pd
 from datetime import datetime, timedelta
+from typing import List, Dict, Any
 
 def render_cross_bureau_analysis():
-    """Render the Cross-Bureau Analysis UI."""
+    """
+    Render the Cross-Bureau Analysis UI.
+    
+    This function creates a 3-column layout for users to enter date information
+    from different credit bureaus and then calls the RuleEngine to identify
+    discrepancies between them.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Compare Across Credit Bureaus</h2>
@@ -52,7 +63,13 @@ def render_cross_bureau_analysis():
                 st.success("No material discrepancies found between the provided bureau dates.")
 
 def render_batch_mode():
-    """Render the experimental Batch Mode UI."""
+    """
+    Render the experimental Batch Mode UI.
+    
+    Provides a file uploader for multiple credit report snippets and analyzes
+    each account found. It also performs forensic behavioral auditing to find
+    systemic patterns across different furnishers.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Analyze Multiple Accounts</h2>
@@ -65,6 +82,8 @@ def render_batch_mode():
     st.info("Upload multiple files and we'll analyze each account for potential issues.")
     
     from app.batch import process_multiple_files
+    
+    engine = RuleEngine()
     
     uploaded_files = st.file_uploader(
         "Upload one or more credit report snippets",
@@ -162,7 +181,13 @@ def render_batch_mode():
             st.warning("Note: Full packet generation for Batch Mode is under development.")
 
 def render_historical_delta_analysis():
-    """Render the Historical Delta Analysis UI."""
+    """
+    Render the Historical Delta Analysis UI.
+    
+    Allows users to upload two different credit reports for the same account
+    from different dates and compares them to detect if key dates like the DOFD
+    have been changed (re-aged) over time.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Compare Reports Over Time</h2>
@@ -248,7 +273,12 @@ def render_historical_delta_analysis():
 
 
 def render_timeline_visualization():
-    """Render the Multi-Report Timeline Visualization UI."""
+    """
+    Render the Multi-Report Timeline Visualization UI.
+    
+    Provides a form to add multiple snapshots of an account from different reports
+    and visualizes them on a timeline to show how reporting has evolved.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Timeline Visualization</h2>
@@ -315,7 +345,7 @@ def render_timeline_visualization():
                     analyze_timeline(st.session_state.timeline_entries)
 
 
-def analyze_timeline(entries):
+def analyze_timeline(entries: List[Dict[str, Any]]) -> None:
     """Analyze timeline entries for suspicious patterns."""
     st.markdown("---")
     st.markdown("## Timeline Analysis Results")

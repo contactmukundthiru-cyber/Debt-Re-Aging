@@ -5,7 +5,7 @@ WCAG compliance helpers, keyboard navigation, screen reader support
 Provides accessibility enhancements for users with disabilities.
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 from dataclasses import dataclass
 
 
@@ -38,6 +38,9 @@ def get_accessibility_css(config: AccessibilityConfig) -> str:
 
     if config.screen_reader_mode:
         css_parts.append(SCREEN_READER_CSS)
+
+    # Added Mobile Responsive support
+    css_parts.append(MOBILE_RESPONSIVE_CSS)
 
     return "\n".join(css_parts)
 
@@ -547,8 +550,8 @@ MOBILE_RESPONSIVE_CSS = """
 def get_skip_link_html() -> str:
     """Generate skip link HTML for keyboard users."""
     return """
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div id="main-content"></div>
+    <a href="#main-content" class="skip-link" aria-label="Skip to main content">Skip to main content</a>
+    <div id="main-content" tabIndex="-1"></div>
     """
 
 
@@ -574,7 +577,7 @@ def get_keyboard_shortcuts_help() -> Dict[str, str]:
     }
 
 
-def render_keyboard_shortcuts(st):
+def render_keyboard_shortcuts(st: Any) -> None:
     """Render keyboard shortcuts help in Streamlit."""
     shortcuts = get_keyboard_shortcuts_help()
 
@@ -615,7 +618,8 @@ def create_accessible_button(label: str, aria_label: str, key: str = None) -> Di
 
 def format_for_screen_reader(text: str, context: str = "") -> str:
     """Format text for better screen reader comprehension."""
-    # Add context for abbreviations
+    import re
+    # Add context for abbreviations using word boundaries
     replacements = {
         "DOFD": "Date of First Delinquency (DOFD)",
         "FCRA": "Fair Credit Reporting Act (FCRA)",
@@ -625,9 +629,10 @@ def format_for_screen_reader(text: str, context: str = "") -> str:
     }
 
     for abbrev, full in replacements.items():
-        # Only replace first occurrence to avoid repetition
-        if abbrev in text and full not in text:
-            text = text.replace(abbrev, full, 1)
+        # Use regex with word boundaries to avoid partial matches (like CRA in FCRA)
+        pattern = r'\b' + re.escape(abbrev) + r'\b'
+        if re.search(pattern, text) and full not in text:
+            text = re.sub(pattern, full, text, count=1)
 
     return text
 
@@ -743,51 +748,53 @@ def get_voice_guidance_html(step: int, auto_play: bool = False) -> str:
     return f"""
     <script>
     // Voice Guidance System
-    const voiceGuidanceText = "{script_escaped}";
-    let speechSynthesis = window.speechSynthesis;
-    let currentUtterance = null;
+    (function() {{
+        const voiceGuidanceText = "{script_escaped}";
+        let speechSynthesis = window.speechSynthesis;
+        let currentUtterance = null;
 
-    function speakGuidance() {{
-        if ('speechSynthesis' in window) {{
-            // Cancel any ongoing speech
-            speechSynthesis.cancel();
+        window.speakGuidance = function() {{
+            if ('speechSynthesis' in window) {{
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
 
-            currentUtterance = new SpeechSynthesisUtterance(voiceGuidanceText);
-            currentUtterance.rate = 0.9;  // Slightly slower for clarity
-            currentUtterance.pitch = 1.0;
-            currentUtterance.volume = 1.0;
+                currentUtterance = new SpeechSynthesisUtterance(voiceGuidanceText);
+                currentUtterance.rate = 0.9;  // Slightly slower for clarity
+                currentUtterance.pitch = 1.0;
+                currentUtterance.volume = 1.0;
 
-            // Try to use a clear English voice
-            const voices = speechSynthesis.getVoices();
-            const englishVoice = voices.find(v => v.lang.startsWith('en-') && v.name.includes('Female'));
-            if (englishVoice) {{
-                currentUtterance.voice = englishVoice;
+                // Try to use a clear English voice
+                const voices = speechSynthesis.getVoices();
+                const englishVoice = voices.find(v => v.lang.startsWith('en-') && v.name.includes('Female'));
+                if (englishVoice) {{
+                    currentUtterance.voice = englishVoice;
+                }}
+
+                speechSynthesis.speak(currentUtterance);
+            }} else {{
+                console.log('Text-to-speech not supported in this browser');
             }}
+        }};
 
-            speechSynthesis.speak(currentUtterance);
-        }} else {{
-            console.log('Text-to-speech not supported in this browser');
-        }}
-    }}
-
-    function stopGuidance() {{
-        if ('speechSynthesis' in window) {{
-            speechSynthesis.cancel();
-        }}
-    }}
-
-    function pauseGuidance() {{
-        if ('speechSynthesis' in window) {{
-            if (speechSynthesis.speaking && !speechSynthesis.paused) {{
-                speechSynthesis.pause();
-            }} else if (speechSynthesis.paused) {{
-                speechSynthesis.resume();
+        window.stopGuidance = function() {{
+            if ('speechSynthesis' in window) {{
+                speechSynthesis.cancel();
             }}
-        }}
-    }}
+        }};
 
-    // Auto-play if enabled
-    {"speakGuidance();" if auto_play else ""}
+        window.pauseGuidance = function() {{
+            if ('speechSynthesis' in window) {{
+                if (speechSynthesis.speaking && !speechSynthesis.paused) {{
+                    speechSynthesis.pause();
+                }} else if (speechSynthesis.paused) {{
+                    speechSynthesis.resume();
+                }}
+            }}
+        }};
+
+        // Auto-play if enabled
+        { "setTimeout(() => window.speakGuidance(), 1000);" if auto_play else "" }
+    }})();
     </script>
     """
 
@@ -800,13 +807,13 @@ def get_voice_controls_html() -> str:
             Voice Guidance
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button onclick="speakGuidance()" style="background: #0ea5e9; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+            <button onclick="window.speakGuidance()" style="background: #0ea5e9; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
                 Play Instructions
             </button>
-            <button onclick="pauseGuidance()" style="background: #64748b; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+            <button onclick="window.pauseGuidance()" style="background: #64748b; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
                 Pause / Resume
             </button>
-            <button onclick="stopGuidance()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+            <button onclick="window.stopGuidance()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
                 Stop
             </button>
         </div>
@@ -814,7 +821,7 @@ def get_voice_controls_html() -> str:
     """
 
 
-def render_voice_guidance(st, step: int, auto_play: bool = False):
+def render_voice_guidance(st: Any, step: int, auto_play: bool = False) -> None:
     """Render voice guidance controls for a step."""
     import streamlit.components.v1 as components
 
@@ -865,7 +872,7 @@ def get_issue_audio_summary(flags: list) -> str:
     return summary
 
 
-def render_accessibility_settings(st):
+def render_accessibility_settings(st: Any) -> None:
     """Render accessibility settings UI."""
     st.markdown("""
     <div style="margin-bottom: 20px;">

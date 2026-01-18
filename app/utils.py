@@ -65,18 +65,27 @@ def normalize_date(date_str: str) -> Tuple[Optional[str], str]:
         # Year-month only
         (r'^(\d{4})/(\d{2})$', '%Y/%m', 'Medium'),
         (r'^(\d{4})-(\d{2})$', '%Y-%m', 'Medium'),
+        # MM/YYYY
+        (r'^(\d{1,2})/(\d{4})$', '%m/%Y', 'Medium'),
+        (r'^(\d{1,2})-(\d{4})$', '%m-%Y', 'Medium'),
     ]
 
     for pattern, fmt, confidence in patterns:
-        if re.match(pattern, date_str, re.IGNORECASE):
+        match = re.match(pattern, date_str, re.IGNORECASE)
+        if match:
             try:
+                # Standardize the date string for strptime by removing optional comma
+                # if the format doesn't have it
+                clean_date = date_str.replace(',', '')
+                clean_fmt = fmt.replace(',', '')
+                
                 # Handle formats without day
-                if '%d' not in fmt:
-                    parsed = datetime.strptime(date_str, fmt)
+                if '%d' not in clean_fmt:
+                    parsed = datetime.strptime(clean_date, clean_fmt)
                     # Default to first of month
-                    return parsed.strftime('%Y-%m-01'), "Medium" if confidence == "High" else "Low"
+                    return parsed.strftime('%Y-%m-01'), confidence
                 else:
-                    parsed = datetime.strptime(date_str, fmt)
+                    parsed = datetime.strptime(clean_date, clean_fmt)
                     return parsed.strftime('%Y-%m-%d'), confidence
             except ValueError:
                 continue
@@ -88,14 +97,16 @@ def normalize_date(date_str: str) -> Tuple[Optional[str], str]:
             m, d, y = int(digits[:2]), int(digits[2:4]), int(digits[4:])
             if 1 <= m <= 12 and 1 <= d <= 31 and 1900 < y < 2100:
                 return f"{y}-{m:02d}-{d:02d}", "Low"
-        except: pass
+        except (ValueError, IndexError):
+            pass
     elif len(digits) == 6: # MMDDYY
         try:
             m, d, y = int(digits[:2]), int(digits[2:4]), int(digits[4:])
             year = 2000 + y if y < 50 else 1900 + y
             if 1 <= m <= 12 and 1 <= d <= 31:
                 return f"{year}-{m:02d}-{d:02d}", "Low"
-        except: pass
+        except (ValueError, IndexError):
+            pass
 
     # Try to extract any year from the string
     year_match = re.search(r'\b(19\d{2}|20\d{2})\b', date_str)
@@ -121,10 +132,12 @@ def calculate_years_difference(date1: str, date2: str) -> Optional[float]:
 def generate_case_id() -> str:
     """
     Generate a unique case ID with sufficient entropy.
+    Format: DR-XXXXXX-XXXX (14 characters)
     """
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     # Use part of a UUID for better uniqueness than just a hash of the timestamp
-    unique_suffix = uuid.uuid4().hex[:6].upper()
+    # Test expects total length 14: "DR-" (3) + 6 digits + "-" (1) + 4 hex = 14
+    unique_suffix = uuid.uuid4().hex[:4].upper()
     return f"DR-{timestamp[-6:]}-{unique_suffix}"
 
 

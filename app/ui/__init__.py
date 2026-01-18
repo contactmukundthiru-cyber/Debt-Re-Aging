@@ -1,3 +1,7 @@
+"""
+UI Module for Debt Re-Aging Case Factory.
+Organizes all Streamlit components into logical groupings.
+"""
 from .common import inject_custom_css, show_disclaimer_banner, show_credit_banner
 from .sidebar import render_sidebar
 from .steps import (

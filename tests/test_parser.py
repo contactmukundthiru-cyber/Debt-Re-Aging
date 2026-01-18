@@ -166,6 +166,29 @@ class TestFieldsToEditableDict:
         assert 'confidence' in editable['date_opened']
         assert 'source_text' in editable['date_opened']
 
+from app.parser import ParsedFields, ExtractedField, CreditReportParser, dict_to_verified_fields
+
+def test_to_verified_dict():
+    parsed = ParsedFields(raw_text="Test")
+    parsed.original_creditor = ExtractedField(value="Bank", confidence="High", source_text="Bank", start_pos=0, end_pos=4)
+    result = parsed.to_verified_dict()
+    assert result['original_creditor'] == "Bank"
+    assert result['date_opened'] is None
+
+def test_dict_to_verified_fields():
+    input_dict = {"name": " John ", "empty": "", "none": None}
+    result = dict_to_verified_fields(input_dict)
+    assert result["name"] == "John"
+    assert result["empty"] is None
+    assert result["none"] is None
+
+def test_extract_bureau_fuzzy():
+    parser = CreditReportParser()
+    # "Expenan" should match "Experian"
+    res = parser._extract_bureau("Report from Expenan")
+    assert res.value == "Experian"
+    assert res.confidence == "Medium"
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

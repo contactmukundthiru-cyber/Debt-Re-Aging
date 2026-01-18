@@ -1,3 +1,6 @@
+"""
+Step-by-step workflow for the single case analysis mode.
+"""
 import streamlit as st
 import html
 import os
@@ -15,7 +18,12 @@ from app.utils import (
 )
 
 def render_step_1_upload():
-    """Render Step 1: Upload credit report."""
+    """
+    Render Step 1: Upload credit report.
+    
+    Provides two tabs for input: file upload (PDF/image) and raw text paste.
+    Handles immediate text extraction upon file upload.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Step 1: Upload Your Credit Report</h2>
@@ -91,7 +99,12 @@ def render_step_1_upload():
                 st.error(f"Error extracting text: {extracted_text}")
 
 def render_step_2_review():
-    """Render Step 2: Review extracted text."""
+    """
+    Render Step 2: Review extracted text.
+    
+    Allows users to manually correct any OCR errors in the extracted text
+    before it is parsed into structured fields.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Step 2: Review the Extracted Text</h2>
@@ -150,7 +163,12 @@ def render_step_2_review():
             st.rerun()
 
 def render_step_3_verify():
-    """Render Step 3: Verify extracted details."""
+    """
+    Render Step 3: Verify extracted details.
+    
+    Shows the structured fields parsed from the text. Users can verify or
+    correct individual data points like DOFD, balance, and creditor name.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Step 3: Verify the Details</h2>
@@ -335,7 +353,12 @@ def render_step_3_verify():
             st.rerun()
 
 def render_timeline_visual(fields):
-    """Render a professional visual timeline of key dates."""
+    """
+    Render a professional visual timeline of key dates.
+    
+    Generates a CSS-based horizontal timeline showing account opening,
+    delinquency, and estimated removal dates.
+    """
     from app.utils import normalize_date
     
     dates = []
@@ -347,7 +370,12 @@ def render_timeline_visual(fields):
                 try:
                     dt = datetime.strptime(norm, '%Y-%m-%d')
                     dates.append({'label': label, 'date': dt, 'str': norm})
-                except: pass
+                except ValueError:
+                    # Logging here would be too noisy for a render loop if it fails often
+                    pass
+                except Exception as e:
+                    from app.rules import logger as rule_logger
+                    rule_logger.error(f"Unexpected error in timeline rendering: {e}")
     
     if len(dates) < 2:
         return
@@ -377,7 +405,12 @@ def render_timeline_visual(fields):
     st.markdown(timeline_html, unsafe_allow_html=True)
 
 def render_step_4_checks():
-    """Render Step 4: Run Checks."""
+    """
+    Render Step 4: Run Checks.
+    
+    Executes the RuleEngine against the verified fields and displays
+    all identified violations with severity, explanations, and legal citations.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Step 4: Issues Found</h2>
@@ -615,7 +648,12 @@ def render_step_4_checks():
             st.rerun()
 
 def render_step_5_generate():
-    """Render Step 5: Generate dispute letters."""
+    """
+    Render Step 5: Generate dispute letters.
+    
+    Provides the UI for generating and downloading the final dispute packet,
+    including PDF and Word document exports.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Step 5: Generate Your Dispute Letters</h2>

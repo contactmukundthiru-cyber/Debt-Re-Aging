@@ -864,12 +864,12 @@ class TestRuleDefinitions:
 
     def test_rule_count(self):
         """Verify we have the correct number of rules defined."""
-        assert len(RULE_DEFINITIONS) == 29
+        assert len(RULE_DEFINITIONS) == 32
 
     def test_get_rule_summary(self):
         """Test rule summary function."""
         summary = get_rule_summary()
-        assert summary['total_rules'] == 29
+        assert summary['total_rules'] == 32
         assert 'by_severity' in summary
         assert 'by_category' in summary
 
@@ -908,6 +908,32 @@ class TestCheckAllRules:
         }
         flags = engine.check_all_rules(fields)
         assert len(flags) >= 3  # Should catch multiple issues
+
+def test_audit_furnisher_behavior():
+    accounts = [
+        {'furnisher_or_collector': 'Bad Bank', 'dofd': '2020-01-01'},
+        {'furnisher_or_collector': 'Bad Bank', 'dofd': '2020-01-01'},
+        {'furnisher_or_collector': 'Bad Bank', 'dofd': '2020-01-01'}
+    ]
+    engine = RuleEngine()
+    flags = engine.audit_furnisher_behavior(accounts)
+    assert len(flags) > 0
+    assert flags[0]['rule_id'] == 'BEH_01'
+
+def test_pattern_scorer():
+    from app.rules import PatternScorer
+    flags = [
+        {'rule_id': 'A2', 'severity': 'high'},
+        {'rule_id': 'B1', 'severity': 'high'}
+    ]
+    scorer = PatternScorer()
+    patterns = scorer.detect_patterns(flags)
+    assert len(patterns) > 0
+    assert patterns[0].pattern_id == 'DEFINITIVE_REAGING'
+    
+    profile = scorer.generate_risk_profile(flags)
+    assert profile.overall_score > 0
+    assert profile.risk_level in ['high', 'critical']
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+"""
+Sidebar navigation and global app state controls.
+"""
 import streamlit as st
 import json
 from pathlib import Path
@@ -6,7 +9,12 @@ from app.settings import SettingsManager
 from app.case_manager import CaseManager, load_case_to_session
 
 def load_sample_case(sample_num: int, project_root: Path):
-    """Load a sample case for demonstration."""
+    """
+    Load a sample case for demonstration.
+    
+    Reads a JSON file from the samples directory and populates the
+    session state with extracted text and fields to showcase the tool.
+    """
     samples_dir = project_root / 'samples'
     sample_file = samples_dir / f'sample_case_{sample_num}.json'
 
@@ -23,7 +31,12 @@ def load_sample_case(sample_num: int, project_root: Path):
     return False
 
 def render_sidebar(project_root: Path):
-    """Render the sidebar with navigation and help."""
+    """
+    Render the sidebar with navigation and help.
+    
+    Provides global controls including language selection, application mode
+    switching (Single Case, Batch, etc.), and access to legal action tools.
+    """
     with st.sidebar:
         # Clean header
         st.markdown("""

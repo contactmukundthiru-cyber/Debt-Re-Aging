@@ -1,3 +1,6 @@
+"""
+Help, documentation, and about pages UI.
+"""
 import streamlit as st
 import streamlit.components.v1 as components
 import sys
@@ -5,7 +8,12 @@ from app.rules import RULE_DEFINITIONS
 
 
 def render_about_website():
-    """Render the About & Website page with GitHub Pages link."""
+    """
+    Render the About & Website page with GitHub Pages link.
+    
+    This page serves as the landing information for the project, linking
+    to the public GitHub repository and portfolio of the developer.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h1 style="color: #1e40af; margin-bottom: 8px;">Credit Report Analyzer</h1>
@@ -175,7 +183,12 @@ def render_about_website():
 
 
 def render_help_about():
-    """Render the Help/About page."""
+    """
+    Render the Help/About page.
+    
+    Provides an educational overview of debt re-aging, the tool's
+    functionality, the privacy model, a glossary, and system health checks.
+    """
     st.title("Help & About")
     
     help_tab1, help_tab2, help_tab3 = st.tabs(["Overview", "Glossary", "System Health"])
@@ -245,7 +258,12 @@ def render_help_about():
 
 
 def render_rules_documentation():
-    """Render the rules documentation page."""
+    """
+    Render the rules documentation page.
+    
+    Dynamically generates documentation for all 24+ rules defined in the
+    RuleEngine, showing severity, description, and suggested evidence.
+    """
     st.title("Rules Documentation")
 
     st.markdown("""
@@ -272,7 +290,12 @@ def render_rules_documentation():
 
 
 def render_pilot_guide():
-    """Render the pilot guide page."""
+    """
+    Render the pilot guide page.
+    
+    Provides instructions for organizations to run a pilot program using
+    the tool, including setup, testing with samples, and evaluation.
+    """
     st.title("Pilot Guide for Organizations")
 
     st.markdown("""

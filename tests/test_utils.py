@@ -203,6 +203,57 @@ class TestMaskPii:
         result = mask_pii("Account: 1234567890123")
         assert "1234567890123" not in result
 
+from app.utils import confidence_to_color, severity_to_emoji, cleanup_old_cases, list_historical_cases
+import time
+import os
+
+def test_confidence_to_color():
+    assert confidence_to_color("High") == '#28a745'
+    assert confidence_to_color("Medium") == '#ffc107'
+    assert confidence_to_color("Low") == '#dc3545'
+    assert confidence_to_color("Unknown") == '#6c757d'
+
+def test_severity_to_emoji():
+    assert severity_to_emoji("high") == '[!!!]'
+    assert severity_to_emoji("medium") == '[!!]'
+    assert severity_to_emoji("low") == '[!]'
+    assert severity_to_emoji("other") == '[?]'
+
+def test_cleanup_old_cases(tmp_path):
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    
+    # Create old file
+    old_file = output_dir / "old.txt"
+    old_file.write_text("old")
+    
+    # Create new file
+    new_file = output_dir / "new.txt"
+    new_file.write_text("new")
+    
+    # Backdate old file
+    old_time = time.time() - (48 * 3600) # 48 hours ago
+    os.utime(old_file, (old_time, old_time))
+    
+    cleanup_old_cases(str(output_dir), max_age_hours=24)
+    
+    assert not old_file.exists()
+    assert new_file.exists()
+
+def test_list_historical_cases(tmp_path):
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    
+    case_dir = output_dir / "CASE1"
+    case_dir.mkdir()
+    case_yaml = case_dir / "case.yaml"
+    case_yaml.write_text("case_id: CASE1\ngenerated: '2023-01-01'\nconsumer_info: {name: 'John'}\nsummary: {total_flags: 5}")
+    
+    cases = list_historical_cases(str(output_dir))
+    assert len(cases) == 1
+    assert cases[0]['id'] == 'CASE1'
+    assert cases[0]['consumer'] == 'John'
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -43,13 +43,13 @@ def load_rule_definitions() -> dict:
     metadata_path = Path(__file__).parent / 'rules_metadata.json'
     try:
         if metadata_path.exists():
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
             logger.warning(f"Metadata file not found at {metadata_path}")
             return {}
     except Exception as e:
-        logger.error(f"Error loading rule definitions: {e}")
+        logger.error(f"Error loading rule definitions from {metadata_path}: {e}")
         return {}
 
 RULE_DEFINITIONS = load_rule_definitions()
@@ -227,7 +227,10 @@ class RuleEngine:
             try:
                 bal_float = float(str(balance).replace(',', '').replace('$', ''))
                 bal_bucket = round(bal_float / 100) * 100
-            except:
+            except (ValueError, TypeError):
+                bal_bucket = 0
+            except Exception as e:
+                logger.error(f"Unexpected error calculating balance bucket in DU2 check: {e}")
                 bal_bucket = 0
 
             if orig and bal_bucket > 0:
@@ -380,7 +383,10 @@ class RuleEngine:
                 return self._create_flag('A2',
                     f"The estimated removal date ({removal_date}) does not align with the expected removal date based on DOFD ({dofd}). Expected removal around {expected_removal}, but reported removal is {diff_months} months different.",
                     {'dofd': dofd, 'estimated_removal_date': removal_date, 'expected_removal_date': expected_removal, 'difference_days': diff_days})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format encountered in A2 check: expected={expected_removal}, reported={removal_date}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_a2: {e}")
         return None
 
     # ============ RE-AGING INDICATORS (B-series) ============
@@ -403,7 +409,10 @@ class RuleEngine:
                     return self._create_flag('B1',
                         f"The date opened ({date_opened}) is {months_diff} months after the Date of First Delinquency ({dofd}). This suggests the account may have been re-aged when transferred to a collection agency.",
                         {'dofd': dofd, 'date_opened': date_opened, 'months_after_dofd': months_diff})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in B1 check: dofd={dofd}, opened={date_opened}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_b1: {e}")
         return None
 
     def _check_rule_b2(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -425,7 +434,10 @@ class RuleEngine:
                 return self._create_flag('B2',
                     f"This collection account shows a date opened of {date_opened} (within the last {years_ago:.1f} years) but does not display a Date of First Delinquency (DOFD). The missing DOFD makes it impossible to verify the proper removal date.",
                     {'date_opened': date_opened, 'dofd': 'NOT REPORTED', 'account_type': account_type, 'years_since_opened': round(years_ago, 1)})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in B2 check: opened={date_opened}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_b2: {e}")
         return None
 
     # ============ CROSS-BUREAU RULES (C-series) ============
@@ -456,7 +468,10 @@ class RuleEngine:
                     if diff > max_diff_days:
                         max_diff_days = diff
                         bureau_pair = (removal_dates[i], removal_dates[j])
-                except ValueError: continue
+                except ValueError:
+                    logger.debug(f"Invalid date format in C1 comparison: {removal_dates[i][1]} vs {removal_dates[j][1]}")
+                except Exception as e:
+                    logger.error(f"Unexpected error in _check_rule_c1 loop: {e}")
 
         if max_diff_days > 180 and bureau_pair:
             return self._create_flag('C1',
@@ -479,7 +494,10 @@ class RuleEngine:
                 return self._create_flag('D1',
                     f"The account status is '{status.upper()}', but a balance of ${balance:,.2f} is still being reported. If an account is paid or settled, the reported balance should be $0.",
                     {'account_status': status, 'current_balance': balance})
-        except ValueError: pass
+        except (ValueError, TypeError):
+            logger.debug(f"Could not parse balance in D1 check: {balance_str}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_d1: {e}")
         return None
 
     # ============ DATA INTEGRITY RULES (E-series) ============
@@ -499,7 +517,10 @@ class RuleEngine:
                         return self._create_flag('E1',
                             f"The {field.replace('_', ' ')} is reported as {val}, which is in the future. This is a clear data integrity violation.",
                             {'field': field, 'reported_date': val, 'current_date': now.strftime('%Y-%m-%d')})
-                except ValueError: pass
+                except ValueError:
+                    logger.debug(f"Invalid date format in E1 check for field {field}: {val}")
+                except Exception as e:
+                    logger.error(f"Unexpected error in _check_rule_e1 for field {field}: {e}")
         return None
 
     # ============ PAYMENT/BALANCE MANIPULATION (F-series) ============
@@ -544,7 +565,10 @@ class RuleEngine:
                 return self._create_flag('F2',
                     f"This debt is {debt_age_years:.1f} years old (DOFD: {dofd}), but shows recent activity on {date_last_activity}. This pattern may indicate artificial activity date refreshing to re-age the debt.",
                     {'dofd': dofd, 'date_last_activity': date_last_activity, 'debt_age_years': round(debt_age_years, 1), 'activity_age_months': round(activity_age_months, 1)})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in F2 check: dofd={dofd}, activity={date_last_activity}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_f2: {e}")
         return None
 
     # ============ FEE/INTEREST ABUSE (G-series) ============
@@ -616,7 +640,10 @@ class RuleEngine:
                 return self._create_flag('H1',
                     f"This medical debt was reported {days_diff} days after the date of service ({date_of_service}). Under current regulations, medical debt cannot be reported until at least 365 days after service.",
                     {'date_of_service': date_of_service, 'date_reported': date_reported, 'days_before_eligible': 365 - days_diff})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in H1 check: service={date_of_service}, reported={date_reported}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_h1: {e}")
         return None
 
     def _check_rule_h2(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -698,7 +725,10 @@ class RuleEngine:
                 return self._create_flag('I2',
                     f"The collection account open date ({date_opened}) differs from the original account date ({original_open_date}) by {diff_months} months. Collection accounts should preserve the original account's open date.",
                     {'date_opened': date_opened, 'original_open_date': original_open_date, 'difference_months': diff_months})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in I2 check: opened={date_opened}, original={original_open_date}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_i2: {e}")
         return None
 
     # ============ ZOMBIE DEBT RULES (J-series) ============
@@ -723,7 +753,10 @@ class RuleEngine:
                 return self._create_flag('J1',
                     f"This debt is {debt_age_years:.1f} years old (DOFD: {dofd}), but was recently reported/updated on {date_reported}. This pattern suggests a 'zombie debt' that may have been purchased and revived by a new collector.",
                     {'dofd': dofd, 'date_reported': date_reported, 'debt_age_years': round(debt_age_years, 1)})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in J1 check: dofd={dofd}, reported={date_reported}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_j1: {e}")
         return None
 
     # ============ INNOVATIVE RULES (K-series) ============
@@ -802,7 +835,10 @@ class RuleEngine:
                     return self._create_flag('K4',
                         f"The date of last payment ({date_last_payment}) is {years_after:.1f} years after the DOFD ({dofd}). Payments should typically precede or closely follow the delinquency date. This may indicate data errors or SOL manipulation.",
                         {'date_last_payment': date_last_payment, 'dofd': dofd, 'years_after_dofd': round(years_after, 1)})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in K4 check: payment={date_last_payment}, dofd={dofd}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_k4: {e}")
         return None
 
     def _check_rule_k5(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -851,7 +887,10 @@ class RuleEngine:
                 return self._create_flag('K6',
                     f"The removal date ({removal_date}) aligns with the Date Opened ({date_opened}) rather than the DOFD ({dofd}). The reporting clock has likely 'drifted' by {abs((opened_dt - dofd_dt).days // 30)} months.",
                     {'dofd': dofd, 'date_opened': date_opened, 'removal_date': removal_date})
-        except: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in K6 check: dofd={dofd}, opened={date_opened}, removal={removal_date}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_k6: {e}")
         return None
 
     def _check_rule_k7(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -887,7 +926,10 @@ class RuleEngine:
                     return self._create_flag('K7',
                         f"Forensic Interest Audit: Implied annual rate of {annual_rate*100:.1f}% exceeds the {state_data.state} legal cap of {cap*100:.1f}%. Balance grew from ${orig:,.2f} to ${curr:,.2f}.",
                         {'annual_interest_rate': f"{annual_rate*100:.1f}%", 'legal_cap': f"{cap*100:.1f}%"})
-        except: pass
+        except (ValueError, TypeError):
+            logger.debug(f"Could not parse balances or date in K7 check: curr={current_balance}, orig={original_balance}, dofd={dofd}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_k7: {e}")
         return None
 
     # ============ METRO2 COMPLIANCE RULES (M-series) ============
@@ -912,7 +954,10 @@ class RuleEngine:
                 return self._create_flag('M1',
                     f"Metro2 Integrity Error: Charge-Off Date ({charge_off_date}) is {days_diff} days from DOFD ({dofd}). Industry standard (Metro2) requires charge-off reporting to align with the 180-day delinquency cycle.",
                     {'dofd': dofd, 'charge_off_date': charge_off_date, 'integrity_gap_days': days_diff})
-        except: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in M1 check: dofd={dofd}, charge_off={charge_off_date}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_m1: {e}")
         return None
 
     def _check_rule_m2(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -928,7 +973,10 @@ class RuleEngine:
                     return self._create_flag('M2',
                         f"Metro2 Compliance Violation: Account status '{status.upper()}' requires a $0 balance reporting. Furnisher is incorrectly reporting a balance of ${balance:,.2f} on a transferred/sold tradeline.",
                         {'status': status, 'reported_balance': balance})
-            except: pass
+            except (ValueError, TypeError):
+                logger.debug(f"Could not parse balance in M2 check: {balance_str}")
+            except Exception as e:
+                logger.error(f"Unexpected error in _check_rule_m2: {e}")
         return None
 
     def _check_rule_l1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -983,7 +1031,10 @@ class RuleEngine:
                 return self._create_flag('S2',
                     f"A payment on {date_last_payment} was made after the original SOL expiry (DOFD {dofd} + {sol_years} years = {sol_expiry.strftime('%Y-%m-%d')}). In some states, this payment may have restarted the statute of limitations.",
                     {'state': state_code, 'dofd': dofd, 'date_last_payment': date_last_payment, 'original_sol_expiry': sol_expiry.strftime('%Y-%m-%d'), 'sol_years': sol_years})
-        except ValueError: pass
+        except ValueError:
+            logger.debug(f"Invalid date format in S2 check: dofd={dofd}, payment={date_last_payment}")
+        except Exception as e:
+            logger.error(f"Unexpected error in _check_rule_s2: {e}")
         return None
 
 

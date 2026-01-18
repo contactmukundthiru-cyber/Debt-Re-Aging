@@ -1,7 +1,19 @@
+"""
+Common UI styling and utility components.
+Defines the visual theme and shared layout elements like banners and cards.
+"""
 import streamlit as st
 
 def inject_custom_css():
     """Inject custom CSS for a premium, minimalist legal-tech aesthetic."""
+    from app.accessibility import get_accessibility_css, AccessibilityConfig
+    
+    # Get accessibility config from session state
+    config = st.session_state.get('accessibility_config', AccessibilityConfig())
+    acc_css = get_accessibility_css(config)
+    
+    st.markdown(acc_css, unsafe_allow_html=True)
+    
     st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');

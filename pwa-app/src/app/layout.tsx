@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import '../styles/globals.css';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Credit Report Analyzer | FCRA Violation Detection',
@@ -38,7 +39,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body className="antialiased">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -1,10 +1,18 @@
+"""
+Furnisher compliance and reporting UI components.
+"""
 import streamlit as st
 import pandas as pd
 from datetime import datetime
 from app.metro2 import Metro2Validator, Metro2BaseSegment
 
 def render_furnisher_mode():
-    """Render the Compliance Auditor mode for furnishers in premium style."""
+    """
+    Render the Compliance Auditor mode for furnishers in premium style.
+    
+    Provides specialized tools for data furnishers (creditors/collectors) to
+    validate their Metro2 reporting strings before submission to bureaus.
+    """
     st.markdown('<p class="section-header">INDUSTRY COMPLIANCE — PRE-REPORTING QC</p>', unsafe_allow_html=True)
     
     st.markdown("""
@@ -41,7 +49,12 @@ def render_furnisher_mode():
         st.markdown('</div>', unsafe_allow_html=True)
 
 def process_metro2_input(uploaded_file, raw_text):
-    """Process and validate Metro2 data."""
+    """
+    Process and validate Metro2 data from either a file or raw text input.
+    
+    Parses the input lines into Metro2BaseSegment objects and runs the
+    Metro2Validator against each segment to identify potential FCRA violations.
+    """
     lines = []
     if uploaded_file:
         content = uploaded_file.read().decode('utf-8')

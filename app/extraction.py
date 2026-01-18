@@ -7,7 +7,7 @@ import io
 import os
 import logging
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Any
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ except ImportError:
 MIN_TEXT_THRESHOLD = 50
 
 
-def preprocess_image(image):
+def preprocess_image(image: Image.Image) -> Image.Image:
     """
     Preprocess image for better OCR results using OpenCV.
     Falls back to basic processing if OpenCV is not available.

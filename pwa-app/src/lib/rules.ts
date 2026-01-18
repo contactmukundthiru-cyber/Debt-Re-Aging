@@ -3,6 +3,29 @@
  * Detects debt re-aging and credit reporting violations
  */
 
+/** Possible field values that can be captured in a rule flag */
+export type FieldValue = string | number | boolean | Date | null | undefined;
+
+/** Bureau-specific tactical advice */
+export interface BureauTactics {
+  experian?: string;
+  equifax?: string;
+  transunion?: string;
+  all?: string;
+}
+
+/** Rule definition metadata */
+export interface RuleDefinition {
+  name: string;
+  severity: 'low' | 'medium' | 'high';
+  successProbability: number;
+  whyItMatters: string;
+  suggestedEvidence: string[];
+  legalCitations: string[];
+  discoveryQuestions?: string[];
+  bureauTactics?: BureauTactics;
+}
+
 export interface RuleFlag {
   ruleId: string;
   ruleName: string;
@@ -10,11 +33,11 @@ export interface RuleFlag {
   explanation: string;
   whyItMatters: string;
   suggestedEvidence: string[];
-  fieldValues: Record<string, any>;
+  fieldValues: Record<string, FieldValue>;
   legalCitations: string[];
   successProbability: number; // 0-100%
   discoveryQuestions?: string[]; // Questions to ask the consumer to find more proof
-  bureauTactics?: Record<string, string>; // Specific advice for each bureau
+  bureauTactics?: BureauTactics; // Specific advice for each bureau
 }
 
 export interface CreditFields {
@@ -62,8 +85,8 @@ export interface PatternScore {
   recommendedAction: string;
 }
 
-// Rule metadata
-const RULE_DEFINITIONS: Record<string, any> = {
+// Rule metadata with strict typing
+const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
   B1: {
     name: 'DOFD Before Account Opening',
     severity: 'high',

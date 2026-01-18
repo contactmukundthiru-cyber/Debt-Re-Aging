@@ -136,6 +136,17 @@ class SettingsManager:
     @property
     def settings(self) -> UserSettings:
         """Get current settings."""
+        # Refresh from session state if in Streamlit context
+        import streamlit as st
+        try:
+            if 'accessibility_config' in st.session_state:
+                acc = st.session_state.accessibility_config
+                self._settings.high_contrast_mode = acc.high_contrast
+                self._settings.larger_text = acc.larger_text
+                self._settings.screen_reader_mode = acc.screen_reader_mode
+                self._settings.keyboard_navigation_hints = acc.keyboard_hints
+        except:
+            pass
         return self._settings
 
     def reload(self):
@@ -176,13 +187,23 @@ class SettingsManager:
         return formats.get(self._settings.date_format, '%Y-%m-%d')
 
 
-def render_settings_page(st):
+def render_settings_page(st: Any) -> None:
     """Render the settings page in Streamlit."""
+    from app.accessibility import AccessibilityConfig
+    
     st.title("Settings")
     st.markdown("Configure your preferences for the Debt Re-Aging Case Factory.")
 
     manager = SettingsManager()
     settings = manager.settings
+
+    # Sync with AccessibilityConfig in session state if needed
+    if 'accessibility_config' in st.session_state:
+        acc = st.session_state.accessibility_config
+        settings.high_contrast_mode = acc.high_contrast
+        settings.larger_text = acc.larger_text
+        settings.screen_reader_mode = acc.screen_reader_mode
+        settings.keyboard_navigation_hints = acc.keyboard_hints
 
     # Create tabs for different settings categories
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -394,4 +415,16 @@ def render_settings_page(st):
             show_debug_info=show_debug,
             metrics_retention_days=metrics_retention
         )
+        
+        # Update session state AccessibilityConfig to match
+        from app.accessibility import AccessibilityConfig
+        st.session_state.accessibility_config = AccessibilityConfig(
+            high_contrast=high_contrast,
+            larger_text=larger_text,
+            screen_reader_mode=screen_reader,
+            keyboard_hints=keyboard_hints,
+            reduced_motion=settings.reduced_motion if hasattr(settings, 'reduced_motion') else False,
+            focus_indicators=settings.focus_indicators if hasattr(settings, 'focus_indicators') else True
+        )
+        
         st.success("Settings saved successfully!")

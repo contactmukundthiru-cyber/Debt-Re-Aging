@@ -86,6 +86,7 @@ DATE_PATTERN = r'''
     (?:
         \d{1,2}[/-]\d{1,2}[/-]\d{2,4}  |  # MM/DD/YYYY or similar
         \d{4}[/-]\d{1,2}[/-]\d{1,2}  |     # YYYY-MM-DD
+        \d{1,2}/\d{4}  |                  # MM/YYYY
         (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}  |  # Month DD, YYYY
         \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}  |  # DD Month YYYY
         (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}  # Month YYYY

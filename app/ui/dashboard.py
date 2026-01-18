@@ -1,9 +1,18 @@
+"""
+Main dashboard UI for case management and metrics overview.
+"""
 import streamlit as st
 import pandas as pd
 from app.metrics import MetricsTracker
 
 def render_metrics_dashboard():
-    """Render the Metrics Dashboard UI."""
+    """
+    Render the Metrics Dashboard UI.
+    
+    Loads aggregate case data from the local MetricsTracker and displays
+    visualizations including issue distribution, bureau statistics, and
+    a list of recent cases.
+    """
     st.markdown("""
     <div style="margin-bottom: 20px;">
         <h2 style="color: #1e40af; margin-bottom: 8px;">Your Statistics</h2>
