@@ -72,7 +72,7 @@ I have previously disputed this information, but the bureau responded with a gen
                     ].map(btn => (
                         <button
                             key={btn.id}
-                            onClick={() => setActiveDocument(btn.id as any)}
+                            onClick={() => setActiveDocument(btn.id as 'affidavit' | 'cfpb' | 'attorney')}
                             className={`px-4 py-3 rounded-xl border flex items-center gap-2 transition-all ${activeDocument === btn.id
                                 ? 'bg-slate-900 border-slate-900 text-white dark:bg-white dark:border-white dark:text-slate-900 shadow-lg'
                                 : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'
@@ -97,7 +97,14 @@ I have previously disputed this information, but the bureau responded with a gen
                                     activeDocument === 'cfpb' ? 'Official Complaint Narrative' : 'Attorney Referral Summary'}
                             </span>
                             <button
-                                onClick={() => copyToClipboard(activeDocument === 'affidavit' ? affidavitText : activeDocument === 'cfpb' ? generateCFPBText() : 'Coming Soon')}
+                                onClick={() => {
+                                    const text = activeDocument === 'affidavit'
+                                        ? affidavitText
+                                        : activeDocument === 'cfpb'
+                                            ? generateCFPBText()
+                                            : `ATTORNEY CASE REFERRAL SUMMARY\n[PRIVILEGED AND CONFIDENTIAL]\n\nCLIENT: ${consumer.firstName} ${consumer.lastName}\n...`;
+                                    copyToClipboard(text);
+                                }}
                                 className="text-xs font-bold text-blue-500 hover:text-blue-600 flex items-center gap-1"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
@@ -108,11 +115,36 @@ I have previously disputed this information, but the bureau responded with a gen
                             {activeDocument === 'affidavit' && affidavitText}
                             {activeDocument === 'cfpb' && generateCFPBText()}
                             {activeDocument === 'attorney' && (
-                                <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                                    <svg className="w-12 h-12 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                    <p>Attorney Case File Generation Locked</p>
-                                    <p className="text-xs mt-2">Requires completing the full forensic workflow.</p>
-                                </div>
+                                `ATTORNEY CASE REFERRAL SUMMARY
+[PRIVILEGED AND CONFIDENTIAL - ATTORNEY WORK PRODUCT]
+
+CLIENT: ${consumer.firstName} ${consumer.lastName}
+DATE: ${new Date().toLocaleDateString()}
+CASE ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}
+
+1. EXECUTIVE CASE SUMMARY
+Potential FCRA/FDCPA litigation matter involving ${flags.filter(f => f.severity === 'high').length} high-severity violations.
+Primary Defendant(s): ${fields.furnisherOrCollector || 'Unknown Furnisher'}
+Estimated Statutory Damages: $${(flags.length * 1000).toLocaleString()} (Max)
+
+2. VIOLATION MATRIX
+${flags.map((f, i) => `[${i + 1}] ${f.ruleName}
+   - Severity: ${f.severity}
+   - Statute: ${f.legalCitations.join(', ')}
+   - Evidence: ${f.fieldValues ? Object.entries(f.fieldValues).map(([k, v]) => `${k}=${v}`).join(', ') : 'N/A'}`).join('\n\n')}
+
+3. PROCEDURAL HISTORY
+- Initial Dispute Sent: [DATE]
+- Bureau Response: [DATE] - Failed to correct
+- Method of Verification Request: [DATE] - Ignored/Insufficient
+
+4. WILLFUL NON-COMPLIANCE MARKERS
+The volume and nature of these errors (${flags.length} total) suggests a systemic failure to maintain reasonable procedures (FCRA § 607(b)), rather than isolated clerical error.
+
+5. ATTACHED EXHIBITS
+- Exhibit A: Original Credit Report (Redacted)
+- Exhibit B: Metro 2® Forensic Audit
+- Exhibit C: Certified Mail Receipts`
                             )}
                         </div>
                     </div>

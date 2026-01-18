@@ -156,19 +156,34 @@ interface AnalyzedAccount {
 }
 
 
-const SAMPLE_TEXT = `Account Information:
-Creditor: PORTFOLIO RECOVERY ASSOC
-Original Creditor: CAPITAL ONE BANK
-Account Type: Collection
-Account Status: Open
-Balance: $2,847.00
-Original Amount: $1,523.00
-Date Opened: 2019-03-15
-Date of First Delinquency: 2020-08-22
-Charge-Off Date: 2020-06-15
-Last Payment: 2020-05-10
-Estimated Removal: 2029-08-22
-Payment History: 30 60 90 120 CO`;
+const SAMPLE_TEXT = `[CASE_FILE_0892] - FORENSIC AUDIT SAMPLE
+
+ACCOUNT 1: PRIMARY VIOLATION CASE
+Creditor: ASSET ACCEPTANCE LLC
+Original Creditor: CHASE BANK
+Account Type: Collection / Factoring Company Account
+Account Status: Open / Past Due
+Balance: $4,219.00
+Original Amount: $1,850.00
+Date Opened: 2018-11-12
+Date of First Delinquency: 2023-04-10
+Charge-Off Date: 2019-06-15
+Last Payment: 2019-04-02
+Estimated Removal: 2031-12-01
+Payment History: 30 60 90 120 150 180 CO
+
+[FORENSIC NOTES]
+- DOFD (2023) is reported AFTER Charge-Off (2019), indicating illegal re-aging.
+- Balance ($4,219) is 228% of original amount without itemized fee disclosure.
+- Estimated removal exceeds FCRA 7-year limit based on actual 2019 delinquency.
+
+ACCOUNT 2: DUPLICATE FRAUD INDICATOR
+Creditor: CAPITAL ONE
+Account Type: Credit Card
+Balance: $4,219.00
+Status: Charged Off
+Date Opened: 2018-11-12
+Note: Data matches Account 1 exactly, indicating potential double-reporting violation.`;
 
 // Analysis tabs configuration (TabId type imported from constants)
 
