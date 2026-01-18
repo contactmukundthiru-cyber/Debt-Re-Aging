@@ -235,36 +235,41 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
           </div>
         </div>
 
-        {/* Issue Breakdown */}
-        <div className="premium-card p-8 lg:col-span-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Violation Matrix</p>
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                <span className="text-red-500">Critical (FCRA)</span>
-                <span className="dark:text-white">{issuesByPriority.high.length}</span>
+        {/* Violation Priority Matrix */}
+        <div className="premium-card p-8 lg:col-span-1 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Violation Priority Matrix</p>
+
+          <div className="grid grid-cols-3 gap-2 h-40 mb-6">
+            {/* Simple 3x3 grid visualization */}
+            {[
+              { label: 'Crit', count: issuesByPriority.high.length, color: 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]' },
+              { label: 'Sub', count: issuesByPriority.medium.length, color: 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' },
+              { label: 'Low', count: issuesByPriority.low.length, color: 'bg-slate-400 shadow-[0_0_15px_rgba(148,163,184,0.2)]' },
+            ].map((level, idx) => (
+              <div key={idx} className="col-span-1 row-span-3 flex flex-col justify-end gap-2">
+                <div className="flex-grow flex items-end justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden relative group/bar">
+                  <div
+                    className={`w-full transition-all duration-1000 ease-out rounded-t-lg ${level.color}`}
+                    style={{ height: flags.length > 0 ? `${Math.max(10, (level.count / flags.length) * 100)}%` : '0%' }}
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center text-xs font-bold dark:text-white opacity-0 group-hover/bar:opacity-100 transition-opacity">
+                    {level.count}
+                  </span>
+                </div>
+                <p className="text-[8px] font-bold text-center text-slate-500 uppercase tracking-tighter">{level.label}</p>
               </div>
-              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-red-500" style={{ width: `${(issuesByPriority.high.length / flags.length) * 100}%` }}></div>
-              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Impact</span>
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                <span className="text-amber-500">Substantial</span>
-                <span className="dark:text-white">{issuesByPriority.medium.length}</span>
-              </div>
-              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500" style={{ width: `${(issuesByPriority.medium.length / flags.length) * 100}%` }}></div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                <span className="text-slate-400">Contextual</span>
-                <span className="dark:text-white">{issuesByPriority.low.length}</span>
-              </div>
-              <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-slate-400" style={{ width: `${(issuesByPriority.low.length / flags.length) * 100}%` }}></div>
-              </div>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="text-[9px] font-bold text-slate-400 uppercase">Success %</span>
             </div>
           </div>
         </div>
