@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debt Re-Aging Case Factory - Credit Report Forensic Analysis</title>
-    <meta name="description" content="Professional open-source tool for legal aid organizations to detect illegal debt re-aging and FCRA violations. Process credit reports locally and privately.">
+    <meta name="description"
+        content="Professional open-source tool for legal aid organizations to detect illegal debt re-aging and FCRA violations. Process credit reports locally and privately.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --primary: #0f172a;
@@ -28,7 +32,11 @@
             --font-serif: 'Fraunces', serif;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: var(--font-main);
@@ -39,11 +47,23 @@
             overflow-x: hidden;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
         /* Smooth Section Transitions */
-        section { opacity: 0; transform: translateY(20px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        section.visible { opacity: 1; transform: translateY(0); }
+        section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
         /* Header Enhancement */
         header {
@@ -58,7 +78,11 @@
             transition: all 0.3s ease;
         }
 
-        header.scrolled { padding: 12px 0; border-bottom: 1px solid var(--slate-200); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        header.scrolled {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--slate-200);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
 
         .logo {
             font-family: var(--font-serif);
@@ -72,7 +96,12 @@
             gap: 8px;
         }
 
-        nav { display: flex; align-items: center; gap: 32px; }
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
         nav a {
             text-decoration: none;
             color: var(--slate-600);
@@ -81,7 +110,11 @@
             transition: color 0.2s;
             position: relative;
         }
-        nav a:hover { color: var(--slate-900); }
+
+        nav a:hover {
+            color: var(--slate-900);
+        }
+
         nav a::after {
             content: '';
             position: absolute;
@@ -92,7 +125,10 @@
             background: var(--accent);
             transition: width 0.3s ease;
         }
-        nav a:hover::after { width: 100%; }
+
+        nav a:hover::after {
+            width: 100%;
+        }
 
         /* Hero Revamp */
         .hero {
@@ -139,6 +175,7 @@
             color: #fff;
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
         }
+
         .btn-primary:hover {
             transform: translateY(-2px);
             background: var(--primary-light);
@@ -150,6 +187,7 @@
             color: var(--slate-900);
             border: 1px solid var(--slate-200);
         }
+
         .btn-secondary:hover {
             background: var(--slate-50);
             border-color: var(--slate-300);
@@ -157,7 +195,13 @@
         }
 
         /* Platform Cards */
-        .platform-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; margin-top: 60px; }
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-top: 60px;
+        }
+
         .platform-card {
             background: #fff;
             padding: 48px;
@@ -169,13 +213,18 @@
             display: flex;
             flex-direction: column;
         }
+
         .platform-card:hover {
             transform: translateY(-8px);
             border-color: var(--accent);
             box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
         }
 
-        .platform-card h3 { font-family: var(--font-serif); font-size: 28px; margin-bottom: 20px; }
+        .platform-card h3 {
+            font-family: var(--font-serif);
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
 
         .feature-list li {
             list-style: none;
@@ -185,6 +234,7 @@
             font-size: 15px;
             color: var(--slate-600);
         }
+
         .feature-list li::before {
             content: '→';
             position: absolute;
@@ -195,26 +245,41 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .hero { padding: 80px 0 60px; }
-            .platform-grid { grid-template-columns: 1fr; }
-            nav { display: none; }
+            .hero {
+                padding: 80px 0 60px;
+            }
+
+            .platform-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                display: none;
+            }
         }
     </style>
 </head>
+
 <body>
     <header id="site-header">
         <div class="container">
             <a href="#" class="logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
                 Debt Re-Aging<span>Case Factory</span>
             </a>
             <nav>
                 <a href="#platforms">Platforms</a>
                 <a href="#how-it-works">Process</a>
                 <a href="#faq">FAQ</a>
-                <a href="./pwa-app/">Launch Portal</a>
+                <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/">Launch Portal</a>
                 <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" class="btn btn-secondary btn-small">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                    </svg>
                     Source
                 </a>
             </nav>
@@ -223,11 +288,15 @@
 
     <section class="hero reveal">
         <div class="container">
-            <span style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 16px; display: block;">Open-Source Credit Forensics</span>
+            <span
+                style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 11px; font-weight: 800; color: var(--accent); margin-bottom: 16px; display: block;">Open-Source
+                Credit Forensics</span>
             <h1>The Gold Standard for<br>Report Correction.</h1>
-            <p>Institutional-grade forensic toolkit designed to detect illegal debt re-aging, SOL violations, and systemic reporting errors locally on your machine.</p>
+            <p>Institutional-grade forensic toolkit designed to detect illegal debt re-aging, SOL violations, and
+                systemic reporting errors locally on your machine.</p>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                <a href="./pwa-app/" class="btn btn-primary">Launch Web Portal</a>
+                <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn btn-primary">Launch
+                    Web Portal</a>
                 <a href="#platforms" class="btn btn-secondary">System Comparison</a>
             </div>
         </div>
@@ -235,30 +304,35 @@
 
     <section class="platform-section" id="platforms">
         <div class="container">
-            <h2 style="text-align: center; font-family: var(--font-serif); font-size: 42px; margin-bottom: 60px;">Analytical Power Comparison</h2>
+            <h2 style="text-align: center; font-family: var(--font-serif); font-size: 42px; margin-bottom: 60px;">
+                Analytical Power Comparison</h2>
             <div class="platform-grid">
                 <div class="platform-card" style="border-top: 4px solid var(--accent);">
                     <h3>Forensic Web Portal</h3>
-                    <p style="color: var(--slate-600); margin-bottom: 32px;">Agile, private, and instant. The quickest way to verify a single case from any device.</p>
+                    <p style="color: var(--slate-600); margin-bottom: 32px;">Agile, private, and instant. The quickest
+                        way to verify a single case from any device.</p>
                     <ul class="feature-list" style="flex-grow: 1;">
                         <li><strong>Multi-Format OCR</strong>: Immediate extraction from PDF/Images.</li>
                         <li><strong>Violation Scoring</strong>: Real-time risk and dispute probability.</li>
                         <li><strong>Evidence ZIP</strong>: One-click export of letters and metadata.</li>
                         <li><strong>Zero Connection</strong>: Runs 100% locally in your sandbox.</li>
                     </ul>
-                    <a href="./pwa-app/" class="btn btn-primary" style="margin-top: 32px;">Open Web Portal</a>
+                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn btn-primary"
+                        style="margin-top: 32px;">Open Web Portal</a>
                 </div>
 
                 <div class="platform-card">
                     <h3>Enterprise Suite</h3>
-                    <p style="color: var(--slate-600); margin-bottom: 32px;">For legal clinics and high-volume advocates. Built for long-term database management.</p>
+                    <p style="color: var(--slate-600); margin-bottom: 32px;">For legal clinics and high-volume
+                        advocates. Built for long-term database management.</p>
                     <ul class="feature-list" style="flex-grow: 1;">
                         <li><strong>CMS Orchestration</strong>: Sync with LegalServer and Salesforce.</li>
                         <li><strong>Systemic Auditing</strong>: Cross-reference trends across thousands of cases.</li>
                         <li><strong>Full SQL Database</strong>: Persistent storage for litigation tracking.</li>
                         <li><strong>Custom Workflows</strong>: API-first design for internal automation.</li>
                     </ul>
-                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md" class="btn btn-secondary" style="margin-top: 32px;">Technical Specs</a>
+                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md"
+                        class="btn btn-secondary" style="margin-top: 32px;">Technical Specs</a>
                 </div>
             </div>
         </div>
@@ -266,8 +340,11 @@
 
     <section class="steps-section" id="how-it-works">
         <div class="container">
-            <h2 style="text-align: center; font-size: 32px; font-weight: 800; color: var(--slate-900); margin-bottom: 12px;">How It Works</h2>
-            <p style="text-align: center; color: var(--slate-600); max-width: 600px; margin: 0 auto;">Upload, verify, and export evidence-grade documents in minutes. Everything runs locally in your browser.</p>
+            <h2
+                style="text-align: center; font-size: 32px; font-weight: 800; color: var(--slate-900); margin-bottom: 12px;">
+                How It Works</h2>
+            <p style="text-align: center; color: var(--slate-600); max-width: 600px; margin: 0 auto;">Upload, verify,
+                and export evidence-grade documents in minutes. Everything runs locally in your browser.</p>
             <div class="steps-grid">
                 <div class="step-card">
                     <span>1</span>
@@ -286,7 +363,8 @@
                 </div>
             </div>
             <div style="display: flex; justify-content: center; margin-top: 32px;">
-                <a href="./pwa-app/" class="btn btn-primary">Open the Web App</a>
+                <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn btn-primary">Open
+                    the Web App</a>
             </div>
         </div>
     </section>
@@ -294,13 +372,16 @@
     <section style="padding: 70px 0; background: var(--slate-50);">
         <div class="container">
             <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-                <h2 style="font-size: 30px; color: var(--slate-900); margin-bottom: 12px;">Export Everything, Instantly</h2>
+                <h2 style="font-size: 30px; color: var(--slate-900); margin-bottom: 12px;">Export Everything, Instantly
+                </h2>
                 <p style="color: var(--slate-600); margin-bottom: 24px;">
                     Generate PDF letters, evidence packages, attorney briefs, and a complete ZIP bundle with one click.
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                    <a href="./pwa-app/" class="btn btn-secondary">See Exports in the Web App</a>
-                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md" class="btn btn-secondary">Download Desktop Suite</a>
+                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/"
+                        class="btn btn-secondary">See Exports in the Web App</a>
+                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md"
+                        class="btn btn-secondary">Download Desktop Suite</a>
                 </div>
             </div>
         </div>
@@ -310,36 +391,45 @@
     <section style="padding: 80px 0; background: var(--slate-900); color: #fff;">
         <div class="container">
             <h2 style="text-align: center; color: #fff; margin-bottom: 16px;">Unrivaled Forensic Capabilities</h2>
-            <p style="text-align: center; color: var(--slate-400); max-width: 600px; margin: 0 auto 48px;">A 1001x leap in credit reporting transparency. Our engine does what legacy tools can't.</p>
-            
+            <p style="text-align: center; color: var(--slate-400); max-width: 600px; margin: 0 auto 48px;">A 1001x leap
+                in credit reporting transparency. Our engine does what legacy tools can't.</p>
+
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px;">
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px;">Comparative Delta Analysis</h4>
-                    <p style="font-size: 14px; color: var(--slate-400);">Automatically diffs multiple reports over time to catch date changes, balance increases, and status manipulation that legacy tools miss.</p>
+                    <p style="font-size: 14px; color: var(--slate-400);">Automatically diffs multiple reports over time
+                        to catch date changes, balance increases, and status manipulation that legacy tools miss.</p>
                 </div>
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px;">Case Law Intelligence</h4>
-                    <p style="font-size: 14px; color: var(--slate-400);">Maps detected violations to relevant federal court rulings (e.g. <i>Gillespie v. Trans Union</i>) to provide high-potency legal citations.</p>
+                    <p style="font-size: 14px; color: var(--slate-400);">Maps detected violations to relevant federal
+                        court rulings (e.g. <i>Gillespie v. Trans Union</i>) to provide high-potency legal citations.
+                    </p>
                 </div>
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px;">Predictive Success Modeling</h4>
-                    <p style="font-size: 14px; color: var(--slate-400);">AI-driven probability scoring for each violation based on historical bureau behavior and legal strength of the detected error.</p>
+                    <p style="font-size: 14px; color: var(--slate-400);">AI-driven probability scoring for each
+                        violation based on historical bureau behavior and legal strength of the detected error.</p>
                 </div>
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px;">Zombie Debt Detection</h4>
-                    <p style="font-size: 14px; color: var(--slate-400);">Detects patterns where old defaulted accounts are re-reported as new collections to illegally bypass FCRA reporting limits.</p>
+                    <p style="font-size: 14px; color: var(--slate-400);">Detects patterns where old defaulted accounts
+                        are re-reported as new collections to illegally bypass FCRA reporting limits.</p>
                 </div>
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px;">Forensic Lab & Synthesis</h4>
-                    <p style="font-size: 14px; color: var(--slate-400);">Advanced lab view mapping violations to U.S. Code with automated legal synthesis for attorney-grade case briefs.</p>
+                    <p style="font-size: 14px; color: var(--slate-400);">Advanced lab view mapping violations to U.S.
+                        Code with automated legal synthesis for attorney-grade case briefs.</p>
                 </div>
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px;">Interactive Discovery Engine</h4>
-                    <p style="font-size: 14px; color: var(--slate-400);">Answer targeted legal discovery questions to uncover hidden violations and track evidence readiness for potential litigation.</p>
+                    <p style="font-size: 14px; color: var(--slate-400);">Answer targeted legal discovery questions to
+                        uncover hidden violations and track evidence readiness for potential litigation.</p>
                 </div>
                 <div>
                     <h4 style="color: var(--primary); margin-bottom: 12px;">Bureau-Specific Strategy</h4>
-                    <p style="font-size: 14px; color: var(--slate-400);">Localized tactical advice for Experian, Equifax, and TransUnion, identifying known procedural failures at each specific agency.</p>
+                    <p style="font-size: 14px; color: var(--slate-400);">Localized tactical advice for Experian,
+                        Equifax, and TransUnion, identifying known procedural failures at each specific agency.</p>
                 </div>
             </div>
         </div>
@@ -348,20 +438,27 @@
     <section style="padding: 100px 0; background: var(--slate-900); color: #fff;">
         <div class="container">
             <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-                <h2 style="font-family: var(--font-serif); font-size: 42px; margin-bottom: 24px;">Privacy as a Core Directive</h2>
-                <p style="color: var(--slate-400); font-size: 18px; margin-bottom: 40px;">Unlike commercial services, the Case Factory never sees your data. All forensic analysis remains strictly within your browser's private memory or your local server instance.</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: left;">
+                <h2 style="font-family: var(--font-serif); font-size: 42px; margin-bottom: 24px;">Privacy as a Core
+                    Directive</h2>
+                <p style="color: var(--slate-400); font-size: 18px; margin-bottom: 40px;">Unlike commercial services,
+                    the Case Factory never sees your data. All forensic analysis remains strictly within your browser's
+                    private memory or your local server instance.</p>
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: left;">
                     <div>
                         <h4 style="color: var(--accent); margin-bottom: 12px;">Zero Cloud Sync</h4>
-                        <p style="font-size: 14px; color: var(--slate-400);">No accounts. No databases. No tracking. Your client's privacy is absolute.</p>
+                        <p style="font-size: 14px; color: var(--slate-400);">No accounts. No databases. No tracking.
+                            Your client's privacy is absolute.</p>
                     </div>
                     <div>
                         <h4 style="color: var(--accent); margin-bottom: 12px;">WASM Processing</h4>
-                        <p style="font-size: 14px; color: var(--slate-400);">Complex logic executes at near-native speeds directly in your client's browser.</p>
+                        <p style="font-size: 14px; color: var(--slate-400);">Complex logic executes at near-native
+                            speeds directly in your client's browser.</p>
                     </div>
                     <div>
                         <h4 style="color: var(--accent); margin-bottom: 12px;">Open Audit</h4>
-                        <p style="font-size: 14px; color: var(--slate-400);">Every line of code is open for jurisdictional security review and institutional approval.</p>
+                        <p style="font-size: 14px; color: var(--slate-400);">Every line of code is open for
+                            jurisdictional security review and institutional approval.</p>
                     </div>
                 </div>
             </div>
@@ -371,13 +468,16 @@
     <section style="padding: 70px 0; background: #fff;">
         <div class="container" style="display: grid; gap: 24px; align-items: center;">
             <div style="text-align: center;">
-                <h2 style="font-size: 30px; color: var(--slate-900); margin-bottom: 12px;">Ready to run a forensic check?</h2>
+                <h2 style="font-size: 30px; color: var(--slate-900); margin-bottom: 12px;">Ready to run a forensic
+                    check?</h2>
                 <p style="color: var(--slate-600); max-width: 640px; margin: 0 auto 24px;">
                     Launch the web app for instant analysis or deploy the desktop suite for full-scale case management.
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                    <a href="./pwa-app/" class="btn btn-primary">Open Web App</a>
-                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md" class="btn btn-secondary">Deploy Desktop Suite</a>
+                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/"
+                        class="btn btn-primary">Open Web App</a>
+                    <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md"
+                        class="btn btn-secondary">Deploy Desktop Suite</a>
                 </div>
             </div>
         </div>
@@ -385,36 +485,45 @@
 
     <section class="faq-section" id="faq">
         <div class="container">
-            <h2 style="text-align: center; font-size: 32px; font-weight: 800; color: var(--slate-900);">Common Questions</h2>
+            <h2 style="text-align: center; font-size: 32px; font-weight: 800; color: var(--slate-900);">Common Questions
+            </h2>
             <div class="faq-grid">
                 <details class="faq-item">
                     <summary>Is my financial data safe?</summary>
                     <div class="faq-content">
-                        Yes. This tool was designed with a "privacy-first" architecture. Whether you use the Web App or the Desktop Suite, all processing happens locally on your device. No data is ever uploaded to a server or stored in the cloud.
+                        Yes. This tool was designed with a "privacy-first" architecture. Whether you use the Web App or
+                        the Desktop Suite, all processing happens locally on your device. No data is ever uploaded to a
+                        server or stored in the cloud.
                     </div>
                 </details>
                 <details class="faq-item">
                     <summary>How accurate is the analysis?</summary>
                     <div class="faq-content">
-                        The tool uses 20+ automated rules based on FCRA and FDCPA regulations. While highly accurate for detecting timeline inconsistencies, it is designed to assist human review, not replace it. Always verify the results before sending disputes.
+                        The tool uses 20+ automated rules based on FCRA and FDCPA regulations. While highly accurate for
+                        detecting timeline inconsistencies, it is designed to assist human review, not replace it.
+                        Always verify the results before sending disputes.
                     </div>
                 </details>
                 <details class="faq-item">
                     <summary>What types of errors does it detect?</summary>
                     <div class="faq-content">
-                        It specializes in detecting "debt re-aging" (when collectors illegally refresh the 7-year reporting clock), statute of limitations violations, duplicate reporting by multiple collectors, and medical debt reporting violations.
+                        It specializes in detecting "debt re-aging" (when collectors illegally refresh the 7-year
+                        reporting clock), statute of limitations violations, duplicate reporting by multiple collectors,
+                        and medical debt reporting violations.
                     </div>
                 </details>
                 <details class="faq-item">
                     <summary>Does the web app work offline?</summary>
                     <div class="faq-content">
-                        Yes. After the first load, the web app runs fully offline and processes everything locally on your device.
+                        Yes. After the first load, the web app runs fully offline and processes everything locally on
+                        your device.
                     </div>
                 </details>
                 <details class="faq-item">
                     <summary>What should I upload?</summary>
                     <div class="faq-content">
-                        Upload a PDF, image, or paste the account section from your credit report. Scanned PDFs will run OCR automatically.
+                        Upload a PDF, image, or paste the account section from your credit report. Scanned PDFs will run
+                        OCR automatically.
                     </div>
                 </details>
             </div>
@@ -423,13 +532,17 @@
 
     <footer style="padding: 80px 0; background: #fff; border-top: 1px solid var(--slate-200);">
         <div class="container" style="text-align: center;">
-            <div class="logo" style="justify-content: center; margin-bottom: 24px;">Debt Re-Aging<span>Case Factory</span></div>
+            <div class="logo" style="justify-content: center; margin-bottom: 24px;">Debt Re-Aging<span>Case
+                    Factory</span></div>
             <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 32px;">
-                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging" style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Platform</a>
-                <a href="mailto:contactmukundthiru1@gmail.com" style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Contact</a>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging"
+                    style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Platform</a>
+                <a href="mailto:contactmukundthiru1@gmail.com"
+                    style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Contact</a>
                 <a href="#" style="color: var(--slate-600); text-decoration: none; font-size: 14px;">Documentation</a>
             </div>
-            <p style="font-size: 13px; color: var(--slate-400);">© 2026 Developed for the consumer legal aid community.</p>
+            <p style="font-size: 13px; color: var(--slate-400);">© 2026 Developed for the consumer legal aid community.
+            </p>
         </div>
     </footer>
 
@@ -458,4 +571,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -37,6 +37,7 @@ import TacticalSimulatorTab from './analysis/TacticalSimulatorTab';
 import LiabilityRadarTab from './analysis/LiabilityRadarTab';
 import LegalEscalationTab from './analysis/LegalEscalationTab';
 import Metro2AuditTab from './analysis/Metro2AuditTab';
+import MasterActionPlanTab from './analysis/MasterActionPlanTab';
 
 
 interface AnalyticsMetric {
@@ -420,23 +421,16 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
         )}
 
         {activeTab === 'actions' && (
-          <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-            <h3 className="text-xl font-bold dark:text-white mb-6">Strategic Action Plan</h3>
-            <div className="space-y-4">
-              {analytics?.actions.map((item, i) => (
-                <div key={i} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.priority === 'immediate' ? 'bg-rose-500 text-white' : 'bg-blue-500 text-white'
-                    }`}>
-                    <span className="text-xs font-black uppercase">{item.priority[0]}</span>
-                  </div>
-                  <div>
-                    <p className="font-bold dark:text-white">{item.action}</p>
-                    <p className="text-xs text-slate-500 mt-1">{item.reason}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <MasterActionPlanTab
+            actions={analytics?.actions.map((item, i) => ({
+              id: `action-${i}`,
+              title: item.action,
+              description: item.reason,
+              priority: item.priority === 'immediate' ? 'high' : item.priority === 'optional' ? 'low' : 'medium'
+            })) || []}
+            setActiveTab={setActiveTab}
+            onExport={() => setActiveTab('lettereditor')}
+          />
         )}
       </div>
     </div>

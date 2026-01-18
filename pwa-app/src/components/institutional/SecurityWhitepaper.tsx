@@ -52,7 +52,7 @@ const SecurityWhitepaper: React.FC = () => {
                             To support legal proceedings and institutional partnerships, every forensic report includes a cryptographic hash (SHA-256) of the source data.
                         </p>
                         <div className="p-6 rounded-2xl bg-slate-950 text-slate-300 font-mono text-xs border border-slate-800">
-                            <p className="mb-2 text-slate-500">// Example Forensic Verification Log</p>
+                            <p className="mb-2 text-slate-500">{'// Example Forensic Verification Log'}</p>
                             <p>HASH_ALGORITHM: SHA-256</p>
                             <p>SOURCE_DOCUMENT: Credit_Report_Jan.pdf</p>
                             <p>INTEGRITY_SIGNATURE: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</p>

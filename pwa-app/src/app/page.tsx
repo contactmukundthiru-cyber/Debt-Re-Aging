@@ -269,6 +269,7 @@ export default function CreditReportAnalyzer() {
         clearSession();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-save session
@@ -725,17 +726,7 @@ export default function CreditReportAnalyzer() {
     discoveryAnswers,
     editableFields,
     flags,
-    riskProfile,
-    generateBureauLetter,
-    generateValidationLetter,
-    generateCFPBNarrative,
-    generateCaseSummary,
-    generateCeaseDesistLetter,
-    generateIntentToSueLetter,
-    buildEvidencePackage,
-    formatEvidencePackage,
-    buildAttorneyPackage,
-    formatAttorneyPackage
+    riskProfile
   ]);
 
   const downloadCaseBundle = useCallback(() => {
