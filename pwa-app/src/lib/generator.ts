@@ -7,9 +7,16 @@ import { CreditFields, RuleFlag, RiskProfile } from './rules';
 import { CaseLaw } from './caselaw';
 
 export interface ConsumerInfo {
-  name?: string;
-  address?: string;
-  state?: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  dob?: string;
+  ssn?: string;
+  email?: string;
+  phone?: string;
 }
 
 /**
@@ -17,14 +24,14 @@ export interface ConsumerInfo {
  */
 export function generatePDFLetter(content: string, filename: string) {
   const doc = new jsPDF();
-  
+
   // Basic PDF styling
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(11);
-  
+
   const splitText = doc.splitTextToSize(content, 180);
   doc.text(splitText, 15, 20);
-  
+
   doc.save(filename);
 }
 
@@ -56,7 +63,7 @@ function buildForensicReportDoc(
   doc.setFontSize(22);
   doc.text('Forensic Investigation Report', 105, y, { align: 'center' });
   y += 10;
-  
+
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text(`Report ID: FIR-${Date.now().toString(36).toUpperCase()}`, 105, y, { align: 'center' });
@@ -68,9 +75,9 @@ function buildForensicReportDoc(
   doc.setFont('helvetica', 'bold');
   doc.text('INVESTIGATION SUBJECT', 20, y + 7);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Name: ${consumer.name || 'Not Provided'}`, 20, y + 15);
-  doc.text(`Account: ${fields.furnisherOrCollector || fields.originalCreditor || 'Unknown'}`, 100, y + 15);
-  doc.text(`Account: ${fields.furnisherOrCollector || 'REDACTED'}`, 20, y + 20);
+  doc.text(`Name: ${consumer.firstName} ${consumer.lastName}`, 20, y + 15);
+  doc.text(`Account Reference: ${fields.furnisherOrCollector || fields.originalCreditor || 'Unknown'}`, 100, y + 15);
+  doc.text(`Address: ${consumer.address}, ${consumer.city} ${consumer.state} ${consumer.zip}`, 20, y + 20);
   doc.text(`Jurisdiction: ${fields.stateCode || 'Federal'}`, 100, y + 20);
   y += 35;
 
@@ -79,7 +86,7 @@ function buildForensicReportDoc(
   doc.setFontSize(14);
   doc.text('FORENSIC RISK ASSESSMENT', 15, y);
   y += 10;
-  
+
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.text(`Overall Risk Index: ${risk.overallScore}/100`, 20, y);
@@ -92,13 +99,13 @@ function buildForensicReportDoc(
   doc.setFont('helvetica', 'bold');
   doc.text('DETECTED VIOLATIONS & DISCOVERY', 15, y);
   y += 8;
-  
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   flags.forEach((flag, i) => {
     if (y > 250) { doc.addPage(); y = 20; }
     doc.setFont('helvetica', 'bold');
-    doc.text(`${i+1}. ${flag.ruleName} [${flag.ruleId}]`, 20, y);
+    doc.text(`${i + 1}. ${flag.ruleName} [${flag.ruleId}]`, 20, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
     const lines = doc.splitTextToSize(flag.explanation, 160);
@@ -131,7 +138,7 @@ function buildForensicReportDoc(
   // Evidence Checklist
   const verifiedEvidence = Array.from(new Set(flags.flatMap(f => f.suggestedEvidence)))
     .filter((_, i) => discoveryAnswers[`ev-${i}`] === 'checked');
-  
+
   if (verifiedEvidence.length > 0) {
     if (y > 250) { doc.addPage(); y = 20; }
     doc.setFont('helvetica', 'bold');
@@ -228,31 +235,32 @@ export function generateBureauLetter(
     disputeReasons += `\nâÿ¢ ${flag.ruleName}: ${flag.explanation}\n`;
   }
 
-  return `${consumer.name || '[YOUR NAME]'}
-${consumer.address || '[YOUR ADDRESS]'}
+  return `${consumer.firstName} ${consumer.lastName}
+${consumer.address}
+${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
 ${bureauName}
 [Bureau Address - See Below]
 
-RE: FORMAL DISPUTE UNDER FCRA Â§ 611
+RE: FORMAL DISPUTE UNDER FCRA § 611
 Account: ${creditorName}
 ${fields.currentBalance ? `Balance Shown: $${fields.currentBalance}` : ''}
 
 Dear Sir/Madam:
 
-I am writing to formally dispute the accuracy of the above-referenced account pursuant to the Fair Credit Reporting Act, 15 U.S.C. Â§ 1681i.
+I am writing to formally dispute the accuracy of the above-referenced account pursuant to the Fair Credit Reporting Act, 15 U.S.C. § 1681i.
 
 Upon careful review of my credit report, I have identified the following inaccuracies and violations:
 ${disputeReasons}
 
 LEGAL BASIS FOR DISPUTE:
 
-Under FCRA Â§ 611(a), you are required to conduct a reasonable investigation of disputed information within 30 days. Under FCRA Â§ 623(a)(1), furnishers are prohibited from reporting information they know or have reasonable cause to believe is inaccurate.
+Under FCRA § 611(a), you are required to conduct a reasonable investigation of disputed information within 30 days. Under FCRA § 623(a)(1), furnishers are prohibited from reporting information they know or have reasonable cause to believe is inaccurate.
 
 ${flags.some(f => ['B1', 'B2', 'B3', 'K6'].includes(f.ruleId)) ?
-`The timeline discrepancies identified above constitute potential violations of FCRA Â§ 605(a), which establishes the 7-year reporting period calculated from the Date of First Delinquency.` : ''}
+      `The timeline discrepancies identified above constitute potential violations of FCRA § 605(a), which establishes the 7-year reporting period calculated from the Date of First Delinquency.` : ''}
 
 I REQUEST THE FOLLOWING:
 
@@ -265,7 +273,7 @@ Please note that failure to comply with this dispute within the statutory timefr
 
 Sincerely,
 
-${consumer.name || '[YOUR SIGNATURE]'}
+${consumer.firstName} ${consumer.lastName}
 
 ---
 BUREAU ADDRESSES:
@@ -287,15 +295,16 @@ export function generateValidationLetter(
   const creditorName = fields.furnisherOrCollector || '[DEBT COLLECTOR NAME]';
   const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
 
-  return `${consumer.name || '[YOUR NAME]'}
-${consumer.address || '[YOUR ADDRESS]'}
+  return `${consumer.firstName} ${consumer.lastName}
+${consumer.address}
+${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
 ${creditorName}
 [Collector Address]
 
-RE: DEBT VALIDATION REQUEST UNDER FDCPA ? 809
+RE: DEBT VALIDATION REQUEST UNDER FDCPA § 809
 Alleged Account from: ${originalCreditor}
 ${fields.currentBalance ? `Amount Claimed: $${fields.currentBalance}` : ''}
 
@@ -303,7 +312,7 @@ SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
 
 Dear Sir/Madam:
 
-This letter is written pursuant to the Fair Debt Collection Practices Act, 15 U.S.C. ? 1692g, to formally request validation of the alleged debt referenced above.
+This letter is written pursuant to the Fair Debt Collection Practices Act, 15 U.S.C. § 1692g, to formally request validation of the alleged debt referenced above.
 
 I DO NOT ACKNOWLEDGE THAT I OWE THIS DEBT.
 
@@ -328,9 +337,9 @@ Please provide the following documentation:
    - Proof you are authorized to collect this specific debt
 
 ${flags.some(f => f.ruleId.startsWith('B') || f.ruleId === 'K6') ?
-`NOTICE OF POTENTIAL VIOLATIONS:
+      `NOTICE OF POTENTIAL VIOLATIONS:
 My records indicate the following concerns with this account:
-${flags.filter(f => f.ruleId.startsWith('B') || f.ruleId === 'K6').map(f => `? ${f.explanation}`).join('\n')}
+${flags.filter(f => f.ruleId.startsWith('B') || f.ruleId === 'K6').map(f => `• ${f.explanation}`).join('\n')}
 
 If you cannot provide proper documentation addressing these discrepancies, you must cease collection activities and remove this tradeline from all credit bureaus.
 ` : ''}
@@ -348,7 +357,7 @@ Respond within 30 days.
 
 Sincerely,
 
-${consumer.name || '[YOUR SIGNATURE]'}
+${consumer.firstName} ${consumer.lastName}
 
 CC: [Your Records]
 `;
@@ -433,8 +442,9 @@ export function generateFurnisherLetter(
   const hasReagingFlags = flags.some(f => ['B1', 'B2', 'B3', 'K6', 'K7'].includes(f.ruleId));
   const hasFDCPAFlags = flags.some(f => f.legalCitations.some(c => c.includes('FDCPA')));
 
-  return `${consumer.name || '[YOUR NAME]'}
-${consumer.address || '[YOUR ADDRESS]'}
+  return `${consumer.firstName} ${consumer.lastName}
+${consumer.address}
+${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
@@ -494,7 +504,7 @@ Your response is required within 30 days.
 
 Sincerely,
 
-${consumer.name || '[YOUR SIGNATURE]'}
+${consumer.firstName} ${consumer.lastName}
 
 Enclosures: Credit report excerpt showing disputed tradeline
 CC: [Your Records]
@@ -513,8 +523,9 @@ export function generateCeaseDesistLetter(
   const creditorName = fields.furnisherOrCollector || '[DEBT COLLECTOR NAME]';
   const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
 
-  return `${consumer.name || '[YOUR NAME]'}
-${consumer.address || '[YOUR ADDRESS]'}
+  return `${consumer.firstName} ${consumer.lastName}
+${consumer.address}
+${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
@@ -567,7 +578,7 @@ This letter is sent without prejudice to my legal rights, all of which are expre
 
 Sincerely,
 
-${consumer.name || '[YOUR SIGNATURE]'}
+${consumer.firstName} ${consumer.lastName}
 
 CC: [Your Records]
 `;
@@ -588,8 +599,9 @@ export function generateIntentToSueLetter(
   const highSeverityFlags = flags.filter(f => f.severity === 'high');
   const totalPotentialDamages = flags.length * 1000; // $1000 per willful FCRA violation
 
-  return `${consumer.name || '[YOUR NAME]'}
-${consumer.address || '[YOUR ADDRESS]'}
+  return `${consumer.firstName} ${consumer.lastName}
+${consumer.address}
+${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
@@ -661,7 +673,7 @@ This letter may be used as evidence of your prior knowledge of these violations.
 
 Sincerely,
 
-${consumer.name || '[YOUR SIGNATURE]'}
+${consumer.firstName} ${consumer.lastName}
 
 CC: [Attorney/Records]
     Consumer Financial Protection Bureau (pending complaint)
@@ -685,7 +697,7 @@ export function generateCFPBNarrative(
   narrative += `SPECIFIC VIOLATIONS & FACTUAL DISCOVERY:\n`;
   flags.forEach((flag, i) => {
     narrative += `${i + 1}. ${flag.ruleName}: ${flag.explanation}\n`;
-    
+
     // Include relevant discovery answers to bolster the narrative
     if (flag.discoveryQuestions) {
       flag.discoveryQuestions.forEach((q, j) => {
@@ -714,7 +726,7 @@ export function generateCFPBNarrative(
   narrative += `SUPPORTING EVIDENCE:\n`;
   const verifiedEvidence = Array.from(new Set(flags.flatMap(f => f.suggestedEvidence)))
     .filter((_, i) => discoveryAnswers[`ev-${i}`] === 'checked');
-  
+
   if (verifiedEvidence.length > 0) {
     narrative += `I have the following evidence ready to upload upon request:\n`;
     verifiedEvidence.forEach(ev => narrative += `- ${ev}\n`);

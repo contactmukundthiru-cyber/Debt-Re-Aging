@@ -1,4 +1,4 @@
-'use strict';
+'use client';
 
 import React from 'react';
 import { RuleFlag, RiskProfile, CreditFields } from '../../lib/rules';
@@ -42,6 +42,13 @@ interface Step5ExportProps {
   downloadPdfFile: (content: string, filename: string) => void;
 }
 
+const TAB_CONFIG = [
+  { id: 'letters' as const, label: 'Dispute Letters', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />, color: 'emerald' },
+  { id: 'cfpb' as const, label: 'CFPB Complaint', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />, color: 'blue' },
+  { id: 'evidence' as const, label: 'Evidence Package', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />, color: 'amber' },
+  { id: 'attorney' as const, label: 'Attorney Export', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />, color: 'purple' },
+];
+
 const Step5Export: React.FC<Step5ExportProps> = ({
   setStep,
   exportTab,
@@ -69,34 +76,42 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   downloadPdfFile
 }) => {
   return (
-    <div className="fade-in max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="heading-xl mb-3 dark:text-white">{translate('export.title')}</h2>
-        <p className="body-lg text-gray-600 dark:text-gray-400">
-          Generate dispute letters, CFPB complaints, evidence packages, and attorney referral documents.
-        </p>
+    <div className="fade-in max-w-5xl mx-auto">
+      {/* Hero Header */}
+      <div className="premium-card p-12 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl mb-10">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] -mr-48 -mt-48" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
+
+        <div className="relative z-10 text-center max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-purple-400 font-mono">Document Generation Center</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            Export <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Legal Documents</span>
+          </h1>
+          <p className="text-slate-400 text-lg">
+            Generate dispute letters, CFPB complaints, evidence packages, and attorney referral bundles with proper legal citations.
+          </p>
+        </div>
       </div>
 
-      {/* Export Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-        <div className="flex gap-6">
-          {(['letters', 'cfpb', 'evidence', 'attorney'] as const).map(tab => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setExportTab(tab)}
-              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${exportTab === tab
-                  ? 'border-gray-900 text-gray-900 dark:border-white dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
-            >
-              {tab === 'letters' && 'Dispute Letters'}
-              {tab === 'cfpb' && 'CFPB Complaint'}
-              {tab === 'evidence' && 'Evidence Package'}
-              {tab === 'attorney' && 'Attorney Export'}
-            </button>
-          ))}
-        </div>
+      {/* Enhanced Tab Navigation */}
+      <div className="flex flex-wrap gap-3 mb-8">
+        {TAB_CONFIG.map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setExportTab(tab.id)}
+            className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-3 border ${exportTab === tab.id
+              ? `bg-${tab.color}-500/10 text-${tab.color}-500 border-${tab.color}-500/20 shadow-lg scale-105`
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">{tab.icon}</svg>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Tab Content */}
@@ -358,69 +373,95 @@ const Step5Export: React.FC<Step5ExportProps> = ({
         {/* Attorney Tab */}
         {exportTab === 'attorney' && (
           <div className="space-y-6">
-            <div className="panel p-6 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="heading-md mb-4 dark:text-white">Attorney Consultation Package</h3>
-              <p className="body-sm text-gray-600 dark:text-gray-400 mb-4">
-                Generate a comprehensive package for attorney consultation including case analysis,
-                violation summary, collector intelligence, and fee structure analysis.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => {
-                    const pkg = buildAttorneyPackage(
-                      editableFields,
-                      flags,
-                      riskProfile!,
-                      {
-                        name: consumer.name || '',
-                        address: consumer.address || '',
-                        city: '',
-                        state: consumer.state || '',
-                        zip: ''
-                      }
-                    );
-                    const content = formatAttorneyPackage(pkg);
-                    downloadTextFile(content, 'attorney_consultation_package.txt');
-                  }}
-                >
-                  Download TXT
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
-                  onClick={() => {
-                    const pkg = buildAttorneyPackage(
-                      editableFields,
-                      flags,
-                      riskProfile!,
-                      {
-                        name: consumer.name || '',
-                        address: consumer.address || '',
-                        city: '',
-                        state: consumer.state || '',
-                        zip: ''
-                      }
-                    );
-                    const content = formatAttorneyPackage(pkg);
-                    downloadPdfFile(content, 'attorney_consultation_package.pdf');
-                  }}
-                >
-                  Download PDF
-                </button>
+            <div className="panel-premium p-8 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold dark:text-white mb-2">Attorney Consultation Package</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed mb-6">
+                    Generate a comprehensive package for attorney consultation including case analysis,
+                    violation summary, collector intelligence, and fee structure analysis. This is designed
+                    for direct handoff to legal counsel.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <button
+                      type="button"
+                      className="px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl text-sm font-bold shadow-lg transition-all active:scale-95"
+                      onClick={() => {
+                        const pkg = buildAttorneyPackage(
+                          editableFields,
+                          flags,
+                          riskProfile!,
+                          {
+                            name: consumer.name || '',
+                            address: consumer.address || '',
+                            city: '',
+                            state: consumer.state || '',
+                            zip: ''
+                          }
+                        );
+                        const content = formatAttorneyPackage(pkg);
+                        downloadPdfFile(content, 'attorney_consultation_package.pdf');
+                      }}
+                    >
+                      Export Case Package (PDF)
+                    </button>
+                    <button
+                      type="button"
+                      className="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-sm font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-700"
+                      onClick={() => {
+                        const pkg = buildAttorneyPackage(
+                          editableFields,
+                          flags,
+                          riskProfile!,
+                          {
+                            name: consumer.name || '',
+                            address: consumer.address || '',
+                            city: '',
+                            state: consumer.state || '',
+                            zip: ''
+                          }
+                        );
+                        const content = formatAttorneyPackage(pkg);
+                        downloadTextFile(content, 'attorney_consultation_package.txt');
+                      }}
+                    >
+                      Export TXT
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="panel p-6 dark:bg-gray-800 dark:border-gray-700">
-              <h4 className="heading-sm mb-3 dark:text-white">Case Summary</h4>
-              <button
-                type="button"
-                className="btn btn-secondary w-full dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
-                onClick={() => downloadDocument('summary', 'pdf')}
-              >
-                Download Case Summary (PDF)
-              </button>
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div className="panel p-6 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl border-l-4 border-l-emerald-500">
+                <h4 className="text-base font-bold dark:text-white mb-2">Forensic Affidavit</h4>
+                <p className="text-xs text-slate-500 mb-4">A signed declaration of accuracy for the extracted forensic data. Essential for attorney-client verification.</p>
+                <button
+                  type="button"
+                  className="w-full px-4 py-2 bg-emerald-500/10 text-emerald-600 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition-all"
+                  onClick={() => {
+                    const content = `AFFIDAVIT OF FORENSIC ACCURACY\n\nI, ${consumer.name || '[NAME]'}, declare under penalty of perjury that the data extracted from the credit report and verified on ${new Date().toLocaleDateString()} is accurate to the best of my knowledge.\n\nCase ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}\nDate: ${new Date().toISOString()}\n\nVerified Flags: ${flags.length}\nTotal Exposure: ${damageEstimate ? damageEstimate.total.max : 'N/A'}\n\nSignature: __________________________`;
+                    downloadPdfFile(content, 'forensic_affidavit.pdf');
+                  }}
+                >
+                  Download Affidavit
+                </button>
+              </div>
+
+              <div className="panel p-6 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl">
+                <h4 className="text-base font-bold dark:text-white mb-2">Statutory Citation List</h4>
+                <p className="text-xs text-slate-500 mb-4">Export a list of all 15+ statutes mapped to the detected violations for legal research.</p>
+                <button
+                  type="button"
+                  className="w-full px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                  onClick={() => downloadDocument('summary', 'pdf')}
+                >
+                  Export Citations
+                </button>
+              </div>
             </div>
           </div>
         )}

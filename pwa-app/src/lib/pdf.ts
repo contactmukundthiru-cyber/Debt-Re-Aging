@@ -1,4 +1,12 @@
 /**
+ * PDF Text Extraction Module
+ * Uses pdfjs-dist for text extraction with OCR fallback via Tesseract.js
+ */
+
+// Worker configuration - using unpkg CDN for reliable cross-origin loading
+const PDF_WORKER_URL = 'https://unpkg.com/pdfjs-dist@5.0.375/build/pdf.worker.min.mjs';
+
+/**
  * Extract text from a PDF file
  * Dynamically imports pdfjs-dist to avoid SSR issues
  */
@@ -9,35 +17,44 @@ export async function extractPDFText(
   // Dynamic import to avoid SSR issues with pdfjs-dist
   const pdfjs = await import('pdfjs-dist');
 
-  // Configure worker using CDN for better compatibility
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs`;
+  // Configure worker using CDN for better compatibility with static exports
+  pdfjs.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
 
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
 
-  const totalPages = pdf.numPages;
-  const textParts: string[] = [];
+    const totalPages = pdf.numPages;
+    const textParts: string[] = [];
 
-  for (let i = 1; i <= totalPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const strings = content.items
-      .filter((item) => 'str' in item && typeof (item as { str: string }).str === 'string')
-      .map(item => (item as { str: string }).str);
+    for (let i = 1; i <= totalPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const strings = content.items
+        .filter((item) => 'str' in item && typeof (item as { str: string }).str === 'string')
+        .map(item => (item as { str: string }).str);
 
-    textParts.push(strings.join(' '));
+      textParts.push(strings.join(' '));
 
-    if (onProgress) {
-      onProgress(i / totalPages);
+      if (onProgress) {
+        onProgress(i / totalPages);
+      }
     }
-  }
 
-  const output = textParts.join('\n\n').trim();
-  if (!output) {
-    throw new Error('No selectable text found in PDF. Try uploading a scanned image.');
-  }
+    const output = textParts.join('\n\n').trim();
+    if (!output) {
+      throw new Error('No selectable text found in PDF. Try uploading a scanned image.');
+    }
 
-  return output;
+    return output;
+  } catch (error) {
+    // Re-throw with more context
+    const message = error instanceof Error ? error.message : 'Unknown PDF error';
+    if (message.includes('No selectable text')) {
+      throw error;
+    }
+    throw new Error(`PDF extraction failed: ${message}`);
+  }
 }
 
 type OCRFallbackOptions = {
@@ -54,18 +71,18 @@ export async function extractPDFTextViaOCR(
   options: OCRFallbackOptions = {}
 ): Promise<string> {
   const pdfjs = await import('pdfjs-dist');
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs`;
+  pdfjs.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
 
   const { createWorker } = await import('tesseract.js');
   const worker = await createWorker('eng', 1);
 
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-  const maxPages = Math.min(pdf.numPages, options.maxPages ?? 5);
-  const scale = options.scale ?? 1.5;
-  const textParts: string[] = [];
-
   try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    const maxPages = Math.min(pdf.numPages, options.maxPages ?? 5);
+    const scale = options.scale ?? 2.0; // Increased scale for better OCR accuracy
+    const textParts: string[] = [];
+
     for (let i = 1; i <= maxPages; i++) {
       const page = await pdf.getPage(i);
       const viewport = page.getViewport({ scale });
@@ -75,8 +92,9 @@ export async function extractPDFTextViaOCR(
 
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
-      await page.render({ canvasContext: context, viewport, canvas }).promise;
+      await page.render({ canvasContext: context, viewport }).promise;
 
+      // Preprocessing: Convert to grayscale for better OCR
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
       for (let px = 0; px < data.length; px += 4) {
@@ -97,16 +115,16 @@ export async function extractPDFTextViaOCR(
         onProgress(i / maxPages);
       }
     }
+
+    const output = textParts.join('\n\n').trim();
+    if (!output) {
+      throw new Error('OCR failed to extract text from this PDF.');
+    }
+
+    return output;
   } finally {
     await worker.terminate();
   }
-
-  const output = textParts.join('\n\n').trim();
-  if (!output) {
-    throw new Error('OCR failed to extract text from this PDF.');
-  }
-
-  return output;
 }
 
 /**

@@ -34,7 +34,6 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   analyzedAccounts,
   executiveSummary,
   flags,
-  discoveryAnswers,
   fileName,
   rawText,
   setRawText,
@@ -88,53 +87,75 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   };
 
   return (
-    <div className="fade-in max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight mb-2 dark:text-white">
-          {analyzedAccounts.length > 1 ? 'Account Forensic Triage' : 'Review Extracted Evidence'}
-        </h2>
-        <p className="text-slate-500 font-medium">
-          {analyzedAccounts.length > 1
-            ? `Forensic engine isolated ${analyzedAccounts.length} distinct tradelines. Select a high-risk target for deep analysis.`
-            : 'Verify the OCR/Extraction integrity before launching forensic analysis.'}
-        </p>
+    <div className="fade-in max-w-5xl mx-auto">
+      {/* Hero Header */}
+      <div className="premium-card p-12 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl mb-12">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] -mr-48 -mt-48" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
+            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-indigo-400 font-mono">Forensic Triage Center</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            {analyzedAccounts.length > 1 ? (
+              <>Account <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Forensic Triage</span></>
+            ) : (
+              <>Review <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Extracted Evidence</span></>
+            )}
+          </h1>
+          <p className="text-slate-400 text-lg max-w-2xl">
+            {analyzedAccounts.length > 1
+              ? `Forensic engine isolated ${analyzedAccounts.length} distinct tradelines. Select a high-risk target for deep analysis.`
+              : 'Verify OCR/extraction integrity before launching forensic violation mapping.'}
+          </p>
+        </div>
       </div>
 
       {analyzedAccounts.length > 1 && executiveSummary && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
-          <div className="premium-card p-5 bg-slate-900 border-none text-white shadow-xl shadow-slate-900/10">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Tradelines</p>
-            <p className="text-4xl font-bold tabular-nums">{executiveSummary.totalAccounts}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          <div className="premium-card p-6 bg-slate-950 border-slate-800 text-white shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 relative z-10">Tradelines</p>
+            <p className="text-5xl font-bold tabular-nums relative z-10">{executiveSummary.totalAccounts}</p>
           </div>
-          <div className="premium-card p-5 border-none shadow-xl shadow-red-900/5 bg-red-50/50 dark:bg-red-950/20">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-red-500 mb-2">Violations</p>
-            <p className="text-4xl font-bold tabular-nums text-red-600 dark:text-red-400">{executiveSummary.totalViolations}</p>
+          <div className="premium-card p-6 bg-rose-500/5 border-rose-500/20 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500 mb-3 relative z-10">Violations</p>
+            <p className="text-5xl font-bold tabular-nums text-rose-500 relative z-10">{executiveSummary.totalViolations}</p>
           </div>
-          <div className="premium-card p-5 border-none shadow-xl shadow-amber-900/5 bg-amber-50/50 dark:bg-amber-950/20">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-2">High Risk</p>
-            <p className="text-4xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{executiveSummary.criticalAccounts}</p>
+          <div className="premium-card p-6 bg-amber-500/5 border-amber-500/20 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500 mb-3 relative z-10">High Risk</p>
+            <p className="text-5xl font-bold tabular-nums text-amber-500 relative z-10">{executiveSummary.criticalAccounts}</p>
           </div>
-          <div className="premium-card p-5 border-none shadow-xl shadow-emerald-900/5 bg-emerald-50/50 dark:bg-emerald-950/20">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-2">Est. Recovery</p>
-            <p className="text-3xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">${executiveSummary.totalEstimatedDamages.toLocaleString()}</p>
+          <div className="premium-card p-6 bg-emerald-500/5 border-emerald-500/20 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-3 relative z-10">Est. Recovery</p>
+            <p className="text-4xl font-bold tabular-nums text-emerald-500 relative z-10">${executiveSummary.totalEstimatedDamages.toLocaleString()}</p>
           </div>
 
           {executiveSummary.discrepancies.length > 0 && (
-            <div className="md:col-span-4 glass-panel p-6 border-amber-200 dark:border-amber-900/50 bg-amber-50/30">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            <div className="lg:col-span-4 premium-card p-8 border-amber-500/20 bg-amber-500/5 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl -mr-24 -mt-24" />
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
-                <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200 uppercase tracking-widest">Cross-Bureau Inconsistencies Detected</h4>
+                <div>
+                  <h4 className="text-lg font-bold text-amber-600 dark:text-amber-400">Cross-Bureau Inconsistencies</h4>
+                  <p className="text-sm text-amber-500/70">Data discrepancies detected across bureau reports</p>
+                </div>
               </div>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4 relative z-10">
                 {executiveSummary.discrepancies.map((d, i) => (
-                  <div key={i} className="bg-white/60 dark:bg-slate-900/40 p-4 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                    <p className="text-[10px] font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-1">{d.field}</p>
-                    <p className="text-xs text-amber-700 dark:text-amber-300 mb-3">{d.description}</p>
+                  <div key={i} className="bg-white/60 dark:bg-slate-900/40 p-5 rounded-2xl border border-amber-200/50 dark:border-amber-800/30">
+                    <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-2">{d.field}</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mb-4">{d.description}</p>
                     <div className="flex flex-wrap gap-2">
                       {d.values.map((v, j) => (
-                        <span key={j} className="text-[10px] font-bold bg-amber-100/50 dark:bg-amber-900/30 px-2 py-1 rounded-md border border-amber-200/50 dark:border-amber-800/30 text-amber-800 dark:text-amber-200 tabular-nums">{v}</span>
+                        <span key={j} className="text-[10px] font-bold bg-amber-100/50 dark:bg-amber-900/30 px-3 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-800/30 text-amber-800 dark:text-amber-200 tabular-nums">{v}</span>
                       ))}
                     </div>
                   </div>

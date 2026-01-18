@@ -5,17 +5,26 @@ import React, { useState, useEffect, useCallback } from 'react';
 interface Shortcut {
     keys: string[];
     description: string;
-    context?: string;
+    category?: string;
 }
 
 const SHORTCUTS: Shortcut[] = [
-    { keys: ['Ctrl/⌘', 'Enter'], description: 'Analyze current input', context: 'Step 1' },
-    { keys: ['Ctrl/⌘', 'P'], description: 'Print analysis results', context: 'Step 4' },
-    { keys: ['Escape'], description: 'Close dialogs and panels' },
-    { keys: ['→', '←'], description: 'Navigate between tabs', context: 'Analysis view' },
-    { keys: ['?'], description: 'Show this help dialog' },
-    { keys: ['Tab'], description: 'Navigate between form fields' },
-    { keys: ['Enter'], description: 'Submit current form' },
+    // Navigation
+    { keys: ['1-6'], description: 'Jump to step', category: 'Navigation' },
+    { keys: ['→', '←'], description: 'Navigate between tabs', category: 'Navigation' },
+    { keys: ['Escape'], description: 'Close dialogs and panels', category: 'Navigation' },
+
+    // Actions
+    { keys: ['Ctrl/⌘', 'Enter'], description: 'Analyze current input', category: 'Actions' },
+    { keys: ['Ctrl/⌘', 'P'], description: 'Print analysis results', category: 'Actions' },
+    { keys: ['Ctrl/⌘', 'S'], description: 'Save/Export current view', category: 'Actions' },
+    { keys: ['Ctrl/⌘', 'D'], description: 'Download active document', category: 'Actions' },
+
+    // General
+    { keys: ['?'], description: 'Show this help dialog', category: 'General' },
+    { keys: ['Tab'], description: 'Navigate between fields', category: 'General' },
+    { keys: ['Enter'], description: 'Submit current form', category: 'General' },
+    { keys: ['Ctrl/⌘', '/'], description: 'Toggle dark mode', category: 'General' },
 ];
 
 interface KeyboardShortcutsProps {
@@ -50,9 +59,11 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ isOpen, on
 
     if (!isOpen) return null;
 
+    const categories = Array.from(new Set(SHORTCUTS.map(s => s.category).filter(Boolean)));
+
     return (
         <div
-            className="fixed inset-0 z-[150] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[150] bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
             aria-labelledby="shortcuts-title"
@@ -60,19 +71,24 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ isOpen, on
                 if (e.target === e.currentTarget) onClose();
             }}
         >
-            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="bg-slate-950 rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-800">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
-                    <h2
-                        id="shortcuts-title"
-                        className="text-lg font-semibold text-gray-900 dark:text-white"
-                    >
-                        Keyboard Shortcuts
-                    </h2>
+                <div className="flex items-center justify-between p-6 border-b border-slate-800">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                        </div>
+                        <div>
+                            <h2 id="shortcuts-title" className="text-lg font-bold text-white">
+                                Keyboard Shortcuts
+                            </h2>
+                            <p className="text-xs text-slate-500">Navigate like a power user</p>
+                        </div>
+                    </div>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        className="p-2 text-slate-500 hover:text-white rounded-xl hover:bg-slate-800 transition-all"
                         aria-label="Close shortcuts dialog"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,32 +98,32 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ isOpen, on
                 </div>
 
                 {/* Shortcuts list */}
-                <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
-                    {SHORTCUTS.map((shortcut, index) => (
-                        <div
-                            key={index}
-                            className="flex items-center justify-between py-2"
-                        >
-                            <div className="flex-1">
-                                <span className="text-sm text-gray-700 dark:text-gray-300">
-                                    {shortcut.description}
-                                </span>
-                                {shortcut.context && (
-                                    <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">
-                                        ({shortcut.context})
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                {shortcut.keys.map((key, keyIndex) => (
-                                    <React.Fragment key={keyIndex}>
-                                        {keyIndex > 0 && (
-                                            <span className="text-gray-400 text-xs">+</span>
-                                        )}
-                                        <kbd className="px-2 py-1 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded border border-gray-200 dark:border-gray-700">
-                                            {key}
-                                        </kbd>
-                                    </React.Fragment>
+                <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    {categories.map(category => (
+                        <div key={category}>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">{category}</p>
+                            <div className="space-y-2">
+                                {SHORTCUTS.filter(s => s.category === category).map((shortcut, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-slate-900 transition-colors"
+                                    >
+                                        <span className="text-sm text-slate-300">
+                                            {shortcut.description}
+                                        </span>
+                                        <div className="flex items-center gap-1">
+                                            {shortcut.keys.map((key, keyIndex) => (
+                                                <React.Fragment key={keyIndex}>
+                                                    {keyIndex > 0 && (
+                                                        <span className="text-slate-600 text-xs mx-0.5">+</span>
+                                                    )}
+                                                    <kbd className="px-2.5 py-1 text-xs font-mono bg-slate-800 text-slate-300 rounded-lg border border-slate-700 shadow-sm">
+                                                        {key}
+                                                    </kbd>
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -115,9 +131,9 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ isOpen, on
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                        Press <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">?</kbd> anytime to show this dialog
+                <div className="p-4 border-t border-slate-800 bg-slate-900/50">
+                    <p className="text-xs text-slate-500 text-center">
+                        Press <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 mx-1 border border-slate-700">?</kbd> anytime to toggle this panel
                     </p>
                 </div>
             </div>

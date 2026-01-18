@@ -73,6 +73,7 @@ export interface RiskProfile {
   detectedPatterns: PatternScore[];
   keyViolations: string[];
   recommendedApproach: string;
+  summary: string;
   scoreBreakdown: ScoreImpact[];
 }
 
@@ -534,10 +535,10 @@ export function runRules(fields: CreditFields): RuleFlag[] {
   }
 
   // H1/H2/H3: Medical Debt
-  const isMedical = (fields.accountType || '').toLowerCase().includes('medical') || 
-                    (fields.furnisherOrCollector || '').toLowerCase().includes('health') ||
-                    (fields.furnisherOrCollector || '').toLowerCase().includes('hospital');
-  
+  const isMedical = (fields.accountType || '').toLowerCase().includes('medical') ||
+    (fields.furnisherOrCollector || '').toLowerCase().includes('health') ||
+    (fields.furnisherOrCollector || '').toLowerCase().includes('hospital');
+
   if (isMedical && fields.currentBalance) {
     const bal = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
     if (!isNaN(bal) && bal > 0 && bal < 500) {
@@ -566,15 +567,15 @@ export function runRules(fields: CreditFields): RuleFlag[] {
       const curr = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
       const orig = parseFloat(fields.originalAmount.replace(/[$,]/g, ''));
       const yearsPassed = (today.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-      
+
       if (orig > 0 && curr > orig && yearsPassed > 0.5) {
         const annualRate = ((curr - orig) / orig) / yearsPassed;
         const cap = isMedical ? sol.medicalInterestCap : sol.judgmentInterestCap;
-        
+
         if (annualRate > cap) {
           flags.push(createFlag('K7',
-            `Forensic Interest Audit: Implied annual rate of ${(annualRate*100).toFixed(1)}% exceeds the ${fields.stateCode} legal cap of ${(cap*100).toFixed(1)}%.`,
-            { annualRate: (annualRate*100).toFixed(1), legalCap: (cap*100).toFixed(1) }
+            `Forensic Interest Audit: Implied annual rate of ${(annualRate * 100).toFixed(1)}% exceeds the ${fields.stateCode} legal cap of ${(cap * 100).toFixed(1)}%.`,
+            { annualRate: (annualRate * 100).toFixed(1), legalCap: (cap * 100).toFixed(1) }
           ));
         }
       }
@@ -588,7 +589,7 @@ export function runRules(fields: CreditFields): RuleFlag[] {
 
     if (!isNaN(current) && !isNaN(original) && current > original * 1.5) {
       flags.push(createFlag('K1',
-        `Current balance ($${current.toFixed(2)}) is ${((current/original - 1) * 100).toFixed(0)}% higher than the original amount ($${original.toFixed(2)}). Significant unexplained increase.`,
+        `Current balance ($${current.toFixed(2)}) is ${((current / original - 1) * 100).toFixed(0)}% higher than the original amount ($${original.toFixed(2)}). Significant unexplained increase.`,
         { currentBalance: fields.currentBalance, originalAmount: fields.originalAmount }
       ));
     }
@@ -704,8 +705,8 @@ export function runRules(fields: CreditFields): RuleFlag[] {
   }
 
   // M3: Metro2 Integrity - Collection must have specific account types
-  if (accountType === 'collection' && fields.accountType && 
-     !['collection', 'factoring company', 'debt buyer'].includes(fields.accountType.toLowerCase())) {
+  if (accountType === 'collection' && fields.accountType &&
+    !['collection', 'factoring company', 'debt buyer'].includes(fields.accountType.toLowerCase())) {
     flags.push(createFlag('M3',
       `Account is being reported as "${fields.accountType}" but has a collection status. Metro 2 requires consistent account types for collection items.`,
       { accountType: fields.accountType, status: fields.accountStatus }
@@ -776,6 +777,11 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
   else if (overallScore >= 50) disputeStrength = 'strong';
   else if (overallScore >= 25) disputeStrength = 'moderate';
 
+  // Generate tactical summary
+  const summary = flags.length > 0
+    ? `Detected ${flags.length} violations including ${keyViolations.slice(0, 2).join(' and ')}. Total forensic strength is ${disputeStrength} with a ${riskLevel} litigation risk level.`
+    : "No major reporting violations detected in current scan.";
+
   // Check for re-aging pattern
   const reAgingRules = flags.filter(f => ['B1', 'B2', 'B3', 'K6', 'Z1', 'R2'].includes(f.ruleId));
   if (reAgingRules.length >= 2) {
@@ -819,23 +825,23 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
 
   // score breakdown
   const scoreBreakdown: ScoreImpact[] = [
-    { 
-      category: 'Timeline Integrity', 
+    {
+      category: 'Timeline Integrity',
       impact: flags.filter(f => f.ruleId.startsWith('B') || f.ruleId === 'K6').length * 20,
       description: 'Date manipulation and reporting period violations.'
     },
-    { 
-      category: 'Data Accuracy', 
+    {
+      category: 'Data Accuracy',
       impact: flags.filter(f => f.ruleId.startsWith('D') || f.ruleId.startsWith('E') || f.ruleId.startsWith('M')).length * 15,
       description: 'Logical inconsistencies and balance reporting errors.'
     },
-    { 
-      category: 'Legal Compliance', 
+    {
+      category: 'Legal Compliance',
       impact: flags.filter(f => f.ruleId.startsWith('S') || f.ruleId.startsWith('H') || f.ruleId.startsWith('R')).length * 25,
       description: 'Violations of state SOL, medical debt rules, or bankruptcy law.'
     },
-    { 
-      category: 'Procedural Errors', 
+    {
+      category: 'Procedural Errors',
       impact: flags.filter(f => f.ruleId.startsWith('F') || f.ruleId.startsWith('C') || f.ruleId.startsWith('P')).length * 10,
       description: 'Stale data, missing dispute markers, or incomplete history.'
     }
@@ -849,6 +855,7 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
     detectedPatterns: patterns,
     keyViolations,
     recommendedApproach,
+    summary,
     scoreBreakdown
   };
 }

@@ -35,7 +35,6 @@ export const Step1Input: React.FC<Step1InputProps> = ({
   progress,
   rawText,
   setRawText,
-  fileName,
   fileInputRef,
   handleFileUpload,
   handleDrop,
@@ -53,28 +52,41 @@ export const Step1Input: React.FC<Step1InputProps> = ({
   importHistory,
   clearHistory,
 }) => {
-  const textLength = rawText.trim().length;
-  const hasEnoughText = textLength > 200;
-
   return (
-    <div className="fade-in max-w-4xl mx-auto">
-      <div className="text-center mb-10">
-        <h2 className="heading-xl mb-3 dark:text-white">Analyze Your Credit Report</h2>
-        <p className="body-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-          Upload any format — PDF, image, or text. Our forensic engine detects
-          FCRA/FDCPA violations and illegal debt re-aging.
-        </p>
+    <div className="fade-in max-w-5xl mx-auto">
+      {/* Hero Section */}
+      <div className="premium-card p-12 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl mb-12">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] -mr-48 -mt-48" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
+
+        <div className="relative z-10 text-center max-w-2xl mx-auto">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-emerald-400 font-mono">Forensic Analysis Engine</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
+            Analyze Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Credit Report</span>
+          </h1>
+          <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
+            Upload any format — PDF, image, or text. Our forensic engine detects FCRA/FDCPA violations and illegal debt re-aging with institutional-grade precision.
+          </p>
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-10">
+      <div className="grid lg:grid-cols-2 gap-8 mb-12">
         {/* File Upload */}
-        <div className="premium-card p-6 flex flex-col">
-          <p className="label mb-4 flex items-center gap-2 dark:text-emerald-400 text-emerald-600">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
-            <span>Forensic Evidence Upload</span>
-          </p>
+        <div className="premium-card p-8 flex flex-col bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold dark:text-white">Forensic Evidence Upload</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Secure • Local • Private</p>
+            </div>
+          </div>
           <div
-            className="upload-area flex-grow min-h-[220px] rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-50/10 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group"
+            className="upload-area flex-grow min-h-[240px] rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-50/5 dark:hover:bg-emerald-500/5 transition-all cursor-pointer flex flex-col items-center justify-center p-8 group relative overflow-hidden"
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -83,6 +95,9 @@ export const Step1Input: React.FC<Step1InputProps> = ({
             tabIndex={0}
             aria-busy={isProcessing}
           >
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+
             <input
               ref={fileInputRef}
               type="file"
@@ -92,37 +107,42 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               disabled={isProcessing}
             />
             {isProcessing ? (
-              <div className="text-center">
-                <div className="spinner mx-auto mb-4 border-emerald-500" />
-                <p className="body-sm text-slate-600 dark:text-slate-400 animate-pulse">{progressText}</p>
-                <div className="w-48 h-1 bg-slate-100 dark:bg-slate-800 rounded-full mt-4 overflow-hidden mx-auto">
-                  <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+              <div className="text-center relative z-10">
+                <div className="w-16 h-16 rounded-full border-4 border-slate-200 dark:border-slate-800 border-t-emerald-500 animate-spin mx-auto mb-6" />
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">{progressText}</p>
+                <div className="w-48 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mx-auto">
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-300 rounded-full" style={{ width: `${progress}%` }} />
                 </div>
               </div>
             ) : (
-              <>
-                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <svg className="w-8 h-8 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="relative z-10 text-center">
+                <div className="w-20 h-20 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/10 transition-all shadow-lg">
+                  <svg className="w-10 h-10 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <p className="heading-sm mb-1 dark:text-white">Secure Upload</p>
-                <p className="body-sm text-slate-500 text-center">PDF, Images, or Text<br />Processed locally and privately</p>
-              </>
+                <p className="text-lg font-bold mb-2 dark:text-white group-hover:text-emerald-500 transition-colors">Secure Upload</p>
+                <p className="text-sm text-slate-500 mb-4">PDF, Images, or Text Files</p>
+                <p className="text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full inline-block">Processed locally via WebAssembly sandbox</p>
+              </div>
             )}
           </div>
-          <p className="text-[10px] text-slate-400 mt-4 leading-tight italic text-center">Automated OCR detects scanned fields via WebAssembly sandbox.</p>
         </div>
 
         {/* Text Input */}
-        <div className="premium-card p-6 flex flex-col">
-          <p className="label mb-4 flex items-center gap-2 text-slate-500">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
-            <span>Direct Text Analysis</span>
-          </p>
+        <div className="premium-card p-8 flex flex-col bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold dark:text-white">Direct Text Analysis</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Copy & Paste Credit Data</p>
+            </div>
+          </div>
           <textarea
-            className="textarea flex-grow min-h-[220px] rounded-2xl border-slate-200 dark:border-slate-800 dark:bg-slate-900/50 p-6 font-mono text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none shadow-inner"
-            placeholder="Paste raw credit report data here..."
+            className="flex-grow min-h-[240px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 p-6 font-mono text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all resize-none dark:text-white placeholder:text-slate-400"
+            placeholder="Paste raw credit report data here...&#10;&#10;Tip: Copy text directly from your credit bureau PDF or online account."
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
           />
@@ -132,43 +152,45 @@ export const Step1Input: React.FC<Step1InputProps> = ({
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
         <button
           type="button"
-          className="btn btn-primary px-10 py-4 h-auto shadow-emerald-900/10 hover:shadow-emerald-500/20"
+          className="btn btn-primary px-12 py-5 h-auto text-base font-bold shadow-xl shadow-emerald-900/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02]"
           onClick={processText}
           disabled={!rawText.trim()}
         >
+          <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           Analyze Report
-          <kbd className="ml-3 text-[10px] bg-white/10 px-1.5 py-0.5 rounded border border-white/20 hidden sm:inline">⌘↵</kbd>
+          <kbd className="ml-3 text-[10px] bg-white/10 px-2 py-1 rounded border border-white/20 hidden sm:inline font-mono">⌘↵</kbd>
         </button>
         <button
           type="button"
-          className="btn btn-secondary px-10 py-4 h-auto dark:bg-slate-900 dark:text-white dark:border-slate-800 hover:border-slate-300"
+          className="btn btn-secondary px-12 py-5 h-auto text-base font-bold dark:bg-slate-900 dark:text-white dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 transition-all"
           onClick={loadSample}
         >
+          <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           Try Sample Data
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-12">
-        <div className="glass-panel p-6 bg-slate-50/50 border-slate-200 dark:bg-slate-900/30">
+      <div className="grid md:grid-cols-2 gap-6 mb-12">
+        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <svg className="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             </div>
             <div>
-              <p className="heading-sm mb-1 dark:text-white">Privacy Architecture</p>
-              <p className="body-sm text-slate-500">Every byte of data stays on your machine. We use on-device compute for zero-latency, zero-risk analysis.</p>
+              <p className="text-base font-bold mb-2 dark:text-white">Zero-Trust Privacy</p>
+              <p className="text-sm text-slate-500 leading-relaxed">Every byte stays on your machine. We use on-device compute for zero-latency, zero-risk analysis. No data transmission.</p>
             </div>
           </div>
         </div>
 
-        <div className="glass-panel p-6 bg-slate-50/50 border-slate-200 dark:bg-slate-900/30">
+        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
             </div>
             <div>
-              <p className="heading-sm mb-1 dark:text-white">Institutional Grade</p>
-              <p className="body-sm text-slate-500">Uses 24+ core forensic heuristics to map report inconsistencies against federal data standards.</p>
+              <p className="text-base font-bold mb-2 dark:text-white">Institutional Grade</p>
+              <p className="text-sm text-slate-500 leading-relaxed">24+ core forensic heuristics map report inconsistencies against federal data standards (FCRA § 611, FDCPA § 809).</p>
             </div>
           </div>
         </div>

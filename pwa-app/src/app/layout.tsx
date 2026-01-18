@@ -21,20 +21,24 @@ const mono = JetBrains_Mono({
   display: 'swap',
 });
 
+import { BRANDING } from '../config/branding';
+
+// ... other imports ...
+
 export const metadata: Metadata = {
-  title: 'Credit Report Analyzer | FCRA Violation Detection',
-  description: 'Free tool to detect illegal debt re-aging and FCRA/FDCPA violations in your credit report. Generate dispute letters automatically.',
-  keywords: ['credit report', 'FCRA', 'FDCPA', 'debt re-aging', 'dispute letter', 'credit repair'],
-  authors: [{ name: 'Credit Report Analyzer' }],
+  title: BRANDING.metaTitle,
+  description: BRANDING.metaDescription,
+  keywords: ['credit report', 'FCRA', 'FDCPA', 'debt re-aging', 'dispute letter', 'credit repair', 'forensic analysis'],
+  authors: [{ name: BRANDING.organizationName }],
   manifest: 'manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Credit Analyzer',
+    title: BRANDING.appName,
   },
   openGraph: {
-    title: 'Credit Report Analyzer',
-    description: 'Free FCRA violation detection tool',
+    title: BRANDING.appName,
+    description: BRANDING.metaDescription,
     type: 'website',
   },
 };

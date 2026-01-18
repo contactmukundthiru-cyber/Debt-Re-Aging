@@ -111,70 +111,50 @@ The **Credit Report Analyzer** is a free, open-source tool designed to help orga
 
 ---
 
-## Technical Requirements
+## Technical Architecture (PWA Edition)
 
-### Minimum System Requirements
+### Pure Client-Side Execution
+The 2026 PWA edition of Credit Report Analyzer utilizes **Zero-Server** technology. All processing happens in the browser thread, ensuring 100% data privacy for sensitive client files.
 
-| Component | Requirement |
-|-----------|-------------|
-| Operating System | Windows 10+, macOS 10.14+, or Linux |
-| RAM | 4 GB minimum, 8 GB recommended |
-| Storage | 500 MB for application + output files |
-| Display | 1280x720 minimum resolution |
-| Browser | Chrome, Firefox, Edge (for web version) |
-
-### Software Dependencies
-
-**For Python Installation:**
-- Python 3.8 or higher
-- pip package manager
-- Tesseract OCR (free, open-source)
-
-**For Docker Installation:**
-- Docker Desktop
-- Docker Compose
-
-### Network Requirements
-
-- **Internet NOT required** for operation
-- Internet needed only for initial setup/updates
-- No firewall exceptions required
-- No cloud services used
+| Component | Technology | Benefit |
+|-----------|------------|---------|
+| **Core Logic** | Next.js 14 (Static) | Blazing fast, offline-capable |
+| **PDF Extraction**| PDF.js (v5.0+) | Local parsing within the browser |
+| **OCR Engine** | Tesseract.js | On-device Image-to-Text conversion |
+| **Data Storage** | IndexDB / LocalState | High-speed local case management |
+| **Security** | SHA-256 Hashing | Cryptographic integrity verification |
 
 ---
 
-## Deployment Options
+## Technical Requirements
 
-### Option 1: Docker (Recommended for Organizations)
+### Browser Compatibility
+*   **Recommended**: Chrome 110+, Edge 110+, Safari 16.4+
+*   **Storage**: 50MB for application cache + dynamic storage for case files.
+*   **Hardware**: 8GB RAM recommended for high-volume OCR processing.
 
-**Pros:** Isolated, reproducible, easy updates
-**Cons:** Requires Docker knowledge
+### Network Requirements
+*   **Initial Load**: Required once to cache the PWA.
+*   **Operation**: 100% Offline-Capable. No internet required for analysis.
+*   **Data Transit**: 0 bytes of sensitive data transmitted.
+
+---
+
+## Institutional Deployment Options
+
+### Option 1: Managed Web (Standard)
+Organizations can point their staff to the secure managed URL. Since data never leaves the client, this fulfills most security audits automatically.
+
+### Option 2: Self-Hosted Static Export
+For organizations with high-security intranets, the PWA can be exported as a static set of HTML/JS/CSS files and hosted on an internal server.
 
 ```bash
-# One-time setup
-git clone https://github.com/[repo]/debt-reaging-case-factory
-cd debt-reaging-case-factory
-docker-compose up -d
-
-# Access at http://localhost:8501
+# IT Deployment Command
+npm run build && npm run export
 ```
 
-**IT Effort:** 1-2 hours initial, minimal ongoing
-
-### Option 2: Python Virtual Environment
-
-**Pros:** Direct control, no Docker needed
-**Cons:** More setup steps
-
-```bash
-# Setup
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-pip install -r requirements.txt
-
-# Run
-streamlit run app/main.py
-```
+### Option 3: Enterprise Hub
+Deploy to a dedicated organizational URL with custom white-labeling and organization-wide rule sets.
 
 **IT Effort:** 2-3 hours initial, some ongoing maintenance
 

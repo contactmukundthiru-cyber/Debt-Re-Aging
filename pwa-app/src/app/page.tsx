@@ -113,6 +113,7 @@ import Step3Verify from '../components/steps/Step3Verify';
 import Step4Analysis from '../components/steps/Step4Analysis';
 import Step5Export from '../components/steps/Step5Export';
 import Step6Track from '../components/steps/Step6Track';
+import { Celebration } from '../components/Celebration';
 import { FIELD_CONFIG, STATES, ACCOUNT_TYPES, STATUSES, STEPS, ANALYSIS_TABS, Step, LetterType, TabId } from '../lib/constants';
 import { getDateValidation, getDateOrderIssues } from '../lib/validation';
 
@@ -195,6 +196,7 @@ export default function CreditReportAnalyzer() {
   const [showHelp, setShowHelp] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<AnalysisRecord[]>([]);
+  const [showCelebration, setShowCelebration] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const historyFileInputRef = useRef<HTMLInputElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -245,8 +247,11 @@ export default function CreditReportAnalyzer() {
       setShowGuide(storedGuide === 'true');
     }
 
-    // Check system preference
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    // Check system preference and saved preference
+    const savedDarkMode = typeof window !== 'undefined' ? localStorage.getItem('cra_dark_mode') : null;
+    if (savedDarkMode !== null) {
+      setDarkMode(savedDarkMode === 'true');
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setDarkMode(true);
     }
 
@@ -284,11 +289,14 @@ export default function CreditReportAnalyzer() {
   }, [step, rawText, editableFields, consumer, discoveryAnswers]);
 
 
+  // Apply dark mode to document and persist to localStorage
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('cra_dark_mode', 'true');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('cra_dark_mode', 'false');
     }
   }, [darkMode]);
 
@@ -350,6 +358,12 @@ export default function CreditReportAnalyzer() {
       setAnalyzedAccounts(analyzed);
       setExecutiveSummary(generateExecutiveSummary(analyzed));
       setFlags(analyzed.flatMap(acc => acc.flags));
+
+      const totalViolations = analyzed.reduce((sum, acc) => sum + acc.flags.length, 0);
+      if (totalViolations > 0) {
+        setShowCelebration(true);
+      }
+
       setStep(2);
       return;
     }
@@ -546,6 +560,10 @@ export default function CreditReportAnalyzer() {
       }
 
       showToast(`Analysis complete: ${detectedFlags.length} violations found`, detectedFlags.length > 0 ? 'info' : 'success');
+
+      if (detectedFlags.length > 0) {
+        setShowCelebration(true);
+      }
     } catch (error) {
       console.error('Analysis failed:', error);
       showToast('Analysis failed. Please check your input data.', 'error');

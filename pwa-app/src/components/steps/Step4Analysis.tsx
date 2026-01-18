@@ -15,17 +15,28 @@ import {
   ConsumerInfo
 } from '../../lib/generator';
 
-// Tab Components
+// Standard Tab Components
 import ViolationsTab from './analysis/ViolationsTab';
 import DeltasTab from './analysis/DeltasTab';
-import PatternsTab from './analysis/PatternsTab';
 import TimelineTab from './analysis/TimelineTab';
 import CaseLawTab from './analysis/CaseLawTab';
-import ScoreBreakdownTab from './analysis/ScoreBreakdownTab';
 import LetterEditorTab from './analysis/LetterEditorTab';
 import DiscoveryTab from './analysis/DiscoveryTab';
 import ForensicLabTab from './analysis/ForensicLabTab';
 import NarrativeTab from './analysis/NarrativeTab';
+
+// Premium / New Tab Components
+import AIAnalysisTab from './analysis/AIAnalysisTab';
+import MultiBureauTab from './analysis/MultiBureauTab';
+import ScoreSimulatorTab from './analysis/ScoreSimulatorTab';
+import EvidenceManagerTab from './analysis/EvidenceManagerTab';
+import WorkflowTrackerTab from './analysis/WorkflowTrackerTab';
+import VoiceTranscriptionTab from './analysis/VoiceTranscriptionTab';
+import StatuteTrackerTab from './analysis/StatuteTrackerTab';
+import TacticalSimulatorTab from './analysis/TacticalSimulatorTab';
+import LiabilityRadarTab from './analysis/LiabilityRadarTab';
+import LegalEscalationTab from './analysis/LegalEscalationTab';
+import Metro2AuditTab from './analysis/Metro2AuditTab';
 
 
 interface AnalyticsMetric {
@@ -161,7 +172,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
   const readiness = totalPossibleEvidence > 0 ? Math.round((checkedEvidenceCount / totalPossibleEvidence) * 100) : 0;
 
   return (
-    <div className="fade-in">
+    <div className="fade-in pb-20">
       {/* Evidence Readiness Header */}
       <div className="mb-10 p-6 glass-panel flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-emerald-900/5">
         <div className="flex items-center gap-6 w-full md:w-auto">
@@ -192,7 +203,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
       {/* Summary Header */}
       <div className="flex flex-col sm:flex-row justify-between items-end gap-6 mb-10">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight mb-2 dark:text-white">Forensic Analysis Report</h2>
+          <h2 className="text-4xl font-bold tracking-tight mb-2 dark:text-white">Forensic Investigation Analysis</h2>
           <p className="text-slate-500 flex items-center gap-2 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Scan complete: {flags.length} potential violations identified
@@ -205,7 +216,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
             className="btn btn-primary !h-12 !px-8 !rounded-xl bg-slate-900 border-none shadow-xl shadow-slate-900/20 hover:scale-[1.02] transition-transform flex items-center gap-2"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
-            Export Dossier
+            Export Full Dossier
           </button>
         </div>
       </div>
@@ -214,111 +225,80 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
       <div className="grid lg:grid-cols-3 gap-6 mb-10">
         {/* Main Score */}
         <div className="premium-card p-8 lg:col-span-1 flex flex-col items-center text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6">Aggregate Strength</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 font-mono">Forensic Strength Index</p>
           <div className="relative w-32 h-32 flex items-center justify-center mb-6">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
               <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="2"></circle>
               <circle cx="18" cy="18" r="16" fill="none" className="stroke-emerald-500 transition-all duration-1000" strokeWidth="2" strokeDasharray={`${riskProfile.overallScore}, 100`} strokeLinecap="round"></circle>
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-bold dark:text-white tabular-nums">{riskProfile.overallScore}</span>
+              <span className="text-4xl font-black dark:text-white tabular-nums">{riskProfile.overallScore}</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase">Points</span>
             </div>
           </div>
           <div className="w-full space-y-3">
-            <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Risk Index</span>
-              <span className={`text-xs font-bold uppercase tracking-widest ${riskProfile.riskLevel === 'critical' ? 'text-red-500' :
-                riskProfile.riskLevel === 'high' ? 'text-orange-500' : 'text-emerald-500'
-                }`}>{riskProfile.riskLevel}</span>
+            <div className="flex items-center gap-2 justify-center mb-2">
+              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em] ${riskProfile.riskLevel === 'critical' ? 'bg-rose-500 text-white' :
+                riskProfile.riskLevel === 'high' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
+                }`}>
+                {riskProfile.riskLevel} Risk
+              </span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{riskProfile.disputeStrength} Strength</span>
             </div>
           </div>
         </div>
 
-        {/* Violation Priority Matrix */}
-        <div className="premium-card p-8 lg:col-span-1 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Violation Priority Matrix</p>
+        {/* AI Insight Peek */}
+        <div className="premium-card p-8 lg:col-span-1 bg-slate-950 border-indigo-900 group overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 rounded-full blur-[60px] -mr-20 -mt-20 group-hover:bg-indigo-500/20 transition-all duration-700" />
+          <div className="relative z-10 h-full flex flex-col">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400 mb-6 font-mono">Agentic Intelligence</p>
+            <div className="flex-grow">
+              <p className="text-indigo-100 text-sm leading-relaxed mb-4 font-medium italic">
+                "{riskProfile.summary.substring(0, 160)}..."
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('aianalysis')}
+              className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
+            >
+              View deep AI analysis
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </button>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-3 gap-2 h-40 mb-6">
-            {/* Simple 3x3 grid visualization */}
+        {/* Forensic Telemetry */}
+        <div className="premium-card p-8 lg:col-span-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 font-mono">Dossier Metrics</p>
+          <div className="space-y-4">
             {[
-              { label: 'Crit', count: issuesByPriority.high.length, color: 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.3)]' },
-              { label: 'Sub', count: issuesByPriority.medium.length, color: 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' },
-              { label: 'Low', count: issuesByPriority.low.length, color: 'bg-slate-400 shadow-[0_0_15px_rgba(148,163,184,0.2)]' },
-            ].map((level, idx) => (
-              <div key={idx} className="col-span-1 row-span-3 flex flex-col justify-end gap-2">
-                <div className="flex-grow flex items-end justify-center bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden relative group/bar">
-                  <div
-                    className={`w-full transition-all duration-1000 ease-out rounded-t-lg ${level.color}`}
-                    style={{ height: flags.length > 0 ? `${Math.max(10, (level.count / flags.length) * 100)}%` : '0%' }}
-                  />
-                  <span className="absolute inset-0 flex items-center justify-center text-xs font-bold dark:text-white opacity-0 group-hover/bar:opacity-100 transition-opacity">
-                    {level.count}
-                  </span>
-                </div>
-                <p className="text-[8px] font-bold text-center text-slate-500 uppercase tracking-tighter">{level.label}</p>
+              { label: 'Violations Found', value: flags.length, status: flags.length > 5 ? 'critical' : 'warning' },
+              { label: 'Evidence Gaps', value: totalPossibleEvidence - checkedEvidenceCount, status: (totalPossibleEvidence - checkedEvidenceCount) > 0 ? 'warning' : 'normal' },
+              { label: 'Litigation Potential', value: riskProfile.litigationPotential ? 'High' : 'Moderate', status: riskProfile.litigationPotential ? 'normal' : 'warning' },
+              { label: 'Time Since Last Update', value: '4 days', status: 'normal' }
+            ].map((m, i) => (
+              <div key={i} className="flex items-center justify-between pb-3 border-b border-slate-50 dark:border-slate-800 last:border-0 last:pb-0">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">{m.label}</span>
+                <span className={`text-xs font-black font-mono tracking-tight ${m.status === 'critical' ? 'text-rose-500' : m.status === 'warning' ? 'text-amber-500' : 'text-emerald-500'
+                  }`}>
+                  {m.value}
+                </span>
               </div>
             ))}
           </div>
-
-          <div className="flex justify-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-              <span className="text-[9px] font-bold text-slate-400 uppercase">Impact</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="text-[9px] font-bold text-slate-400 uppercase">Success %</span>
-            </div>
-          </div>
         </div>
-
-        {/* Metrics */}
-        {analytics && (
-          <div className="premium-card p-8 lg:col-span-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 text-center">Forensic Telemetry</p>
-            <div className="space-y-4">
-              {Object.entries(analytics.metrics).slice(0, 4).map(([key, item]) => (
-                <div key={key} className="flex items-center justify-between pb-3 border-b border-slate-50 dark:border-slate-800 last:border-0 last:pb-0">
-                  <span className="text-xs font-medium text-slate-500">{key}</span>
-                  <span className={`text-xs font-bold font-mono tracking-tight ${item.status === 'critical' ? 'text-red-500' :
-                    item.status === 'warning' ? 'text-amber-500' : 'text-slate-900 dark:text-emerald-400'
-                    }`}>
-                    {item.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700 mb-6 no-print">
+      {/* Tabs Menu */}
+      <div className="border-b border-gray-200 dark:border-gray-700 mb-10 no-print sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-40">
         <div
           ref={tabsRef}
-          className="flex gap-4 overflow-x-auto pb-px scrollbar-hide"
+          className="flex gap-8 overflow-x-auto py-4 scrollbar-hide"
           role="tablist"
-          aria-label="Analysis results tabs"
         >
           {ANALYSIS_TABS.map((tab) => {
             const isSelected = activeTab === tab.id;
-            const getTabLabel = () => {
-              switch (tab.id) {
-                case 'violations': return `${translate('analysis.violations')} (${flags.length})`;
-                case 'narrative': return `Case Narrative`;
-                case 'patterns': return `${translate('analysis.patterns')} (${analytics?.patterns.length || 0})`;
-
-                case 'deltas': return `Forensic Diff (${deltas.length})`;
-                case 'caselaw': return `${translate('analysis.caseLaw')} (${relevantCaseLaw.length})`;
-                case 'timeline': return translate('analysis.timeline');
-                case 'breakdown': return translate('analysis.scoreBreakdown');
-                case 'actions': return translate('analysis.actionItems');
-                default: return tab.label;
-              }
-            };
-
             return (
               <button
                 key={tab.id}
@@ -326,24 +306,22 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
                 role="tab"
                 id={`tab-${tab.id}`}
                 aria-selected={isSelected}
-                aria-controls={`tabpanel-${tab.id}`}
-                tabIndex={isSelected ? 0 : -1}
                 onClick={() => setActiveTab(tab.id)}
                 onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
-                className={`pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${isSelected
-                  ? 'border-gray-900 text-gray-900 dark:border-white dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                className={`pb-2 text-[10px] uppercase tracking-[0.2em] font-black border-b-2 transition-all whitespace-nowrap ${isSelected
+                  ? 'border-slate-900 text-slate-900 dark:border-white dark:text-white'
+                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
                   }`}
               >
-                {getTabLabel()}
+                {tab.label}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Tab Content */}
-      <div className="mb-8 min-h-[400px]">
+      {/* Tab Content Rendering */}
+      <div className="mb-8 min-h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-500">
         {activeTab === 'violations' && (
           <ViolationsTab
             flags={flags}
@@ -352,23 +330,74 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
             translate={translate}
           />
         )}
-        {activeTab === 'narrative' && <NarrativeTab flags={flags} editableFields={editableFields} />}
-        {activeTab === 'deltas' && <DeltasTab deltas={deltas} />}
 
-        {activeTab === 'patterns' && analytics && <PatternsTab patterns={analytics.patterns} />}
-        {activeTab === 'timeline' && analytics && <TimelineTab timeline={analytics.timeline} />}
-        {activeTab === 'caselaw' && <CaseLawTab relevantCaseLaw={relevantCaseLaw} />}
-        {activeTab === 'breakdown' && <ScoreBreakdownTab riskProfile={riskProfile} />}
-        {activeTab === 'lettereditor' && (
+        {activeTab === 'statutes' && (
+          <StatuteTrackerTab fields={editableFields} />
+        )}
 
-          <LetterEditorTab
-            selectedLetterType={selectedLetterType}
-            setSelectedLetterType={setSelectedLetterType}
-            editableLetter={editableLetter}
-            setEditableLetter={setEditableLetter}
-            generatePDF={generatePDFLetter}
+        {activeTab === 'simulation' && (
+          <TacticalSimulatorTab flags={flags} riskProfile={riskProfile} />
+        )}
+
+        {activeTab === 'liability' && (
+          <LiabilityRadarTab flags={flags} />
+        )}
+
+        {activeTab === 'escalation' && (
+          <LegalEscalationTab flags={flags} fields={editableFields} riskProfile={riskProfile} />
+        )}
+
+        {activeTab === 'metro2' && (
+          <Metro2AuditTab fields={editableFields} />
+        )}
+
+        {activeTab === 'aianalysis' && (
+          <AIAnalysisTab
+            flags={flags}
+            fields={editableFields}
+            patterns={analytics?.patterns || []}
+            timeline={analytics?.timeline || []}
+            riskProfile={riskProfile}
           />
         )}
+
+        {activeTab === 'multibureau' && (
+          <MultiBureauTab
+            fields={editableFields}
+            rawText=""
+          />
+        )}
+
+        {activeTab === 'narrative' && <NarrativeTab flags={flags} editableFields={editableFields} />}
+
+        {activeTab === 'actions' && analytics && (
+          <MasterActionPlanTab
+            actions={analytics.actions}
+            setActiveTab={setActiveTab}
+            onExport={() => setActiveTab('lettereditor')}
+          />
+        )}
+
+        {activeTab === 'scoresim' && (
+          <ScoreSimulatorTab
+            flags={flags}
+            fields={editableFields}
+            riskProfile={riskProfile}
+          />
+        )}
+
+        {activeTab === 'timeline' && analytics && <TimelineTab timeline={analytics.timeline} />}
+
+        {activeTab === 'evidence' && <EvidenceManagerTab caseId="current-case" />}
+
+        {activeTab === 'workflow' && <WorkflowTrackerTab caseId="current-case" />}
+
+        {activeTab === 'voice' && <VoiceTranscriptionTab />}
+
+        {activeTab === 'caselaw' && <CaseLawTab relevantCaseLaw={relevantCaseLaw} />}
+
+        {activeTab === 'deltas' && <DeltasTab deltas={deltas} />}
+
         {activeTab === 'discovery' && (
           <DiscoveryTab
             flags={flags}
@@ -377,8 +406,38 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
             setActiveTab={setActiveTab}
           />
         )}
+
         {activeTab === 'lab' && <ForensicLabTab flags={flags} />}
-        {/* Placeholder for other tabs if needed */}
+
+        {activeTab === 'lettereditor' && (
+          <LetterEditorTab
+            selectedLetterType={selectedLetterType}
+            setSelectedLetterType={setSelectedLetterType}
+            editableLetter={editableLetter}
+            setEditableLetter={setEditableLetter}
+            generatePDF={generatePDFLetter}
+          />
+        )}
+
+        {activeTab === 'actions' && (
+          <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+            <h3 className="text-xl font-bold dark:text-white mb-6">Strategic Action Plan</h3>
+            <div className="space-y-4">
+              {analytics?.actions.map((item, i) => (
+                <div key={i} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.priority === 'immediate' ? 'bg-rose-500 text-white' : 'bg-blue-500 text-white'
+                    }`}>
+                    <span className="text-xs font-black uppercase">{item.priority[0]}</span>
+                  </div>
+                  <div>
+                    <p className="font-bold dark:text-white">{item.action}</p>
+                    <p className="text-xs text-slate-500 mt-1">{item.reason}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

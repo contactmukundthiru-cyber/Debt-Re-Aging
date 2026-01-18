@@ -72,46 +72,67 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
   const quality = activeParsedFields ? getExtractionQuality(activeParsedFields) : null;
 
   return (
-    <div className="fade-in max-w-4xl mx-auto">
-      <div className="mb-8 flex items-end justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight mb-2 dark:text-white">Verify Forensic Indicators</h2>
-          <p className="text-slate-500 font-medium">Accurate data points are essential for institutional-grade violation mapping.</p>
+    <div className="fade-in max-w-5xl mx-auto">
+      {/* Hero Header */}
+      <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl mb-10">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+              <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-cyan-400 font-mono">Data Validation Suite</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+              Verify <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400">Forensic Indicators</span>
+            </h2>
+            <p className="text-slate-400 text-sm max-w-lg">Accurate data points are essential for institutional-grade violation mapping and legal defensibility.</p>
+          </div>
+
+          <button
+            onClick={() => setShowWorkbench(!showWorkbench)}
+            className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-3 ${showWorkbench
+              ? 'bg-white text-slate-900 shadow-xl'
+              : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+              }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+            {showWorkbench ? 'Hide Workbench' : 'Forensic Workbench'}
+          </button>
         </div>
-        <button
-          onClick={() => setShowWorkbench(!showWorkbench)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold uppercase tracking-widest transition-all ${showWorkbench
-            ? 'bg-slate-900 text-white border-slate-900 shadow-lg'
-            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'
-            }`}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-          Forensic Workbench
-        </button>
       </div>
 
+      {/* Extraction Quality Panel */}
       {quality && (
-        <div className="mb-10 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="relative w-12 h-12 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-200 dark:stroke-slate-800" strokeWidth="3"></circle>
-                <circle cx="18" cy="18" r="16" fill="none" className="stroke-emerald-500" strokeWidth="3" strokeDasharray={`${quality.score}, 100`}></circle>
-              </svg>
-              <span className="absolute text-[10px] font-bold tabular-nums dark:text-white">{quality.score}%</span>
+        <div className="premium-card p-6 mb-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16" />
+          <div className="relative z-10 flex flex-wrap items-center gap-8">
+            <div className="flex items-center gap-5">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="absolute inset-0 bg-emerald-500/10 rounded-full blur-lg" />
+                <svg className="w-full h-full -rotate-90 relative z-10" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" className="stroke-slate-200 dark:stroke-slate-800" strokeWidth="3"></circle>
+                  <circle cx="18" cy="18" r="14" fill="none" className="stroke-emerald-500" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${quality.score * 0.88}, 100`}></circle>
+                </svg>
+                <span className="absolute text-lg font-bold tabular-nums dark:text-white">{quality.score}%</span>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Extraction Confidence</p>
+                <p className="text-base font-bold text-emerald-500">{quality.description}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Extraction Confidence</p>
-              <p className="text-xs font-bold dark:text-emerald-400">{quality.description}</p>
+            <div className="h-12 w-px bg-slate-200 dark:bg-slate-800 hidden lg:block" />
+            <div className="flex-grow">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Detected Fields</p>
+              <div className="flex flex-wrap gap-2">
+                {quality.details.map((detail, i) => (
+                  <span key={i} className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">
+                    {detail}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block" />
-          <div className="flex-grow flex flex-wrap gap-2">
-            {quality.details.map((detail, i) => (
-              <span key={i} className="px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded text-[10px] text-slate-500 font-medium">
-                {detail}
-              </span>
-            ))}
           </div>
         </div>
       )}
@@ -119,12 +140,15 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
       <div className={`transition-all duration-500 grid gap-8 ${showWorkbench ? 'lg:grid-cols-[1fr_400px]' : 'grid-cols-1'}`}>
         <div className="space-y-8">
           {/* Account Info Section */}
-          <div className="premium-card overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+          <div className="premium-card overflow-hidden bg-white dark:bg-slate-900">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
               </div>
-              <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Identity & Account Meta</p>
+              <div>
+                <p className="text-sm font-bold dark:text-white">Identity & Account Meta</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest">Core forensic identifiers</p>
+              </div>
             </div>
             <div className="p-8 grid sm:grid-cols-2 gap-8">
               {FIELD_CONFIG.filter(f => f.section === 'account').map(field => (

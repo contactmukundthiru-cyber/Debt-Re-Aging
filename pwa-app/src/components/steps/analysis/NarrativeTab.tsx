@@ -58,19 +58,19 @@ export const NarrativeTab: React.FC<NarrativeTabProps> = ({ flags, editableField
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse shadow-[0_0_10px_rgba(20,184,166,0.8)]" />
-                            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-teal-400 font-mono">AI-Assisted Drafting</span>
+                            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-teal-400 font-mono">Expert Forensic Synthesis</span>
                         </div>
                         <h2 className="text-3xl font-bold tracking-tight mb-2">
-                            Forensic <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">Narrative</span>
+                            Case <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400">Narrative Builder</span>
                         </h2>
-                        <p className="text-slate-400 text-sm max-w-lg">Professional legal narrative optimized for CFPB submissions and attorney briefs. Uses specific citations to trigger reinvestigation protocols.</p>
+                        <p className="text-slate-400 text-sm max-w-lg">Advanced legal narrative mapping reporting inconsistencies against statutory requirements. Optimized for regulatory submissions and attorney handoffs.</p>
                     </div>
 
                     <button
                         onClick={handleCopy}
                         className={`px-6 py-4 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 ${copied
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
-                                : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
+                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                            : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
                             }`}
                     >
                         {copied ? (
