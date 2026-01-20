@@ -20,7 +20,6 @@ const LegalEscalationTab: React.FC<LegalEscalationTabProps> = ({
 }) => {
     const [activeDocument, setActiveDocument] = useState<'affidavit' | 'cfpb' | 'attorney'>('affidavit');
 
-    // varied consumer info fallback
     const consumer: ConsumerInfo = consumerInfo || {
         firstName: '[FIRST NAME]',
         lastName: '[LAST NAME]',
@@ -52,9 +51,47 @@ Attempted Resolution:
 I have previously disputed this information, but the bureau responded with a generic 'verification' without providing the Method of Verification (MOV) as requested under FCRA 611(a)(7).`;
     };
 
+    const generateAttorneyText = () => {
+        return `ATTORNEY CASE REFERRAL SUMMARY
+[PRIVILEGED AND CONFIDENTIAL - ATTORNEY WORK PRODUCT]
+
+CLIENT: ${consumer.firstName} ${consumer.lastName}
+DATE: ${new Date().toLocaleDateString()}
+CASE ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}
+
+1. EXECUTIVE CASE SUMMARY
+Potential FCRA/FDCPA litigation matter involving ${flags.filter(f => f.severity === 'high').length} high-severity violations.
+Primary Defendant(s): ${fields.furnisherOrCollector || 'Unknown Furnisher'}
+Estimated Statutory Damages: $${(flags.length * 1000).toLocaleString()} (Max)
+
+2. VIOLATION MATRIX
+${flags.map((f, i) => `[${i + 1}] ${f.ruleName}
+   - Severity: ${f.severity}
+   - Statute: ${f.legalCitations.join(', ')}
+   - Evidence: ${f.fieldValues ? Object.entries(f.fieldValues).map(([k, v]) => `${k}=${v}`).join(', ') : 'N/A'}`).join('\n\n')}
+
+3. PROCEDURAL HISTORY
+- Initial Dispute Sent: [DATE]
+- Bureau Response: [DATE] - Failed to correct
+- Method of Verification Request: [DATE] - Ignored/Insufficient
+
+4. WILLFUL NON-COMPLIANCE MARKERS
+The volume and nature of these errors (${flags.length} total) suggests a systemic failure to maintain reasonable procedures (FCRA § 607(b)), rather than isolated clerical error.
+
+5. ATTACHED EXHIBITS
+- Exhibit A: Original Credit Report (Redacted)
+- Exhibit B: Metro 2® Forensic Audit
+- Exhibit C: Certified Mail Receipts`;
+    };
+
+    const getDocumentText = () => {
+        if (activeDocument === 'affidavit') return affidavitText;
+        if (activeDocument === 'cfpb') return generateCFPBText();
+        return generateAttorneyText();
+    };
+
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        // Could add a toast notification here
     };
 
     return (
@@ -97,14 +134,7 @@ I have previously disputed this information, but the bureau responded with a gen
                                     activeDocument === 'cfpb' ? 'Official Complaint Narrative' : 'Attorney Referral Summary'}
                             </span>
                             <button
-                                onClick={() => {
-                                    const text = activeDocument === 'affidavit'
-                                        ? affidavitText
-                                        : activeDocument === 'cfpb'
-                                            ? generateCFPBText()
-                                            : `ATTORNEY CASE REFERRAL SUMMARY\n[PRIVILEGED AND CONFIDENTIAL]\n\nCLIENT: ${consumer.firstName} ${consumer.lastName}\n...`;
-                                    copyToClipboard(text);
-                                }}
+                                onClick={() => copyToClipboard(getDocumentText())}
                                 className="text-xs font-bold text-blue-500 hover:text-blue-600 flex items-center gap-1"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
@@ -112,40 +142,7 @@ I have previously disputed this information, but the bureau responded with a gen
                             </button>
                         </div>
                         <div className="flex-grow p-8 overflow-y-auto bg-white dark:bg-slate-950 font-mono text-sm leading-relaxed whitespace-pre-wrap dark:text-slate-300">
-                            {activeDocument === 'affidavit' && affidavitText}
-                            {activeDocument === 'cfpb' && generateCFPBText()}
-                            {activeDocument === 'attorney' && (
-                                `ATTORNEY CASE REFERRAL SUMMARY
-[PRIVILEGED AND CONFIDENTIAL - ATTORNEY WORK PRODUCT]
-
-CLIENT: ${consumer.firstName} ${consumer.lastName}
-DATE: ${new Date().toLocaleDateString()}
-CASE ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}
-
-1. EXECUTIVE CASE SUMMARY
-Potential FCRA/FDCPA litigation matter involving ${flags.filter(f => f.severity === 'high').length} high-severity violations.
-Primary Defendant(s): ${fields.furnisherOrCollector || 'Unknown Furnisher'}
-Estimated Statutory Damages: $${(flags.length * 1000).toLocaleString()} (Max)
-
-2. VIOLATION MATRIX
-${flags.map((f, i) => `[${i + 1}] ${f.ruleName}
-   - Severity: ${f.severity}
-   - Statute: ${f.legalCitations.join(', ')}
-   - Evidence: ${f.fieldValues ? Object.entries(f.fieldValues).map(([k, v]) => `${k}=${v}`).join(', ') : 'N/A'}`).join('\n\n')}
-
-3. PROCEDURAL HISTORY
-- Initial Dispute Sent: [DATE]
-- Bureau Response: [DATE] - Failed to correct
-- Method of Verification Request: [DATE] - Ignored/Insufficient
-
-4. WILLFUL NON-COMPLIANCE MARKERS
-The volume and nature of these errors (${flags.length} total) suggests a systemic failure to maintain reasonable procedures (FCRA § 607(b)), rather than isolated clerical error.
-
-5. ATTACHED EXHIBITS
-- Exhibit A: Original Credit Report (Redacted)
-- Exhibit B: Metro 2® Forensic Audit
-- Exhibit C: Certified Mail Receipts`
-                            )}
+                            {getDocumentText()}
                         </div>
                     </div>
                 </div>

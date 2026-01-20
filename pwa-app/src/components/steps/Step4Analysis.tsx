@@ -1,4 +1,4 @@
-'use strict';
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import { ANALYSIS_TABS, TabId, LetterType } from '../../lib/constants';
@@ -385,6 +385,47 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
             })) || []}
             setActiveTab={setActiveTab}
             onExport={() => setActiveTab('lettereditor')}
+          />
+        )}
+
+        {activeTab === 'scoresim' && (
+          <ScoreSimulatorTab
+            flags={flags}
+            fields={editableFields}
+            riskProfile={riskProfile}
+          />
+        )}
+
+        {activeTab === 'timeline' && analytics && <TimelineTab timeline={analytics.timeline} />}
+
+        {activeTab === 'evidence' && <EvidenceManagerTab caseId="current-case" />}
+
+        {activeTab === 'workflow' && <WorkflowTrackerTab caseId="current-case" />}
+
+        {activeTab === 'voice' && <VoiceTranscriptionTab />}
+
+        {activeTab === 'caselaw' && <CaseLawTab relevantCaseLaw={relevantCaseLaw} />}
+
+        {activeTab === 'deltas' && <DeltasTab deltas={deltas} />}
+
+        {activeTab === 'discovery' && (
+          <DiscoveryTab
+            flags={flags}
+            discoveryAnswers={discoveryAnswers}
+            setDiscoveryAnswers={setDiscoveryAnswers}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'lab' && <ForensicLabTab flags={flags} />}
+
+        {activeTab === 'lettereditor' && (
+          <LetterEditorTab
+            selectedLetterType={selectedLetterType}
+            setSelectedLetterType={setSelectedLetterType}
+            editableLetter={editableLetter}
+            setEditableLetter={setEditableLetter}
+            generatePDF={generatePDFLetter}
           />
         )}
       </div>

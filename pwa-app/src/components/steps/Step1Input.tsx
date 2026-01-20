@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AnalysisRecord, formatTimestamp } from '../../lib/storage';
+import { ForensicScanner } from '../ForensicScanner';
 
 
 interface Step1InputProps {
@@ -85,9 +86,6 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               <p className="text-[10px] text-slate-400 uppercase tracking-widest">Secure • Local • Private</p>
             </div>
           </div>
-          import {ForensicScanner} from '../ForensicScanner';
-
-          // ... (in the component)
 
           <div
             className="flex-grow flex flex-col items-center justify-center p-0 group relative"
