@@ -62,8 +62,10 @@ class ParsedFields:
     """Container for all parsed fields from a credit report snippet."""
     original_creditor: ExtractedField = None
     furnisher_or_collector: ExtractedField = None
+    normalized_furnisher: str = None  # New: Normalized entity name
     account_type: ExtractedField = None
     account_status: ExtractedField = None
+    metro2_status_code: ExtractedField = None # New: Detected Metro2 numeric code
     current_balance: ExtractedField = None
     original_amount: ExtractedField = None
     date_opened: ExtractedField = None
@@ -83,7 +85,7 @@ class ParsedFields:
         result = {}
         all_fields = [
             'original_creditor', 'furnisher_or_collector', 'account_type',
-            'account_status', 'current_balance', 'original_amount',
+            'account_status', 'metro2_status_code', 'current_balance', 'original_amount',
             'date_opened', 'date_reported_or_updated', 'dofd',
             'charge_off_date', 'date_last_payment', 'date_last_activity',
             'estimated_removal_date', 'payment_history', 'remarks', 'bureau'
@@ -98,6 +100,8 @@ class ParsedFields:
                 }
             else:
                 result[key] = {'value': None, 'confidence': 'Low', 'source_text': ''}
+        
+        result['normalized_furnisher'] = self.normalized_furnisher
         return result
 
     def to_verified_dict(self) -> Dict[str, str]:
@@ -105,7 +109,7 @@ class ParsedFields:
         result = {}
         all_fields = [
             'original_creditor', 'furnisher_or_collector', 'account_type',
-            'account_status', 'current_balance', 'original_amount',
+            'account_status', 'metro2_status_code', 'current_balance', 'original_amount',
             'date_opened', 'date_reported_or_updated', 'dofd',
             'charge_off_date', 'date_last_payment', 'date_last_activity',
             'estimated_removal_date', 'payment_history', 'remarks', 'bureau'
@@ -113,6 +117,8 @@ class ParsedFields:
         for key in all_fields:
             field_obj = getattr(self, key)
             result[key] = field_obj.value if field_obj else None
+        
+        result['normalized_furnisher'] = self.normalized_furnisher
         return result
 
 
@@ -258,11 +264,44 @@ class CreditReportParser:
         # Extract creditor/furnisher
         result.original_creditor = self._extract_creditor(text)
         result.furnisher_or_collector = self._extract_furnisher(text)
+        
+        # Normalize furnisher for entity resolution
+        if result.furnisher_or_collector and result.furnisher_or_collector.value:
+            furn_val = result.furnisher_or_collector.value.upper()
+            result.normalized_furnisher = furn_val
+            for alias, canonical in CREDITOR_ALIAS_MAP.items():
+                if alias in furn_val:
+                    result.normalized_furnisher = canonical
+                    break
+
+        # Extract Metro2 Status Code
+        result.metro2_status_code = self._extract_metro2_code(text)
 
         # Extract remarks
         result.remarks = self._extract_remarks(text)
 
         return result
+
+    def _extract_metro2_code(self, text: str) -> ExtractedField:
+        """Extract numeric Metro2 status codes (e.g., 'Status Code: 97')."""
+        patterns = [
+            re.compile(r'status\s*code[:\s]+(\d{2})', re.IGNORECASE),
+            re.compile(r'metro2\s*(?:status)?[:\s]+(\d{2})', re.IGNORECASE),
+            re.compile(r'comment\s*code[:\s]+([A-Z0-9]{2})', re.IGNORECASE),
+        ]
+        
+        for pattern in patterns:
+            match = pattern.search(text)
+            if match:
+                code = match.group(1).upper()
+                return ExtractedField(
+                    value=code,
+                    confidence='High',
+                    source_text=match.group(),
+                    start_pos=match.start(),
+                    end_pos=match.end()
+                )
+        return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
 
     def _extract_remarks(self, text: str) -> ExtractedField:
         """Extract remarks/comments section where bankruptcy markers often appear."""

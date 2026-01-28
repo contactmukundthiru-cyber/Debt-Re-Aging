@@ -15,8 +15,9 @@ export interface BureauTactics {
 /** Rule definition metadata */
 export interface RuleDefinition {
     name: string;
-    severity: 'low' | 'medium' | 'high';
+    severity: 'low' | 'medium' | 'high' | 'critical';
     successProbability: number;
+
     whyItMatters: string;
     suggestedEvidence: string[];
     legalCitations: string[];
@@ -27,8 +28,9 @@ export interface RuleDefinition {
 export interface RuleFlag {
     ruleId: string;
     ruleName: string;
-    severity: 'low' | 'medium' | 'high';
+    severity: 'low' | 'medium' | 'high' | 'critical';
     explanation: string;
+
     whyItMatters: string;
     suggestedEvidence: string[];
     fieldValues: Record<string, FieldValue>;

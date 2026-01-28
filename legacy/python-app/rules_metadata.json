@@ -508,5 +508,28 @@
       "Itemized interest statements"
     ],
     "legal_citations": ["MA_GL_93A", "NY_GBL_349"]
+  },
+  "M3": {
+    "name": "Metro2 Status Code Conflict",
+    "severity": "high",
+    "description": "The numeric Metro2 status code contradicts the printed account status description.",
+    "why_it_matters": "Banks and bureaus often present a 'friendly' status description to consumers while reporting a different, more damaging raw code (like '97' for unpaid collection) to scoring algorithms. This internal inconsistency is a violation of the FCRA's requirement for maximum possible accuracy.",
+    "suggested_evidence": [
+      "Raw data pull or full report showing status codes",
+      "Screen capture of inconsistent status description"
+    ],
+    "legal_citations": ["FCRA_607_b", "METRO2"]
+  },
+  "DU3": {
+    "name": "Parent/Subsidiary Duplicate Reporting",
+    "severity": "high",
+    "description": "The same debt is being reported by both a parent company and a subsidiary (e.g., Midland Funding and MCM).",
+    "why_it_matters": "When a debt buyer and its servicing arm both report the same debt, it creates a duplicate negative entry that artificially lowers your credit score. This is a common algorithmic error in entity resolution that furnishers are required to prevent.",
+    "suggested_evidence": [
+      "Credit report showing both entries",
+      "Corporate relationship documentation (Parent/Subsidiary)",
+      "Notice of assignment showing single debt chain"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FDCPA_807_2A"]
   }
 }

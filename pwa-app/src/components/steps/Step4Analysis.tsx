@@ -209,22 +209,22 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
       </div>
 
       {/* Summary Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-end gap-6 mb-10">
+      <div className="flex flex-col sm:flex-row justify-between items-end gap-6 mb-6">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight mb-2 dark:text-white">Forensic Investigation Analysis</h2>
-          <p className="text-slate-500 flex items-center gap-2 font-medium">
+          <h2 className="text-3xl font-black tracking-tighter mb-1 text-white uppercase italic">Zenith Command Center</h2>
+          <p className="text-slate-500 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Scan complete: {flags.length} potential violations identified
+            Forensic analysis active • {flags.length} nodes identified
           </p>
         </div>
-        <div className="flex gap-3 no-print">
+        <div className="flex gap-2 no-print">
           <button
             type="button"
             onClick={() => generateForensicReport(editableFields, flags, riskProfile, relevantCaseLaw, consumer, discoveryAnswers)}
-            className="btn btn-primary !h-12 !px-8 !rounded-xl bg-slate-900 border-none shadow-xl shadow-slate-900/20 hover:scale-[1.02] transition-transform flex items-center gap-2"
+            className="btn btn-primary !h-10 !px-6 !rounded-lg bg-white !text-slate-950 border-none shadow-xl shadow-white/5 hover:scale-[1.02] transition-transform flex items-center gap-2 !text-[10px] !font-black !uppercase !tracking-widest"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
-            Export Full Dossier
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+            Export Dossier
           </button>
         </div>
       </div>
@@ -235,74 +235,95 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
         readiness={readiness}
       />
 
-      {/* Score Dashboard */}
-      <div className="grid lg:grid-cols-3 gap-6 mb-10">
-        {/* Main Score */}
-        <div className="premium-card p-8 lg:col-span-1 flex flex-col items-center text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 font-mono">Forensic Strength Index</p>
-          <div className="relative w-32 h-32 flex items-center justify-center mb-6">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-100 dark:stroke-slate-800" strokeWidth="2"></circle>
-              <circle cx="18" cy="18" r="16" fill="none" className="stroke-emerald-500 transition-all duration-1000" strokeWidth="2" strokeDasharray={`${riskProfile.overallScore}, 100`} strokeLinecap="round"></circle>
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-black dark:text-white tabular-nums">{riskProfile.overallScore}</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Points</span>
+      {/* Main Command View */}
+      <div className="grid lg:grid-cols-12 gap-6 mb-10">
+        {/* Left Column: Violations & Risk (High Density) */}
+        <div className="lg:col-span-8 space-y-6">
+          <div className="premium-card bg-slate-900/40 border-slate-800/60 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-800/60 flex items-center justify-between bg-slate-900/20">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-mono flex items-center gap-2">
+                <svg className="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                Violation Log
+              </h3>
+              <span className="text-[10px] font-mono text-slate-600 uppercase italic">FCRA/FDCPA CORE</span>
             </div>
-          </div>
-          <div className="w-full space-y-3">
-            <div className="flex items-center gap-2 justify-center mb-2">
-              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.1em] ${riskProfile.riskLevel === 'critical' ? 'bg-rose-500 text-white' :
-                riskProfile.riskLevel === 'high' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white'
-                }`}>
-                {riskProfile.riskLevel} Risk
-              </span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{riskProfile.disputeStrength} Strength</span>
+            <div className="p-0 max-h-[500px] overflow-y-auto scrollbar-thin">
+              {flags.map((flag, idx) => (
+                <div key={idx} className="border-b border-slate-800/40 last:border-0 p-5 hover:bg-slate-800/20 transition-colors group">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${flag.severity === 'critical' ? 'bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.8)]' : flag.severity === 'high' ? 'bg-rose-500' : flag.severity === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                      {flag.ruleName}
+                    </h4>
+                    <span className={`text-[9px] font-mono font-bold bg-slate-800 px-2 py-0.5 rounded uppercase ${flag.severity === 'critical' ? 'text-indigo-400 border border-indigo-500/30' : 'text-slate-500'}`}>{flag.severity}</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-3 font-medium">{flag.explanation}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {flag.legalCitations.slice(0, 2).map((cite, i) => (
+                      <span key={i} className="text-[9px] font-mono text-emerald-500/80 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded">{cite}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* AI Insight Peek */}
-        <div className="premium-card p-8 lg:col-span-1 bg-slate-950 border-indigo-900 group overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 rounded-full blur-[60px] -mr-20 -mt-20 group-hover:bg-indigo-500/20 transition-all duration-700" />
-          <div className="relative z-10 h-full flex flex-col">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-400 mb-6 font-mono">Agentic Intelligence</p>
-            <div className="flex-grow">
-              <p className="text-indigo-100 text-sm leading-relaxed mb-4 font-medium italic">
-                "{riskProfile.summary.substring(0, 160)}..."
-              </p>
+        {/* Right Column: Action Plan & Intelligence */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* Executive Action Plan */}
+          <div className="premium-card bg-slate-900/40 border-slate-800/60">
+            <div className="px-6 py-4 border-b border-slate-800/60 bg-slate-900/20">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-mono flex items-center gap-2">
+                <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                Action Plan
+              </h3>
             </div>
-            <button
-              onClick={() => setActiveTab('aianalysis')}
-              className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
-            >
-              View deep AI analysis
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </button>
+            <div className="p-6 space-y-4">
+              {analytics?.actions.slice(0, 4).map((action, i) => (
+                <div key={i} className="flex gap-3 group">
+                  <div className="mt-1 shrink-0">
+                    <div className={`w-1.5 h-6 rounded-full ${action.priority === 'immediate' ? 'bg-rose-500' : 'bg-slate-700'}`} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-200 mb-1 group-hover:text-emerald-400 transition-colors">{action.action}</p>
+                    <p className="text-[10px] text-slate-500 leading-tight font-medium">{action.reason}</p>
+                  </div>
+                </div>
+              ))}
+              <button 
+                onClick={() => setActiveTab('lettereditor')}
+                className="w-full mt-4 py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-slate-950 transition-all"
+              >
+                Execute Documents
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Forensic Telemetry */}
-        <div className="premium-card p-8 lg:col-span-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6 font-mono">Dossier Metrics</p>
-          <div className="space-y-4">
-            {[
-              { label: 'Violations Found', value: flags.length, status: flags.length > 5 ? 'critical' : 'warning' },
-              { label: 'Evidence Gaps', value: totalPossibleEvidence - checkedEvidenceCount, status: (totalPossibleEvidence - checkedEvidenceCount) > 0 ? 'warning' : 'normal' },
-              { label: 'Litigation Potential', value: riskProfile.litigationPotential ? 'High' : 'Moderate', status: riskProfile.litigationPotential ? 'normal' : 'warning' },
-              { label: 'Time Since Last Update', value: '4 days', status: 'normal' }
-            ].map((m, i) => (
-              <div key={i} className="flex items-center justify-between pb-3 border-b border-slate-50 dark:border-slate-800 last:border-0 last:pb-0">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">{m.label}</span>
-                <span className={`text-xs font-black font-mono tracking-tight ${m.status === 'critical' ? 'text-rose-500' : m.status === 'warning' ? 'text-amber-500' : 'text-emerald-500'
-                  }`}>
-                  {m.value}
-                </span>
+          {/* AI Intelligence Brief */}
+          <div className="premium-card bg-slate-950 border-indigo-500/20 p-6 overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-all" />
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-4 font-mono">Agent Briefing</p>
+            <p className="text-[11px] text-slate-300 leading-relaxed font-medium italic mb-6">
+              "{riskProfile.summary.substring(0, 200)}..."
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+                <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Risk Tier</p>
+                 <p className={`text-xs font-black uppercase ${riskProfile.riskLevel === 'critical' ? 'text-indigo-400 animate-pulse' : riskProfile.riskLevel === 'high' ? 'text-rose-500' : 'text-emerald-500'}`}>{riskProfile.riskLevel}</p>
+
               </div>
-            ))}
+              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
+                <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Litigation</p>
+                <p className="text-xs font-black uppercase text-indigo-400">{riskProfile.litigationPotential ? 'High' : 'Low'}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Legacy Score Dashboard (Removing or replacing) */}
+
 
       {/* Tabs Menu */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-10 no-print sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-40">

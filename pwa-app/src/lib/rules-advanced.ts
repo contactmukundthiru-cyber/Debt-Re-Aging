@@ -109,7 +109,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Physical impossibility proves intentional data fabrication.',
     suggestedEvidence: ['Original account opening documents', 'First statement'],
-    legalCitations: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
+    legalCitations: ['15 USC § 1681e(b)', '15 USC § 1681s-2(a)(1)', 'Cushman v. Trans Union, 115 F.3d 220'],
     remediation: 'Immediate deletion required. No verification possible.'
   },
   'B4': {
@@ -122,9 +122,10 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'DOFD must remain constant. Changes indicate illegal re-aging.',
     suggestedEvidence: ['Historical credit reports', 'Original creditor records'],
-    legalCitations: ['15 USC 1681s-2(a)(5)', 'FCRA 623(a)(5)'],
+    legalCitations: ['15 USC § 1681s-2(a)(5)', 'FCRA § 623(a)(5)', 'Seamans v. Temple Univ., 744 F.3d 853'],
     remediation: 'Restore original DOFD or delete tradeline.'
   },
+
   'B5': {
     name: 'Collector Created New DOFD',
     category: 'fcra',
@@ -284,7 +285,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Bureaus cannot simply repeat furnisher data as verification.',
     suggestedEvidence: ['Dispute response', 'Verification letter content'],
-    legalCitations: ['15 USC 1681i(a)(1)(A)', 'Cushman v. Trans Union'],
+    legalCitations: ['15 USC § 1681i(a)(1)(A)', 'Cushman v. Trans Union, 115 F.3d 220', 'Stevenson v. TRW, Inc., 987 F.2d 288'],
     remediation: 'Conduct meaningful reinvestigation.'
   },
   'V2': {
@@ -297,7 +298,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Bureau must investigate disputes within 30 days.',
     suggestedEvidence: ['Dispute letter', 'Response timeline', 'Investigation records'],
-    legalCitations: ['15 USC 1681i(a)(1)', 'Dennis v. BEH-1, LLC'],
+    legalCitations: ['15 USC § 1681i(a)(1)', 'Dennis v. BEH-1, LLC, 520 F.3d 1066'],
     remediation: 'Conduct proper reinvestigation.'
   },
   'V3': {
@@ -310,7 +311,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Verification must include method and furnisher contact.',
     suggestedEvidence: ['Verification letter', 'Missing elements list'],
-    legalCitations: ['15 USC 1681i(a)(6)', '15 USC 1681i(a)(7)'],
+    legalCitations: ['15 USC § 1681i(a)(6)', '15 USC § 1681i(a)(7)'],
     remediation: 'Provide complete verification information.'
   },
   'V4': {
@@ -323,9 +324,10 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Bureau must forward all relevant dispute information.',
     suggestedEvidence: ['Dispute letter with attachments', 'Furnisher response'],
-    legalCitations: ['15 USC 1681i(a)(2)', 'Gorman v. Wolpoff'],
+    legalCitations: ['15 USC § 1681i(a)(2)', 'Gorman v. Wolpoff & Abramson, LLP, 584 F.3d 1147'],
     remediation: 'Forward complete dispute file to furnisher.'
   },
+
 
   // ====== FURNISHER DUTIES ======
   'FD1': {
@@ -338,7 +340,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Furnisher must investigate direct disputes under 623(a)(8).',
     suggestedEvidence: ['Direct dispute letter', 'Continued reporting evidence'],
-    legalCitations: ['15 USC 1681s-2(a)(8)', 'Chiang v. Verizon'],
+    legalCitations: ['15 USC § 1681s-2(a)(8)', 'Chiang v. Verizon New England Inc., 595 F.3d 26'],
     remediation: 'Investigate and correct or delete.'
   },
   'FD2': {
@@ -351,7 +353,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Furnishers must have reasonable procedures for accuracy.',
     suggestedEvidence: ['Pattern of errors', 'Lack of correction'],
-    legalCitations: ['15 USC 1681s-2(a)(1)', 'Johnson v. MBNA'],
+    legalCitations: ['15 USC § 1681s-2(a)(1)', 'Johnson v. MBNA Am. Bank, NA, 357 F.3d 426'],
     remediation: 'Implement accuracy procedures.'
   },
   'FD3': {
@@ -364,9 +366,10 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     statutoryMax: 1000,
     whyItMatters: 'Disputed accounts must be marked as disputed.',
     suggestedEvidence: ['Dispute confirmation', 'Credit report without dispute notation'],
-    legalCitations: ['15 USC 1681s-2(a)(3)', '15 USC 1681i(a)(4)'],
+    legalCitations: ['15 USC § 1681s-2(a)(3)', '15 USC § 1681i(a)(4)', 'Saunders v. Branch Banking & Trust Co. of Va., 526 F.3d 142'],
     remediation: 'Add disputed status to account.'
   },
+
 
   // ====== COLLECTION PRACTICES ======
   'CP1': {

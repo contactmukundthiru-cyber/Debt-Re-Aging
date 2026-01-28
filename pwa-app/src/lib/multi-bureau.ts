@@ -5,8 +5,10 @@
  */
 
 import { CreditFields, RuleFlag } from './rules';
+import { runAdvancedRules, AdvancedRuleFlag } from './rules-advanced';
 
 export type BureauName = 'Equifax' | 'Experian' | 'TransUnion';
+
 
 export interface BureauData {
     bureau: BureauName;
@@ -109,8 +111,29 @@ export function compareMultipleBureaus(bureauData: BureauData[]): BureauComparis
                 discrepancies.push(createDiscrepancy(fieldKey, values, 'missing', missingBureaus));
             } else if (uniqueValues.size > 1) {
                 // Conflicting values across bureaus
-                discrepancies.push(createDiscrepancy(fieldKey, values, 'conflicting', []));
+                const discrepancy = createDiscrepancy(fieldKey, values, 'conflicting', []);
+                discrepancies.push(discrepancy);
+                
+                // Integrate with Advanced Rules for per-se violations
+                if (discrepancy.severity === 'critical' || discrepancy.severity === 'high') {
+                    const bureauComparison = bureauData.map(bd => ({
+                        bureau: bd.bureau,
+                        fields: bd.fields as CreditFields
+                    }));
+
+                    const xbFlags = runAdvancedRules(bureauComparison[0].fields, {
+                        crossBureauData: bureauComparison
+                    }).filter(f => f.ruleId.startsWith('XB'));
+
+                    xbFlags.forEach(f => {
+                        const opportunity = `${f.ruleName}: ${f.explanation}`;
+                        if (!violationOpportunities.includes(opportunity)) {
+                            violationOpportunities.push(opportunity);
+                        }
+                    });
+                }
             } else if (uniqueValues.size === 1 && definedValues.length === bureausCompared.length) {
+
                 // All bureaus match
                 matchedFields.push(FIELD_LABELS[fieldKey] || fieldKey);
             }
