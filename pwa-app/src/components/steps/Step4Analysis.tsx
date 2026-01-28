@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { ANALYSIS_TABS, TabId, LetterType } from '../../lib/constants';
 import { GuideOverlay } from '../GuideOverlay';
-import { RuleFlag, RiskProfile, CreditFields } from '../../lib/rules';
+import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { CaseLaw } from '../../lib/caselaw';
 import { TimelineEvent, PatternInsight } from '../../lib/analytics';
 import { DeltaResult } from '../../lib/delta';
@@ -39,6 +39,10 @@ import LiabilityRadarTab from './analysis/LiabilityRadarTab';
 import LegalEscalationTab from './analysis/LegalEscalationTab';
 import Metro2AuditTab from './analysis/Metro2AuditTab';
 import MasterActionPlanTab from './analysis/MasterActionPlanTab';
+import AdversarialMazeTab from './analysis/AdversarialMazeTab';
+import LegalShieldTab from './analysis/LegalShieldTab';
+import CaseSummaryDashboard from './analysis/CaseSummaryDashboard';
+import { getSmartRecommendations } from '../../lib/intelligence';
 
 
 interface AnalyticsMetric {
@@ -225,6 +229,12 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
         </div>
       </div>
 
+      <CaseSummaryDashboard
+        flags={flags}
+        riskProfile={riskProfile}
+        readiness={readiness}
+      />
+
       {/* Score Dashboard */}
       <div className="grid lg:grid-cols-3 gap-6 mb-10">
         {/* Main Score */}
@@ -340,8 +350,16 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
           <StatuteTrackerTab fields={editableFields} />
         )}
 
+        {activeTab === 'legalshield' && (
+          <LegalShieldTab editableFields={editableFields} />
+        )}
+
         {activeTab === 'simulation' && (
           <TacticalSimulatorTab flags={flags} riskProfile={riskProfile} />
+        )}
+
+        {activeTab === 'adversarial' && (
+          <AdversarialMazeTab flags={flags} riskProfile={riskProfile} />
         )}
 
         {activeTab === 'liability' && (

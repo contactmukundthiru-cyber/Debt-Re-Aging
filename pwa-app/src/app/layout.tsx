@@ -58,11 +58,28 @@ export default function RootLayout({
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href={`${basePath}/favicon.svg`} sizes="any" type="image/svg+xml" />
         <link rel="apple-touch-icon" href={`${basePath}/icons/icon.svg`} />
         <link rel="manifest" href={`${basePath}/manifest.json`} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var dark = localStorage.getItem('cra_dark_mode');
+                  var supportDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  if (dark === 'true' || (dark === null && supportDark)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.variable} ${serif.variable} ${mono.variable} antialiased`}>
         <Providers>{children}</Providers>

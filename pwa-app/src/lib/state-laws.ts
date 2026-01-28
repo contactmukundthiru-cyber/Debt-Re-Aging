@@ -226,7 +226,7 @@ export const STATE_LAWS: Record<string, StateLawProfile> = {
   NY: {
     code: 'NY',
     name: 'New York',
-    sol: { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6 },
+    sol: { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3 },
     interestCaps: { judgments: 9.0, medical: 2.0, consumer: 16.0 },
     consumerProtections: {
       hasMiniCFPA: true, hasDebtBuyerLaw: true, hasMedicalDebtProtections: true,
@@ -235,9 +235,11 @@ export const STATE_LAWS: Record<string, StateLawProfile> = {
     keyStatutes: [
       'NY Gen. Bus. Law § 349 (Deceptive Practices)',
       'NY Gen. Bus. Law § 600 (Debt Collection)',
+      'NY CCFA 2022 (SOL reduction)',
       '23 NYCRR 1 (DFS Debt Collection Rules)'
     ],
     specialNotes: [
+      'SOL reduced to 3 years by CCFA in 2022',
       'NYC has additional local protections',
       'DFS heavily regulates debt collection',
       'Medical debt protections under state law',

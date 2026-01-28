@@ -15,6 +15,16 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
   expandedCard,
   setExpandedCard
 }) => {
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [filterSeverity, setFilterSeverity] = React.useState<'all' | 'high' | 'medium' | 'low'>('all');
+
+  const filteredFlags = flags.filter(flag => {
+    const matchesSearch = flag.ruleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      flag.explanation.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSeverity = filterSeverity === 'all' || flag.severity === filterSeverity;
+    return matchesSearch && matchesSeverity;
+  });
+
   if (flags.length === 0) {
     return (
       <div className="premium-card p-16 text-center bg-slate-50 dark:bg-slate-950/20 border-dashed border-slate-200 dark:border-slate-800">
@@ -29,6 +39,36 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-grow">
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search violations, rules, or citations..."
+            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none dark:text-white"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          {(['all', 'high', 'medium', 'low'] as const).map(s => (
+            <button
+              key={s}
+              onClick={() => setFilterSeverity(s)}
+              className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${filterSeverity === s
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Summary Header */}
       <div className="glass-panel p-6 flex flex-wrap items-center justify-between gap-6 mb-8">
         <div className="flex items-center gap-4">
@@ -36,8 +76,10 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Detected Violations</p>
-            <p className="text-2xl font-bold dark:text-white tabular-nums">{flags.length} Issues</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              {searchTerm || filterSeverity !== 'all' ? 'Matching Results' : 'Detected Violations'}
+            </p>
+            <p className="text-2xl font-bold dark:text-white tabular-nums">{filteredFlags.length} Issues</p>
           </div>
         </div>
         <div className="flex gap-4">
@@ -49,7 +91,11 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
               low: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
             };
             return (
-              <div key={severity} className={`px-4 py-2 rounded-xl border ${colors[severity as keyof typeof colors]}`}>
+              <div
+                key={severity}
+                className={`px-4 py-2 rounded-xl border cursor-pointer transition-all hover:scale-105 active:scale-95 ${colors[severity as keyof typeof colors]} ${filterSeverity === severity ? 'ring-2 ring-slate-400 ring-offset-2 dark:ring-offset-slate-900' : ''}`}
+                onClick={() => setFilterSeverity(severity as any)}
+              >
                 <span className="text-[10px] font-bold uppercase tracking-widest">{severity}: </span>
                 <span className="text-sm font-bold tabular-nums">{count}</span>
               </div>
@@ -58,8 +104,20 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
         </div>
       </div>
 
+      {filteredFlags.length === 0 && (searchTerm || filterSeverity !== 'all') && (
+        <div className="text-center py-20">
+          <p className="text-slate-500">No violations match your current filters.</p>
+          <button
+            onClick={() => { setSearchTerm(''); setFilterSeverity('all'); }}
+            className="text-emerald-500 font-bold mt-2 text-sm"
+          >
+            Clear all filters
+          </button>
+        </div>
+      )}
+
       {/* Violation Cards */}
-      {flags.map((flag, i) => {
+      {filteredFlags.map((flag, i) => {
         const isExpanded = expandedCard === i;
         const severityConfig = {
           high: { color: 'text-rose-500 bg-rose-500/10 border-rose-500/30', glow: 'shadow-rose-500/10', icon: '🔴' },

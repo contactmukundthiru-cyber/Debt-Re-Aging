@@ -14,7 +14,14 @@
  * - Pattern fingerprinting
  */
 
-import { CreditFields, RuleFlag, RiskProfile, PatternScore, ScoreImpact, parseDate, RULE_DEFINITIONS, STATE_SOL } from './rules';
+import {
+  CreditFields,
+  RuleFlag,
+  RiskProfile,
+  PatternScore,
+  ScoreImpact
+} from './types';
+import { parseDate, RULE_DEFINITIONS, STATE_SOL } from './rules';
 
 // ============================================================================
 // EXTENDED INTERFACES
@@ -388,6 +395,19 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     legalCitations: ['15 USC 1681c-2', '15 USC 1681g(e)'],
     remediation: 'Block and delete fraudulent account.'
   },
+  'SL1': {
+    name: 'Rehabilitated Student Loan Inaccuracy',
+    category: 'student',
+    severity: 'high',
+    successProbability: 95,
+    willfulnessIndicator: 70,
+    statutoryMin: 0,
+    statutoryMax: 1000,
+    whyItMatters: 'After student loan rehabilitation, the default status MUST be removed from the credit report.',
+    suggestedEvidence: ['Rehabilitation completion letter', 'Payment history showing 9 on-time payments'],
+    legalCitations: ['34 CFR 682.405', 'Higher Education Act'],
+    remediation: 'Remove default marker and report as Current.'
+  },
   'CP3': {
     name: 'Suing on Time-Barred Debt',
     category: 'fdcpa',
@@ -674,6 +694,47 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     suggestedEvidence: ['Purchase date', 'DOFD', '7-year calculation'],
     legalCitations: ['15 USC 1681c(a)(4)', '15 USC 1681c(c)'],
     remediation: 'Delete. Debt is unreportable.'
+  },
+
+  // ====== LATEST 2024-2025 REGULATORY UPDATES ======
+  'MD1': {
+    name: 'Medical Debt: Financial Assistance Eligibility',
+    category: 'medical',
+    severity: 'high',
+    successProbability: 85,
+    willfulnessIndicator: 40,
+    statutoryMin: 0,
+    statutoryMax: 0,
+    whyItMatters: 'Many states (e.g., CA, WA, NY) require providers to screen for financial assistance eligibility BEFORE reporting to collections.',
+    suggestedEvidence: ['Hospital financial assistance policy', 'Income documentation', 'Denial letter'],
+    legalCitations: ['CA Health & Safety Code § 127400', 'WA RCW 70.170'],
+    remediation: 'Remove from credit if screening was not performed.'
+  },
+  'UC1': {
+    name: 'Usury Clock Drift: Illegal Interest Accumulation',
+    category: 'state',
+    severity: 'critical',
+    successProbability: 80,
+    willfulnessIndicator: 90,
+    statutoryMin: 500,
+    statutoryMax: 5000,
+    whyItMatters: 'Applying interest rates above state usury caps on defaulted consumer debt is a per-se violation of the FDCPA.',
+    suggestedEvidence: ['Historical balance statements', 'State interest rate cap citations'],
+    legalCitations: ['15 USC 1692e(2)', 'State Usury Statutes'],
+    remediation: 'Refund overcharged interest and correct balance.'
+  },
+  'ZR1': {
+    name: 'Zombie Debt: Post-SOL Resuscitation Attempt',
+    category: 'fdcpa',
+    severity: 'high',
+    successProbability: 95,
+    willfulnessIndicator: 95,
+    statutoryMin: 1000,
+    statutoryMax: 1000,
+    whyItMatters: 'Attempting to collect or report a debt that is beyond both the SOL and FCRA reporting period is deceptive.',
+    suggestedEvidence: ['Original creditor DOFD records', 'Notification of assignment'],
+    legalCitations: ['15 USC 1692e', 'Huertas v. Galaxy Asset Services'],
+    remediation: 'Permanent deletion and cease-and-desist.'
   }
 };
 
@@ -1041,6 +1102,7 @@ export function runAdvancedRules(
   runBalanceRules(fields, flags);
   runStatusRules(fields, flags);
   runMedicalDebtRules(fields, flags);
+  runStudentLoanRules(fields, flags);
   runChainOfTitleRules(fields, flags);
   runVerificationRules(fields, flags);
 
@@ -1235,11 +1297,34 @@ function runBalanceRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void 
       75
     ));
   }
+
+  // UC1: Usury Clock Drift
+  if (fields.stateCode && fields.dofd && original > 0 && current > original) {
+    const dofd = parseDate(fields.dofd);
+    if (dofd) {
+      const yearsElapsed = (new Date().getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+      if (yearsElapsed > 0.5) {
+        const sol = STATE_SOL[fields.stateCode.toUpperCase()];
+        const appliedRate = ((current - original) / original) / yearsElapsed;
+        const cap = sol ? sol.judgmentInterestCap : 0.10; // Default to 10%
+
+        if (appliedRate > cap + 0.05) { // 5% buffer for legitimate fees
+          const rule = ADVANCED_RULE_DEFINITIONS['UC1'];
+          flags.push(createAdvancedFlag('UC1', rule,
+            `Implied annual rate of ${(appliedRate * 100).toFixed(1)}% exceeds ${fields.stateCode} cap of ${(cap * 100).toFixed(1)}%.`,
+            { state: fields.stateCode, rate: (appliedRate * 100).toFixed(1), cap: (cap * 100).toFixed(1) },
+            90
+          ));
+        }
+      }
+    }
+  }
 }
 
 function runStatusRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void {
   const status = (fields.accountStatus || '').toLowerCase();
   const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const remarks = (fields.remarks || '').toLowerCase();
 
   // SI1: Paid but showing balance
   if ((status.includes('paid') || status.includes('settled') || status.includes('closed')) && current > 0) {
@@ -1248,6 +1333,23 @@ function runStatusRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void {
       `Account status "${fields.accountStatus}" but balance is $${current.toLocaleString()}.`,
       { status: fields.accountStatus, balance: current },
       90
+    ));
+  }
+
+  // CP1: Bankruptcy discharged but shows balance
+  const isBK = status.includes('bankruptcy') || 
+               remarks.includes('bankruptcy') || 
+               remarks.includes('discharged') || 
+               remarks.includes('ch 7') || 
+               remarks.includes('ch 13') || 
+               remarks.includes('chapter');
+
+  if (isBK && current > 0) {
+    const rule = ADVANCED_RULE_DEFINITIONS['CP1'];
+    flags.push(createAdvancedFlag('CP1', rule,
+      `Account shows bankruptcy indicators but reports a balance of $${current.toLocaleString()}.`,
+      { status: fields.accountStatus, remarks, balance: current },
+      97
     ));
   }
 }
@@ -1296,6 +1398,35 @@ function runMedicalDebtRules(fields: CreditFields, flags: AdvancedRuleFlag[]): v
       99
     ));
   }
+
+  // MD1: Financial Assistance screening
+  if (['CA', 'WA', 'NY', 'NJ', 'MD'].includes(fields.stateCode || '')) {
+    const rule = ADVANCED_RULE_DEFINITIONS['MD1'];
+    flags.push(createAdvancedFlag('MD1', rule,
+      `This medical debt was reported in ${fields.stateCode}, which requires pre-reporting financial assistance screening.`,
+      { state: fields.stateCode, accountType: fields.accountType },
+      85
+    ));
+  }
+}
+
+function runStudentLoanRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void {
+  const accountType = (fields.accountType || '').toLowerCase();
+  const status = (fields.accountStatus || '').toLowerCase();
+  const isStudentLoan = accountType.includes('student') || accountType.includes('education');
+
+  if (!isStudentLoan) return;
+
+  // SL1: Rehabilitated but still showing default/collection
+  const remarks = (fields.remarks || '').toLowerCase();
+  if (remarks.includes('rehabilitated') && (status.includes('collection') || status.includes('default'))) {
+    const rule = ADVANCED_RULE_DEFINITIONS['SL1'];
+    flags.push(createAdvancedFlag('SL1', rule,
+      'Account is marked "Rehabilitated" but still shows collection/default status.',
+      { remarks, status: fields.accountStatus },
+      95
+    ));
+  }
 }
 
 function runChainOfTitleRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void {
@@ -1311,6 +1442,24 @@ function runChainOfTitleRules(fields: CreditFields, flags: AdvancedRuleFlag[]): 
       { furnisher, accountType: fields.accountType },
       82
     ));
+  }
+
+  // ZR1: Zombie Debt Resuscitation
+  const opened = parseDate(fields.dateOpened);
+  const dofd = parseDate(fields.dofd);
+  if (opened && dofd && fields.stateCode) {
+    const yearsDiff = (opened.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    const sol = STATE_SOL[fields.stateCode.toUpperCase()];
+    const solLimit = sol ? sol.writtenContracts : 4;
+
+    if (yearsDiff > solLimit + 1) { // 1 year grace after SOL
+      const rule = ADVANCED_RULE_DEFINITIONS['ZR1'];
+      flags.push(createAdvancedFlag('ZR1', rule,
+        `This collection was opened ${yearsDiff.toFixed(1)} years after the DOFD, which is beyond the ${fields.stateCode} SOL of ${solLimit} years.`,
+        { opened: fields.dateOpened, dofd: fields.dofd, sol: solLimit },
+        95
+      ));
+    }
   }
 }
 

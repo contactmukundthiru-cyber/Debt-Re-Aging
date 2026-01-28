@@ -48,7 +48,7 @@
 |-------------|---------|
 | Computer | Windows, Mac, or Linux |
 | Memory | 4GB RAM |
-| Cost | **Free** (open source) |
+| Cost | **Free for personal and nonprofit use** |
 | Training | 2 hours |
 
 ---
@@ -87,4 +87,4 @@ streamlit run app/main.py
 
 ---
 
-*Free and open source. Built for consumers and the organizations that serve them.*
+*Free for personal and nonprofit use. Commercial use requires a paid license.*

@@ -2,27 +2,10 @@
 
 import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import { CreditFields, RuleFlag, RiskProfile } from '../lib/rules';
+import { ConsumerInfo, AnalyzedAccount } from '../lib/types';
 
 // Types
 export type Step = 1 | 2 | 3 | 4 | 5 | 6;
-
-export interface ConsumerInfo {
-  name?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  ssn?: string;
-  dob?: string;
-}
-
-export interface AnalyzedAccount {
-  id: string;
-  rawText: string;
-  fields: CreditFields;
-  flags: RuleFlag[];
-  risk: RiskProfile;
-}
 
 export interface AppState {
   // Navigation
@@ -49,16 +32,20 @@ export interface AppState {
 
   // Active Tab
   activeTab: string;
+  showSecurityModal: boolean;
 }
 
 // Actions
 type AppAction =
   | { type: 'SET_STEP'; payload: Step }
+  | { type: 'SET_STEP_FUNC'; payload: Step | ((prev: Step) => Step) }
   | { type: 'SET_RAW_TEXT'; payload: string }
   | { type: 'SET_FILE_NAME'; payload: string | null }
   | { type: 'SET_EDITABLE_FIELDS'; payload: CreditFields }
+  | { type: 'SET_EDITABLE_FIELDS_FUNC'; payload: CreditFields | ((prev: CreditFields) => CreditFields) }
   | { type: 'UPDATE_FIELD'; payload: { key: keyof CreditFields; value: string } }
   | { type: 'SET_CONSUMER'; payload: Partial<ConsumerInfo> }
+  | { type: 'SET_CONSUMER_FUNC'; payload: Partial<ConsumerInfo> | ((prev: ConsumerInfo) => ConsumerInfo) }
   | { type: 'SET_FLAGS'; payload: RuleFlag[] }
   | { type: 'SET_RISK_PROFILE'; payload: RiskProfile | null }
   | { type: 'SET_ANALYZED_ACCOUNTS'; payload: AnalyzedAccount[] }
@@ -67,6 +54,7 @@ type AppAction =
   | { type: 'SET_ANALYZING'; payload: boolean }
   | { type: 'SET_DARK_MODE'; payload: boolean }
   | { type: 'SET_ACTIVE_TAB'; payload: string }
+  | { type: 'SET_SECURITY_MODAL'; payload: boolean }
   | { type: 'RESET' };
 
 // Initial State
@@ -75,7 +63,7 @@ const initialState: AppState = {
   rawText: '',
   fileName: null,
   editableFields: {},
-  consumer: {},
+  consumer: { name: '', address: '', city: '', state: '', zip: '' },
   flags: [],
   riskProfile: null,
   analyzedAccounts: [],
@@ -86,6 +74,7 @@ const initialState: AppState = {
   isAnalyzing: false,
   darkMode: false,
   activeTab: 'violations',
+  showSecurityModal: false,
 };
 
 // Reducer
@@ -93,6 +82,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'SET_STEP':
       return { ...state, step: action.payload };
+    case 'SET_STEP_FUNC': {
+      const nextStep = typeof action.payload === 'function' ? action.payload(state.step) : action.payload;
+      return { ...state, step: nextStep };
+    }
 
     case 'SET_RAW_TEXT':
       return { ...state, rawText: action.payload };
@@ -103,6 +96,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_EDITABLE_FIELDS':
       return { ...state, editableFields: action.payload };
 
+    case 'SET_EDITABLE_FIELDS_FUNC': {
+      const newFields = typeof action.payload === 'function' ? action.payload(state.editableFields) : action.payload;
+      return { ...state, editableFields: newFields };
+    }
     case 'UPDATE_FIELD':
       return {
         ...state,
@@ -114,6 +111,11 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SET_CONSUMER':
       return { ...state, consumer: { ...state.consumer, ...action.payload } };
+
+    case 'SET_CONSUMER_FUNC': {
+      const newConsumer = typeof action.payload === 'function' ? action.payload(state.consumer) : { ...state.consumer, ...action.payload };
+      return { ...state, consumer: newConsumer };
+    }
 
     case 'SET_FLAGS':
       return { ...state, flags: action.payload };
@@ -143,6 +145,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
 
     case 'SET_ACTIVE_TAB':
       return { ...state, activeTab: action.payload };
+    case 'SET_SECURITY_MODAL':
+      return { ...state, showSecurityModal: action.payload };
 
     case 'RESET':
       return {
@@ -160,12 +164,12 @@ interface AppContextValue {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
   // Convenience actions
-  setStep: (step: Step) => void;
+  setStep: React.Dispatch<React.SetStateAction<Step>>;
   setRawText: (text: string) => void;
   setFileName: (name: string | null) => void;
-  setEditableFields: (fields: CreditFields) => void;
+  setEditableFields: React.Dispatch<React.SetStateAction<CreditFields>>;
   updateField: (key: keyof CreditFields, value: string) => void;
-  setConsumer: (info: Partial<ConsumerInfo>) => void;
+  setConsumer: React.Dispatch<React.SetStateAction<ConsumerInfo>>;
   setFlags: (flags: RuleFlag[]) => void;
   setRiskProfile: (profile: RiskProfile | null) => void;
   setAnalyzedAccounts: (accounts: AnalyzedAccount[]) => void;
@@ -184,8 +188,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   // Convenience action creators
-  const setStep = useCallback((step: Step) => {
-    dispatch({ type: 'SET_STEP', payload: step });
+  const setStep = useCallback((step: Step | ((prev: Step) => Step)) => {
+    dispatch({ type: 'SET_STEP_FUNC', payload: step });
   }, []);
 
   const setRawText = useCallback((text: string) => {
@@ -196,16 +200,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_FILE_NAME', payload: name });
   }, []);
 
-  const setEditableFields = useCallback((fields: CreditFields) => {
-    dispatch({ type: 'SET_EDITABLE_FIELDS', payload: fields });
+  const setEditableFields = useCallback((fields: CreditFields | ((prev: CreditFields) => CreditFields)) => {
+    dispatch({ type: 'SET_EDITABLE_FIELDS_FUNC', payload: fields });
   }, []);
 
   const updateField = useCallback((key: keyof CreditFields, value: string) => {
     dispatch({ type: 'UPDATE_FIELD', payload: { key, value } });
   }, []);
 
-  const setConsumer = useCallback((info: Partial<ConsumerInfo>) => {
-    dispatch({ type: 'SET_CONSUMER', payload: info });
+  const setConsumer = useCallback((info: Partial<ConsumerInfo> | ((prev: ConsumerInfo) => ConsumerInfo)) => {
+    dispatch({ type: 'SET_CONSUMER_FUNC', payload: info });
   }, []);
 
   const setFlags = useCallback((flags: RuleFlag[]) => {
@@ -243,6 +247,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const reset = useCallback(() => {
     dispatch({ type: 'RESET' });
   }, []);
+
+  // Persistent Theme Support
+  React.useEffect(() => {
+    const saved = localStorage.getItem('cra_dark_mode');
+    if (saved !== null) {
+      dispatch({ type: 'SET_DARK_MODE', payload: saved === 'true' });
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      dispatch({ type: 'SET_DARK_MODE', payload: true });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (state.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('cra_dark_mode', String(state.darkMode));
+  }, [state.darkMode]);
 
   const value: AppContextValue = {
     state,

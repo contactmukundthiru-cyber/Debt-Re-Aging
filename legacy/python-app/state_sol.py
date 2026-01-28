@@ -58,11 +58,11 @@ STATE_SOL_DATABASE: Dict[str, StateSol] = {
     'MO': StateSol('Missouri', 'MO', 5, 5, 5, 5, 0.09, 0.09),
     'MT': StateSol('Montana', 'MT', 5, 5, 5, 5, 0.10, 0.10),
     'NE': StateSol('Nebraska', 'NE', 5, 4, 5, 5, 0.06, 0.06),
-    'NV': StateSol('Nevada', 'NV', 6, 4, 6, 6, 0.08, 0.00), # NV medical interest is 0%
+    'NV': StateSol('Nevada', 'NV', 6, 4, 6, 6, 0.08, 0.0), # NV medical interest is 0%
     'NH': StateSol('New Hampshire', 'NH', 3, 3, 3, 3, 0.08, 0.08),
     'NJ': StateSol('New Jersey', 'NJ', 6, 6, 6, 6, 0.06, 0.06),
     'NM': StateSol('New Mexico', 'NM', 6, 4, 6, 6, 0.08, 0.08),
-    'NY': StateSol('New York', 'NY', 6, 6, 6, 6, 0.09, 0.02), # NY medical interest cap is 2%
+    'NY': StateSol('New York', 'NY', 3, 3, 3, 3, 0.09, 0.02), # NY CCFA 2022 reduced SOL to 3 years
     'NC': StateSol('North Carolina', 'NC', 3, 3, 3, 3, 0.08, 0.08),
     'ND': StateSol('North Dakota', 'ND', 6, 6, 6, 6, 0.06, 0.06),
     'OH': StateSol('Ohio', 'OH', 6, 6, 6, 6, 0.05, 0.05),

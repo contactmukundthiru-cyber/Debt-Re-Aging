@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useApp } from '../context/AppContext';
 
 interface InstitutionalBannerProps {
   onDismiss?: () => void;
 }
 
 const STORAGE_KEY = 'institutional_banner_dismissed';
-const VERSION = '4.4.0';
+const VERSION = '5.0.0';
 
 const QUICK_TIPS = [
   { title: 'Upload Reports', desc: 'Drop PDF, images, or paste text from any credit bureau report', icon: '📄' },
@@ -23,6 +24,7 @@ const QUICK_TIPS = [
  * Displays important information about the tool's capabilities and compliance
  */
 export const InstitutionalBanner: React.FC<InstitutionalBannerProps> = ({ onDismiss }) => {
+  const { dispatch } = useApp();
   const [isVisible, setIsVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showTraining, setShowTraining] = useState(false);
@@ -141,7 +143,10 @@ export const InstitutionalBanner: React.FC<InstitutionalBannerProps> = ({ onDism
                   <h4 className="font-bold text-white">Security Whitepaper</h4>
                 </div>
                 <p className="text-xs text-slate-400 mb-6 leading-relaxed">Technical documentation on Zero-Trust architecture, browser-local processing, and PII governance.</p>
-                <button className="w-full py-3 bg-blue-500 text-slate-950 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-blue-400 transition-colors shadow-lg shadow-blue-500/20">
+                <button
+                  onClick={() => dispatch({ type: 'SET_SECURITY_MODAL', payload: true })}
+                  className="w-full py-3 bg-blue-500 text-slate-950 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-blue-400 transition-colors shadow-lg shadow-blue-500/20"
+                >
                   Access Security Info
                 </button>
               </div>

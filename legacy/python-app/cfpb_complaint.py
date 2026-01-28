@@ -69,11 +69,15 @@ def generate_complaint_narrative(
     account_type = str(fields.get('account_type') or 'account')
     dofd = str(fields.get('dofd') or 'unknown')
     removal_date = str(fields.get('estimated_removal_date') or 'unknown')
+    consumer_name = (consumer_info or {}).get('name') or ""
 
     narrative = []
 
     # Opening
-    narrative.append(f"I am filing this complaint regarding inaccurate information being reported on my credit report by {creditor}.")
+    if consumer_name:
+        narrative.append(f"My name is {consumer_name}. I am filing this complaint regarding inaccurate information being reported on my credit report by {creditor}.")
+    else:
+        narrative.append(f"I am filing this complaint regarding inaccurate information being reported on my credit report by {creditor}.")
     narrative.append("")
 
     # Account identification

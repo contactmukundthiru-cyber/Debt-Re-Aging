@@ -5,19 +5,8 @@
 import { jsPDF } from 'jspdf';
 import { CreditFields, RuleFlag, RiskProfile } from './rules';
 import { CaseLaw } from './caselaw';
-
-export interface ConsumerInfo {
-  firstName: string;
-  lastName: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  dob?: string;
-  ssn?: string;
-  email?: string;
-  phone?: string;
-}
+import { ConsumerInfo } from './types';
+export type { ConsumerInfo };
 
 /**
  * Generate a professional PDF dispute letter
@@ -75,7 +64,7 @@ function buildForensicReportDoc(
   doc.setFont('helvetica', 'bold');
   doc.text('INVESTIGATION SUBJECT', 20, y + 7);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Name: ${consumer.firstName} ${consumer.lastName}`, 20, y + 15);
+  doc.text(`Name: ${consumer.name}`, 20, y + 15);
   doc.text(`Account Reference: ${fields.furnisherOrCollector || fields.originalCreditor || 'Unknown'}`, 100, y + 15);
   doc.text(`Address: ${consumer.address}, ${consumer.city} ${consumer.state} ${consumer.zip}`, 20, y + 20);
   doc.text(`Jurisdiction: ${fields.stateCode || 'Federal'}`, 100, y + 20);
@@ -235,7 +224,7 @@ export function generateBureauLetter(
     disputeReasons += `\nâÿ¢ ${flag.ruleName}: ${flag.explanation}\n`;
   }
 
-  return `${consumer.firstName} ${consumer.lastName}
+  return `${consumer.name}
 ${consumer.address}
 ${consumer.city}, ${consumer.state} ${consumer.zip}
 
@@ -273,7 +262,7 @@ Please note that failure to comply with this dispute within the statutory timefr
 
 Sincerely,
 
-${consumer.firstName} ${consumer.lastName}
+${consumer.name}
 
 ---
 BUREAU ADDRESSES:
@@ -295,7 +284,7 @@ export function generateValidationLetter(
   const creditorName = fields.furnisherOrCollector || '[DEBT COLLECTOR NAME]';
   const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
 
-  return `${consumer.firstName} ${consumer.lastName}
+  return `${consumer.name}
 ${consumer.address}
 ${consumer.city}, ${consumer.state} ${consumer.zip}
 
@@ -357,7 +346,7 @@ Respond within 30 days.
 
 Sincerely,
 
-${consumer.firstName} ${consumer.lastName}
+${consumer.name}
 
 CC: [Your Records]
 `;
@@ -442,7 +431,7 @@ export function generateFurnisherLetter(
   const hasReagingFlags = flags.some(f => ['B1', 'B2', 'B3', 'K6', 'K7'].includes(f.ruleId));
   const hasFDCPAFlags = flags.some(f => f.legalCitations.some(c => c.includes('FDCPA')));
 
-  return `${consumer.firstName} ${consumer.lastName}
+  return `${consumer.name}
 ${consumer.address}
 ${consumer.city}, ${consumer.state} ${consumer.zip}
 
@@ -504,7 +493,7 @@ Your response is required within 30 days.
 
 Sincerely,
 
-${consumer.firstName} ${consumer.lastName}
+${consumer.name}
 
 Enclosures: Credit report excerpt showing disputed tradeline
 CC: [Your Records]
@@ -523,7 +512,7 @@ export function generateCeaseDesistLetter(
   const creditorName = fields.furnisherOrCollector || '[DEBT COLLECTOR NAME]';
   const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
 
-  return `${consumer.firstName} ${consumer.lastName}
+  return `${consumer.name}
 ${consumer.address}
 ${consumer.city}, ${consumer.state} ${consumer.zip}
 
@@ -578,7 +567,7 @@ This letter is sent without prejudice to my legal rights, all of which are expre
 
 Sincerely,
 
-${consumer.firstName} ${consumer.lastName}
+${consumer.name}
 
 CC: [Your Records]
 `;
@@ -599,7 +588,7 @@ export function generateIntentToSueLetter(
   const highSeverityFlags = flags.filter(f => f.severity === 'high');
   const totalPotentialDamages = flags.length * 1000; // $1000 per willful FCRA violation
 
-  return `${consumer.firstName} ${consumer.lastName}
+  return `${consumer.name}
 ${consumer.address}
 ${consumer.city}, ${consumer.state} ${consumer.zip}
 
@@ -673,7 +662,7 @@ This letter may be used as evidence of your prior knowledge of these violations.
 
 Sincerely,
 
-${consumer.firstName} ${consumer.lastName}
+${consumer.name}
 
 CC: [Attorney/Records]
     Consumer Financial Protection Bureau (pending complaint)

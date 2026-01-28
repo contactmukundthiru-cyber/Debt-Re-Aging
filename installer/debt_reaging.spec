@@ -23,6 +23,7 @@ app_dir = project_root / 'app'
 output_dir = project_root / 'output'
 templates_dir = project_root / 'templates'
 samples_dir = project_root / 'samples'
+legacy_app_dir = project_root / 'legacy' / 'python-app'
 
 # Collect all Python files from app directory
 app_files = [(str(f), 'app') for f in app_dir.glob('*.py')]
@@ -35,6 +36,8 @@ a = Analysis(
     datas=[
         # Application code
         (str(app_dir), 'app'),
+        # Legacy Python app (runtime import source for app.*)
+        (str(legacy_app_dir), 'legacy/python-app') if legacy_app_dir.exists() else (None, None),
         # Templates
         (str(templates_dir), 'templates') if templates_dir.exists() else (None, None),
         # Sample files

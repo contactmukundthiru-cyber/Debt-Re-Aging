@@ -4,7 +4,7 @@
  * and various third-party credit monitoring services
  */
 
-import { CreditFields } from './rules';
+import { CreditFields } from './types';
 
 export interface ExtractedField {
   value: string;
@@ -148,23 +148,11 @@ const FIELD_PATTERNS: Record<string, RegExp[]> = {
     /(?:date\s*(?:of\s*)?)?last\s*activity[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
     /last\s*(?:reported|updated)[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
   ],
-  estimatedRemovalDate: [
-    /(?:estimated\s*)?(?:removal|drop[\s\-]?off)\s*(?:date)?[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
-    /falls?\s*off[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
-    /expected\s*removal[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
-    /on\s*record\s*until[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
-  ],
-  paymentHistory: [
-    /payment\s*history[:\s]*([A-Za-z0-9\s\-\|]+)/i,
-    /payment\s*pattern[:\s]*([A-Za-z0-9\s\-\|]+)/i,
-    /history[:\s]*([XCOU0123456789\s\-\|]+)/i,
-  ],
-  bureau: [
-    /(experian|equifax|transunion|trans\s*union)/i,
-  ],
   remarks: [
-    /remarks?[:\s]*([A-Za-z0-9\s\-\.,]+?)(?:\n|$)/i,
-    /comment[:\s]*([A-Za-z0-9\s\-\.,]+?)(?:\n|$)/i,
+    /(?:remarks|comments|notes)[:\s]+([A-Za-z0-9\s\.,&\'\-\(\)\!/]+?)(?:\n|\||$)/i,
+    /consumer\s*statement[:\s]+([A-Za-z0-9\s\.,&\'\-\(\)\!/]+?)(?:\n|\||$)/i,
+    /subscriber\s*remarks[:\s]+([A-Za-z0-9\s\.,&\'\-\(\)\!/]+?)(?:\n|\||$)/i,
+    /remarks?[:\s]*([A-Za-z0-9\s\-\.,&\'\-\(\)\!/]+?)(?:\n|$)/i,
   ],
 };
 

@@ -143,19 +143,24 @@ class RuleEngine:
         """
         flags = []
 
-        # Rule DU1: Duplicate Reporting by Balance
-        seen_balances = {}  # balance -> [account_info]
+        # Rule DU1: Duplicate Reporting by Balance and Creditor
+        seen_items = {}  # (balance, creditor_snippet) -> [account_info]
 
         for i, acc in enumerate(accounts):
             balance = acc.get('current_balance')
+            creditor = str(acc.get('original_creditor') or '').strip().lower()
+            # Use first 5 chars of creditor for fuzzy matching if name varies slightly
+            cred_short = creditor[:8] if len(creditor) >= 8 else creditor
+            
             if balance and balance != '0' and balance != '0.00':
                 try:
                     bal_float = float(str(balance).replace(',', '').replace('$', ''))
                     if bal_float > 0:
                         bal_key = f"{bal_float:.2f}"
-                        if bal_key not in seen_balances:
-                            seen_balances[bal_key] = []
-                        seen_balances[bal_key].append({
+                        key = (bal_key, cred_short)
+                        if key not in seen_items:
+                            seen_items[key] = []
+                        seen_items[key].append({
                             'index': i,
                             'furnisher': acc.get('furnisher_or_collector', 'Unknown'),
                             'original_creditor': acc.get('original_creditor', ''),
@@ -164,18 +169,19 @@ class RuleEngine:
                 except (ValueError, TypeError):
                     pass
 
-        for balance, accounts_list in seen_balances.items():
+        for (balance, cred_short), accounts_list in seen_items.items():
             if len(accounts_list) >= 2:
-                rule = self.rules.get('DU1', {})
+                # Filter to ensure we don't flag if it's just the same furnisher twice (though usually that's also a duplicate)
                 furnishers = [a['furnisher'] for a in accounts_list]
-
+                
+                rule = self.rules.get('DU1', {})
                 flags.append({
                     'rule_id': 'DU1',
                     'rule_name': rule.get('name', 'Duplicate Reporting'),
                     'severity': rule.get('severity', 'high'),
                     'explanation': (
-                        f"Potential duplicate: Balance ${balance} reported by multiple furnishers: "
-                        f"{', '.join(furnishers)}. If this is the same debt, only one should report a balance."
+                        f"Highly probable duplicate: Balance ${balance} for creditor '{accounts_list[0]['original_creditor']}' "
+                        f"reported by {len(accounts_list)} different furnishers: {', '.join(furnishers)}."
                     ),
                     'why_it_matters': rule.get('why_it_matters', ''),
                     'suggested_evidence': rule.get('suggested_evidence', []),
@@ -312,6 +318,21 @@ class RuleEngine:
         # Zombie debt (J-series)
         flag = self._check_rule_j1(fields)
         if flag: flags.append(flag)
+
+        # Bankruptcy rules (BK-series)
+        flag = self._check_rule_bk1(fields)
+        if flag: flags.append(flag)
+
+        # Student Loan rules (SL-series)
+        flag = self._check_rule_sl1(fields)
+        if flag: flags.append(flag)
+
+        # Advanced Audit rules (UC/ZR series)
+        for check in [self._check_rule_uc1, self._check_rule_zr1, self._check_rule_md1,
+                      self._check_rule_mil1, self._check_rule_cot1, self._check_rule_st1,
+                      self._check_rule_tb1]:
+            flag = check(fields)
+            if flag: flags.append(flag)
 
         # Innovative rules (K-series)
         for check in [self._check_rule_k1, self._check_rule_k2, self._check_rule_k3,
@@ -759,6 +780,120 @@ class RuleEngine:
             logger.error(f"Unexpected error in _check_rule_j1: {e}")
         return None
 
+    def _check_rule_bk1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """BK1: Post-bankruptcy balance reporting"""
+        status = str(fields.get('account_status') or '').lower()
+        remarks = str(fields.get('remarks') or '').lower()
+        balance_str = fields.get('current_balance', '0')
+        
+        is_bankruptcy = 'bankruptcy' in status or 'discharged' in status or 'bankruptcy' in remarks or 'discharged' in remarks
+        
+        if not is_bankruptcy: return None
+        
+        try:
+            balance = float(str(balance_str).replace(',', '').replace('$', ''))
+            if balance > 0:
+                return self._create_flag('BK1',
+                    f"This account is marked as involved in bankruptcy (Status/Remarks: {status or remarks}), but still reports a balance of ${balance:,.2f}. Once discharged, the balance must be reported as $0.",
+                    {'account_status': status, 'remarks': remarks, 'current_balance': balance})
+        except (ValueError, TypeError): pass
+        return None
+
+    def _check_rule_sl1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """SL1: Student Loan Rehabilitation Inaccuracy"""
+        remarks = str(fields.get('remarks') or '').lower()
+        status = str(fields.get('account_status') or '').lower()
+        
+        is_rehab = 'rehabilitat' in remarks or 'rehab' in remarks
+        # If successfully rehabilitated, it shouldn't be in collection or default
+        is_negative = any(s in status for s in ['collection', 'default', 'delinquent', 'late'])
+        
+        if is_rehab and is_negative:
+            return self._create_flag('SL1',
+                f"Student loan shows 'Rehabilitated' in remarks but still reports a negative status of '{status.upper()}'. Per the Higher Education Act, successful rehabilitation requires the removal of the default marker.",
+                {'remarks': remarks, 'account_status': status})
+        return None
+
+    def _check_rule_uc1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """UC1: Usury Clock Drift Audit (State Cap)"""
+        from app.state_sol import get_state_sol
+        state_code = fields.get('state_code')
+        curr_bal = fields.get('current_balance')
+        orig_bal = fields.get('original_balance') or fields.get('original_amount')
+        dofd = fields.get('dofd')
+
+        if not all([state_code, curr_bal, orig_bal, dofd]): return None
+
+        state_data = get_state_sol(state_code)
+        if not state_data: return None
+
+        try:
+            curr = float(str(curr_bal).replace(',', '').replace('$', ''))
+            orig = float(str(orig_bal).replace(',', '').replace('$', ''))
+            dofd_dt = datetime.strptime(dofd, '%Y-%m-%d')
+            years_since_dofd = max((datetime.now() - dofd_dt).days / 365.25, 0.5)
+
+            if orig > 0 and curr > orig:
+                implied_annual_rate = ((curr - orig) / orig) / years_since_dofd
+                
+                # Use judgment_interest_cap as a general usury proxy if more specific caps aren't available
+                cap = state_data.judgment_interest_cap
+                
+                if implied_annual_rate > (cap + 0.02):  # 2% buffer for one-time legal fees
+                    return self._create_flag('UC1',
+                        f"Forensic Audit detected Usury Clock Drift: The balance grew from ${orig:,.2f} to ${curr:,.2f} over {years_since_dofd:.1f} years, implying an annual interest rate of {implied_annual_rate*100:.1f}%. This exceeds the {state_data.state} legal cap of {cap*100:.1f}%.",
+                        {'original': orig, 'current': curr, 'implied_rate': f"{implied_annual_rate*100:.1f}%", 'cap': f"{cap*100:.1f}%"})
+        except (ValueError, TypeError): pass
+        return None
+
+    def _check_rule_zr1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """ZR1: Zombie Debt Resuscitation (Post-SOL First Reporting)"""
+        from app.state_sol import check_sol_expired
+        state_code = fields.get('state_code')
+        dofd = fields.get('dofd')
+        date_opened = fields.get('date_opened')
+
+        if not all([state_code, dofd, date_opened]): return None
+        if not all(validate_iso_date(d) for d in [dofd, date_opened]): return None
+
+        is_expired, sol_years, _ = check_sol_expired(state_code, dofd)
+        if not is_expired: return None
+
+        try:
+            dofd_dt = datetime.strptime(dofd, '%Y-%m-%d')
+            opened_dt = datetime.strptime(date_opened, '%Y-%m-%d')
+            sol_expiry = dofd_dt + relativedelta(years=sol_years)
+
+            # If the collection account was opened AFTER the SOL expired
+            if opened_dt > sol_expiry:
+                months_after = (opened_dt.year - sol_expiry.year) * 12 + (opened_dt.month - sol_expiry.month)
+                if months_after > 3: # 3 month buffer
+                    return self._create_flag('ZR1',
+                        f"Zombie Debt Detected: This account was opened/reported on {date_opened}, which is {months_after} months AFTER the legal statute of limitations for this debt expired ({sol_expiry.strftime('%Y-%m-%d')}). This is a common tactic for illegal debt resuscitation.",
+                        {'dofd': dofd, 'sol_years': sol_years, 'sol_expiry': sol_expiry.strftime('%Y-%m-%d'), 'opened': date_opened})
+        except ValueError: pass
+        return None
+
+    def _check_rule_md1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """MD1: Medical Financial Assistance Screening"""
+        account_type = str(fields.get('account_type') or '').lower()
+        industry_code = str(fields.get('industry_code') or '').lower()
+        state_code = fields.get('state_code')
+
+        is_medical = ('medical' in account_type or 'medical' in industry_code or
+                      'healthcare' in account_type or 'hospital' in industry_code)
+
+        if not is_medical or not state_code: return None
+
+        # States with strong "Charity Care" or financial assistance screening laws
+        restricted_states = ['CA', 'WA', 'NY', 'NJ', 'MD', 'CO', 'IL']
+        
+        if state_code in restricted_states:
+            return self._create_flag('MD1',
+                f"Medical Debt Screening Violation: This debt was reported in {state_code}, which requires healthcare providers to screen patients for financial assistance eligibility BEFORE collection. If you were not screened or have low income, this reporting may be illegal.",
+                {'state': state_code, 'account_type': account_type})
+        return None
+
     # ============ INNOVATIVE RULES (K-series) ============
 
     def _check_rule_k1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -932,6 +1067,60 @@ class RuleEngine:
             logger.error(f"Unexpected error in _check_rule_k7: {e}")
         return None
 
+    def _check_rule_mil1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """MIL1: SCRA Interest Rate Violation"""
+        is_military = fields.get('is_military', False)
+        remarks = str(fields.get('remarks') or '').lower()
+        
+        # Auto-detect military status from remarks if not explicitly provided
+        if not is_military:
+            if any(term in remarks for term in ['active duty', 'scra', 'defense.gov', 'military']):
+                is_military = True
+        
+        if not is_military: return None
+
+        curr_bal = fields.get('current_balance')
+        orig_bal = fields.get('original_balance') or fields.get('original_amount')
+        dofd = fields.get('dofd')
+
+        if not all([curr_bal, orig_bal, dofd]): return None
+
+        try:
+            curr = float(str(curr_bal).replace(',', '').replace('$', ''))
+            orig = float(str(orig_bal).replace(',', '').replace('$', ''))
+            dofd_dt = datetime.strptime(dofd, '%Y-%m-%d')
+            years = max((datetime.now() - dofd_dt).days / 365.25, 0.5)
+
+            if orig > 0 and curr > orig:
+                annual_rate = ((curr - orig) / orig) / years
+                if annual_rate > 0.061: # 6% cap with small rounding tolerance
+                    return self._create_flag('MIL1',
+                        f"SCRA Violation: Implied interest rate of {annual_rate*100:.1f}% exceeds the 6% federal cap for servicemembers. servicemembers are protected from interest rates above 6% on pre-service debt.",
+                        {'implied_rate': f"{annual_rate*100:.1f}%", 'federal_cap': '6.0%', 'is_military_detected': True})
+        except Exception: pass
+        return None
+
+    def _check_rule_cot1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """COT1: Systematic Re-assignment Pattern"""
+        remarks = str(fields.get('remarks') or '').lower()
+        furnisher = str(fields.get('furnisher_or_collector') or '').lower()
+        
+        # Look for keywords indicating multiple transfers
+        transfer_keywords = ['transferred from', 'purchased from', 'formerly known as', 'assigned to']
+        match_count = sum(1 for kw in transfer_keywords if kw in remarks)
+        
+        if match_count >= 2 or 'multiple' in remarks:
+            return self._create_flag('COT1',
+                f"High-Risk Transfer Pattern: This debt shows evidence of multiple ownership transfers in the remarks ('{remarks[:50]}...'). Rapid transfers are a high-confidence indicator of data corruption or intentional re-aging.",
+                {'remarks': remarks, 'furnisher': furnisher})
+        return None
+
+    def _check_rule_tb1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """TB1: Treble Damage Risk Indicator"""
+        # This rule fires if there is a combination of High-Severity violations on one tradeline
+        # It's an aggregate rule called manually or via check_all_rules context
+        return None  # Will be handled by the aggregator for logic flow
+
     # ============ METRO2 COMPLIANCE RULES (M-series) ============
 
     def _check_rule_m1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -994,6 +1183,27 @@ class RuleEngine:
             return self._create_flag('L1',
                 f"Lexical Inconsistency: Account status is '{status.upper()}', but recent payment history shows delinquency markers ({history[:10]}...). This contradictory reporting violates the FCRA accuracy requirement.",
                 {'status': status, 'payment_history': history})
+        return None
+
+    def _check_rule_st1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """ST1: Stale Status Update Anomaly"""
+        status = str(fields.get('account_status') or '').lower()
+        date_reported = fields.get('date_reported_or_updated')
+        date_closed = fields.get('date_closed')
+
+        if not date_reported or not date_closed: return None
+        if 'closed' not in status and 'paid' not in status: return None
+
+        try:
+            reported_dt = datetime.strptime(date_reported, '%Y-%m-%d')
+            closed_dt = datetime.strptime(date_closed, '%Y-%m-%d')
+            
+            # If a closed account is being refreshed more than 2 years after closing
+            if (reported_dt - closed_dt).days > 730:
+                return self._create_flag('ST1',
+                    f"Stale Update Anomaly: This account was closed on {date_closed} but received a status update on {date_reported} (over 2 years later). Frequent updates on old, closed debt are often used to artificially influence credit scores.",
+                    {'date_closed': date_closed, 'date_reported': date_reported})
+        except Exception: pass
         return None
 
     def _check_rule_s1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -1311,6 +1521,17 @@ class PatternScorer:
         """Generate comprehensive risk profile for an account."""
         base_score = self.calculate_base_score(flags)
         patterns = self.detect_patterns(flags)
+
+        # Check for TB1 (Treble Damage) if multiple critical violations exist
+        high_severity_rules = [f.get('rule_id') for f in flags if f.get('severity') in ['high', 'critical']]
+        if len(high_severity_rules) >= 3:
+            # Inject TB1 if not present
+            if 'TB1' not in [f.get('rule_id') for f in flags]:
+                engine = RuleEngine()
+                tb1_flag = engine._create_flag('TB1', 
+                    f"Aggregate Risk: {len(high_severity_rules)} high/critical violations detected on a single tradeline. This significantly increases the legal weight and potential for statutory treble damages.",
+                    {'violation_count': len(high_severity_rules)})
+                flags.append(tb1_flag.to_dict())
 
         # Boost score based on patterns
         pattern_boost = sum(p.confidence_score * 0.1 for p in patterns)

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { RuleFlag, RiskProfile, CreditFields } from '../../lib/rules';
+import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { Step } from '../../lib/constants';
 import { DamageEstimate } from '../../lib/evidence-builder';
 import { ConsumerInfo } from '../../lib/generator';

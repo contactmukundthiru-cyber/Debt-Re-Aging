@@ -8,18 +8,21 @@ const SESSION_KEY = 'credit_analyzer_session';
 const SESSION_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 const AUTO_SAVE_INTERVAL_MS = 30 * 1000; // 30 seconds
 
+import { CreditFields } from './rules';
+import { ConsumerInfo } from './types';
+
 export interface SessionData {
     timestamp: number;
     step: number;
     rawText: string;
-    editableFields: any;
-    consumerInfo: any;
+    editableFields: CreditFields;
+    consumerInfo: ConsumerInfo;
     discoveryAnswers: Record<string, string>;
     version: string;
 }
 
 
-const VERSION = '4.4.0';
+const VERSION = '5.0.0';
 
 /**
  * Save current session state to localStorage

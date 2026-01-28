@@ -179,7 +179,7 @@ In the unlikely event of a security concern:
 
 ## Certifications & Attestations
 
-This is an open-source project. Security claims can be verified through:
+This is a source-available project. Security claims can be verified through:
 
 - **Source Code**: https://github.com/contactmukundthiru-cyber/Debt-Re-Aging
 - **Build Process**: Reproducible via GitHub Actions

@@ -75,15 +75,20 @@ export function reconstructMetro2Base(fields: Partial<CreditFields>): Metro2Segm
     };
 }
 
+import { ConsumerInfo } from './types';
+
 /**
  * J2 Segment: Associated Names (Used for Mixed Files)
  */
-export function reconstructJ2Segment(consumer: any): Metro2Segment {
+export function reconstructJ2Segment(consumer: ConsumerInfo): Metro2Segment {
+    const nameParts = consumer.name.split(' ');
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : consumer.name;
+
     return {
         segmentIdentifier: 'J2',
         fields: [
             { position: 1, length: 2, label: 'Segment ID', value: 'J2', description: 'Associated Name', standard: 'J2', isValid: true },
-            { position: 3, length: 30, label: 'Last Name', value: (consumer.lastName || '').padEnd(30), description: 'Secondary Name', standard: 'Alphanumeric', isValid: true }
+            { position: 3, length: 30, label: 'Last Name', value: lastName.padEnd(30), description: 'Secondary Name', standard: 'Alphanumeric', isValid: true }
         ]
     };
 }

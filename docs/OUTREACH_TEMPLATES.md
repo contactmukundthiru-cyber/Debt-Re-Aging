@@ -12,7 +12,7 @@ Use these templates to reach out to potential partner organizations.
 
 Dear [Name/Organization],
 
-I'm reaching out to share a free, open-source tool that may help your organization serve clients dealing with credit report issues more efficiently.
+I'm reaching out to share a free tool (free for personal and nonprofit use; commercial use requires a paid license) that may help your organization serve clients dealing with credit report issues more efficiently.
 
 **The Problem:**
 Many consumers, particularly those in underserved communities, have debts illegally "re-aged" on their credit reports—making negative items stay longer than the law allows. Identifying these violations requires time-consuming manual analysis of dates and calculations.
@@ -24,7 +24,7 @@ The **Credit Report Analyzer** automates this analysis. Upload a credit report s
 - Generates professional dispute documentation
 
 **Key Features:**
-- 100% free and open-source
+- Free for personal and nonprofit use (commercial use requires a paid license)
 - Completely local—no client data leaves your computer
 - Generates dispute letters and documentation automatically
 - Includes 50-state Statute of Limitations database
@@ -112,7 +112,7 @@ The Credit Report Analyzer helps identify potential FCRA violations in consumer 
 - Track outcomes for clinic reporting
 
 **Free for Educational Use:**
-The tool is completely free and open-source. I can provide:
+The tool is free for personal and nonprofit use. Commercial use requires a paid license. I can provide:
 - Installation support
 - Training session for students and supervisors
 - Ongoing technical assistance
@@ -223,7 +223,7 @@ Best,
 
 Debt re-aging—the illegal manipulation of dates on credit reports to extend the reporting period beyond statutory limits—disproportionately affects low-income consumers who lack resources to identify and challenge these violations. Traditional analysis requires attorneys to manually calculate date differentials across multiple data points, consuming valuable time that could be spent on representation.
 
-This presentation introduces the Credit Report Analyzer, a free, open-source tool that automates the identification of potential FCRA timeline violations. The tool processes credit report snippets using OCR technology, extracts relevant dates and account information, and applies over 10 transparent rules based on established FCRA principles. When issues are detected, it generates professional dispute documentation including bureau letters, furnisher letters, and debt validation requests.
+This presentation introduces the Credit Report Analyzer, a free tool (free for personal and nonprofit use; commercial use requires a paid license) that automates the identification of potential FCRA timeline violations. The tool processes credit report snippets using OCR technology, extracts relevant dates and account information, and applies over 10 transparent rules based on established FCRA principles. When issues are detected, it generates professional dispute documentation including bureau letters, furnisher letters, and debt validation requests.
 
 Key features include:
 - 100% local processing with no cloud data transmission
@@ -253,7 +253,7 @@ The presentation includes a live demonstration and time for Q&A.
 🔍 Excited to share a tool that's helping legal aid organizations identify illegal debt re-aging in credit reports!
 
 The Credit Report Analyzer:
-✅ Free and open-source
+✅ Free for personal and nonprofit use
 ✅ 100% private—no client data leaves your computer
 ✅ Saves 1-2 hours per case
 ✅ Generates professional dispute documentation
@@ -281,7 +281,7 @@ Interested in piloting this tool at your organization? Comment below or DM me!
 
 6/ Pilot results: 25% detection rate for high-severity violations. 1.5 hours saved per case. 67% successful dispute rate.
 
-7/ Want to try it? It's free, open-source, and 100% private. No client data leaves your computer.
+7/ Want to try it? It's free for personal and nonprofit use and 100% private. Commercial use requires a paid license. No client data leaves your computer.
 
 Link: [URL]
 
@@ -343,7 +343,7 @@ This proposal outlines a partnership to implement the Credit Report Analyzer too
 
 #### 6. No Cost
 
-This partnership involves no financial cost to [Partner Organization]. The tool is free and open-source.
+This partnership involves no financial cost to [Partner Organization]. The tool is free for personal and nonprofit use. Commercial use requires a paid license.
 
 #### 7. Contact
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { SecurityModal } from '../SecurityModal';
+import { useApp } from '../../context/AppContext';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -22,7 +23,10 @@ export const Header: React.FC<HeaderProps> = ({
   reset,
   translate
 }) => {
-  const [isSecurityModalOpen, setIsSecurityModalOpen] = useState(false);
+  const { state, dispatch } = useApp();
+  const { showSecurityModal } = state;
+  const setIsSecurityModalOpen = (val: boolean) => dispatch({ type: 'SET_SECURITY_MODAL', payload: val });
+
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const websiteRoot = basePath.replace(/\/pwa-app\/?$/, '');
   const websiteHref = websiteRoot ? `${websiteRoot}/` : '/';
@@ -85,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </header>
 
-      <SecurityModal isOpen={isSecurityModalOpen} onClose={() => setIsSecurityModalOpen(false)} />
+      <SecurityModal isOpen={showSecurityModal} onClose={() => setIsSecurityModalOpen(false)} />
     </>
   );
 };

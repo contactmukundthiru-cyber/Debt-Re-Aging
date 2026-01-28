@@ -1,6 +1,6 @@
 # IT Deployment Guide - Credit Report Analyzer PWA
 
-**Version 4.4.0 | For IT Administrators**
+**Version 5.0.0 | For IT Administrators**
 
 ---
 
@@ -285,4 +285,4 @@ User data is stored in browser LocalStorage. Recommend instructing users to:
 
 ---
 
-*IT Deployment Guide v4.4.0 | January 2026*
+*IT Deployment Guide v5.0.0 | January 2026*

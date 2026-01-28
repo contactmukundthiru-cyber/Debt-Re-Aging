@@ -3,7 +3,7 @@
  * Estimates potential credit score improvement from removing violations
  */
 
-import { CreditFields, RuleFlag } from './rules';
+import { CreditFields, RuleFlag } from './types';
 
 export interface ScoreFactors {
   paymentHistory: number;      // 35%
@@ -314,7 +314,7 @@ function getLengthExplanation(fields: CreditFields): string {
 /**
  * Estimate base score from available data
  */
-function estimateBaseScore(fields: CreditFields, flags: RuleFlag[]): number {
+export function estimateBaseScore(fields: CreditFields, flags: RuleFlag[]): number {
   // Start at median
   let estimate = 650;
 

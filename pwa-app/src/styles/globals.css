@@ -46,14 +46,30 @@
 }
 
 .dark {
-  --bg-app: #020617;
+  --bg-app: #080a11;
   --panel-bg: #0f172a;
   --panel-border: #1e293b;
-  --text-main: #f1f5f9;
+  --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --input-bg: #0f172a;
   --glass-bg: rgba(15, 23, 42, 0.8);
   --glass-border: rgba(30, 41, 59, 0.5);
+
+  --black: #ffffff;
+  --white: #020617;
+  --primary: #f8fafc;
+
+  --gray-950: #f8fafc;
+  --gray-900: #f1f5f9;
+  --gray-800: #e2e8f0;
+  --gray-700: #cbd5e1;
+  --gray-600: #94a3b8;
+  --gray-500: #64748b;
+  --gray-400: #475569;
+  --gray-300: #334155;
+  --gray-200: #1e293b;
+  --gray-100: #0f172a;
+  --gray-50: #020617;
 }
 
 @layer base {

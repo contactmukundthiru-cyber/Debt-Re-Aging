@@ -3,88 +3,27 @@
  * Detects debt re-aging and credit reporting violations
  */
 
-/** Possible field values that can be captured in a rule flag */
-export type FieldValue = string | number | boolean | Date | null | undefined;
+import {
+  CreditFields,
+  RuleFlag,
+  RiskProfile,
+  PatternScore,
+  ScoreImpact,
+  RuleDefinition,
+  FieldValue,
+  BureauTactics
+} from './types';
 
-/** Bureau-specific tactical advice */
-export interface BureauTactics {
-  experian?: string;
-  equifax?: string;
-  transunion?: string;
-  all?: string;
+// State Statute of Limitations data
+export interface StateSolData {
+  writtenContracts: number;
+  oralContracts: number;
+  promissoryNotes: number;
+  openAccounts: number;
+  judgmentInterestCap: number;
+  medicalInterestCap: number;
 }
 
-/** Rule definition metadata */
-export interface RuleDefinition {
-  name: string;
-  severity: 'low' | 'medium' | 'high';
-  successProbability: number;
-  whyItMatters: string;
-  suggestedEvidence: string[];
-  legalCitations: string[];
-  discoveryQuestions?: string[];
-  bureauTactics?: BureauTactics;
-}
-
-export interface RuleFlag {
-  ruleId: string;
-  ruleName: string;
-  severity: 'low' | 'medium' | 'high';
-  explanation: string;
-  whyItMatters: string;
-  suggestedEvidence: string[];
-  fieldValues: Record<string, FieldValue>;
-  legalCitations: string[];
-  successProbability: number; // 0-100%
-  discoveryQuestions?: string[]; // Questions to ask the consumer to find more proof
-  bureauTactics?: BureauTactics; // Specific advice for each bureau
-}
-
-export interface CreditFields {
-  originalCreditor?: string;
-  furnisherOrCollector?: string;
-  accountType?: string;
-  accountStatus?: string;
-  currentBalance?: string;
-  originalAmount?: string;
-  dateOpened?: string;
-  dateReportedOrUpdated?: string;
-  dofd?: string; // Date of First Delinquency
-  chargeOffDate?: string;
-  dateLastPayment?: string;
-  dateLastActivity?: string;
-  estimatedRemovalDate?: string;
-  paymentHistory?: string;
-  bureau?: string;
-  stateCode?: string;
-}
-
-export interface ScoreImpact {
-  category: string;
-  impact: number; // 0 to 100
-  description: string;
-}
-
-export interface RiskProfile {
-  overallScore: number;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  disputeStrength: 'weak' | 'moderate' | 'strong' | 'definitive';
-  litigationPotential: boolean;
-  detectedPatterns: PatternScore[];
-  keyViolations: string[];
-  recommendedApproach: string;
-  summary: string;
-  scoreBreakdown: ScoreImpact[];
-}
-
-export interface PatternScore {
-  patternName: string;
-  confidenceScore: number;
-  legalStrength: 'weak' | 'moderate' | 'strong' | 'definitive';
-  matchedRules: string[];
-  description: string;
-  recommendedAction: string;
-}
 
 // Rule metadata with strict typing
 const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
@@ -337,14 +276,6 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
 };
 
 // State Statute of Limitations data
-interface StateSolData {
-  writtenContracts: number;
-  oralContracts: number;
-  promissoryNotes: number;
-  openAccounts: number;
-  judgmentInterestCap: number;
-  medicalInterestCap: number;
-}
 
 const STATE_SOL: Record<string, StateSolData> = {
   'AL': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.075, medicalInterestCap: 0.08 },
@@ -378,7 +309,7 @@ const STATE_SOL: Record<string, StateSolData> = {
   'NH': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
   'NJ': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
   'NM': { writtenContracts: 6, oralContracts: 4, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
-  'NY': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.09, medicalInterestCap: 0.02 },
+  'NY': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.09, medicalInterestCap: 0.02 },
   'NC': { writtenContracts: 3, oralContracts: 3, promissoryNotes: 3, openAccounts: 3, judgmentInterestCap: 0.08, medicalInterestCap: 0.08 },
   'ND': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.06, medicalInterestCap: 0.06 },
   'OH': { writtenContracts: 6, oralContracts: 6, promissoryNotes: 6, openAccounts: 6, judgmentInterestCap: 0.05, medicalInterestCap: 0.05 },
@@ -402,29 +333,63 @@ const STATE_SOL: Record<string, StateSolData> = {
 
 /**
  * Parse a date string into a Date object
+ * Robust implementation handling multiple US and ISO formats with fuzzy OCR correction
  */
 function parseDate(dateStr: string | undefined): Date | null {
   if (!dateStr) return null;
+  
+  // OCR Correction: 'O'->'0', 'I'->'1', etc.
+  let cleaned = dateStr.trim().toLowerCase()
+    .replace(/[ol]/g, (m) => (m === 'o' ? '0' : '1'))
+    .replace(/[|i]/g, '1');
 
-  // Try various formats
-  const formats = [
-    /^(\d{4})-(\d{2})-(\d{2})$/, // YYYY-MM-DD
-    /^(\d{2})\/(\d{2})\/(\d{4})$/, // MM/DD/YYYY
-    /^(\d{2})-(\d{2})-(\d{4})$/, // MM-DD-YYYY
-  ];
-
-  for (const format of formats) {
-    const match = dateStr.match(format);
-    if (match) {
-      if (format === formats[0]) {
-        return new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
-      } else {
-        return new Date(parseInt(match[3]), parseInt(match[1]) - 1, parseInt(match[2]));
-      }
-    }
+  // 1. ISO Format (YYYY-MM-DD or YYYY-MM)
+  const isoMatch = cleaned.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+  if (isoMatch) {
+    const year = parseInt(isoMatch[1]);
+    const month = parseInt(isoMatch[2]) - 1;
+    const day = isoMatch[3] ? parseInt(isoMatch[3]) : 1;
+    return new Date(year, month, day);
   }
 
-  // Try native parsing
+  // 2. US Slashing (MM/DD/YYYY or MM-DD-YYYY)
+  const usMatch = cleaned.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (usMatch) {
+    let year = parseInt(usMatch[3]);
+    if (year < 100) year += year > 50 ? 1900 : 2000;
+    return new Date(year, parseInt(usMatch[1]) - 1, parseInt(usMatch[2]));
+  }
+
+  // 3. Month Name Formats
+  const months: Record<string, number> = {
+    jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+    jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+  };
+
+  const monthNames = Object.keys(months).join('|');
+  
+  // Format: Month DD, YYYY
+  const mdyPattern = new RegExp(`^(${monthNames})[a-z]*\\.?\\s+(\\d{1,2}),?\\s+(\\d{4})$`, 'i');
+  const mdyMatch = cleaned.match(mdyPattern);
+  if (mdyMatch) {
+    return new Date(parseInt(mdyMatch[3]), months[mdyMatch[1].toLowerCase().substring(0, 3)], parseInt(mdyMatch[2]));
+  }
+
+  // Format: DD Month YYYY
+  const dmyPattern = new RegExp(`^(\\d{1,2})\\s+(${monthNames})[a-z]*\\.?\\s+(\\d{4})$`, 'i');
+  const dmyMatch = cleaned.match(dmyPattern);
+  if (dmyMatch) {
+    return new Date(parseInt(dmyMatch[3]), months[dmyMatch[2].toLowerCase().substring(0, 3)], parseInt(dmyMatch[1]));
+  }
+
+  // Format: Month YYYY
+  const myPattern = new RegExp(`^(${monthNames})[a-z]*\\.?\\s+(\\d{4})$`, 'i');
+  const myMatch = cleaned.match(myPattern);
+  if (myMatch) {
+    return new Date(parseInt(myMatch[2]), months[myMatch[1].toLowerCase().substring(0, 3)], 1);
+  }
+
+  // 4. Native Fallback
   const parsed = new Date(dateStr);
   return isNaN(parsed.getTime()) ? null : parsed;
 }

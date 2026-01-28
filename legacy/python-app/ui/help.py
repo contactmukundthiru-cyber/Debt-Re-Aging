@@ -18,7 +18,7 @@ def render_about_website():
     <div style="margin-bottom: 20px;">
         <h1 style="color: #1e40af; margin-bottom: 8px;">Credit Report Analyzer</h1>
         <p style="color: #64748b; font-size: 1.1rem;">
-            Free, open-source tool to find errors in credit reports and generate dispute letters
+            Free for personal and nonprofit use. Commercial use requires a paid license.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -27,7 +27,7 @@ def render_about_website():
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Rules", "24+", help="Automated checks for credit report errors")
     col2.metric("States", "50", help="State-specific statute of limitations data")
-    col3.metric("Price", "Free", help="100% free and open source")
+    col3.metric("Price", "Free", help="Free for personal and nonprofit use; paid license required for commercial use")
     col4.metric("Privacy", "100%", help="All data stays on your computer")
 
     st.markdown("---")

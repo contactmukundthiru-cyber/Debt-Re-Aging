@@ -1,16 +1,7 @@
-import { CreditFields, RuleFlag, RiskProfile } from './rules';
+import { CreditFields, RuleFlag, RiskProfile, AnalysisRecord } from './types';
 
 const STORAGE_KEY = 'credit_analyzer_history';
 const MAX_HISTORY = 20;
-
-export interface AnalysisRecord {
-  id: string;
-  timestamp: number;
-  fileName?: string;
-  fields: CreditFields;
-  flags: RuleFlag[];
-  riskProfile: RiskProfile;
-}
 
 /**
  * Save an analysis to localStorage
@@ -19,7 +10,8 @@ export function saveAnalysis(
   fields: CreditFields,
   flags: RuleFlag[],
   riskProfile: RiskProfile,
-  fileName?: string
+  fileName?: string,
+  tags?: string[]
 ): string {
   const history = getHistory();
 
@@ -30,6 +22,7 @@ export function saveAnalysis(
     fields,
     flags,
     riskProfile,
+    tags,
   };
 
   // Add to beginning of history

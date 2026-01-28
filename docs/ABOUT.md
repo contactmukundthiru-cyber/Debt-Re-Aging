@@ -94,4 +94,4 @@ If you use this tool in your work, please cite it appropriately. See the CITATIO
 
 ## License
 
-This project is released under the MIT License. See LICENSE file for details.
+This project is released under **AXIOM Non-Commercial License v1.0**. See `LICENSE` for details.

@@ -1,0 +1,40 @@
+{
+  "name": "Sample Case 8: Medical Debt Violation (CA)",
+  "description": "Medical collection appearing in California without required financial assistance screening and below $500 threshold reporting policies.",
+  "raw_text": "MEDICAL COLLECTIONS\n\nFurnisher: WESTERN HEALTH COLLECT\nOriginal Creditor: ST JOSEPH HOSPITAL\nAccount Type: Medical\nStatus: Active Collection\n\nBalance: $342\nOriginal Amount: $342\nDate of Service: 01/10/2024\nDate Opened: 03/15/2025\nState: CA\n\nRemarks: UNPAID MEDICAL DEBT",
+  "fields": {
+    "original_creditor": {
+      "value": "ST JOSEPH HOSPITAL",
+      "confidence": "High"
+    },
+    "furnisher_or_collector": {
+      "value": "WESTERN HEALTH COLLECT",
+      "confidence": "High"
+    },
+    "account_type": {
+      "value": "medical",
+      "confidence": "High"
+    },
+    "current_balance": {
+      "value": "342",
+      "confidence": "High"
+    },
+    "date_of_service": {
+      "value": "2024-01-10",
+      "confidence": "High"
+    },
+    "date_opened": {
+      "value": "2025-03-15",
+      "confidence": "High"
+    },
+    "state_code": {
+      "value": "CA",
+      "confidence": "High"
+    }
+  },
+  "expected_flags": [
+    "H3",
+    "MD1"
+  ],
+  "notes": "Triggers H3 because the balance is under $500. Triggers MD1 because California requires financial assistance screening before reporting medical debt to collections."
+}

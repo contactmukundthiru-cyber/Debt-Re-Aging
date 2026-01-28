@@ -220,7 +220,8 @@ class BatchProcessor:
             Path to the batch ZIP file
         """
         if output_dir is None:
-            output_dir = Path(__file__).parent.parent / 'output'
+            repo_root = Path(__file__).resolve().parents[2]
+            output_dir = repo_root / 'output'
 
         batch_dir = Path(output_dir) / batch_result.batch_id
         batch_dir.mkdir(parents=True, exist_ok=True)

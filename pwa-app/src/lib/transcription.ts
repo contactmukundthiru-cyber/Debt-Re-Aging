@@ -23,6 +23,20 @@ export interface CallLog {
     violationFlags: string[];
 }
 
+interface ISpeechRecognitionEvent extends Event {
+    results: SpeechRecognitionResultList;
+    resultIndex: number;
+}
+
+interface ISpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    onresult: (event: ISpeechRecognitionEvent) => void;
+    start: () => void;
+    stop: () => void;
+}
+
 /**
  * Capture real-time speech and convert to segments
  * (Wrapper for Web Speech API)
@@ -34,12 +48,12 @@ export async function startLiveTranscription(onUpdate: (segment: TranscriptionSe
         throw new Error('Speech Recognition not supported in this browser');
     }
 
-    const recognition = new SpeechRecognition();
+    const recognition: ISpeechRecognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: ISpeechRecognitionEvent) => {
         const result = event.results[event.results.length - 1];
         if (result.isFinal) {
             onUpdate({

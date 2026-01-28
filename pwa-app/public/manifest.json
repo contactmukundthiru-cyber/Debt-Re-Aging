@@ -3,7 +3,7 @@
   "short_name": "CreditAnalyzer",
   "description": "Enterprise-grade tool for detecting illegal debt re-aging and FCRA/FDCPA violations. Used by legal aid organizations and consumer advocacy groups nationwide. 100% local processing - no data transmission.",
   "start_url": "./",
-  "id": "credit-report-analyzer-v4",
+  "id": "credit-report-analyzer-v5",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#111111",
@@ -11,7 +11,12 @@
   "scope": "./",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["finance", "utilities", "productivity", "business"],
+  "categories": [
+    "finance",
+    "utilities",
+    "productivity",
+    "business"
+  ],
   "iarc_rating_id": "",
   "screenshots": [],
   "icons": [
@@ -34,21 +39,39 @@
       "short_name": "Analyze",
       "description": "Upload and analyze a credit report",
       "url": "./?action=analyze",
-      "icons": [{ "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "./icons/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     },
     {
       "name": "Generate Dispute",
       "short_name": "Dispute",
       "description": "Generate dispute letters and evidence packages",
       "url": "./?action=dispute",
-      "icons": [{ "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "./icons/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     },
     {
       "name": "Track Disputes",
       "short_name": "Track",
       "description": "Monitor dispute status and deadlines",
       "url": "./?action=track",
-      "icons": [{ "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [
+        {
+          "src": "./icons/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
     }
   ],
   "related_applications": [],
@@ -61,4 +84,3 @@
     "preferred_width": 400
   }
 }
-

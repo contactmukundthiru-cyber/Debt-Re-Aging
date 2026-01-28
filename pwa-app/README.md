@@ -1,4 +1,4 @@
-# Credit Report Analyzer - Forensic PWA
+# Credit Report Analyzer - Forensic PWA ![Version 5.0.0](https://img.shields.io/badge/version-5.0.0-emerald)
 
 A professional-grade Progressive Web App (PWA) designed for deep forensic analysis of credit reports. It detects sophisticated FCRA/FDCPA violations, illegal debt re-aging, and Metro 2® formatting errors that standard credit repair tools miss.
 
@@ -68,4 +68,4 @@ This tool is architecture-ready for adoption by law firms and credit repair orga
 
 ## License
 
-MIT License - Free for personal and institutional use.
+AXIOM Non-Commercial License v1.0. See the repository `LICENSE`.

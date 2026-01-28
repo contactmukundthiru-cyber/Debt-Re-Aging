@@ -1,0 +1,45 @@
+{
+  "name": "Sample Case 9: Zombie Debt Resuscitation (NY)",
+  "description": "Debt that is past the New York 3-year Statute of Limitations suddenly appearing as a new collection account.",
+  "raw_text": "COLLECTIONS\n\nFurnisher: ZOMBIE RECOVERY LLC\nOriginal Creditor: OLD RETAIL BANK\nAccount Type: Collection\nBalance: $1,250\nOriginal Amount: $1,000\n\nDOFD: 05/15/2018\nDate Opened: 08/20/2025\nState: NY\n\nEstimated Date of Removal: 05/2025\n\nRemarks: RE-ASSIGNED DEBT; ACCOUNT PURCHASED FROM PREVIOUS COLLECTOR",
+  "fields": {
+    "furnisher_or_collector": {
+      "value": "ZOMBIE RECOVERY LLC",
+      "confidence": "High"
+    },
+    "original_creditor": {
+      "value": "OLD RETAIL BANK",
+      "confidence": "High"
+    },
+    "account_type": {
+      "value": "collection",
+      "confidence": "High"
+    },
+    "current_balance": {
+      "value": "1250",
+      "confidence": "High"
+    },
+    "original_balance": {
+      "value": "1000",
+      "confidence": "High"
+    },
+    "dofd": {
+      "value": "2018-05-15",
+      "confidence": "High"
+    },
+    "date_opened": {
+      "value": "2025-08-20",
+      "confidence": "High"
+    },
+    "state_code": {
+      "value": "NY",
+      "confidence": "High"
+    }
+  },
+  "expected_flags": [
+    "S1",
+    "ZR1",
+    "J1"
+  ],
+  "notes": "Triggers S1 because New York SOL for consumer debt is 3 years. Triggers ZR1 because the account was opened in 2025, long after the 2018 debt's SOL expired. Triggers J1 due to the dormant account being revived."
+}

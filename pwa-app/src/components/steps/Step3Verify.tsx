@@ -1,18 +1,21 @@
-'use strict';
+'use client';
 
 import React from 'react';
 import { FIELD_CONFIG, ACCOUNT_TYPES, STATUSES, STATES, Step } from '../../lib/constants';
+import { ConsumerInfo } from '../../lib/types';
 import { getDateValidation, getCurrencyValidation, getDateOrderIssues } from '../../lib/validation';
-import { CreditFields } from '../../lib/rules';
+import { CreditFields } from '../../lib/types';
 import { ParsedFields, getExtractionQuality } from '../../lib/parser';
+
+import { getSmartRecommendations, SmartRecommendation } from '../../lib/intelligence';
 
 interface Step3VerifyProps {
   editableFields: Partial<CreditFields>;
   setEditableFields: React.Dispatch<React.SetStateAction<Partial<CreditFields>>>;
   activeParsedFields: ParsedFields | null;
   rawText: string;
-  consumer: { name?: string; address?: string; state?: string };
-  setConsumer: React.Dispatch<React.SetStateAction<{ name?: string; address?: string; state?: string }>>;
+  consumer: ConsumerInfo;
+  setConsumer: React.Dispatch<React.SetStateAction<ConsumerInfo>>;
   runAnalysis: () => void;
   isAnalyzing: boolean;
   setStep: (step: Step) => void;
@@ -34,6 +37,10 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
   setShowHelp,
 }) => {
   const [showWorkbench, setShowWorkbench] = React.useState(false);
+  const [showSmartFixes, setShowSmartFixes] = React.useState(true);
+
+  const recommendations = React.useMemo(() => getSmartRecommendations(editableFields), [editableFields]);
+
   const dateFields = FIELD_CONFIG.filter(f => f.section === 'dates');
   const amountFields = FIELD_CONFIG.filter(f => f.section === 'amounts');
 
@@ -132,6 +139,54 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
                   </span>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Smart Recommendations Panel */}
+      {recommendations.length > 0 && showSmartFixes && (
+        <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="premium-card p-6 bg-emerald-500/5 border-emerald-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-16 -mt-16" />
+            <div className="flex items-center justify-between mb-6 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest dark:text-emerald-400">Smart Forensic Corrections</p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest">AI-detected inconsistencies ({recommendations.length})</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSmartFixes(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+              {recommendations.map((rec) => (
+                <div key={rec.id} className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-emerald-500/10 shadow-sm flex flex-col justify-between group hover:border-emerald-500/30 transition-all">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${rec.type === 'error' ? 'bg-rose-500' : rec.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                      <h4 className="text-xs font-bold dark:text-white uppercase tracking-tight">{rec.title}</h4>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mb-4">{rec.description}</p>
+                  </div>
+                  {rec.suggestedValue && (
+                    <button
+                      onClick={() => setEditableFields(prev => ({ ...prev, [rec.field]: rec.suggestedValue }))}
+                      className="w-full py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/20"
+                    >
+                      {rec.actionLabel}: {rec.suggestedValue}
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

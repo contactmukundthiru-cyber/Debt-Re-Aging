@@ -6,14 +6,14 @@
 
 ## Executive Summary
 
-The **Credit Report Analyzer** is a free, open-source tool designed to help organizations identify illegal manipulation of dates on consumer credit reports. This guide provides everything you need to evaluate, pilot, deploy, and scale the tool within your organization.
+The **Credit Report Analyzer** is free for personal and nonprofit use (commercial use requires a paid license). It is designed to help organizations identify illegal manipulation of dates on consumer credit reports. This guide provides everything you need to evaluate, pilot, deploy, and scale the tool within your organization.
 
 **Key Benefits:**
 - **Privacy-First**: 100% local processing, no data leaves your systems
 - **Time Savings**: Reduce analysis time from hours to minutes
 - **Consistency**: Standardized rule-based detection across all cases
 - **Documentation**: Professional dispute packets generated automatically
-- **Cost**: Completely free and open-source
+- **Cost**: Free for personal and nonprofit use (commercial use requires a paid license)
 
 ---
 

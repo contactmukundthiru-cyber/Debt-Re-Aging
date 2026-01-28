@@ -1,9 +1,14 @@
 'use client';
 
+import { useApp } from '../context/AppContext';
+
+
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { parseCreditReport, fieldsToSimple, parseMultipleAccounts, ParsedFields } from '../lib/parser';
-import { runRules, calculateRiskProfile, CreditFields, RuleFlag, RiskProfile } from '../lib/rules';
-import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, ConsumerInfo, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
+import { runRules, calculateRiskProfile, parseDate } from '../lib/rules';
+import { runComprehensiveAnalysis } from '../lib/forensic-engine';
+import { CreditFields, RuleFlag, RiskProfile, ConsumerInfo, AnalysisRecord } from '../lib/types';
+import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
 import { isPDF, extractPDFText, extractPDFTextViaOCR } from '../lib/pdf';
 import { compareReports, DeltaResult } from '../lib/delta';
@@ -30,7 +35,6 @@ import {
   importHistory,
   clearHistory,
   formatTimestamp,
-  AnalysisRecord
 } from '../lib/storage';
 
 // Revolutionary feature imports
@@ -59,12 +63,14 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import {
   estimateScoreImpact,
+  estimateBaseScore,
   getScoreCategory,
   calculateCategoryJump,
   estimateFinancialImpact,
   simulateActions,
   ScoreImpactEstimate
 } from '../lib/score-impact';
+
 import {
   BureauReport,
   compareAccounts,
@@ -145,15 +151,9 @@ import {
 
 // Types imported from constants: Step, LetterType, TabId
 
-// Multi-account analysis interface
-interface AnalyzedAccount {
-  id: string;
-  rawText: string;
-  fields: CreditFields;
-  parsedFields?: ParsedFields;
-  flags: RuleFlag[];
-  risk: RiskProfile;
-}
+import { ConsumerInfo as AppConsumerInfo, AnalyzedAccount } from '../lib/types';
+
+// Multi-account analysis interface moved to lib/types
 
 
 const SAMPLE_TEXT = `[CASE_FILE_0892] - FORENSIC AUDIT SAMPLE
@@ -189,14 +189,9 @@ Note: Data matches Account 1 exactly, indicating potential double-reporting viol
 
 export default function CreditReportAnalyzer() {
   const maxUploadSizeMB = 20;
-  const [step, setStep] = useState<Step>(1);
-  const [rawText, setRawText] = useState('');
-  const [editableFields, setEditableFields] = useState<CreditFields>({});
-  const [flags, setFlags] = useState<RuleFlag[]>([]);
-  const [riskProfile, setRiskProfile] = useState<RiskProfile | null>(null);
-  const [consumer, setConsumer] = useState<ConsumerInfo>({});
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const { state, setDarkMode, setStep, setRawText, setEditableFields, setConsumer, setFlags, setRiskProfile, setProcessing, setAnalyzing, reset: resetApp } = useApp();
+  const { darkMode, step, rawText, editableFields, consumer, flags, riskProfile, isProcessing, progress, isAnalyzing } = state;
+
   const [progressText, setProgressText] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
   const [analyzedAccounts, setAnalyzedAccounts] = useState<AnalyzedAccount[]>([]);
@@ -228,7 +223,6 @@ export default function CreditReportAnalyzer() {
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [selectedLetterType, setSelectedLetterType] = useState<LetterType>('bureau');
   const [exportTab, setExportTab] = useState<'letters' | 'cfpb' | 'evidence' | 'attorney'>('letters');
-  const [darkMode, setDarkMode] = useState(false);
   const [editableLetter, setEditableLetter] = useState<string>('');
   const [isBundling, setIsBundling] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
@@ -241,9 +235,6 @@ export default function CreditReportAnalyzer() {
 
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
-
-  // Loading state for analysis
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Show toast helper
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -260,14 +251,6 @@ export default function CreditReportAnalyzer() {
     const storedGuide = typeof window !== 'undefined' ? localStorage.getItem('cra_show_guide') : null;
     if (storedGuide !== null) {
       setShowGuide(storedGuide === 'true');
-    }
-
-    // Check system preference and saved preference
-    const savedDarkMode = typeof window !== 'undefined' ? localStorage.getItem('cra_dark_mode') : null;
-    if (savedDarkMode !== null) {
-      setDarkMode(savedDarkMode === 'true');
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
     }
 
     // Try to recover session
@@ -304,17 +287,6 @@ export default function CreditReportAnalyzer() {
     return () => saver.stop();
   }, [step, rawText, editableFields, consumer, discoveryAnswers]);
 
-
-  // Apply dark mode to document and persist to localStorage
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('cra_dark_mode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('cra_dark_mode', 'false');
-    }
-  }, [darkMode]);
 
   // Handle language change
   const handleLanguageChange = useCallback((newLang: Language) => {
@@ -416,8 +388,7 @@ export default function CreditReportAnalyzer() {
   }, [step, rawText, analyzeText]);
 
   const handleFileUpload = useCallback(async (file: File) => {
-    setIsProcessing(true);
-    setProgress(0);
+    setProcessing(true, 0, 'Opening forensic scanner...');
     setFileName(file.name);
 
     try {
@@ -428,25 +399,23 @@ export default function CreditReportAnalyzer() {
       let text = '';
 
       if (isPDF(file)) {
-        setProgressText('Extracting PDF text...');
+        setProcessing(true, undefined, 'Extracting PDF text...');
         try {
-          text = await extractPDFText(file, (p) => setProgress(Math.round(p * 100)));
+          text = await extractPDFText(file, (p) => setProcessing(true, Math.round(p * 100)));
         } catch (error) {
           const message = error instanceof Error ? error.message : '';
           if (message.toLowerCase().includes('no selectable text')) {
-            setProgressText('Running OCR on scanned PDF...');
-            text = await extractPDFTextViaOCR(file, (p) => setProgress(Math.round(p * 100)));
+            setProcessing(true, undefined, 'Running OCR on scanned PDF...');
+            text = await extractPDFTextViaOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
           } else {
             throw error;
           }
         }
       } else if (isImage(file)) {
-        setProgressText('Running OCR...');
-        text = await performOCR(file, (p) => setProgress(Math.round(p * 100)));
+        setProcessing(true, undefined, 'Running OCR...');
+        text = await performOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
       } else {
-        setProgressText('Reading file...');
-        text = await file.text();
-        setProgress(100);
+        setProcessing(true, 100, 'Reading file...');
       }
 
       // Ensure scanner animation plays for at least 1.5s for that "sophisticated" feel
@@ -456,12 +425,7 @@ export default function CreditReportAnalyzer() {
     } catch (error) {
       console.error('Processing error:', error);
       const message = error instanceof Error ? error.message : 'Unable to process the file.';
-      setProgressText(message);
-      showToast(message, 'error');
-    } finally {
-      setIsProcessing(false);
-      setProgress(0);
-      setProgressText('');
+      setProcessing(false, 0, '');
     }
   }, [analyzeText, showToast, maxUploadSizeMB]);
 
@@ -491,7 +455,7 @@ export default function CreditReportAnalyzer() {
   }, [analyzeText]);
 
   const runAnalysis = useCallback(async () => {
-    setIsAnalyzing(true);
+    setAnalyzing(true);
 
     // Small delay to show loading state for UX
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -511,14 +475,16 @@ export default function CreditReportAnalyzer() {
 
       if (requiredIssues.length > 0 || orderIssues.length > 0) {
         showToast('Fix required date fields before analysis.', 'error');
-        setIsAnalyzing(false);
+        setAnalyzing(false);
         return;
       }
 
-      // Core analysis
-      const detectedFlags = runRules(editableFields);
+      // Core analysis - Zenith V5 Forensic Engine
+      const { flags: detectedFlags, riskProfile: profile } = runComprehensiveAnalysis(editableFields, {
+        stateCode: editableFields.stateCode
+      });
+
       setFlags(detectedFlags);
-      const profile = calculateRiskProfile(detectedFlags, editableFields);
       setRiskProfile(profile);
 
       // Fetch relevant case law
@@ -528,8 +494,8 @@ export default function CreditReportAnalyzer() {
       // Revolutionary features computation with individual error handling
       // 1. Score Impact Estimation
       try {
-        const currentScore = 620; // Default estimate
-        const impact = estimateScoreImpact(editableFields, detectedFlags, currentScore);
+        const baseScore = estimateBaseScore(editableFields, detectedFlags);
+        const impact = estimateScoreImpact(editableFields, detectedFlags, baseScore);
         setScoreImpact(impact);
       } catch (e) {
         console.warn('Score impact estimation failed:', e);
@@ -587,7 +553,7 @@ export default function CreditReportAnalyzer() {
       console.error('Analysis failed:', error);
       showToast('Analysis failed. Please check your input data.', 'error');
     } finally {
-      setIsAnalyzing(false);
+      setAnalyzing(false);
     }
   }, [editableFields, fileName, showToast]);
 
@@ -813,19 +779,13 @@ export default function CreditReportAnalyzer() {
     }
   }, [buildCaseBundleSections, consumer, discoveryAnswers, editableFields, fileName, flags, isBundling, relevantCaseLaw, riskProfile, showToast]);
 
-  const reset = useCallback(() => {
-    setStep(1);
-    setRawText('');
-    setEditableFields({});
-    setFlags([]);
-    setRiskProfile(null);
-    setConsumer({});
+  const handleReset = useCallback(() => {
+    resetApp();
     setFileName(null);
     setAnalyzedAccounts([]);
     setSelectedAccountId(null);
-    setActiveTab('violations');
     setExpandedCard(null);
-  }, []);
+  }, [resetApp]);
 
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -844,7 +804,7 @@ export default function CreditReportAnalyzer() {
   }, [step]);
 
   return (
-    <div className={`min-h-screen flex flex-col transition-colors duration-300 bg-white dark:bg-gray-950 ${darkMode ? 'dark' : ''}`}>
+    <div className="min-h-screen flex flex-col transition-colors duration-300">
       {/* Skip to main content link for accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -902,7 +862,7 @@ export default function CreditReportAnalyzer() {
         language={language}
         handleLanguageChange={handleLanguageChange}
         step={step}
-        reset={reset}
+        reset={handleReset}
         translate={translate}
       />
 
@@ -1112,7 +1072,7 @@ export default function CreditReportAnalyzer() {
               getDisputeStats={getDisputeStats}
               updateDisputeStatus={updateDisputeStatus}
               setStep={setStep}
-              reset={reset}
+              reset={handleReset}
             />
           )}
         </div>

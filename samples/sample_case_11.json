@@ -1,0 +1,35 @@
+{
+  "name": "Sample Case 11: Military SCRA Interest Violation",
+  "description": "Debt incurred before service that is charging more than 6% interest during active duty military service.",
+  "raw_text": "INSTALLMENT LOAN\n\nCreditor: QUICK AUTO LOANS\nAccount Type: Installment\nStatus: Active\n\nOriginal Amount: $15,000\nBalance: $18,450\nDate Opened: 05/10/2021\nDOFD: 06/15/2024\n\nRemarks: ACTIVE DUTY SERVICEMEMBER; PROTECTION APPLIED",
+  "fields": {
+    "furnisher_or_collector": {
+      "value": "QUICK AUTO LOANS",
+      "confidence": "High"
+    },
+    "original_amount": {
+      "value": "15000",
+      "confidence": "High"
+    },
+    "current_balance": {
+      "value": "18450",
+      "confidence": "High"
+    },
+    "dofd": {
+      "value": "2024-06-15",
+      "confidence": "High"
+    },
+    "remarks": {
+      "value": "Active Duty Servicemember; Protection Applied",
+      "confidence": "High"
+    },
+    "is_military": {
+      "value": true,
+      "confidence": "High"
+    }
+  },
+  "expected_flags": [
+    "MIL1"
+  ],
+  "notes": "Triggers MIL1 because the balance grew from $15k to $18.4k in roughly 1.5 years from DOFD (or ~4 years total), but the implied rate exceeds the 6% SCRA cap for a servicemember on active duty."
+}

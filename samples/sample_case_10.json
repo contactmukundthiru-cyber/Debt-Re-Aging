@@ -1,0 +1,32 @@
+{
+  "name": "Sample Case 10: Post-Bankruptcy Reporting Violation",
+  "description": "A debt discharged in bankruptcy that is still being reported with an active balance.",
+  "raw_text": "CREDIT CARDS\n\nCreditor: BIG BOX FINANCE\nAccount Type: Revolving\nStatus: Discharged in Bankruptcy\n\nBalance: $4,821\nCredit Limit: $5,000\nDate Closed: 11/10/2023\n\nRemarks: CHAPTER 7 DISCHARGE; INCLUDED IN BANKRUPTCY",
+  "fields": {
+    "furnisher_or_collector": {
+      "value": "BIG BOX FINANCE",
+      "confidence": "High"
+    },
+    "account_type": {
+      "value": "revolving",
+      "confidence": "High"
+    },
+    "account_status": {
+      "value": "discharged in bankruptcy",
+      "confidence": "High"
+    },
+    "current_balance": {
+      "value": "4821",
+      "confidence": "High"
+    },
+    "remarks": {
+      "value": "Chapter 7 Discharge; Included in Bankruptcy",
+      "confidence": "High"
+    }
+  },
+  "expected_flags": [
+    "BK1",
+    "D1"
+  ],
+  "notes": "Triggers BK1 because a discharged debt must report a $0 balance. Triggers D1 because 'Discharged' status is inconsistent with a $4,821 balance."
+}

@@ -215,8 +215,18 @@
       "Any debt sale notices received"
     ],
     "legal_citations": ["FCRA_605_a", "FDCPA_807_8"]
-  },
-  "J2": {
+  },  "BK1": {
+    "name": "Post-Bankruptcy Balance Reporting",
+    "severity": "high",
+    "description": "Account shows a balance or delinquent status after a bankruptcy discharge.",
+    "why_it_matters": "Once a debt is discharged in bankruptcy, the furnisher MUST report a $0 balance and cannot report it as 'delinquent' or 'charged off'. They should report 'Discharged in Bankruptcy'. Continuing to report a balance is a violation of the bankruptcy discharge injunction and the FCRA.",
+    "suggested_evidence": [
+      "Bankruptcy discharge papers",
+      "Schedule F showing the debt was included",
+      "Account statements showing balance post-discharge"
+    ],
+    "legal_citations": ["FCRA_623_a1", "11_USC_524"]
+  },  "J2": {
     "name": "Multiple Collector Waterfall",
     "severity": "high",
     "description": "Same debt appears to have been reported by 3+ different collectors.",
@@ -382,5 +392,121 @@
     "why_it_matters": "A credit report must be internally consistent. If an account is reported as 'Current' while showing lates in the history, it proves the furnisher is reporting inaccurate data, which is a violation of the FCRA.",
     "suggested_evidence": ["Account statements", "Payment history records"],
     "legal_citations": ["FCRA_623_a1"]
+  },
+  "BK1": {
+    "name": "Post-Bankruptcy Balance Reporting",
+    "severity": "critical",
+    "description": "Debt discharged in bankruptcy is reporting a balance greater than zero.",
+    "why_it_matters": "A bankruptcy discharge order legally prohibits creditors from attempting to collect the debt. Reporting a balance on a discharged debt is a violation of the bankruptcy injunction and the FCRA's accuracy requirements.",
+    "suggested_evidence": [
+      "Bankruptcy Discharge Order",
+      "Bankruptcy Schedule listing the account",
+      "Evidence of notice of discharge provided to creditor"
+    ],
+    "legal_citations": ["11 USC 524", "FCRA_623_a1"]
+  },
+  "J1": {
+    "name": "Judgment Statute of Limitations Expired",
+    "severity": "high",
+    "description": "A judgment is being reported beyond the legal reporting limit.",
+    "why_it_matters": "Judgments can generally only be reported for 7 years from the date of entry. Reporting a judgment beyond this period is a violation of the FCRA.",
+    "suggested_evidence": [
+      "Court record showing judgment entry date",
+      "Evidence of judgment satisfaction or vacation"
+    ],
+    "legal_citations": ["FCRA_605_a3"]
+  },
+  "SL1": {
+    "name": "Student Loan Rehabilitation Inaccuracy",
+    "severity": "high",
+    "description": "Student loan marked as 'rehabilitated' still shows delinquency or collection status.",
+    "why_it_matters": "Under the Higher Education Act, once a student loan is successfully rehabilitated, the default marker MUST be removed from your credit history. Failing to do so prevents you from accessing new federal aid and harms your credit score illegally.",
+    "suggested_evidence": [
+      "Rehabilitation completion letter",
+      "Payment history showing on-time rehabilitation payments"
+    ],
+    "legal_citations": ["34 CFR 682.405", "HEA_428F"]
+  },
+  "UC1": {
+    "name": "Usury Clock Drift Audit",
+    "severity": "high",
+    "description": "Balance growth indicates an interest rate exceeding state usury caps.",
+    "why_it_matters": "When collectors add interest to a debt, they must adhere to state usury laws. If the balance grows faster than the legal annual limit, they are overcharging you, which is a violation of the FDCPA and state law.",
+    "suggested_evidence": [
+      "Original debt amount documentation",
+      "Itemized list of interest charges",
+      "State-specific interest rate statutes"
+    ],
+    "legal_citations": ["FDCPA_807_2A", "FDCPA_808_1"]
+  },
+  "ZR1": {
+    "name": "Zombie Debt Resuscitation",
+    "severity": "critical",
+    "description": "Debt appearing for the first time after the statute of limitations has expired.",
+    "why_it_matters": "Collectors often purchase 'debt portfolios' and report them as new accounts to trick consumers into paying. If the debt first appears on your credit report AFTER the legal time to sue has passed, it is often a sign of illegal resuscitation or re-aging.",
+    "suggested_evidence": [
+      "Proof of true DOFD from original creditor",
+      "Evidence that the debt was first reported after SOL expiry"
+    ],
+    "legal_citations": ["FCRA_605_c", "FDCPA_807_8"]
+  },
+  "MD1": {
+    "name": "Medical Financial Assistance Screening Missing",
+    "severity": "high",
+    "description": "Medical debt reported without required state-level financial assistance (Charity Care) screening.",
+    "why_it_matters": "Several states (e.g., CA, WA, NY) require hospitals and providers to screen patients for financial assistance eligibility BEFORE referring the debt to collections. Failing to do so makes the collection action premature and potentially illegal under state consumer protection acts.",
+    "suggested_evidence": [
+      "Hospital billing history",
+      "Evidence of income eligibility for charity care",
+      "State-specific medical billing notices"
+    ],
+    "legal_citations": ["WA_70.170.060", "CA_HSC_127400", "NY_PHL_2807-k"]
+  },
+  "MIL1": {
+    "name": "SCRA Interest Rate Violation",
+    "severity": "critical",
+    "description": "Interest rate on debt exceeds 6% during a period of active military service.",
+    "why_it_matters": "The Servicemembers Civil Relief Act (SCRA) mandates that interest on any debt incurred before active duty must be capped at 6% during the period of military service. Exceeding this is a federal violation and can lead to significant statutory damages.",
+    "suggested_evidence": [
+      "Military service records (DD214 or active duty orders)",
+      "Account statements showing interest rates",
+      "Notice sent to creditor regarding military status"
+    ],
+    "legal_citations": ["SCRA_50_USC_3937"]
+  },
+  "COT1": {
+    "name": "Systematic Re-assignment Pattern",
+    "severity": "high",
+    "description": "The debt has been sold or transferred multiple times in a short period ('hot potato' debt).",
+    "why_it_matters": "Frequent transfers of debt often lead to data corruption, lost chain of title, and inaccurate balance reporting. This is a common tactic used to mask the original DOFD and restart the collection clock illegally.",
+    "suggested_evidence": [
+      "Chain of title documentation",
+      "Prior credit reports showing different owners",
+      "Validation letters from each alleged owner"
+    ],
+    "legal_citations": ["FDCPA_809_b", "FCRA_623_a1"]
+  },
+  "ST1": {
+    "name": "Stale Status Update Anomaly",
+    "severity": "medium",
+    "description": "Account is closed but receives frequent status updates or date refreshments.",
+    "why_it_matters": "Once an account is closed and charged off, the 'Date Reported' should not be refreshed unless there is a material change. Frequent 'soft refreshes' on stale debt is a tactic used to keep the debt appearing 'new' to credit scoring algorithms.",
+    "suggested_evidence": [
+      "Prior credit reports showing older reported dates",
+      "Account closing documentation"
+    ],
+    "legal_citations": ["FCRA_605_a", "FDCPA_807_8"]
+  },
+  "TB1": {
+    "name": "Treble Damage Risk Indicator",
+    "severity": "critical",
+    "description": "The combination of violations indicates a high potential for statutory treble damages under state law.",
+    "why_it_matters": "Certain states (like Massachusetts under 93A) allow for triple (treble) damages if a business practice is found to be willfully deceptive or unfair. Combining interest violations with re-aging tactics often meets this threshold.",
+    "suggested_evidence": [
+      "Evidence of prior disputes ignored",
+      "Multiple concurrent violations on a single tradeline",
+      "Itemized interest statements"
+    ],
+    "legal_citations": ["MA_GL_93A", "NY_GBL_349"]
   }
 }

@@ -98,6 +98,20 @@ coverage.xml
 # pytest
 .pytest_cache/
 
+# Docker (Private deployment)
+docker/
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docker (Private deployment only - contact maintainer for Vercel deployment)
+docker-compose.yml
+docker/
+Dockerfile
+**/Dockerfile
+docker-compose.override.yml
+.dockerignore
+
 # Streamlit
 .streamlit/secrets.toml
 

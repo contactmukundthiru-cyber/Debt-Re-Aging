@@ -86,12 +86,13 @@ export function createClient(name: string, caseNumber: string): ClientProfile {
 /**
  * Audit Log Generation (Institutional Compliance)
  */
-export function generateAuditLog(clientId: string, action: string, results: any) {
+export function generateAuditLog(clientId: string, action: string, results: unknown) {
     const log = {
         timestamp: new Date().toISOString(),
         actor: 'Forensic System',
         clientId,
         action,
+        results,
         hash: btoa(Math.random().toString()), // Mock signature for local integrity
         integrityVerified: true
     };

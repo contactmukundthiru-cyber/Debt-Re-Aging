@@ -75,7 +75,7 @@ Based on pilot implementations:
 
 ### Cost
 
-**Free and open-source.** No licensing fees, no per-case charges, no subscriptions.
+**Free for personal and nonprofit use. Commercial use requires a paid license.**
 
 Optional support and customization available through partnership arrangements.
 

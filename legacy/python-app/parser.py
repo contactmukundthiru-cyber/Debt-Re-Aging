@@ -13,6 +13,40 @@ from app.utils import normalize_date, validate_iso_date
 # Configure logging
 logger = logging.getLogger(__name__)
 
+# Metro2 Status Code Decoder
+# Source: Metro2 Industry Standards for Credit Reporting
+METRO2_STATUS_MAP = {
+    '11': 'Current',
+    '13': 'Paid',
+    '62': 'Charge-off',
+    '64': 'Collection',
+    '71': 'Account Involved in Bankruptcy Chapter 7',
+    '78': 'Account Involved in Bankruptcy Chapter 11',
+    '80': 'Account Involved in Bankruptcy Chapter 13',
+    '82': 'Account Involved in Bankruptcy Chapter 12',
+    '83': 'Account Involved in Bankruptcy Chapter 13',
+    '84': 'Account Involved in Bankruptcy Chapter 13',
+    '93': 'Account involved in litigation',
+    '97': 'Unpaid collection',
+    'DA': 'Delete account (Metro2 error code)',
+    'DF': 'Deceased',
+}
+
+# Creditor Alias Map for Entity Resolution
+# Helps identify if multiple names belong to the same parent entity
+CREDITOR_ALIAS_MAP = {
+    'MIDLAND FUNDING': 'MIDLAND CREDIT MANAGEMENT',
+    'MCM': 'MIDLAND CREDIT MANAGEMENT',
+    'MIDLAND CREDIT': 'MIDLAND CREDIT MANAGEMENT',
+    'LVNV': 'LVNV FUNDING',
+    'RESURGENT': 'RESURGENT CAPITAL SERVICES',
+    'PRA': 'PORTFOLIO RECOVERY ASSOCIATES',
+    'PORTFOLIO RECOVERY': 'PORTFOLIO RECOVERY ASSOCIATES',
+    'ASSET ACCEPTANCE': 'ENCORE CAPITAL GROUP',
+    'CAVALRY': 'CAVALRY SPV',
+    'JEFFERSON CAPITAL': 'JEFFERSON CAPITAL SYSTEMS',
+}
+
 @dataclass
 class ExtractedField:
     """Represents an extracted field with metadata."""
@@ -40,6 +74,7 @@ class ParsedFields:
     date_last_activity: ExtractedField = None
     estimated_removal_date: ExtractedField = None
     payment_history: ExtractedField = None
+    remarks: ExtractedField = None  # New: Remarks/Comments section
     bureau: ExtractedField = None
     raw_text: str = ""
 
@@ -51,7 +86,7 @@ class ParsedFields:
             'account_status', 'current_balance', 'original_amount',
             'date_opened', 'date_reported_or_updated', 'dofd',
             'charge_off_date', 'date_last_payment', 'date_last_activity',
-            'estimated_removal_date', 'payment_history', 'bureau'
+            'estimated_removal_date', 'payment_history', 'remarks', 'bureau'
         ]
         for key in all_fields:
             field_obj = getattr(self, key)
@@ -73,7 +108,7 @@ class ParsedFields:
             'account_status', 'current_balance', 'original_amount',
             'date_opened', 'date_reported_or_updated', 'dofd',
             'charge_off_date', 'date_last_payment', 'date_last_activity',
-            'estimated_removal_date', 'payment_history', 'bureau'
+            'estimated_removal_date', 'payment_history', 'remarks', 'bureau'
         ]
         for key in all_fields:
             field_obj = getattr(self, key)
@@ -224,7 +259,29 @@ class CreditReportParser:
         result.original_creditor = self._extract_creditor(text)
         result.furnisher_or_collector = self._extract_furnisher(text)
 
+        # Extract remarks
+        result.remarks = self._extract_remarks(text)
+
         return result
+
+    def _extract_remarks(self, text: str) -> ExtractedField:
+        """Extract remarks/comments section where bankruptcy markers often appear."""
+        remarks_patterns = [
+            re.compile(r'(?:remarks|comments|notes)[:\s]+([A-Za-z0-9\s\.,&\'\-\(\)\!/]+?)(?:\n|$)', re.IGNORECASE),
+            re.compile(r'consumer\s*statement[:\s]+([A-Za-z0-9\s\.,&\'\-\(\)\!/]+?)(?:\n|$)', re.IGNORECASE),
+        ]
+        
+        for pattern in remarks_patterns:
+            match = pattern.search(text)
+            if match:
+                return ExtractedField(
+                    value=match.group(1).strip(),
+                    confidence='High',
+                    source_text=match.group(),
+                    start_pos=match.start(),
+                    end_pos=match.end()
+                )
+        return ExtractedField(value=None, confidence='Low', source_text='', start_pos=0, end_pos=0)
 
     def _extract_bureau(self, text: str) -> ExtractedField:
         """Extract credit bureau name with fuzzy matching."""
@@ -292,6 +349,8 @@ class CreditReportParser:
             'delinquent': ['delinquent', 'past due', 'late', '30 days', '60 days', '90 days'],
             'collection': ['collection', 'placed for collection', 'transfer', 'sold'],
             'charge_off': ['charge-off', 'charged off', 'profit and loss'],
+            'bankruptcy': ['bankruptcy', 'discharged', 'ch7', 'ch13', 'chapter 7', 'chapter 13'],
+            'rehabilitated': ['rehabilitated', 'rehab', 'default cured'],
             'current': ['current', 'on time', 'active']
         }
         

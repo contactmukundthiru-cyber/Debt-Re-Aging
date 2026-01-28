@@ -28,8 +28,10 @@ class PacketGenerator:
             templates_dir: Path to templates directory. Defaults to ./templates
         """
         if templates_dir is None:
-            # Default to templates directory relative to project root
-            templates_dir = Path(__file__).parent.parent / 'templates'
+            # Default to templates directory relative to repository root
+            # legacy/python-app/<this file> -> repo root is 2 levels up
+            repo_root = Path(__file__).resolve().parents[2]
+            templates_dir = repo_root / 'templates'
 
         self.templates_dir = Path(templates_dir)
 
@@ -90,7 +92,8 @@ class PacketGenerator:
             Dictionary mapping file names to their full paths
         """
         if output_dir is None:
-            output_dir = Path(__file__).parent.parent / 'output' / case_id
+            repo_root = Path(__file__).resolve().parents[2]
+            output_dir = repo_root / 'output' / case_id
         else:
             output_dir = Path(output_dir) / case_id
 
@@ -226,7 +229,8 @@ class PacketGenerator:
             Path to the created ZIP file
         """
         if output_dir is None:
-            output_dir = Path(__file__).parent.parent / 'output'
+            repo_root = Path(__file__).resolve().parents[2]
+            output_dir = repo_root / 'output'
         else:
             output_dir = Path(output_dir)
 
@@ -280,7 +284,8 @@ def generate_dispute_packet(
     if output_dir:
         zip_output_dir = output_dir
     else:
-        zip_output_dir = Path(__file__).parent.parent / 'output'
+        repo_root = Path(__file__).resolve().parents[2]
+        zip_output_dir = repo_root / 'output'
 
     zip_path = generator.create_zip(
         case_id=case_id,

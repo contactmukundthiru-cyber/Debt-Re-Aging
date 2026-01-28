@@ -1,35 +1,112 @@
-MIT License
+AXIOM Non-Commercial License v1.0
 
-Copyright (c) 2024 Mukund Thiru
+Copyright (c) 2026 Mukund Thiru
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This license applies to the software and associated documentation files (the "Software").
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Free for personal and nonprofit use.
+Commercial use requires a paid license.
 
+## 1) Overview (Community + Commercial)
+The Software is offered under two possible license paths:
+
+- **Community License (Non-Commercial)** (default): free to use for personal and
+  nonprofit purposes, subject to the restrictions below.
+- **Commercial License**: required for any Commercial Use (defined below) and is
+  a paid license.
+
+If your use is not permitted under the Community License (Non-Commercial), you must obtain
+a Commercial License before using the Software.
+
+## 2) Community License Grant (Personal + Nonprofit Use)
+Subject to the terms below, you are granted a limited, non-exclusive,
+non-transferable, revocable license to:
+
+- use the Software for personal use; or for internal nonprofit purposes only;
+- copy the Software as reasonably necessary for permitted use; and
+- modify the Software for permitted use.
+
+### 2.1) Who Qualifies
+**Personal use** means use by an individual for their own personal, non-commercial purposes.
+
+**Nonprofit use** means use by an organization that is organized and operated on a
+not-for-profit basis under applicable law and that does not distribute profits to owners
+or shareholders, solely for internal nonprofit purposes.
+
+Individuals acting on behalf of a qualifying nonprofit (employees, volunteers,
+contractors) may use the Software solely for the benefit of that nonprofit.
+
+### 2.2) Restrictions (Community License)
+The following restrictions apply to the Community License (Non-Commercial):
+
+- Redistribution of the Software, in whole or in part, is prohibited.
+- No sublicensing.
+- Nonprofit use is permitted for internal purposes only.
+- No offering as a hosted service to third parties.
+
+For clarity, you may NOT redistribute, publish, sublicense, sell, rent, lease,
+lend, or otherwise provide the Software (original or modified) to any third
+party, except that you may share copies internally within the same legal
+entity for permitted nonprofit use.
+
+For clarity, you may NOT make the Software publicly available (including hosting the
+Software, its build artifacts, or a fork in a public repository) under the Community
+License.
+
+## 3) Commercial License Required for Commercial Use
+Commercial Use is not permitted under the Community License.
+Commercial use requires a paid license (a separate written Commercial License from the
+copyright holder).
+
+### 3.1) Commercial Use (Definition)
+"Commercial Use" includes, without limitation:
+- use by a for-profit entity;
+- use that is intended to generate revenue or reduce costs for a commercial
+  offering;
+- offering the Software or its functionality as part of a paid product or
+  service (SaaS, hosting, consulting, or otherwise);
+- offering the Software as a hosted service to third parties (paid or free);
+- charging fees for access to the Software; or
+- using the Software to provide services to third parties for a fee.
+
+Nonprofit status alone does not automatically make a use non-commercial if the
+Software is used as part of a revenue-generating offering.
+
+## 4) Ownership
+The Software is licensed, not sold. All rights not expressly granted are
+reserved by the copyright holder.
+
+## 5) Attribution / Notices
+You must retain this license text and all copyright notices in any copies made
+for permitted use.
+
+## 6) Termination
+Any violation of this license automatically terminates your rights to use the
+Software. Upon termination, you must stop using the Software and delete all
+copies in your possession or control.
+
+## 7) Disclaimer of Warranty
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+## 8) Limitation of Liability
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
 ADDITIONAL DISCLAIMER
 
 This software is designed to assist in identifying potential timeline
-inconsistencies in credit reports. It does NOT provide legal advice and
-should not be relied upon as such. Users are responsible for verifying
-all information and should consult with qualified legal professionals
-for legal matters.
+inconsistencies in credit reports. It does NOT provide legal advice and should
+not be relied upon as such. Users are responsible for verifying all
+information and should consult with qualified legal professionals for legal
+matters.
 
-The authors and contributors of this software make no representations
-or warranties regarding the accuracy, completeness, or suitability of
-the information generated by this tool.
+The authors and contributors of this software make no representations or
+warranties regarding the accuracy, completeness, or suitability of the
+information generated by this tool.
