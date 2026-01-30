@@ -14,7 +14,13 @@ import {
   Info,
   BookOpen,
   ClipboardList,
-  Target
+  Target,
+  Activity,
+  Cpu,
+  Fingerprint,
+  Radiation,
+  Boxes,
+  CheckCircle2
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -57,241 +63,300 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
   }
 
   return (
-    <div className="space-y-8">
-      {/* Search & Filter - Institutional Grade */}
-      <div className="flex flex-col lg:flex-row gap-4">
+    <div className="fade-in space-y-12 pb-24">
+      {/* SECTION_HEADER::VIOLATION_MATRIX */}
+      <div className="relative p-12 bg-slate-950 rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden group">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px] -mr-64 -mt-64 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] -ml-40 -mb-40" />
+
+        <div className="relative z-10 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-12">
+          <div className="flex-1 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-md">
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] font-mono">Forensic Violation Engine</span>
+              </div>
+              <div className="h-px w-24 bg-gradient-to-r from-emerald-500/50 to-transparent" />
+            </div>
+
+            <h2 className="text-6xl font-black text-white tracking-tighter uppercase font-mono italic leading-none">
+              Violation <span className="text-emerald-500">Matrix</span>
+            </h2>
+            
+            <p className="text-slate-400 text-lg leading-relaxed font-medium max-w-3xl">
+              Mapping detected data variances against the statutory framework. Every entry here represents a <span className="text-white italic">HIGH-PROBABILITY LITIGATION VECTOR</span> or regulatory breach identified within the institutional record.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full xl:w-auto">
+            <div className="bg-white/5 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl group/metric">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 font-mono">NODE_COUNT::01</p>
+              <p className="text-5xl font-black text-white tabular-nums tracking-tighter font-mono">{flags.length}</p>
+              <div className="h-1 w-full bg-slate-800 rounded-full mt-4 overflow-hidden">
+                <div className="h-full bg-emerald-500 w-full" />
+              </div>
+            </div>
+            
+            <div className="bg-rose-500/10 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-rose-500/20 shadow-2xl group/metric">
+              <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-3 font-mono">CRITICAL_VECTORS::02</p>
+              <p className="text-5xl font-black text-rose-500 tabular-nums tracking-tighter font-mono">{flags.filter(f => f.severity === 'high').length}</p>
+              <div className="h-1 w-full bg-rose-500/20 rounded-full mt-4 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(flags.filter(f => f.severity === 'high').length / Math.max(1, flags.length)) * 100}%` }}
+                  className="h-full bg-rose-500" 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SEARCH_AND_FILTER::CLINICAL_GRADE */}
+      <div className="flex flex-col xl:flex-row gap-8">
         <div className="relative flex-grow group">
-          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-            <Search size={18} className="text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+          <div className="absolute inset-y-0 left-8 flex items-center pointer-events-none">
+            <Search className="w-6 h-6 text-slate-500 group-focus-within:text-emerald-500 transition-colors" />
           </div>
           <input
             type="text"
             placeholder="Search forensic patterns, rules, or citations..."
-            className="w-full pl-14 pr-6 py-5 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none dark:text-white shadow-sm"
+            className="w-full pl-20 pr-10 py-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/20 backdrop-blur-xl text-lg focus:ring-[12px] focus:ring-emerald-500/5 transition-all outline-none dark:text-white shadow-2xl placeholder:text-slate-600 font-mono italic"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         
-        <div className="bg-slate-100 dark:bg-slate-900 p-1.5 rounded-[24px] flex gap-1 border border-slate-200 dark:border-slate-800">
+        <div className="bg-slate-100 dark:bg-slate-900/50 p-2 rounded-[2.5rem] flex gap-2 border border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-inner">
           {(['all', 'high', 'medium', 'low'] as const).map(s => (
             <button
               key={s}
               onClick={() => setFilterSeverity(s)}
               className={cn(
-                "px-6 py-3 rounded-[18px] text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
+                "px-10 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] transition-all relative overflow-hidden font-mono",
                 filterSeverity === s
-                  ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-md'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  ? 'bg-slate-950 text-white shadow-2xl scale-105'
+                  : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
               )}
             >
-              {s}
+              <span className="relative z-10">{s}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Results Overview */}
-      <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="w-14 h-14 rounded-2xl bg-slate-950 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center shadow-xl">
-            <Scale size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Forensic Match Count</p>
-            <p className="text-2xl font-bold dark:text-white tabular-nums">{filteredFlags.length} <span className="text-slate-400 text-lg font-medium">Potential Issues</span></p>
-          </div>
-        </div>
-        
-        <div className="hidden md:flex gap-3">
-          {['high', 'medium', 'low'].map(severity => {
-            const count = flags.filter(f => f.severity === severity).length;
+      {/* ANIMATED_VIOLATION_MATRIX::DYNAMIC_GRID */}
+      <div className="grid gap-10">
+        <AnimatePresence mode="popLayout">
+          {filteredFlags.map((flag, i) => {
+            const isExpanded = expandedCard === i;
+            
             return (
-              <div
-                key={severity}
+              <motion.div
+                key={flag.ruleId + i}
+                layout
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  "px-5 py-2.5 rounded-2xl border flex items-center gap-3 transition-all",
-                  severity === 'high' ? "bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-400" :
-                  severity === 'medium' ? "bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20 text-orange-600 dark:text-orange-400" :
-                  "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500"
+                  "relative group rounded-[3.5rem] border transition-all duration-700 overflow-hidden",
+                  isExpanded 
+                    ? "bg-white dark:bg-slate-900 border-emerald-500/50 shadow-[0_64px_128px_-32px_rgba(0,0,0,0.5)] ring-1 ring-emerald-500/20" 
+                    : "bg-white dark:bg-slate-950/30 border-white/5 hover:border-white/20 hover:shadow-2xl hover:bg-slate-900/40"
                 )}
               >
-                <div className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  severity === 'high' ? "bg-rose-500" : severity === 'medium' ? "bg-orange-500" : "bg-slate-400"
-                )} />
-                <span className="text-[10px] font-bold uppercase tracking-widest">{severity}</span>
-                <span className="font-bold tabular-nums text-sm">{count}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                <div 
+                  className="p-10 xl:p-14 cursor-pointer relative"
+                  onClick={() => setExpandedCard(isExpanded ? null : i)}
+                >
+                  {/* BACKGROUND_ARTIFACTS */}
+                  {isExpanded && (
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[100px] -mr-64 -mt-64 animate-pulse" />
+                      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[100px] -ml-40 -mb-40" />
+                    </div>
+                  )}
 
-      {/* Animated Violation Cards */}
-      <div className="space-y-4">
-        {filteredFlags.map((flag, i) => {
-          const isExpanded = expandedCard === i;
-          
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              layout
-              className={cn(
-                "rounded-[32px] transition-all duration-500 border overflow-hidden",
-                isExpanded 
-                  ? "bg-white dark:bg-slate-900 border-emerald-500/40 shadow-[0_32px_64px_-16px_rgba(16,185,129,0.1)] ring-1 ring-emerald-500/20" 
-                  : "bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-900"
-              )}
-            >
-              <div 
-                className="p-8 cursor-pointer relative"
-                onClick={() => setExpandedCard(isExpanded ? null : i)}
-              >
-                {/* Header Row */}
-                <div className="flex items-start justify-between gap-6">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-5">
-                      <span className={cn(
-                        "text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full border",
-                        flag.severity === 'high' ? "bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/30 text-rose-600 dark:text-rose-400" :
-                        flag.severity === 'medium' ? "bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/30 text-orange-600 dark:text-orange-400" :
-                        "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500"
-                      )}>
-                        {flag.severity} RISK
-                      </span>
-                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-lg">RULE::{flag.ruleId}</span>
+                  <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-12">
+                    <div className="flex-1 space-y-8">
+                      <div className="flex flex-wrap items-center gap-6">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "w-3 h-3 rounded-full animate-pulse",
+                            flag.severity === 'high' ? "bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.6)]" :
+                            flag.severity === 'medium' ? "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)]" :
+                            "bg-slate-500"
+                          )} />
+                          <span className={cn(
+                            "text-[10px] font-black uppercase tracking-[0.4em] font-mono",
+                            flag.severity === 'high' ? "text-rose-500" :
+                            flag.severity === 'medium' ? "text-amber-500" :
+                            "text-slate-500"
+                          )}>
+                             Risk_Level::{flag.severity}
+                          </span>
+                        </div>
+
+                        <div className="h-4 w-px bg-white/10" />
+
+                        <div className="flex items-center gap-3 px-5 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md shadow-sm">
+                           <span className="text-[10px] font-mono font-black text-slate-400 tracking-widest leading-none">ID::{flag.ruleId}</span>
+                        </div>
+
+                        <div className="flex items-center gap-6 ml-auto lg:ml-0">
+                           <div className="flex flex-col">
+                              <div className="flex items-center gap-4">
+                                 <div className="h-1.5 w-32 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
+                                   <motion.div 
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${flag.successProbability}%` }}
+                                      className={cn(
+                                          "h-full relative",
+                                          flag.successProbability > 75 ? 'bg-emerald-500' : 'bg-amber-500'
+                                      )}
+                                   />
+                                 </div>
+                                 <span className="text-xs font-black dark:text-white font-mono">{flag.successProbability}% PROBABILITY</span>
+                              </div>
+                           </div>
+                        </div>
+                      </div>
                       
-                      <div className="flex items-center gap-3 ml-auto pr-8">
-                         <div className="text-right">
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Success Factor</p>
-                            <div className="flex items-center gap-2">
-                               <div className="h-1 w-20 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                 <motion.div 
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${flag.successProbability}%` }}
-                                    className={cn(
-                                        "h-full transition-all duration-1000",
-                                        flag.successProbability > 70 ? 'bg-emerald-500' : 'bg-orange-500'
-                                    )}
-                                 />
-                               </div>
-                               <span className="text-[10px] font-bold dark:text-white">{flag.successProbability}%</span>
-                            </div>
-                         </div>
+                      <div className="space-y-4">
+                        <h4 className="text-4xl font-black dark:text-white group-hover:text-emerald-400 transition-colors tracking-tighter uppercase font-mono italic leading-none">
+                          {flag.ruleName}
+                        </h4>
+                        <p className={cn(
+                          "text-xl leading-relaxed text-slate-600 dark:text-slate-400 font-medium",
+                          isExpanded ? "" : "line-clamp-1"
+                        )}>
+                          {flag.explanation}
+                        </p>
                       </div>
                     </div>
-                    
-                    <h4 className="text-xl font-bold dark:text-white mb-3 group-hover:text-emerald-500 transition-colors">
-                      {flag.ruleName}
-                    </h4>
-                    <p className={cn(
-                      "text-sm leading-relaxed text-slate-600 dark:text-slate-400 transition-all",
-                      isExpanded ? "" : "line-clamp-2"
+
+                    <div className={cn(
+                      "w-20 h-20 rounded-[2rem] flex items-center justify-center transition-all shrink-0 border shadow-3xl",
+                      isExpanded 
+                        ? "bg-slate-950 text-white border-emerald-500/50 rotate-180" 
+                        : "bg-white dark:bg-slate-950 text-slate-400 dark:border-white/10 group-hover:border-emerald-500/50 group-hover:text-emerald-500"
                     )}>
-                      {flag.explanation}
-                    </p>
+                      <ChevronDown size={32} strokeWidth={3} />
+                    </div>
                   </div>
 
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shrink-0",
-                    isExpanded ? "bg-emerald-500 text-white rotate-180" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                  )}>
-                    <ChevronDown size={20} />
-                  </div>
-                </div>
-
-                {/* Expanded Content */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="mt-10 pt-10 border-t border-slate-100 dark:border-slate-800 space-y-10">
-                        <div className="grid lg:grid-cols-2 gap-10">
-                          {/* Left Column: Forensic Logic */}
-                          <div className="space-y-8">
-                            <div>
-                              <div className="flex items-center gap-2 mb-4">
-                                <Info size={14} className="text-emerald-500" />
-                                <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Strategic Impact</h5>
+                  {/* EXPANDED_NODE_ANALYSIS */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-14 pt-14 border-t border-white/5 space-y-14 relative z-10">
+                          <div className="grid lg:grid-cols-2 gap-12">
+                            {/* FORENSIC_LOGIC_ENGINE */}
+                            <div className="space-y-8">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                                  <Fingerprint size={24} />
+                                </div>
+                                <div>
+                                  <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400 font-mono">Forensic Logic</h5>
+                                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Cognitive Extraction</p>
+                                </div>
                               </div>
-                              <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[24px] border border-slate-100 dark:border-slate-800">
-                                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 italic">
+                              
+                              <div className="bg-slate-950/40 p-10 rounded-[2.5rem] border border-white/5 relative overflow-hidden group/logic shadow-2xl">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] scale-[2] rotate-12 transition-transform group-hover/logic:scale-[2.2]">
+                                  <Radiation size={120} />
+                                </div>
+                                <p className="text-2xl leading-relaxed text-slate-300 font-bold italic relative z-10 tracking-tight">
                                   "{flag.whyItMatters}"
                                 </p>
                               </div>
+
+                              {flag.legalCitations.length > 0 && (
+                                <div className="pt-6">
+                                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono mb-6">Statutory_Framework</p>
+                                  <div className="flex flex-wrap gap-3">
+                                    {flag.legalCitations.map((cite, j) => (
+                                      <span key={j} className="text-[11px] font-black px-6 py-3 bg-white/5 text-cyan-400 rounded-full border border-cyan-500/20 shadow-lg font-mono uppercase tracking-widest">
+                                        {cite}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
-                            {flag.legalCitations.length > 0 && (
-                              <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                  <BookOpen size={14} className="text-indigo-500" />
-                                  <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Institutional Foundation</h5>
+                            {/* TACTICAL_EVIDENCE_STREAM */}
+                            <div className="space-y-8">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 border border-cyan-500/20">
+                                  <Boxes size={24} />
                                 </div>
-                                <div className="flex flex-wrap gap-2">
-                                  {flag.legalCitations.map((cite, j) => (
-                                    <span key={j} className="text-[10px] font-bold px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 rounded-xl border border-indigo-500/10">
-                                      {cite}
-                                    </span>
-                                  ))}
+                                <div>
+                                  <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-400 font-mono">Tactical Evidence</h5>
+                                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Manifest Assembly</p>
                                 </div>
                               </div>
-                            )}
-                          </div>
 
-                          {/* Right Column: Tactical Evidence */}
-                          <div className="space-y-8">
-                            {flag.suggestedEvidence.length > 0 && (
-                              <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                  <ClipboardList size={14} className="text-orange-500" />
-                                  <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Verification Protocol</h5>
-                                </div>
-                                <div className="space-y-3">
-                                  {flag.suggestedEvidence.map((e, j) => (
-                                    <div key={j} className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
-                                      <Zap size={14} className="text-emerald-500" />
-                                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{e}</span>
+                              <div className="space-y-4">
+                                {flag.suggestedEvidence.map((item, j) => (
+                                  <div key={j} className="flex items-center gap-6 p-6 rounded-[2rem] bg-white/5 border border-white/10 hover:border-cyan-500/30 transition-colors group/item shadow-xl">
+                                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-500 font-mono text-xs font-black">
+                                      {j + 1}
                                     </div>
-                                  ))}
-                                </div>
+                                    <span className="text-base text-slate-300 font-medium">{item}</span>
+                                    <CheckCircle2 className="w-5 h-5 ml-auto text-slate-700 group-hover/item:text-cyan-500 transition-colors" />
+                                  </div>
+                                ))}
                               </div>
-                            )}
 
-                            {flag.bureauTactics && Object.keys(flag.bureauTactics).length > 0 && (
-                              <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                  <Target size={14} className="text-rose-500" />
-                                  <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Execution Vector</h5>
+                              {flag.bureauTactics && Object.keys(flag.bureauTactics).length > 0 && (
+                                <div className="pt-8 space-y-6">
+                                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono">Institutional_Countermeasures</p>
+                                  <div className="grid gap-4">
+                                    {Object.entries(flag.bureauTactics).map(([bureau, tactic], j) => (
+                                      <div key={j} className="bg-slate-950 p-8 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden group/tactic">
+                                        <div className="absolute top-0 right-0 px-6 py-3 bg-emerald-500/10 rounded-bl-3xl border-b border-l border-emerald-500/20">
+                                          <span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] font-mono">{bureau} Target</span>
+                                        </div>
+                                        <p className="text-lg text-slate-400 leading-relaxed font-mono italic pr-12 group-hover/tactic:text-slate-200 transition-colors">
+                                          {tactic}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
-                                <div className="space-y-3">
-                                  {Object.entries(flag.bureauTactics).map(([bureau, tactic], j) => (
-                                    <div key={j} className="bg-slate-950 p-5 rounded-2xl border border-slate-800">
-                                      <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-2 block">{bureau} Target</span>
-                                      <p className="text-xs text-slate-400 leading-relaxed font-mono italic">"{tactic}"</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          );
-        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
+      
+      {filteredFlags.length === 0 && (
+        <div className="py-40 text-center space-y-8 bg-slate-900/20 rounded-[4rem] border border-dashed border-white/10">
+          <div className="w-24 h-24 bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/5">
+            <Search className="w-10 h-10 text-slate-600" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-black text-white uppercase font-mono tracking-tighter">No forensic matches</h3>
+            <p className="text-slate-500 font-medium">No violations meet the current filter criteria.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

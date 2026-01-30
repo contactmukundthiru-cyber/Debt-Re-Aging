@@ -69,13 +69,12 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var dark = localStorage.getItem('cra_dark_mode');
-                  var supportDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (dark === 'true' || (dark === null && supportDark)) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
+                  var root = document.documentElement;
+                  var stored = localStorage.getItem('cra_dark_mode');
+                  var prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var useDark = stored === 'true' || (stored !== 'false' && stored === null && prefersDark);
+                  if (useDark) root.classList.add('dark');
+                  else root.classList.remove('dark');
                 } catch (e) {}
               })();
             `,

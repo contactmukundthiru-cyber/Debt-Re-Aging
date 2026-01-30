@@ -26,11 +26,11 @@ export function generateForensicAffidavit(
     text += `STATE OF ${consumer.state || '[STATE]'}\n`;
     text += `COUNTY OF ${consumer.county || '[COUNTY]'}\n\n`;
 
-    text += `I, ${consumer.firstName} ${consumer.lastName}, being of lawful age and first duly sworn upon my oath, state as follows:\n\n`;
+    text += `I, ${consumer.name}, being of lawful age and first duly sworn upon my oath, state as follows:\n\n`;
 
     text += `1. INTRODUCTION: I am a consumer as defined by 15 U.S.C. § 1681a(c). This affidavit is prepared following a forensic audit of my credit disclosures provided by the consumer reporting agencies.\n\n`;
 
-    text += `2. SUBJECT ACCOUNT: This analysis pertains to the account reported by ${fields.furnisherOrCollector || fields.originalCreditor || 'the Creditor'} under Account Number ${fields.accountNumber || '[ACCOUNT NUMBER]'}.\n\n`;
+    text += `2. SUBJECT ACCOUNT: This analysis pertains to the account reported by ${fields.furnisherOrCollector || fields.originalCreditor || 'the Creditor'} under Account Identifier ${fields.accountType || '[ACCOUNT IDENTIFIER]'}.\n\n`;
 
     text += `3. FORENSIC FINDINGS: My audit of the data provided has identified the following material inaccuracies and/or legal violations:\n\n`;
 
@@ -51,7 +51,7 @@ export function generateForensicAffidavit(
     text += `FURTHER AFFIANT SAYETH NOT.\n\n`;
 
     text += `__________________________________________\n`;
-    text += `${consumer.firstName} ${consumer.lastName}, Affiant\n\n`;
+    text += `${consumer.name}, Affiant\n\n`;
 
     text += `Subscribed and sworn to before me this ____ day of ___________, 20____.\n\n`;
     text += `__________________________________________\n`;

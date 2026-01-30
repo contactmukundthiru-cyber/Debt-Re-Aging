@@ -45,6 +45,7 @@ export interface CreditFields {
     furnisherOrCollector?: string;
     accountType?: string;
     accountStatus?: string;
+    originalAmount?: string;
     currentValue?: string;
     initialValue?: string;
     creditLimit?: string;
@@ -94,6 +95,7 @@ export interface ConsumerInfo {
     city: string;
     state: string;
     zip: string;
+    county?: string;
     dob?: string;
     ssn?: string;
     email?: string;

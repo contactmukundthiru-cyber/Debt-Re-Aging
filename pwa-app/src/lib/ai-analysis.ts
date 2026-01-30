@@ -170,7 +170,7 @@ function generateKeyFindings(flags: RuleFlag[], patterns: PatternInsight[]): AIF
             title: 'Critical FCRA Violations Detected',
             explanation: `${highSeverityFlags.length} high-severity violations identified that constitute clear breaches of federal credit reporting law.`,
             evidence: highSeverityFlags.map(f => f.explanation),
-            legalBasis: [...new Set(highSeverityFlags.flatMap(f => f.legalCitations))],
+            legalBasis: Array.from(new Set(highSeverityFlags.flatMap(f => f.legalCitations))),
             actionRequired: true
         });
     }
@@ -305,8 +305,8 @@ function buildNarrativeBlocks(
     const blocks: NarrativeBlock[] = [];
     const furnisher = fields.furnisherOrCollector || fields.originalCreditor || 'the furnisher';
     const criticalCount = flags.filter(f => f.severity === 'high').length;
-    const allCitations = [...new Set(flags.flatMap(f => f.legalCitations))];
-    const allEvidence = [...new Set(flags.flatMap(f => f.suggestedEvidence))];
+    const allCitations = Array.from(new Set(flags.flatMap(f => f.legalCitations)));
+    const allEvidence = Array.from(new Set(flags.flatMap(f => f.suggestedEvidence)));
 
     blocks.push({
         type: 'introduction',

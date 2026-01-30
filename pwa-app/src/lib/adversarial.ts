@@ -18,9 +18,13 @@ export interface DecisionNode {
 
 export interface SimulationResult {
     pathOfLeastResistance: DecisionNode[];
-    estimatedComplianceCost: number; // Estimated cost for them to respond
-    settlementThreshold: number; // Price at which they usually give up
+    internalRiskMitigationScore: number; // Score representing their effort to mitigate risk
+    institutionalCompliancePressure: number; // Score representing pressure to delete
     tactic: 'technical_fault' | 'administrative_burden' | 'legal_risk';
+    /** Estimated cost (in dollars) for the bureau/collector to comply with verification. */
+    estimatedComplianceCost: number;
+    /** Threshold (in dollars) below which settlement/deletion is often preferred over fight. */
+    settlementThreshold: number;
 }
 
 /**
@@ -31,7 +35,7 @@ export function simulateAdversarialLogic(
     risk: RiskProfile
 ): SimulationResult {
     const nodes: DecisionNode[] = [];
-    let complianceCost = 150; // Base cost of processing a dispute (clerk time, mail, etc.)
+    let compliancePressure = 15; // Base pressure of processing a dispute (clerk time, mail, etc.)
 
     // Logic 1: The "Auto-Verification" Filter (e-OSCAR)
     const technicalViolations = flags.filter(f => f.ruleId.startsWith('B') || f.ruleId.startsWith('E'));
@@ -39,42 +43,47 @@ export function simulateAdversarialLogic(
     if (technicalViolations.length > 0) {
         nodes.push({
             id: 'step-1',
-            label: 'Batch e-OSCAR Processing',
+            label: 'Batch e-OSCAR Filtering',
             probability: 85,
             outcome: 'verify',
-            reasoning: 'Standard automated verification usually ignores high-level logic. This is their first line of defense.',
-            counterTactic: 'Use certified mail with "Restricted Delivery" to bypass automated sorting.'
+            reasoning: 'Standard automated verification usually ignores high-level logic. This is their primary algorithmic gate.',
+            counterTactic: 'Utilize specialized delivery protocols to bypass automated sorting clusters.'
         });
-        complianceCost += technicalViolations.length * 45;
+        compliancePressure += technicalViolations.length * 10;
     }
 
     // Logic 2: Risk Management Escalation
     if (risk.overallScore > 70) {
         nodes.push({
             id: 'step-2',
-            label: 'Manual Legal Review',
+            label: 'Institutional Forensic Audit',
             probability: 40,
             outcome: 'human_review',
-            reasoning: 'High forensic strength scores often trigger a secondary review to avoid regulatory liability.',
-            counterTactic: 'Escalate directly to the registered agent of the corporation.'
+            reasoning: 'High-fidelity forensic markers often trigger a manual audit to assess corporate exposure.',
+            counterTactic: 'Initiate communication with the Chief Compliance Officer or Registered Agent.'
         });
-        complianceCost += 500; // Legal review is expensive
+        compliancePressure += 85; 
     }
 
     // Logic 3: The Deletion Decision
     const deleteProb = Math.min(95, (risk.overallScore / 1.5) + (technicalViolations.length * 10));
     nodes.push({
         id: 'step-3',
-        label: 'Cost-Benefit Deletion',
+        label: 'Risk-Based Deletion',
         probability: deleteProb,
         outcome: 'delete',
-        reasoning: `If compliance cost ($${complianceCost}) exceeds projected collection value, deletion is the standard business decision.`,
+        reasoning: `When institutional compliance pressure (${compliancePressure} points) exceeds the threshold of profitable verification, data removal becomes the logical outcome.`,
     });
+
+    const estimatedComplianceCost = compliancePressure * 12; // ~$12/point (clerical, mail, review)
+    const settlementThreshold = Math.max(200, 800 - risk.overallScore * 4);
 
     return {
         pathOfLeastResistance: nodes,
-        estimatedComplianceCost: complianceCost,
-        settlementThreshold: risk.overallScore * 25,
-        tactic: technicalViolations.length > 2 ? 'technical_fault' : 'legal_risk'
+        internalRiskMitigationScore: risk.overallScore * 2,
+        institutionalCompliancePressure: compliancePressure,
+        tactic: technicalViolations.length > 2 ? 'technical_fault' : 'legal_risk',
+        estimatedComplianceCost,
+        settlementThreshold
     };
 }

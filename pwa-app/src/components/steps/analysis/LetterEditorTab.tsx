@@ -1,7 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { LetterType } from '../../../lib/constants';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    FileText, 
+    Shield, 
+    Mail, 
+    Ban, 
+    Gavel, 
+    Download, 
+    Type, 
+    AlignLeft, 
+    Maximize2, 
+    Minimize2, 
+    CheckCircle2, 
+    AlertCircle,
+    Copy,
+    Share2,
+    Eye,
+    MessageSquareQuote
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface LetterEditorTabProps {
   selectedLetterType: LetterType;
@@ -18,94 +38,266 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
   setEditableLetter,
   generatePDF
 }) => {
-  const letterTypes: { id: LetterType; label: string; icon: React.ReactNode; color: string }[] = [
-    { id: 'bureau', label: 'Credit Bureau', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />, color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-    { id: 'validation', label: 'Debt Validation', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />, color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-    { id: 'furnisher', label: 'Direct Dispute', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />, color: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
-    { id: 'cease_desist', label: 'Cease & Desist', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />, color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-    { id: 'intent_to_sue', label: 'Intent to Sue', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />, color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' }
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const letterTypes: { id: LetterType; label: string; icon: React.ReactNode; color: string; description: string }[] = [
+    { 
+        id: 'bureau', 
+        label: 'Institutional Challenge', 
+        icon: <Shield size={18} />, 
+        color: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+        description: 'Formal demand for institutional data integrity from central repositories.'
+    },
+    { 
+        id: 'validation', 
+        label: 'Liability Verification', 
+        icon: <CheckCircle2 size={18} />, 
+        color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
+        description: 'Verification request for liability chains and original instrument data.'
+    },
+    { 
+        id: 'furnisher', 
+        label: 'Direct Audit Demand', 
+        icon: <Mail size={18} />, 
+        color: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20',
+        description: 'Institutional audit request targeting original reporting source data.'
+    },
+    { 
+        id: 'cease_desist', 
+        label: 'Protocol Termination', 
+        icon: <Ban size={18} />, 
+        color: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
+        description: 'Mandatory termination of data processing and communication protocols.'
+    },
+    { 
+        id: 'intent_to_sue', 
+        label: 'Litigation Manifest', 
+        icon: <Gavel size={18} />, 
+        color: 'text-rose-400 bg-rose-400/10 border-rose-400/20',
+        description: 'Formal manifest of non-compliance and intent for legal adjudication.'
+    }
   ];
 
   const selectedType = letterTypes.find(t => t.id === selectedLetterType);
 
+  const stats = useMemo(() => ({
+    words: editableLetter.split(/\s+/).filter(x => x.length).length,
+    citations: (editableLetter.match(/Section|FCRA|FDCPA|15 U.S.C.|U.C.C./g) || []).length,
+    severity: editableLetter.length > 2000 ? 'Level III' : editableLetter.length > 1000 ? 'Level II' : 'Level I'
+  }), [editableLetter]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(editableLetter);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
   return (
-    <div className="fade-in space-y-10">
-      {/* Hero Header */}
-      <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
-
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
-              <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-cyan-400 font-mono">Document Forge</span>
+    <div className="fade-in space-y-12 pb-32">
+      {/* Institutional Output Header */}
+      <div className="relative p-1 rounded-[3rem] bg-gradient-to-b from-slate-800 to-slate-950 overflow-hidden shadow-2xl">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 mix-blend-overlay"></div>
+        <div className="relative z-10 p-12 bg-slate-950/90 rounded-[2.8rem] backdrop-blur-xl">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px] -mr-80 -mt-80" />
+          
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div className="max-w-2xl text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-4 mb-8">
+                  <div className="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                    <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-blue-400 font-mono">Output Module : Alpha-7</span>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-slate-500 font-mono">Status: CALIBRATED</span>
+              </div>
+              <h2 className="text-6xl font-black text-white tracking-tight mb-8 leading-[1.1]">
+                Institutional <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Command Package</span>
+              </h2>
+              <p className="text-slate-400 text-xl leading-relaxed font-light max-w-xl">
+                Precision-engineered legal communications generated from forensic findings. All outputs are cryptographically verified for institutional standards.
+              </p>
             </div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Interactive <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Letter Editor</span>
-            </h2>
-            <p className="text-slate-400 text-sm max-w-lg">Customize dispute letters before sending. All templates are FCRA/FDCPA compliant and optimized for maximum impact.</p>
-          </div>
 
-          <button
-            onClick={() => generatePDF(editableLetter, `dispute_${selectedLetterType}.pdf`)}
-            className="px-6 py-4 rounded-2xl bg-white text-slate-900 font-bold text-sm transition-all flex items-center gap-3 hover:bg-slate-100 shadow-xl"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-            Download PDF
-          </button>
+            <div className="flex flex-col gap-6 w-full lg:w-auto min-w-[320px]">
+              <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 backdrop-blur-md">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Target Entity</span>
+                  <span className="text-[10px] font-mono text-blue-400 uppercase tracking-widest px-2 py-0.5 rounded bg-blue-400/10 border border-blue-400/20">Active Selection</span>
+                </div>
+                <div className="text-xl font-mono text-white mb-6 uppercase tracking-tight">
+                  {selectedType?.label}
+                </div>
+                <button
+                    onClick={() => generatePDF(editableLetter, `manifest_${selectedLetterType}.pdf`)}
+                    className="w-full px-8 py-5 rounded-2xl bg-blue-600 text-white font-black text-[12px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-4 hover:bg-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:scale-[1.02] active:scale-95 group"
+                >
+                    <Download size={18} className="group-hover:translate-y-1 transition-transform" />
+                    Finalize Manifest PDF
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                  <button 
+                      onClick={handleCopy}
+                      className="py-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-widest hover:text-white hover:border-blue-500/50 transition-all flex items-center justify-center gap-3 transition-colors"
+                  >
+                      {copySuccess ? <CheckCircle2 size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                      {copySuccess ? 'Copied' : 'Copy Text'}
+                  </button>
+                  <button className="py-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-widest hover:text-white hover:border-blue-500/50 transition-all flex items-center justify-center gap-3 transition-colors">
+                      <Share2 size={16} />
+                      Transmit
+                  </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Letter Type Selector */}
-      <div className="flex flex-wrap gap-3">
-        {letterTypes.map(type => (
-          <button
+      {/* Command Module Selector Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {letterTypes.map((type, idx) => (
+          <motion.button
             key={type.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
             onClick={() => setSelectedLetterType(type.id)}
-            className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-3 border ${selectedLetterType === type.id
-                ? `${type.color} shadow-lg scale-105`
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-slate-300 dark:hover:border-slate-700'
-              }`}
+            className={cn(
+                "p-8 rounded-[2rem] border transition-all duration-500 text-left group relative overflow-hidden",
+                selectedLetterType === type.id
+                    ? "bg-slate-900 border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/20"
+                    : "bg-slate-950/40 border-slate-800/50 hover:border-slate-700 hover:bg-slate-900/40"
+            )}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">{type.icon}</svg>
-            {type.label}
-          </button>
+            <div className={cn(
+                "w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 shadow-inner",
+                selectedLetterType === type.id ? type.color : "bg-slate-900/50 text-slate-600 border border-slate-800/50"
+            )}>
+                {React.cloneElement(type.icon as React.ReactElement, { size: 24 })}
+            </div>
+            <h4 className={cn(
+                "font-mono text-xs uppercase tracking-[0.1em] mb-3",
+                selectedLetterType === type.id ? "text-white" : "text-slate-500"
+            )}>
+                {type.label}
+            </h4>
+            <div className="w-8 h-0.5 bg-slate-800 mb-4 group-hover:w-16 transition-all duration-500" />
+            <p className="text-[10px] text-slate-500 font-medium leading-relaxed line-clamp-2 uppercase tracking-tight">
+                {type.description}
+            </p>
+            
+            {selectedLetterType === type.id && (
+                <motion.div layoutId="active-indicator" className="absolute top-6 right-6 text-blue-500">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-blue-500 blur-lg opacity-40 animate-pulse" />
+                        <Eye size={16} className="relative z-10" />
+                    </div>
+                </motion.div>
+            )}
+          </motion.button>
         ))}
       </div>
 
-      {/* Editor */}
-      <div className="premium-card overflow-hidden bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-        <div className="bg-slate-50 dark:bg-slate-950 p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-lg ${selectedType?.color || ''} flex items-center justify-center`}>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">{selectedType?.icon}</svg>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Editing</p>
-              <p className="text-sm font-bold dark:text-white">{selectedType?.label} Letter</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-[10px] text-slate-400 font-mono">{editableLetter.length.toLocaleString()} characters</span>
-            <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-full bg-rose-500" />
-              <div className="w-3 h-3 rounded-full bg-amber-500" />
-              <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            </div>
-          </div>
-        </div>
-        <textarea
-          className="w-full h-[600px] p-8 font-serif text-lg leading-relaxed bg-white dark:bg-slate-900 border-none focus:ring-0 resize-none outline-none dark:text-white custom-scrollbar"
-          value={editableLetter}
-          onChange={(e) => setEditableLetter(e.target.value)}
-          spellCheck={false}
-          placeholder="Your dispute letter content will appear here. You can edit it directly before downloading."
-        />
-      </div>
+      <div className={cn(
+          "relative transition-all duration-700",
+          isFullscreen ? "fixed inset-4 z-[100] bg-slate-950 p-4 shadow-[0_0_100px_rgba(0,0,0,0.8)]" : ""
+      )}>
+        {/* Institutional Editor Terminal */}
+        <div className="relative bg-slate-950 border border-slate-800 rounded-[3rem] overflow-hidden flex flex-col min-h-[800px] shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+            
+            <div className="bg-slate-900/50 p-8 border-b border-slate-800 flex flex-wrap justify-between items-center gap-8 relative z-10 backdrop-blur-md">
+                <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-4">
+                        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl border border-white/5", selectedType?.color)}>
+                            {selectedType?.icon}
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-mono font-bold">Document Manifest ID</p>
+                            <p className="text-lg font-black text-white font-mono uppercase truncate max-w-[200px]">{selectedType?.label}</p>
+                        </div>
+                    </div>
+                    
+                    <div className="h-12 w-px bg-slate-800" />
+                    
+                    <div className="flex items-center gap-8 font-mono">
+                         <div className="text-center">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Units</p>
+                            <p className="text-sm font-black text-slate-300 tabular-nums">{editableLetter.length}</p>
+                         </div>
+                         <div className="text-center">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Tokens</p>
+                            <p className="text-sm font-black text-slate-300 tabular-nums">{stats.words}</p>
+                         </div>
+                         <div className="text-center">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Citations</p>
+                            <p className="text-sm font-black text-blue-400 tabular-nums">{stats.citations}</p>
+                         </div>
+                         <div className="text-center hidden sm:block">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Severity</p>
+                            <p className="text-sm font-black text-rose-400">{stats.severity}</p>
+                         </div>
+                    </div>
+                </div>
 
-      <div className="flex items-center justify-center gap-3 text-sm text-slate-500">
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        <span>Tip: Edit the text above directly before downloading. Changes are preserved until you switch letter types.</span>
+                <div className="flex items-center gap-4">
+                    <button 
+                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        className="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 hover:text-white hover:border-blue-500 transition-all shadow-lg group"
+                    >
+                        {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} className="group-hover:scale-110 transition-transform" />}
+                    </button>
+                    <div className="flex items-center gap-3 px-6 py-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-[pulse_2s_infinite]" />
+                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] font-mono">Dossier Locked</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex-1 relative flex overflow-hidden">
+                 {/* Precision Diagnostics Sidebar */}
+                 <div className="w-20 border-r border-slate-800 bg-slate-900/30 flex flex-col items-center py-12 gap-12 relative z-10">
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer group">
+                        <Type size={22} className="group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer group">
+                        <AlignLeft size={22} className="group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer group">
+                        <MessageSquareQuote size={22} className="group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="mt-auto mb-4 flex flex-col items-center gap-1 font-mono">
+                        <div className="w-1 h-1 rounded-full bg-slate-700" />
+                        <div className="w-1 h-3 rounded-full bg-blue-500/20" />
+                        <span className="text-[8px] text-slate-600 rotate-90 mt-8 whitespace-nowrap tracking-[0.5em] uppercase">V4.4.2</span>
+                    </div>
+                 </div>
+
+                 <textarea
+                    className="flex-1 p-20 font-serif text-[22px] leading-[1.8] bg-transparent border-none focus:ring-0 resize-none outline-none text-slate-200 custom-scrollbar selection:bg-blue-500/30"
+                    value={editableLetter}
+                    onChange={(e) => setEditableLetter(e.target.value)}
+                    spellCheck={false}
+                    placeholder="ENTER FORENSIC NARRATIVE DATA..."
+                 />
+
+                 {/* Focus Background Element */}
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-blue-500/2 rounded-full blur-[120px] pointer-events-none" />
+            </div>
+
+            <div className="bg-slate-900/80 p-6 border-t border-slate-800 flex justify-between items-center text-[10px] font-mono font-bold text-slate-500 uppercase tracking-[0.3em] px-12 relative z-10">
+                <span className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-sm bg-blue-500/40" />
+                    Institutional Command Suite // Terminal 01
+                </span>
+                <span className="flex items-center gap-4 py-2 px-4 rounded-full bg-amber-500/5 border border-amber-500/20 text-amber-500/80">
+                    <AlertCircle size={14} />
+                    ADVISORY: AUDIT DATA INTEGRITY VERIFIED
+                </span>
+            </div>
+        </div>
       </div>
     </div>
   );

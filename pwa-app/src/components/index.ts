@@ -20,6 +20,9 @@ export {
   NoHistoryState,
 } from './EmptyState';
 
+// Loading / skeleton
+export { Skeleton, SkeletonCard, SkeletonRow } from './Skeleton';
+
 // Institutional components
 export { InstitutionalBanner } from './InstitutionalBanner';
 export { Onboarding } from './Onboarding';

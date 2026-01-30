@@ -35,9 +35,10 @@ export interface AttorneyPackage {
     litigationPotential: boolean;
     forensicImpact: {
       statutoryEligible: boolean;
-      actualImpact: string;
-      civilAccountability: boolean;
-      totalRisk: string;
+      culpabilityLevel: 'negligent' | 'willful' | 'systemic';
+      litigationStrength: 'low' | 'moderate' | 'high' | 'critical';
+      attorneyFeesEligible: boolean;
+      executiveSeverity: 'low' | 'moderate' | 'high' | 'critical';
     };
   };
 
@@ -45,7 +46,7 @@ export interface AttorneyPackage {
   violations: {
     ruleId: string;
     ruleName: string;
-    severity: 'high' | 'medium' | 'low';
+    severity: 'high' | 'medium' | 'low' | 'critical';
     description: string;
     legalCitations: string[];
     evidence: string[];
@@ -249,9 +250,10 @@ export function buildAttorneyPackage(
       litigationPotential: riskProfile.litigationPotential,
       forensicImpact: {
         statutoryEligible: impact.statutory.eligible,
-        actualImpact: impact.actual.severity,
-        civilAccountability: impact.civilAccountability.possible,
-        totalRisk: impact.overallRisk
+        culpabilityLevel: impact.culpability.level,
+        litigationStrength: impact.litigationViability.strength,
+        attorneyFeesEligible: impact.attorneyFees.recoverable,
+        executiveSeverity: impact.executiveSummary.overallSeverity
       }
     },
 
@@ -578,7 +580,7 @@ function analyzeFees(
   impact: ImpactAssessment
 ): AttorneyPackage['feeAnalysis'] {
   const highCount = flags.filter(f => f.severity === 'high').length;
-  const contingencyViable = highCount >= 2 || impact.overallRisk === 'critical';
+  const contingencyViable = highCount >= 2 || impact.executiveSummary.overallSeverity === 'critical';
 
   let estimatedFees = '';
   if (contingencyViable) {
@@ -591,8 +593,11 @@ function analyzeFees(
   if (riskProfile.litigationPotential) {
     notes = 'Strong case for fee-shifting. FCRA provides for mandatory attorney fees to prevailing plaintiffs. ';
   }
-  if (impact.civilAccountability.possible) {
-    notes += 'Civil Liability potential enhances case resolution. ';
+  if (impact.culpability.level !== 'negligent') {
+    notes += 'Elevated culpability supports civil accountability arguments. ';
+  }
+  if (impact.attorneyFees.recoverable) {
+    notes += 'Fee-shifting eligibility strengthens counsel viability. ';
   }
   if (highCount >= 3) {
     notes += 'Multiple violations supporting a pattern of non-compliance.';
@@ -642,11 +647,12 @@ export function formatAttorneyPackage(pkg: AttorneyPackage): string {
   lines.push(`Case Strength: ${pkg.caseSummary.caseStrength.toUpperCase()}`);
   lines.push(`Litigation Potential: ${pkg.caseSummary.litigationPotential ? 'YES' : 'NO'}`);
   lines.push('');
-  lines.push('ESTIMATED DAMAGES:');
-  lines.push(`  Statutory: $${pkg.caseSummary.estimatedImpact.statutory.min} - $${pkg.caseSummary.estimatedImpact.statutory.max}`);
-  lines.push(`  Actual: $${pkg.caseSummary.estimatedImpact.actual}`);
-  lines.push(`  Punitive Possible: ${pkg.caseSummary.estimatedImpact.punitive ? 'YES' : 'NO'}`);
-  lines.push(`  TOTAL RANGE: $${pkg.caseSummary.estimatedImpact.total.min} - $${pkg.caseSummary.estimatedImpact.total.max}`);
+  lines.push('FORENSIC IMPACT:');
+  lines.push(`  Statutory Eligibility: ${pkg.caseSummary.forensicImpact.statutoryEligible ? 'YES' : 'NO'}`);
+  lines.push(`  Culpability Level: ${pkg.caseSummary.forensicImpact.culpabilityLevel.toUpperCase()}`);
+  lines.push(`  Litigation Strength: ${pkg.caseSummary.forensicImpact.litigationStrength.toUpperCase()}`);
+  lines.push(`  Attorney Fees: ${pkg.caseSummary.forensicImpact.attorneyFeesEligible ? 'ELIGIBLE' : 'NOT ELIGIBLE'}`);
+  lines.push(`  Executive Severity: ${pkg.caseSummary.forensicImpact.executiveSeverity.toUpperCase()}`);
   lines.push('');
 
   lines.push('═'.repeat(70));

@@ -17,6 +17,24 @@ import {
   buildNoResponseNotice,
   buildCFPBOutline
 } from '../../../lib/follow-up-letters';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Clock, 
+    Calendar, 
+    Bell, 
+    Download, 
+    Mail, 
+    AlertTriangle, 
+    CheckCircle2, 
+    Timer, 
+    ChevronRight,
+    MousePointer2,
+    FileText,
+    ShieldAlert,
+    Activity,
+    Zap
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface DeadlinesTabProps {
   fields: Partial<CreditFields>;
@@ -170,237 +188,262 @@ const DeadlinesTab: React.FC<DeadlinesTabProps> = ({ fields, consumer, flags }) 
   const buildCFPB = () => buildCFPBOutline(fields, consumer, flags);
 
   return (
-    <div className="space-y-8">
-      <div className="premium-card p-6 bg-slate-950 text-white border-slate-800 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[120px] -mr-32 -mt-32" />
-        <div className="absolute bottom-0 left-0 w-56 h-56 bg-blue-500/10 rounded-full blur-[100px] -ml-28 -mb-28" />
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-amber-400 font-bold font-mono">Timeline Ops</p>
-            <h3 className="text-3xl font-black tracking-tight mt-2">Deadline Command Matrix</h3>
-            <p className="text-sm text-slate-400 mt-2 max-w-2xl">
-              Live countdowns with preloaded reminders. Export calendar events to keep the case on strict compliance timing.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={downloadCalendar}
-              className="btn btn-secondary !px-5 !py-3 !rounded-xl !text-[11px] !font-bold !uppercase !tracking-widest bg-white/10 text-white border-white/20 hover:bg-white/20"
-            >
-              Download Calendar
-            </button>
-            <button
-              type="button"
-              onClick={downloadTextReport}
-              className="btn btn-secondary !px-5 !py-3 !rounded-xl !text-[11px] !font-bold !uppercase !tracking-widest border-white/20 text-white/80 hover:text-white"
-            >
-              Export Brief
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Dispute Clock</p>
-                <h4 className="text-lg font-bold dark:text-white">30/45-Day Response Window</h4>
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-[1fr_180px] gap-3 items-end">
-              <div>
-                <label className="field-label">Dispute Filed Date (optional)</label>
-                <input
-                  type="date"
-                  value={disputeFiledDate}
-                  onChange={(e) => setDisputeFiledDate(e.target.value)}
-                  className="input rounded-xl"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => setDisputeFiledDate('')}
-                className="btn btn-secondary !rounded-xl !px-4 !py-3"
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-
-          <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Countdowns</p>
-                <h4 className="text-lg font-bold dark:text-white">Active Deadline Stack</h4>
-              </div>
-              <span className="text-xs font-bold text-slate-500">{tracker.countdowns.length} tracked</span>
-            </div>
-
-            <div className="space-y-4">
-              {tracker.countdowns.map((countdown, index) => (
-                <div key={`${countdown.type}-${index}`} className="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-                  <div className="flex items-start justify-between gap-4">
+    <div className="fade-in space-y-12 pb-32">
+        {/* Elite Command Header */}
+        <div className="relative p-1 rounded-[3rem] bg-gradient-to-br from-slate-800 to-slate-950 overflow-hidden shadow-3xl">
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] -mr-64 -mt-64" />
+            <div className="relative z-10 p-12 bg-slate-950/90 rounded-[2.8rem] backdrop-blur-xl border border-white/5">
+                <div className="grid lg:grid-cols-2 gap-16 items-center">
                     <div>
-                      <p className="text-[10px] uppercase tracking-widest text-slate-400">{formatCountdown(countdown)}</p>
-                      <h5 className="text-base font-bold dark:text-white">{countdown.label}</h5>
-                      <p className="text-xs text-slate-500 mt-1">{countdown.explanation}</p>
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center gap-2">
+                                <Timer size={12} className="text-amber-400" />
+                                <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-amber-400 font-mono">Temporal Matrix Node</span>
+                            </div>
+                            <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Compliance Core</span>
+                        </div>
+                        <h2 className="text-6xl font-black text-white tracking-tight mb-8 leading-tight">
+                            Compliance <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">Temporal Matrix</span>
+                        </h2>
+                        <div className="flex items-center gap-12">
+                             <div className="space-y-1">
+                                 <p className="text-[10px] uppercase text-slate-500 font-black tracking-widest font-mono">Countdowns</p>
+                                 <p className="text-4xl font-black text-white font-mono tracking-tighter">{tracker.countdowns.length}</p>
+                             </div>
+                             <div className="h-12 w-px bg-slate-800" />
+                             <div className="space-y-1">
+                                 <p className="text-[10px] uppercase text-slate-500 font-black tracking-widest font-mono">Active Reminders</p>
+                                 <p className="text-4xl font-black text-amber-400 font-mono tracking-tighter">{reminders.length}</p>
+                             </div>
+                        </div>
                     </div>
-                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded ${countdown.urgency === 'expired'
-                      ? 'bg-rose-500/10 text-rose-500'
-                      : countdown.urgency === 'critical'
-                        ? 'bg-amber-500/10 text-amber-500'
-                        : countdown.urgency === 'warning'
-                          ? 'bg-blue-500/10 text-blue-500'
-                          : 'bg-emerald-500/10 text-emerald-500'
-                      }`}
-                    >
-                      {countdown.urgency}
-                    </span>
-                  </div>
-                  <div className="mt-4 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400">Next Action</p>
-                    <p className="text-sm font-semibold dark:text-white">{countdown.action}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Case Timeline</p>
-                <h4 className="text-lg font-bold dark:text-white">Milestone Ledger</h4>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {tracker.milestones.map((milestone, index) => (
-                <div key={`${milestone.event}-${index}`} className="flex items-start gap-4">
-                  <div className={`w-2 h-2 mt-2 rounded-full ${milestone.passed ? 'bg-slate-300' : 'bg-emerald-500'}`} />
-                  <div>
-                    <p className="text-xs font-bold dark:text-white">{milestone.event}</p>
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400">{milestone.date.toLocaleDateString()}</p>
-                    <p className="text-xs text-slate-500">{milestone.significance}</p>
-                  </div>
+                    <div className="bg-white/5 border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-2xl space-y-8 shadow-2xl">
+                         <div className="flex items-center gap-4 mb-2">
+                            <Calendar size={18} className="text-amber-400" />
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 font-mono">Filing Initialization</h4>
+                         </div>
+                         <div className="grid sm:grid-cols-[1fr_auto] gap-4">
+                            <input
+                                type="date"
+                                className="w-full bg-slate-900 border border-white/10 rounded-2xl px-6 py-5 text-white outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-mono"
+                                value={disputeFiledDate}
+                                onChange={(e) => setDisputeFiledDate(e.target.value)}
+                            />
+                            <button
+                                onClick={() => setDisputeFiledDate('')}
+                                className="px-8 bg-slate-800 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 hover:text-white transition-all shadow-xl active:scale-95 transform"
+                            >
+                                Reset
+                            </button>
+                         </div>
+                         <div className="flex gap-4">
+                            <button
+                                onClick={downloadCalendar}
+                                className="flex-grow py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-400 hover:text-white transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 transform font-mono"
+                            >
+                                <Calendar size={16} /> Sync iCal Events
+                            </button>
+                         </div>
+                    </div>
                 </div>
-              ))}
             </div>
-          </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="premium-card p-6 bg-slate-950 text-white border-slate-800">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Reminder Cadence</p>
-            <div className="space-y-3">
-              {reminderOptions.map(days => (
-                <button
-                  key={days}
-                  type="button"
-                  onClick={() => toggleReminder(days)}
-                  className={`w-full px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest border transition-all ${reminders.includes(days)
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                    : 'border-slate-800 text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  {days} Day Reminder
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setCadence([30, 14, 7, 1])}
-                className="px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-slate-800 text-slate-400 hover:text-slate-200"
-              >
-                Standard Cadence
-              </button>
-              <button
-                type="button"
-                onClick={() => setCadence([45, 30, 14, 7, 3, 1])}
-                className="px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest border border-slate-800 text-slate-400 hover:text-slate-200"
-              >
-                Escalation Cadence
-              </button>
-            </div>
-            <div className="mt-6 p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500">Next Action</p>
-              <p className="text-sm font-semibold text-white">{tracker.nextAction.description}</p>
-              <p className="text-[10px] text-slate-500 mt-2">Due {tracker.nextAction.deadline.toLocaleDateString()} ({tracker.nextAction.daysUntil} days)</p>
-            </div>
-          </div>
+        <div className="grid lg:grid-cols-12 gap-12">
+            {/* Countdown Matrix */}
+            <div className="lg:col-span-8 space-y-8">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-black text-white flex items-center gap-4">
+                        <span className="w-1.5 h-8 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+                        Compliance Tracking Stack
+                    </h3>
+                </div>
 
-          <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Auto Reminders</p>
-            <p className="text-sm text-slate-500">Calendar export includes alert popups for each deadline and milestone based on your selected cadence.</p>
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={downloadCalendar}
-                className="btn btn-primary w-full !rounded-xl !py-3"
-              >
-                Sync Calendar Now
-              </button>
-            </div>
-          </div>
+                <div className="grid gap-6">
+                    {tracker.countdowns.map((cd, idx) => (
+                        <motion.div
+                            key={`${cd.type}-${idx}`}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className={cn(
+                                "relative group p-10 rounded-[3rem] border border-white/5 backdrop-blur-xl transition-all duration-500 overflow-hidden",
+                                cd.urgency === 'expired' ? "bg-rose-500/5 border-rose-500/30" :
+                                cd.urgency === 'critical' ? "bg-orange-500/5 border-orange-500/30" :
+                                "bg-slate-900/40"
+                            )}
+                        >
+                            <div className="absolute top-0 right-0 p-10">
+                                <span className={cn(
+                                    "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] font-mono border",
+                                    cd.urgency === 'expired' ? "bg-rose-500 text-white border-rose-400" :
+                                    cd.urgency === 'critical' ? "bg-orange-500 text-white border-orange-400" :
+                                    "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                )}>
+                                    {cd.urgency}
+                                </span>
+                            </div>
 
-          <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Email Templates</p>
-            <p className="text-sm text-slate-500">Prebuilt outreach text for deadline reminders and no-response escalations.</p>
-            <div className="mt-4 space-y-3">
-              <button
-                type="button"
-                onClick={() => copyTemplate('reminder')}
-                className="btn btn-secondary w-full !rounded-xl !py-3 !text-[11px] !uppercase !tracking-widest"
-              >
-                Copy Reminder Email
-              </button>
-              <button
-                type="button"
-                onClick={() => copyTemplate('no_response')}
-                className="btn btn-secondary w-full !rounded-xl !py-3 !text-[11px] !uppercase !tracking-widest"
-              >
-                Copy No-Response Email
-              </button>
-              {copyStatus !== 'idle' && (
-                <p className={`text-[10px] uppercase tracking-widest ${copyStatus === 'success' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                  {copyStatus === 'success' ? 'Copied to clipboard' : 'Copy failed'}
-                </p>
-              )}
-            </div>
-          </div>
+                            <div className="flex flex-col md:flex-row md:items-center gap-10">
+                                <div className="text-center md:text-left min-w-[220px]">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono mb-2">Temporal Offset</p>
+                                    <p className={cn(
+                                        "text-5xl font-black font-mono tracking-tighter shrink-0",
+                                        cd.urgency === 'expired' ? "text-rose-500" : "text-white"
+                                    )}>
+                                        {formatCountdown(cd)}
+                                    </p>
+                                </div>
 
-          <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Follow-Up Kit</p>
-            <p className="text-sm text-slate-500">Auto-generated letters for escalation when deadlines are missed or investigations stall.</p>
-            <div className="mt-4 space-y-3">
-              <button
-                type="button"
-                onClick={() => downloadText(buildMOV(), 'method_of_verification_request.txt')}
-                className="btn btn-secondary w-full !rounded-xl !py-3 !text-[11px] !uppercase !tracking-widest"
-              >
-                Download MOV Request
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadText(buildNotice(), 'failure_to_investigate_notice.txt')}
-                className="btn btn-secondary w-full !rounded-xl !py-3 !text-[11px] !uppercase !tracking-widest"
-              >
-                Download No-Response Notice
-              </button>
-              <button
-                type="button"
-                onClick={() => downloadText(buildCFPB(), 'cfpb_complaint_outline.txt')}
-                className="btn btn-secondary w-full !rounded-xl !py-3 !text-[11px] !uppercase !tracking-widest"
-              >
-                Download CFPB Outline
-              </button>
+                                <div className="h-px md:h-24 w-full md:w-px bg-white/10" />
+
+                                <div className="flex-grow space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <AlertTriangle size={16} className={cn(
+                                            cd.urgency === 'expired' ? "text-rose-400" : "text-amber-400"
+                                        )} />
+                                        <h4 className="text-xl font-black text-white uppercase tracking-tight">
+                                            {cd.label}
+                                        </h4>
+                                    </div>
+                                    <p className="text-sm text-slate-400 leading-relaxed font-medium">
+                                        {cd.explanation}
+                                    </p>
+                                    <div className="pt-8 mt-4 border-t border-white/5 flex items-center gap-5">
+                                        <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-xl">
+                                            <MousePointer2 size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Execution Directive</p>
+                                            <p className="text-sm font-bold text-white font-mono">{cd.action}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
             </div>
-          </div>
+
+            {/* Sidebar Controls */}
+            <div className="lg:col-span-4 space-y-8">
+                {/* Reminders */}
+                <div className="bg-slate-900/50 border border-white/5 rounded-[3rem] p-10 shadow-2xl">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono mb-10 flex items-center gap-3">
+                        <Bell size={14} className="text-amber-400" />
+                        Trigger Presets
+                    </h3>
+                    <div className="space-y-4">
+                        {reminderOptions.map(days => (
+                            <button
+                                key={days}
+                                onClick={() => toggleReminder(days)}
+                                className={cn(
+                                    "w-full flex items-center justify-between p-6 rounded-2xl border transition-all active:scale-95 group",
+                                    reminders.includes(days) 
+                                        ? "bg-amber-500/10 border-amber-400/50 text-amber-400" 
+                                        : "bg-slate-950 border-white/5 text-slate-600 hover:border-white/20 hover:text-slate-300"
+                                )}
+                            >
+                                <span className="font-black text-[10px] uppercase tracking-[0.3em] font-mono">{days} Day Interval</span>
+                                {reminders.includes(days) ? (
+                                    <CheckCircle2 size={20} className="text-amber-400" />
+                                ) : (
+                                    <div className="w-5 h-5 rounded-full border-2 border-slate-800 group-hover:border-slate-700" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Comms */}
+                <div className="bg-gradient-to-br from-amber-600/10 to-transparent border border-white/10 rounded-[3rem] p-10 space-y-8 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-6 opacity-20">
+                        <Mail size={80} className="text-amber-400 rotate-12" />
+                    </div>
+                    <div className="relative z-10">
+                        <h4 className="text-lg font-black text-white mb-6 uppercase tracking-tight">Outreach Manifests</h4>
+                        <div className="space-y-4">
+                            <button
+                                onClick={() => copyTemplate('reminder')}
+                                className="w-full flex items-center gap-5 p-5 bg-slate-900/80 border border-white/5 rounded-2xl hover:border-amber-400/50 transition-all text-left group"
+                            >
+                                <div className="w-12 h-12 rounded-xl bg-amber-500/5 flex items-center justify-center text-amber-500 border border-amber-500/10 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                                    <Zap size={20} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-white group-hover:text-amber-400 transition-colors">Forensic Status Check</p>
+                                    <p className="text-[9px] text-slate-500 font-bold font-mono">Export Internal Reminder</p>
+                                </div>
+                            </button>
+                            <button
+                                onClick={() => copyTemplate('no_response')}
+                                className="w-full flex items-center gap-5 p-5 bg-slate-900/80 border border-white/5 rounded-2xl hover:border-rose-500/50 transition-all text-left group"
+                            >
+                                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                                    <ShieldAlert size={20} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-white group-hover:text-rose-400 transition-colors">Statutory Lapse Notice</p>
+                                    <p className="text-[9px] text-slate-500 font-bold font-mono">Export Escalation Draft</p>
+                                </div>
+                            </button>
+                        </div>
+                        {copyStatus === 'success' && (
+                            <motion.p 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-center text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] mt-6"
+                            >
+                                SYNC_SUCCESS
+                            </motion.p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Milestone Ledger */}
+                <div className="p-10 bg-slate-900/40 border border-white/5 rounded-[3rem] shadow-2xl">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono mb-10">Statutory Milestone Ledger</h3>
+                    <div className="space-y-8">
+                        {tracker.milestones.map((m, idx) => (
+                            <div key={idx} className="flex gap-6 group">
+                                <div className="flex flex-col items-center">
+                                    <div className={cn(
+                                        "w-3 h-3 rounded-full border-2 transition-all",
+                                        m.passed 
+                                            ? "bg-slate-700 border-slate-800" 
+                                            : "bg-amber-500 border-amber-900 shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-125"
+                                    )} />
+                                    {idx < tracker.milestones.length - 1 && (
+                                        <div className={cn(
+                                            "w-px flex-grow my-2",
+                                            m.passed ? "bg-slate-800" : "bg-gradient-to-b from-amber-500/50 to-slate-800"
+                                        )} />
+                                    )}
+                                </div>
+                                <div className="pb-4">
+                                    <p className={cn(
+                                        "text-sm font-black uppercase tracking-tight",
+                                        m.passed ? "text-slate-600 line-through" : "text-white"
+                                    )}>
+                                        {m.event}
+                                    </p>
+                                    <div className="flex items-center gap-3 mt-1 text-[10px] font-mono font-bold">
+                                        <Calendar size={10} className="text-slate-600" />
+                                        <span className="text-slate-500">{m.date.toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-xs text-slate-600 mt-3 font-medium leading-relaxed group-hover:text-slate-400 transition-colors">
+                                        {m.significance}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
   );
 };

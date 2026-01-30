@@ -46,6 +46,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to start the analyzer.
 
+### One-Click Vercel Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+The app remains a one-click Vercel deploy. Optional remote AI extensions can be configured without breaking client-only behavior.
+
+### Environment Template
+
+Copy `pwa-app/.env.example` to `.env.local` and adjust only what you need. Optional remote AI keys are supported but not required.
+
 ### Build for Production
 
 ```bash
@@ -65,6 +75,8 @@ This tool is architecture-ready for adoption by law firms and credit repair orga
 ## ⚠️ Legal Disclaimer
 
 **This software is for educational and informational purposes only.** It does not constitute legal advice. The "Liability Radar" and "Statute Tracker" provide estimates based on general statutory rules and may not reflect specific case law in your jurisdiction. Always consult with a qualified consumer protection attorney for legal matters.
+
+For organizational or non-individual use, contact the organization listed in `src/config/branding.ts`.
 
 ## License
 

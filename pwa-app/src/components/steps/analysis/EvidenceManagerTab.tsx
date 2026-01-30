@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     createEvidenceItem,
     createEvidencePackage,
@@ -8,6 +8,7 @@ import {
     EvidenceItem,
     EvidencePackage
 } from '../../../lib/evidence-custody';
+import { Skeleton } from '../../Skeleton';
 
 interface EvidenceManagerTabProps {
     caseId: string;
@@ -74,12 +75,12 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
                     <p className="text-slate-500">Securely manage and verify forensic evidence for litigation.</p>
                 </div>
                 <div className="flex gap-4">
-                    <label className="btn btn-secondary !px-6 !py-3 !rounded-xl cursor-pointer flex items-center gap-2">
+                    <label className={isUploading ? 'btn btn-secondary !px-6 !py-3 !rounded-xl cursor-not-allowed opacity-70 pointer-events-none' : 'btn btn-secondary !px-6 !py-3 !rounded-xl cursor-pointer flex items-center gap-2'}>
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        Add Evidence
-                        <input type="file" multiple className="hidden" onChange={handleFileUpload} />
+                        {isUploading ? 'Processing…' : 'Add Evidence'}
+                        <input type="file" multiple className="hidden" onChange={handleFileUpload} disabled={isUploading} />
                     </label>
                     <button
                         disabled={evidence.length === 0}
@@ -137,7 +138,23 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {evidence.length === 0 ? (
+                            {isUploading ? (
+                                <>
+                                    {[1, 2, 3].map((i) => (
+                                        <tr key={`skeleton-${i}`}>
+                                            <td colSpan={4} className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <Skeleton variant="rectangular" className="h-8 w-8 rounded" />
+                                                    <div className="space-y-2 flex-1">
+                                                        <Skeleton variant="rectangular" className="h-4 w-32" />
+                                                        <Skeleton variant="rectangular" className="h-3 w-16" />
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </>
+                            ) : evidence.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">No evidence items uploaded yet.</td>
                                 </tr>

@@ -6,7 +6,7 @@
 
 import { RuleFlag } from './rules';
 
-export interface DamageAssessment {
+export interface ForensicAssessment {
     statute: 'FCRA' | 'FDCPA' | 'TILA' | 'STATE_LAW';
     section: string;
     violationType: string;
@@ -16,7 +16,7 @@ export interface DamageAssessment {
 
 export interface LiabilityReport {
     overallSeverityScore: number;
-    assessments: DamageAssessment[];
+    assessments: ForensicAssessment[];
     riskMultiplier: number;
     litigationReady: boolean;
 }
@@ -28,7 +28,7 @@ const SEVERITY_WEIGHTS = {
 };
 
 export function calculateLiability(flags: RuleFlag[]): LiabilityReport {
-    const assessments: DamageAssessment[] = [];
+    const assessments: ForensicAssessment[] = [];
     let totalScore = 0;
 
     flags.forEach(flag => {

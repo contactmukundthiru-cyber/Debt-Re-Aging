@@ -77,62 +77,64 @@ const ComparisonWizard: React.FC<ComparisonWizardProps> = ({ options, onCompare,
   const [newerId, setNewerId] = useState(options[options.length - 1]?.id || '');
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <label className="text-[10px] uppercase tracking-widest text-indigo-500/80">
-          Older Snapshot
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <label className="space-y-2">
+          <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 font-mono">Baseline Archive</span>
           <select
-            className="mt-2 input rounded-xl bg-white/80"
+            className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
             value={olderId}
             onChange={(e) => setOlderId(e.target.value)}
           >
             {options.map(option => (
               <option key={option.id} value={option.id}>
-                {option.label}{option.isCurrent ? ' (current)' : ''}
+                {option.label}{option.isCurrent ? ' (live)' : ''}
               </option>
             ))}
           </select>
         </label>
-        <label className="text-[10px] uppercase tracking-widest text-indigo-500/80">
-          Newer Snapshot
+        <label className="space-y-2">
+          <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 font-mono">Target Archive</span>
           <select
-            className="mt-2 input rounded-xl bg-white/80"
+            className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:ring-2 focus:ring-blue-500/50 transition-all font-mono"
             value={newerId}
             onChange={(e) => setNewerId(e.target.value)}
           >
             {options.map(option => (
               <option key={option.id} value={option.id}>
-                {option.label}{option.isCurrent ? ' (current)' : ''}
+                {option.label}{option.isCurrent ? ' (live)' : ''}
               </option>
             ))}
           </select>
         </label>
       </div>
+      
       <button
         type="button"
-        className="btn btn-secondary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+        className="w-full py-4 bg-white text-slate-950 rounded-2xl text-[9px] font-black uppercase tracking-[0.3em] hover:bg-blue-400 hover:text-white transition-all shadow-xl font-mono"
         onClick={() => {
           if (olderId && newerId && onCompare) {
             onCompare(olderId, newerId);
           }
         }}
       >
-        Compare Snapshots
+        Execute Forensic Comparison
       </button>
-      <div className="flex flex-wrap gap-2">
+
+      <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
-          className="btn btn-primary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+          className="py-3 bg-slate-900 text-white rounded-xl text-[8px] font-black uppercase tracking-[0.2em] border border-white/5 hover:bg-slate-800 transition-all font-mono"
           onClick={onAutoCompare}
         >
-          Auto Compare Oldest vs Latest
+          Auto (Start vs End)
         </button>
         <button
           type="button"
-          className="btn btn-secondary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+          className="py-3 bg-slate-900 text-white rounded-xl text-[8px] font-black uppercase tracking-[0.2em] border border-white/5 hover:bg-slate-800 transition-all font-mono"
           onClick={onExportBundle}
         >
-          Export Dossier Bundle
+          Export ZIP Bundle
         </button>
       </div>
     </div>
@@ -455,661 +457,282 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
   }, [flags]);
 
   return (
-    <div className="fade-in pb-20">
-      {/* Forensic Intelligence Header */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="lg:col-span-2 bg-slate-950 rounded-[40px] p-8 text-white relative overflow-hidden shadow-2xl border border-slate-800"
-        >
-          <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
-            <ShieldCheck size={200} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-emerald-500/30">
-                Institutional Grade Analysis
-              </span>
-              <span className="bg-slate-800 text-slate-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-slate-700">
-                v5.0 PRO
-              </span>
-            </div>
-            <h2 className="text-3xl font-bold tracking-tight mb-4">Case Statistics</h2>
-            <div className="flex items-center gap-12">
-              <div>
-                <p className="text-[10px] uppercase text-slate-500 font-bold mb-1 tracking-widest">Impact Factor</p>
-                <div className="flex items-end gap-2">
-                  <span className="text-5xl font-black text-white">{readiness}</span>
-                  <span className="text-slate-500 font-bold mb-1 text-sm">/ 100</span>
-                </div>
-              </div>
-              <div className="h-12 w-px bg-slate-800" />
-              <div className="flex gap-10">
-                <div>
-                  <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Signals</p>
-                  <p className="text-2xl font-bold text-white">{flags.length}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Conflicts</p>
-                  <p className="text-2xl font-bold text-rose-500">{smartRecommendations.length}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Deltas</p>
-                  <p className="text-2xl font-bold text-orange-400">{seriesInsights?.length ?? 0}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-slate-900 rounded-[40px] p-8 border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col justify-between"
-        >
-          <div>
-            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2">Audit Status</p>
-            <h3 className="text-xl font-bold dark:text-white mb-4">Conduct Forensic Audit</h3>
-            <p className="text-xs text-slate-500 mb-6 leading-relaxed">Systematic verification of data integrity across all reported fields.</p>
-          </div>
-          <button
-            onClick={() => setActiveTab('discovery')}
-            className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-slate-950 dark:bg-emerald-500 text-white dark:text-slate-950 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
-          >
-            <Search size={14} />
-            Initialize Audit
-          </button>
-        </motion.div>
-      </div>
-
-      {smartRecommendations.length > 0 && (
-        <div className="mb-10 grid lg:grid-cols-[1.3fr_1fr] gap-6">
-          <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60">
-            <div className="flex items-center justify-between gap-4 mb-6">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Smart Recommendations</p>
-                <h3 className="text-xl font-semibold dark:text-white">Auto-detected data conflicts</h3>
-              </div>
-              <span className="text-xs font-mono text-slate-400">{smartRecommendations.length} signals</span>
-            </div>
-            <div className="space-y-4">
-              {smartRecommendations.slice(0, 3).map(rec => (
-                <div key={rec.id} className="flex items-start gap-4 border border-slate-200/70 dark:border-slate-800/70 rounded-2xl p-4 bg-white/70 dark:bg-slate-900/40">
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${rec.type === 'error' ? 'bg-rose-500/10 text-rose-500' : rec.type === 'warning' ? 'bg-amber-500/10 text-amber-500' : 'bg-blue-500/10 text-blue-500'}`}>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold dark:text-white">{rec.title}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{rec.description}</p>
-                    {rec.suggestedValue && (
-                      <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-2">Suggested: {rec.suggestedValue}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="premium-card p-6 border-rose-500/20 bg-rose-500/5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500 mb-2">Resolution Path</p>
-            <h3 className="text-xl font-semibold text-rose-900 mb-4">Fix the blockers fast</h3>
-            <p className="text-sm text-rose-900/70 mb-4">Correct these fields before exporting letters to keep the
-              dispute narrative airtight.</p>
-            <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-rose-600">
-              <span className="px-3 py-1.5 rounded-full bg-rose-500/10">Step 3 Verification</span>
-              <span className="px-3 py-1.5 rounded-full bg-rose-500/10">Evidence Audit</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {(flags.length > 0 || citationHighlights.length > 0) && (
-        <div className="mb-10 grid lg:grid-cols-[1.4fr_1fr] gap-6">
-          <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60">
-            <div className="flex items-center justify-between gap-4 mb-6">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Evidence Coverage</p>
-                <h3 className="text-lg font-semibold dark:text-white">Gap analysis by severity</h3>
-              </div>
-              <span className="text-xs font-mono text-slate-400">{checkedEvidenceCount}/{totalPossibleEvidence} items</span>
-            </div>
-            <div className="space-y-4">
-              {evidenceBySeverity.map(item => (
-                <div key={item.level} className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{item.level}</p>
-                    <p className="text-[11px] text-slate-500">{item.checked} of {item.total || 0} evidence items</p>
-                  </div>
-                  <div className="w-48 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                    <div
-                      className={`h-full ${item.level === 'critical' ? 'bg-rose-500' : item.level === 'high' ? 'bg-amber-500' : item.level === 'medium' ? 'bg-blue-500' : 'bg-emerald-500'}`}
-                      style={{ width: `${item.total > 0 ? Math.round((item.checked / item.total) * 100) : 0}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-2">Strategic Playbook</p>
-            <h3 className="text-lg font-semibold text-indigo-900 mb-4">Citations + bureau tactics</h3>
-            <div className="space-y-3 text-sm text-indigo-900/70">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-indigo-500/80 mb-2">Top Citations</p>
-                <div className="flex flex-wrap gap-2">
-                  {citationHighlights.length > 0 ? citationHighlights.map(citation => (
-                    <span key={citation} className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white/70 text-indigo-700 border border-indigo-200/60">
-                      {citation}
-                    </span>
-                  )) : (
-                    <span className="text-xs text-indigo-900/60">No citations detected yet.</span>
-                  )}
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-indigo-500/80 mb-2">Bureau Tactics</p>
-                <ul className="text-xs text-indigo-900/70 space-y-1">
-                  {Object.entries(bureauPlaybook).filter(([_, items]) => items.length > 0).map(([bureau, items]) => (
-                    <li key={bureau}>
-                      <strong className="uppercase">{bureau}</strong>: {items.join(' • ')}
-                    </li>
-                  ))}
-                  {Object.values(bureauPlaybook).every(items => items.length === 0) && (
-                    <li>No bureau-specific tactics surfaced yet.</li>
-                  )}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="mb-10 grid lg:grid-cols-[1.2fr_1fr] gap-6">
-        <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Outcome Probability</p>
-              <h3 className="text-lg font-semibold dark:text-white">Projected success outlook</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">{outcomeProbability.label.replace('_', ' ')}</span>
-          </div>
-          <div className="flex items-center gap-5 mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-slate-900 text-white flex flex-col items-center justify-center">
-              <span className="text-[10px] uppercase tracking-widest">Score</span>
-              <strong className="text-xl">{outcomeProbability.score}%</strong>
-            </div>
-            <div className="flex-1">
-              <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className={`h-full ${outcomeProbability.score >= 80 ? 'bg-emerald-500' : outcomeProbability.score >= 65 ? 'bg-blue-500' : outcomeProbability.score >= 45 ? 'bg-amber-500' : 'bg-rose-500'}`}
-                  style={{ width: `${outcomeProbability.score}%` }}
-                />
-              </div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-2">Model based on severity, readiness, and historical rule strength</p>
-            </div>
-          </div>
-          <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
-            {outcomeProbability.factors.map((factor, idx) => (
-              <li key={idx}>• {factor}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="premium-card p-6 border-emerald-500/20 bg-emerald-500/5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-2">Acceleration Moves</p>
-          <h3 className="text-lg font-semibold text-emerald-900 mb-4">Boost this score quickly</h3>
-          <div className="space-y-3 text-sm text-emerald-900/70">
-            <div className="flex items-center justify-between">
-              <span>Finish evidence checklist</span>
-              <strong>{readiness}%</strong>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Resolve smart recommendations</span>
-              <strong>{smartRecommendations.length}</strong>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>High-severity violations</span>
-              <strong>{flags.filter(f => f.severity === 'high' || f.severity === 'critical').length}</strong>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setActiveTab('discovery')}
-            className="mt-5 btn btn-secondary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
-          >
-            Improve Evidence
-          </button>
-        </div>
-      </div>
-
-      <div className="mb-10 grid lg:grid-cols-[1.3fr_1fr] gap-6">
-        <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Forensic Signal Index</p>
-              <h3 className="text-lg font-semibold dark:text-white">Strength of forensic signals</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">{signalScore}%</span>
-          </div>
-          <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-4">
-            <div className="h-full bg-indigo-500 transition-all" style={{ width: `${signalScore}%` }} />
-          </div>
-          <div className="grid md:grid-cols-3 gap-4 text-xs text-slate-600 dark:text-slate-400">
-            <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/70 p-3 bg-white/70 dark:bg-slate-900/40">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">High Severity</p>
-              <p className="text-lg font-semibold">{highSeverityCount}</p>
-            </div>
-            <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/70 p-3 bg-white/70 dark:bg-slate-900/40">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Series Anomalies</p>
-              <p className="text-lg font-semibold">{seriesCount}</p>
-            </div>
-            <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/70 p-3 bg-white/70 dark:bg-slate-900/40">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Negative Deltas</p>
-              <p className="text-lg font-semibold">{negativeDeltaCount}</p>
-            </div>
-          </div>
-          <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-            <span>Timeline Integrity</span>
-            <span className="font-mono">{timelineIntegrityScore}%</span>
-          </div>
-        </div>
-
-        <div className="premium-card p-6 border-amber-500/20 bg-amber-500/5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-2">Legal Clock Analysis</p>
-          <h3 className="text-lg font-semibold text-amber-900 mb-4">Removal date timing</h3>
-          <div className="space-y-2 text-sm text-amber-900/70">
-            <div className="flex items-center justify-between">
-              <span>DOFD</span>
-              <strong>{editableFields.dofd || '—'}</strong>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Expected Removal</span>
-              <strong>{expectedRemoval ? expectedRemoval.expected.toLocaleDateString('en-US') : '—'}</strong>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Reported Removal</span>
-              <strong>{editableFields.estimatedRemovalDate || '—'}</strong>
-            </div>
-            {removalDeltaDays !== null && (
-              <div className="flex items-center justify-between">
-                <span>Delta (days)</span>
-                <strong className={removalDeltaDays > 30 ? 'text-rose-600' : 'text-emerald-600'}>
-                  {removalDeltaDays > 0 ? `+${removalDeltaDays}` : removalDeltaDays}
-                </strong>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {timelineIssues.length > 0 && (
-        <div className="mb-10 premium-card p-6 bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Timeline Consistency Engine</p>
-              <h3 className="text-lg font-semibold dark:text-white">Chronology validation</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">{timelineIssues.length} issue(s)</span>
-          </div>
-          <div className="grid gap-3">
-            {timelineIssues.map(issue => (
-              <div key={issue.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
-                <div>
-                  <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full border ${
-                    issue.severity === 'blocking' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                  }`}>
-                    {issue.severity}
-                  </span>
-                  <p className="text-sm font-semibold dark:text-white mt-2">{issue.title}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{issue.description}</p>
-                </div>
-                {issue.field && (
-                  <button
-                    type="button"
-                    className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                    onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: issue.field } }))}
-                  >
-                    Fix Field
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {actionQueue.length > 0 && (
-        <div className="mb-10 premium-card p-6 bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Forensic Action Queue</p>
-              <h3 className="text-lg font-semibold dark:text-white">Top fixes to strengthen the case</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">{actionQueue.length} priorities</span>
-          </div>
-          <div className="grid gap-3">
-            {actionQueue.map(item => (
-              <div key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
-                <div>
-                  <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full border ${
-                    item.priority === 'critical' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
-                    item.priority === 'high' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                    'bg-slate-100 text-slate-500 border-slate-200'
-                  }`}>
-                    {item.priority}
-                  </span>
-                  <p className="text-sm font-semibold dark:text-white mt-2">{item.title}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{item.detail}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {item.tab && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => setActiveTab(item.tab!)}
-                    >
-                      Open {item.tab}
-                    </button>
-                  )}
-                  {item.field && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: item.field } }))}
-                    >
-                      Fix Field
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="mb-10 premium-card p-6 bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Analysis Readiness</p>
-            <h3 className="text-lg font-semibold dark:text-white">Pre‑litigation readiness gate</h3>
-          </div>
-          <span className="text-xs font-mono text-slate-400">{analysisReadiness.readinessScore}%</span>
-        </div>
-        <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-4">
-          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${analysisReadiness.readinessScore}%` }} />
-        </div>
-        <div className="grid md:grid-cols-3 gap-4 text-xs text-slate-600 dark:text-slate-400">
-          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3">
-            <p className="text-[10px] uppercase tracking-widest text-rose-500 mb-1">Blocking Issues</p>
-            <p className="text-lg font-semibold text-rose-600">{analysisReadiness.blockers}</p>
-          </div>
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
-            <p className="text-[10px] uppercase tracking-widest text-amber-500 mb-1">Warnings</p>
-            <p className="text-lg font-semibold text-amber-600">{analysisReadiness.warnings}</p>
-          </div>
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
-            <p className="text-[10px] uppercase tracking-widest text-emerald-500 mb-1">Evidence Readiness</p>
-            <p className="text-lg font-semibold text-emerald-600">{readiness}%</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-10 grid lg:grid-cols-[1.4fr_1fr] gap-6">
-        <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Bureau Calibration</p>
-              <h3 className="text-lg font-semibold dark:text-white">Adjust probability weights</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">0.8x - 1.2x</span>
-          </div>
-          <div className="space-y-4 text-xs text-slate-600 dark:text-slate-400">
-            {(['experian', 'equifax', 'transunion'] as const).map(bureau => (
-              <div key={bureau}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="uppercase tracking-widest">{bureau}</span>
-                  <span className="font-mono">{bureauWeights[bureau].toFixed(2)}x</span>
-                </div>
-                <input
-                  type="range"
-                  min={0.8}
-                  max={1.2}
-                  step={0.05}
-                  value={bureauWeights[bureau]}
-                  onChange={(e) => setBureauWeights(prev => ({ ...prev, [bureau]: Number(e.target.value) }))}
-                  className="w-full"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-2">Comparison Wizard</p>
-          <h3 className="text-lg font-semibold text-indigo-900 mb-4">Select snapshots to compare</h3>
-          {seriesOptions && seriesOptions.length > 1 ? (
-            <ComparisonWizard
-              options={seriesOptions}
-              onCompare={onCompareSnapshots}
-              onAutoCompare={() => {
-                if (!seriesOptions || seriesOptions.length < 2 || !onCompareSnapshots) return;
-                onCompareSnapshots(seriesOptions[0].id, seriesOptions[seriesOptions.length - 1].id);
-              }}
-              onExportBundle={async () => {
-                const content = exportComparisonDossier(deltas, seriesInsights || [], seriesSnapshots || []);
-                const csv = exportComparisonCsv(deltas);
-                const pdfBlob = buildComparisonDossierPdfBlob(deltas, seriesInsights || [], seriesSnapshots || [], readiness);
-                const JSZip = (await import('jszip')).default;
-                const zip = new JSZip();
-                zip.file('comparison_dossier.txt', content);
-                zip.file('comparison_dossier.csv', csv);
-                zip.file('comparison_dossier.pdf', pdfBlob);
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
-                const url = URL.createObjectURL(zipBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'comparison_dossier_bundle.zip';
-                link.click();
-                URL.revokeObjectURL(url);
-              }}
-            />
-          ) : (
-            <p className="text-sm text-indigo-900/70">Add another report to history to unlock multi-snapshot comparison.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Summary Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-end gap-6 mb-6">
-        <div>
-          <h2 className="text-3xl font-black tracking-tighter mb-1 text-white uppercase italic">Zenith Command Center</h2>
-          <p className="text-slate-500 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Forensic analysis active • {flags.length} nodes identified
-          </p>
-        </div>
-        <div className="flex gap-2 no-print">
-          <button
-            type="button"
-            onClick={() => generateForensicReport(editableFields, flags, riskProfile, relevantCaseLaw, consumer, discoveryAnswers)}
-            className="btn btn-primary !h-10 !px-6 !rounded-lg bg-white !text-slate-950 border-none shadow-xl shadow-white/5 hover:scale-[1.02] transition-transform flex items-center gap-2 !text-[10px] !font-black !uppercase !tracking-widest"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
-            Export Dossier
-          </button>
-        </div>
-      </div>
-
-      <CaseSummaryDashboard
-        flags={flags}
-        riskProfile={riskProfile}
-        readiness={readiness}
-      />
-
-      {/* Main Command View moved into Overview tab below */}
-
-      {/* Legacy Score Dashboard (Removing or replacing) */}
-
-
-      {/* Forensic Tab Navigation */}
-      <div className="sticky top-0 z-50 py-6 mb-12 -mx-4 px-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800/50 no-print transition-all">
-        <div 
-          ref={tabsRef}
-          className="max-w-7xl mx-auto flex items-center justify-between gap-8"
-        >
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-            {ANALYSIS_TABS.map((tab) => {
-              const isSelected = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  id={`tab-${tab.id}`}
-                  data-tab={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "relative px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all",
-                    isSelected 
-                      ? "text-white" 
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                  )}
-                >
-                  {isSelected && (
-                    <motion.div 
-                      layoutId="activeTab"
-                      className="absolute inset-0 bg-slate-950 dark:bg-emerald-500 rounded-full shadow-lg shadow-slate-950/20"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                  <span className="relative z-10">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+    <>
+    <div className="fade-in pb-20 space-y-12">
+      {/* Forensic Intelligence Center - Institutional Hero */}
+      <section className="relative group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5 rounded-[3rem] blur-3xl -z-10 transition-all group-hover:from-blue-600/10 group-hover:to-indigo-600/10" />
+        <div className="premium-card p-12 bg-slate-950 text-white border-slate-800 rounded-[3rem] overflow-hidden relative shadow-3xl shadow-blue-900/10">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -mr-64 -mt-64 animate-pulse opacity-50" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] -ml-40 -mb-40" />
           
-          <div className="hidden md:flex items-center gap-4">
-            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
-            <button className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors">
-              Compare Mode
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Tab Content Rendering */}
-      <div className="mb-8 min-h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-        {activeTab === 'overview' && (
-          <div className="space-y-10">
-            <CaseSummaryDashboard
-              flags={flags}
-              riskProfile={riskProfile}
-              readiness={readiness}
-            />
-
-            {/* Main Command View */}
-            <div className="grid lg:grid-cols-12 gap-8">
-              {/* Left Column: Violations & Risk (High Density) */}
-              <div className="lg:col-span-8 space-y-6">
-                <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl">
-                  <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
-                       <AlertTriangle size={14} className="text-rose-500" />
-                       Violation Log
-                    </h3>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase italic">FCRA/FDCPA CORE</span>
-                  </div>
-                  <div className="p-0 max-h-[600px] overflow-y-auto scrollbar-hide">
-                    {flags.map((flag, idx) => (
-                      <div key={idx} className="border-b border-slate-50 dark:border-slate-800/40 last:border-0 p-8 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group">
-                        <div className="flex items-start justify-between gap-4 mb-3">
-                          <h4 className="text-base font-bold dark:text-white flex items-center gap-3">
-                            <span className={cn(
-                              "w-2 h-2 rounded-full",
-                              flag.severity === 'critical' ? "bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)]" : 
-                              flag.severity === 'high' ? "bg-rose-500" : "bg-orange-500"
-                            )} />
-                            {flag.ruleName}
-                          </h4>
-                          <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full uppercase tracking-widest">{flag.severity}</span>
-                        </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6 font-medium">{flag.explanation}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {flag.legalCitations.slice(0, 3).map((cite, i) => (
-                            <span key={i} className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/10 px-3 py-1 rounded-lg uppercase tracking-wider">{cite}</span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          <div className="relative z-10 grid lg:grid-cols-12 gap-16 items-center">
+            <div className="lg:col-span-8">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="px-4 py-1.5 bg-blue-500/10 rounded-full border border-blue-500/20">
+                  <span className="text-[10px] uppercase font-black tracking-[0.4em] text-blue-400 font-mono animate-pulse">Forensic Intelligence Active</span>
                 </div>
+                <div className="h-px w-12 bg-slate-800" />
+                <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-500 font-mono">Institutional v5.0</span>
               </div>
-
-              {/* Right Column: Action Plan & Intelligence */}
-              <div className="lg:col-span-4 space-y-8">
-                {/* Executive Action Plan */}
-                <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
-                  <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800">
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
-                      <Zap size={14} className="text-emerald-500" />
-                      Execution Plan
-                    </h3>
+              
+              <h2 className="text-6xl lg:text-8xl font-black tracking-tighter mb-10 leading-[0.85] uppercase font-mono italic">
+                Audit <span className="text-blue-500">Manifest</span>
+              </h2>
+              
+              <div className="flex flex-wrap items-center gap-16">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Activity size={14} className="text-blue-500 animate-pulse" />
+                    <p className="text-[10px] uppercase text-slate-500 font-black tracking-[0.4em] font-mono">Forensic Readiness</p>
                   </div>
-                  <div className="p-8 space-y-6">
-                    {analytics?.actions.slice(0, 5).map((action, i) => (
-                      <div key={i} className="flex gap-4 group">
-                        <div className="mt-1 shrink-0">
-                          <div className={cn(
-                            "w-1 h-8 rounded-full transition-all",
-                            action.priority === 'immediate' ? "bg-rose-500" : "bg-slate-200 dark:bg-slate-700 group-hover:bg-emerald-500"
-                          )} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold dark:text-white mb-1 group-hover:text-emerald-500 transition-colors">{action.action}</p>
-                          <p className="text-xs text-slate-500 leading-relaxed font-medium">{action.reason}</p>
-                        </div>
-                      </div>
-                    ))}
-                    <button 
-                      onClick={() => setActiveTab('lettereditor')}
-                      className="w-full mt-6 py-4 bg-slate-950 dark:bg-emerald-500 text-white dark:text-slate-950 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-transform hover:scale-[1.02]"
-                    >
-                      Execute Legal Package
-                    </button>
+                  <div className="flex items-end gap-3">
+                    <span className="text-7xl font-black text-white leading-none tabular-nums tracking-tighter font-mono">{readiness}%</span>
+                    <div className="flex flex-col mb-1 border-l border-white/10 pl-3">
+                       <span className={`text-[10px] font-black uppercase tracking-widest ${readiness > 80 ? 'text-emerald-500' : 'text-orange-500'}`}>
+                         {readiness > 80 ? 'COURT_READY' : 'INCOMPLETE'}
+                       </span>
+                       <span className="text-[8px] font-black text-slate-600 font-mono tracking-widest mt-0.5">V5.0_STABLE</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* AI Intelligence Brief */}
-                <div className="bg-slate-950 rounded-[32px] p-8 text-white relative overflow-hidden shadow-2xl border border-slate-800 group">
-                  <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-                    <ShieldCheck size={100} />
-                  </div>
-                  <div className="relative z-10">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-orange-400 mb-6 font-mono">Agent Briefing</p>
-                    <p className="text-sm text-slate-300 leading-relaxed font-medium italic mb-8 border-l-2 border-orange-500/30 pl-4">
-                      "{riskProfile?.summary?.substring(0, 180)}..."
-                    </p>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                        <p className="text-[9px] font-bold text-slate-500 uppercase mb-2">Risk Strategy</p>
-                        <p className={cn(
-                          "text-xs font-bold uppercase tracking-widest",
-                          riskProfile?.riskLevel === 'critical' ? 'text-indigo-400 animate-pulse' : 'text-rose-500'
-                        )}>{riskProfile?.riskLevel}</p>
+                <div className="h-20 w-px bg-white/5 hidden sm:block" />
+
+                <div className="grid grid-cols-2 gap-x-16 gap-y-8">
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.4em] font-mono whitespace-nowrap">Primary Violations</p>
+                    <div className="flex items-center gap-3">
+                      <p className="text-4xl font-black text-white tabular-nums tracking-tighter font-mono">{flags.length}</p>
+                      <div className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20">
+                        <span className="text-[8px] font-black text-rose-500 font-mono tracking-widest">NODES</span>
                       </div>
-                      <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800">
-                        <p className="text-[9px] font-bold text-slate-500 uppercase mb-2">Litigation Potential</p>
-                        <p className="text-xs font-bold uppercase text-orange-400 tracking-widest">{riskProfile?.litigationPotential ? 'Elevated' : 'Standard'}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.4em] font-mono whitespace-nowrap">Sequence Drift</p>
+                    <div className="flex items-center gap-3">
+                      <p className="text-4xl font-black text-orange-500 tabular-nums tracking-tighter font-mono">{seriesInsights?.length ?? 0}</p>
+                      <div className="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20">
+                        <span className="text-[8px] font-black text-orange-500 font-mono tracking-widest">DRIVES</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            <div className="lg:col-span-4 self-stretch">
+               <div className="h-full bg-white/5 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 p-8 flex flex-col justify-between shadow-inner">
+                  <div>
+                    <h5 className="text-[10px] font-mono uppercase font-black text-slate-400 tracking-[0.3em] mb-4">Command Actions</h5>
+                    <p className="text-sm text-slate-400 leading-relaxed font-medium mb-8">
+                      Systematic verification of <span className="text-white italic">data integrity</span> across all reported fields has detected <span className="text-blue-400">{flags.length} nodes</span> for challenge.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => generateForensicReport(editableFields, flags, riskProfile, relevantCaseLaw, consumer, discoveryAnswers)}
+                      className="w-full group py-4 px-6 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-blue-400 hover:text-white shadow-xl flex items-center justify-center gap-3"
+                    >
+                      <Briefcase size={14} className="group-hover:rotate-12 transition-transform" />
+                      Generate Institutional Dossier
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('discovery')}
+                      className="w-full group py-4 px-6 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 transition-all hover:border-blue-500/50 flex items-center justify-center gap-3"
+                    >
+                      <Search size={14} className="group-hover:scale-125 transition-transform" />
+                      Initialize Forensic Audit
+                    </button>
+                  </div>
+               </div>
+            </div>
           </div>
-        )}
+        </div>
+      </section>
+
+      {/* Navigation Component - Elite Institutional Style */}
+      <nav className="sticky top-6 z-[100] px-6 no-print">
+        <div className="mx-auto bg-slate-950/80 backdrop-blur-3xl p-2 rounded-[2.5rem] border border-white/10 shadow-4xl flex items-center justify-center gap-2 overflow-x-auto scrollbar-hide no-scrollbar ring-1 ring-white/5">
+          {ANALYSIS_TABS.map((tab, idx) => {
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "relative flex flex-col items-center justify-center px-8 py-4 rounded-[1.8rem] transition-all duration-500 group min-w-[160px]",
+                  isSelected 
+                    ? "text-slate-950" 
+                    : "text-slate-500 hover:text-white hover:bg-white/5"
+                )}
+                role="tab"
+                aria-selected={isSelected}
+              >
+                {isSelected && (
+                  <motion.div 
+                    layoutId="activeTabPill"
+                    className="absolute inset-0 bg-white rounded-[1.6rem] shadow-2xl"
+                    transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
+                  />
+                )}
+                <div className="relative z-10 flex flex-col items-center gap-1.5">
+                  <span className={cn(
+                    "text-[8px] font-black font-mono tracking-widest leading-none",
+                    isSelected ? "text-slate-400" : "text-slate-700 group-hover:text-slate-500"
+                  )}>
+                    NODE::{String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <span className={cn(
+                    "text-[10px] font-black uppercase tracking-[0.2em] text-center transition-colors font-mono whitespace-nowrap",
+                    isSelected ? "text-slate-950" : ""
+                  )}>
+                    {tab.label}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <div>
+      {/* Dashboard Sub-Stats for Overview (Auto-integrated) */}
+      {activeTab === 'overview' && (
+        <div className="space-y-16 animate-in fade-in duration-700">
+          <CaseSummaryDashboard flags={flags} riskProfile={riskProfile} readiness={readiness} />
+
+          <div className="grid lg:grid-cols-12 gap-10">
+            {/* Mission Critical Items */}
+            <div className="lg:col-span-8 space-y-10">
+              {/* Compliance Violations Manifest */}
+              <div className="premium-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-slate-100 dark:ring-white/5">
+                <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20">
+                       <AlertTriangle size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black dark:text-white tracking-tight uppercase font-mono">Violations <span className="text-indigo-500">MANIFEST</span></h3>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">FCRA / FDCPA Sequence Audit</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full uppercase tracking-widest font-mono">{flags.length} Nodes detected</span>
+                </div>
+                <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {flags.slice(0, 5).map((flag, idx) => (
+                    <motion.div 
+                      key={idx} 
+                      whileHover={{ x: 10 }}
+                      className="p-10 hover:bg-slate-50 dark:hover:bg-indigo-500/5 transition-all cursor-default group"
+                    >
+                      <div className="flex items-center justify-between gap-6 mb-4">
+                        <div className="flex items-center gap-4">
+                          <span className={cn(
+                            "w-2.5 h-2.5 rounded-full",
+                            flag.severity === 'critical' ? "bg-indigo-500 animate-pulse shadow-[0_0_15px_rgba(99,102,241,0.6)]" : 
+                            flag.severity === 'high' ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]" : "bg-orange-500"
+                          )} />
+                          <h4 className="text-lg font-black dark:text-white uppercase font-mono tracking-tight group-hover:text-indigo-500 transition-colors">{flag.ruleName}</h4>
+                        </div>
+                        <span className="text-[9px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg uppercase tracking-[0.2em] font-mono group-hover:bg-indigo-500 group-hover:text-white transition-colors">{flag.severity}</span>
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 font-medium max-w-3xl pr-4 italic">
+                        "{flag.explanation}"
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {flag.legalCitations.slice(0, 4).map((cite, i) => (
+                          <span key={i} className="text-[9px] font-black text-indigo-500 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-3 py-1.5 rounded-lg uppercase tracking-widest font-mono">{cite}</span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                  {flags.length > 5 && (
+                    <button 
+                      onClick={() => setActiveTab('violations')}
+                      className="w-full py-6 text-center text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all font-mono"
+                    >
+                       + {flags.length - 5} Additional Nodes in Archive
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side Strategy */}
+            <div className="lg:col-span-4 space-y-10">
+              {/* Mission Briefing */}
+              <div className="bg-slate-950 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-3xl border border-slate-800 group ring-1 ring-white/10">
+                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-1000">
+                  <ShieldCheck size={180} />
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-10">
+                    <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 font-mono">Strategic Briefing</p>
+                  </div>
+                  
+                  <div className="space-y-8 mb-12">
+                    <p className="text-lg text-slate-200 leading-relaxed font-bold italic tracking-tight pr-6 relative">
+                      <span className="text-6xl text-blue-500/20 absolute -top-8 -left-4 font-serif">"</span>
+                      {riskProfile?.summary?.substring(0, 220)}...
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md">
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 font-mono">Tactical Strength</p>
+                      <p className={cn(
+                        "text-sm font-black uppercase tracking-[0.2em] font-mono",
+                        riskProfile?.riskLevel === 'critical' ? 'text-blue-400 animate-pulse' : 'text-emerald-500'
+                      )}>{riskProfile?.riskLevel}</p>
+                    </div>
+                    <div className="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md">
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 font-mono">Litigation Vector</p>
+                      <p className="text-sm font-black uppercase text-orange-400 tracking-[0.2em] font-mono">{riskProfile?.litigationPotential ? 'Elevated' : 'Defensive'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Execution Manifest */}
+              <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden ring-1 ring-slate-100 dark:ring-white/5">
+                <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-3 font-mono">
+                    <Zap size={14} className="text-emerald-500" />
+                    Execution Manifest
+                  </h3>
+                </div>
+                <div className="p-10 space-y-8">
+                  {analytics?.actions.slice(0, 4).map((action, i) => (
+                    <div key={i} className="flex gap-6 group cursor-pointer" onClick={() => setActiveTab('lettereditor')}>
+                      <div className="mt-1 shrink-0">
+                        <div className={cn(
+                          "w-1 h-12 rounded-full transition-all duration-500",
+                          action.priority === 'immediate' ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "bg-slate-200 dark:bg-slate-800 group-hover:bg-blue-500 group-hover:h-14"
+                        )} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black dark:text-white mb-2 group-hover:text-blue-500 transition-colors uppercase font-mono">{action.action}</p>
+                        <p className="text-xs text-slate-500 leading-relaxed font-normal">{action.reason}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => setActiveTab('lettereditor')}
+                    className="w-full group mt-8 py-5 bg-slate-950 dark:bg-indigo-600 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl flex items-center justify-center gap-4"
+                  >
+                    Generate Legal Command Package
+                    <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
         {activeTab === 'violations' && (
           <ViolationsTab
@@ -1257,6 +880,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
 
       {showGuide && <GuideOverlay onClose={() => setShowGuide(false)} />}
     </div>
+    </>
   );
 };
 

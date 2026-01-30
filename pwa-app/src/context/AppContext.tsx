@@ -248,23 +248,48 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'RESET' });
   }, []);
 
-  // Persistent Theme Support
+  // Persistent Theme Support: read initial theme from DOM (set by layout script) or localStorage
   React.useEffect(() => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
     const saved = localStorage.getItem('cra_dark_mode');
     if (saved !== null) {
       dispatch({ type: 'SET_DARK_MODE', payload: saved === 'true' });
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      dispatch({ type: 'SET_DARK_MODE', payload: true });
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      dispatch({ type: 'SET_DARK_MODE', payload: prefersDark });
     }
   }, []);
 
+  // Follow system preference when user has never set a preference
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => {
+      if (localStorage.getItem('cra_dark_mode') !== null) return;
+      dispatch({ type: 'SET_DARK_MODE', payload: mq.matches });
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Sync theme to DOM and localStorage; avoid overwriting script-set dark on first paint
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
     if (state.darkMode) {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
+      localStorage.setItem('cra_dark_mode', 'true');
     } else {
-      document.documentElement.classList.remove('dark');
+      const stored = localStorage.getItem('cra_dark_mode');
+      const scriptSetDark = root.classList.contains('dark') && stored !== 'false';
+      if (scriptSetDark) {
+        // Layout script set dark from system pref; sync state to match
+        dispatch({ type: 'SET_DARK_MODE', payload: true });
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('cra_dark_mode', 'false');
+      }
     }
-    localStorage.setItem('cra_dark_mode', String(state.darkMode));
   }, [state.darkMode]);
 
   const value: AppContextValue = {

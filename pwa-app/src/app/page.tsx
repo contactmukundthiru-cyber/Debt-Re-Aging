@@ -8,6 +8,7 @@ import { parseCreditReport, fieldsToSimple, parseMultipleAccounts, ParsedFields 
 import { runRules, calculateRiskProfile, parseDate } from '../lib/rules';
 import { runComprehensiveAnalysis } from '../lib/forensic-engine';
 import { CreditFields, RuleFlag, RiskProfile, ConsumerInfo, AnalysisRecord } from '../lib/types';
+import { BRANDING } from '../config/branding';
 import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
 import { isPDF, extractPDFText, extractPDFTextViaOCR } from '../lib/pdf';
@@ -1209,6 +1210,9 @@ export default function CreditReportAnalyzer() {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2 text-sm text-gray-500">
             <p className="mono text-xs">Credit Report Analyzer v5.0 | Revolutionary Edition</p>
             <p>100% client-side · Your data stays on your device · {language === 'en' ? 'English' : 'Español'}</p>
+          </div>
+          <div className="mt-2 text-[11px] text-gray-500 text-center">
+            For organizational or non-individual use, contact {BRANDING.organizationName} at {BRANDING.organizationUrl}.
           </div>
         </div>
       </footer>

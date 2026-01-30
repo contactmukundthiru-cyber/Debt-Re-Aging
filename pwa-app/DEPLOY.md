@@ -14,7 +14,7 @@ This is the fastest way to get your organization's instance running on a secure,
 *(Note: Select your forked repository when prompted)*
 
 3. Vercel will automatically detect the Next.js framework configuration.
-4. **Environment Variables**: No sensitive API keys are required for the core forensic engine.
+4. **Environment Variables**: No sensitive API keys are required for the core forensic engine. Optional remote AI defaults can be set via `.env.local` or Vercel project settings (see `.env.example`).
 
 ### Option 2: Docker / On-Premise
 For air-gapped or strictly regulated environments:
@@ -50,6 +50,17 @@ Commit these changes, and Vercel will automatically redeploy with your new brand
 *   **No Database**: All case data is stored in the device's `IndexedDB` (encrypted at rest by the OS).
 *   **Audit Trail**: The application generates a cryptographic hash of every forensic report for chain-of-custody verification.
 
+## Optional Remote AI (BYO Key)
+
+Remote AI analysis is optional and stateless. Users can paste keys in the UI, or a single-tenant deployment can set:
+
+- `NEXT_PUBLIC_AI_REMOTE_ENDPOINT`
+- `NEXT_PUBLIC_AI_REMOTE_MODEL`
+- `NEXT_PUBLIC_AI_REMOTE_API_KEY`
+- `NEXT_PUBLIC_AI_REMOTE_INCLUDE_FIELDS`
+
+See `pwa-app/.env.example` for a ready-to-copy template.
+
 ## Support
 
-For technical integration support or custom Metro 2® mapping rules, contact the development team.
+For organizational or non-individual use, contact the organization listed in `src/config/branding.ts`.

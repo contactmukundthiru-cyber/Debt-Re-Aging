@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { CaseLaw } from '../../../lib/caselaw';
+import { motion } from 'framer-motion';
+import { Gavel, Scale, FileText, Search, Library, ExternalLink, ShieldCheck } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface CaseLawTabProps {
   relevantCaseLaw: CaseLaw[];
@@ -10,87 +13,142 @@ interface CaseLawTabProps {
 const CaseLawTab: React.FC<CaseLawTabProps> = ({ relevantCaseLaw }) => {
   if (relevantCaseLaw.length === 0) {
     return (
-      <div className="premium-card p-16 text-center bg-slate-50 dark:bg-slate-950/20 border-dashed border-slate-200 dark:border-slate-800">
-        <svg className="w-20 h-20 mx-auto mb-6 text-slate-200 dark:text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-        </svg>
-        <h3 className="text-xl font-bold dark:text-white mb-2">No Case Law Matches</h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">No specific legal precedents were found for the detected violations. Consult with an FCRA attorney for tailored case law research.</p>
+      <div className="relative p-1 rounded-[3rem] bg-gradient-to-b from-slate-800 to-slate-950 overflow-hidden shadow-2xl">
+        <div className="relative z-10 p-20 text-center bg-slate-950/90 rounded-[2.8rem] backdrop-blur-xl border border-white/5">
+          <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800">
+            <Search className="w-10 h-10 text-slate-700" />
+          </div>
+          <h3 className="text-2xl font-black text-white mb-4 uppercase tracking-tighter">Precedent Matrix Empty</h3>
+          <p className="text-slate-500 max-w-md mx-auto font-medium leading-relaxed uppercase text-[10px] tracking-[0.2em]">
+            No specific legal precedents detected for current violation parameters. System is standing by for manual jurisprudential injection.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="fade-in space-y-10">
-      {/* Hero Header */}
-      <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
-
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
-              <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-amber-400 font-mono">Legal Research Engine</span>
+    <div className="fade-in space-y-12 pb-32">
+      {/* Jurisprudential Signal Header */}
+      <div className="relative p-1 rounded-[3rem] bg-gradient-to-b from-slate-800 to-slate-950 overflow-hidden shadow-2xl">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 mix-blend-overlay"></div>
+        <div className="relative z-10 p-12 bg-slate-950/90 rounded-[2.8rem] backdrop-blur-xl">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] -mr-80 -mt-80" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="max-w-2xl text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-4 mb-8">
+                  <div className="px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-amber-500 font-mono">Matrix ID: JURIS-X</span>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-slate-500 font-mono">Status: INDEXED</span>
+              </div>
+              <h2 className="text-6xl font-black text-white tracking-tight mb-8 leading-[1.1]">
+                Institutional <br/>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500">Precedent Matrix</span>
+              </h2>
+              <p className="text-slate-400 text-xl leading-relaxed font-light">
+                High-fidelity jurisprudential signals mapping federal court rulings to active forensic findings. These precedents establish the mandatory liability standard.
+              </p>
             </div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Case Law <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">Repository</span>
-            </h2>
-            <p className="text-slate-400 text-sm max-w-lg">Relevant precedents from federal courts supporting your FCRA/FDCPA claims. Use these citations to bolster dispute letters and legal filings.</p>
-          </div>
 
-          <div className="px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-center">
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Precedents</p>
-            <p className="text-3xl font-bold tabular-nums text-amber-400">{relevantCaseLaw.length}</p>
+            <div className="flex flex-col items-center justify-center p-10 rounded-full bg-slate-900 border border-slate-800 shadow-inner min-w-[200px] h-[200px] relative">
+              <div className="absolute inset-0 border-4 border-amber-500/20 rounded-full border-t-amber-500 animate-[spin_10s_linear_infinite]" />
+              <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-1 relative z-10">Nodes Found</p>
+              <p className="text-6xl font-black tabular-nums text-white relative z-10 font-mono tracking-tighter">{relevantCaseLaw.length}</p>
+              <div className="mt-2 text-[8px] font-mono text-amber-500/60 uppercase tracking-[0.3em]">Precision Ver. 01</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Case Cards */}
-      <div className="space-y-6">
+      {/* Case Dossiers */}
+      <div className="grid grid-cols-1 gap-8">
         {relevantCaseLaw.map((law, i) => (
-          <div key={i} className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 transition-all group hover:border-amber-500/30 hover:-translate-y-0.5 overflow-hidden relative">
-            {/* Left Accent Bar */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 to-orange-500" />
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="group relative"
+          >
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/0 via-amber-500/20 to-amber-500/0 rounded-[2.5rem] blur opacity-0 group-hover:opacity-100 transition duration-1000"></div>
+            
+            <div className="relative p-10 bg-slate-950 border border-slate-800/80 rounded-[2.5rem] overflow-hidden">
+                <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-amber-500/50 to-orange-600/50" />
+                
+                <div className="flex flex-col lg:flex-row gap-12 relative z-10">
+                    <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-4 mb-8">
+                            <span className="text-[9px] font-mono font-bold uppercase tracking-[0.2em] px-4 py-1.5 bg-amber-500/10 text-amber-500 rounded-full border border-amber-500/20">
+                                Institutional Precedent #{String(i + 1).padStart(2, '0')}
+                            </span>
+                            <span className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">Type: FEDERAL_RULING</span>
+                        </div>
 
-            <div className="flex flex-col lg:flex-row justify-between gap-8">
-              <div className="flex-1 pl-4">
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full border border-amber-500/20">Legal Precedent</span>
+                        <h4 className="text-3xl font-black text-white mb-3 group-hover:text-amber-400 transition-colors uppercase tracking-tight">
+                            {law.case}
+                        </h4>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-900 rounded-lg border border-slate-800 mb-10">
+                            <Library size={12} className="text-slate-500" />
+                            <p className="text-xs font-mono font-bold text-slate-400 tracking-tighter">{law.citation}</p>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-10">
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3 text-slate-500 font-mono text-[10px] uppercase tracking-widest">
+                                <ShieldCheck size={14} className="text-emerald-500" />
+                                Forensic Applicability
+                            </div>
+                            <p className="text-slate-400 text-sm leading-[1.8] font-medium border-l border-slate-800 pl-6">
+                                {law.relevance}
+                            </p>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3 text-slate-500 font-mono text-[10px] uppercase tracking-widest">
+                                <Gavel size={14} className="text-amber-500" />
+                                Hardened Ruling
+                            </div>
+                            <div className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 relative group/ruling overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-10">
+                                    <Scale size={40} className="text-amber-500" />
+                                </div>
+                                <p className="text-base italic text-slate-300 leading-relaxed relative z-10 font-serif">
+                                  "{law.ruling}"
+                                </p>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+
+                    <div className="lg:w-48 flex lg:flex-col items-center justify-center gap-8 lg:border-l lg:border-slate-800/50 lg:pl-10">
+                        <div className="w-20 h-20 rounded-[2rem] bg-slate-900 flex items-center justify-center border border-slate-800 shadow-2xl group-hover:border-amber-500/50 transition-colors">
+                          <FileText className="w-8 h-8 text-amber-500/50 group-hover:text-amber-500 transition-colors" />
+                        </div>
+                        <div className="flex flex-col items-center gap-2">
+                             <button className="p-3 rounded-xl bg-slate-800 hover:bg-amber-500 text-slate-400 hover:text-white transition-all transform hover:scale-110">
+                                <ExternalLink size={18} />
+                             </button>
+                             <span className="text-[8px] font-mono text-slate-600 uppercase tracking-[0.4em] mt-2">Access Node</span>
+                        </div>
+                    </div>
                 </div>
-
-                <h4 className="text-xl font-bold dark:text-white mb-2 group-hover:text-amber-500 transition-colors">{law.case}</h4>
-                <p className="text-xs font-mono text-slate-400 mb-6">{law.citation}</p>
-
-                <div className="space-y-6">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-2">
-                      <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                      Relevance to Your Case
-                    </p>
-                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{law.relevance}</p>
-                  </div>
-
-                  <div className="p-5 rounded-xl bg-slate-50/50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                      Key Ruling
-                    </p>
-                    <p className="text-sm italic text-slate-600 dark:text-slate-400 leading-relaxed border-l-2 border-amber-500/30 pl-4">
-                      "{law.ruling}"
-                    </p>
-                  </div>
+                
+                {/* Background Pattern */}
+                <div className="absolute bottom-0 right-0 opacity-[0.02] pointer-events-none transform translate-x-1/4 translate-y-1/4">
+                    <Scale size={300} strokeWidth={1} />
                 </div>
-              </div>
-
-              <div className="shrink-0 flex lg:flex-col items-center gap-4 lg:border-l lg:border-slate-100 lg:dark:border-slate-800 lg:pl-8">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
-                  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg>
-                </div>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-center">#{String(i + 1).padStart(2, '0')}</span>
-              </div>
             </div>
-          </div>
+          </motion.div>
         ))}
+      </div>
+
+      <div className="p-12 rounded-[3rem] bg-slate-900/30 border border-slate-800 border-dashed text-center">
+        <p className="text-xs font-mono text-slate-600 uppercase tracking-[0.4em]">
+            Institutional Jurisprudence Update Scheduled: T-MINUS 04:00:00
+        </p>
       </div>
     </div>
   );

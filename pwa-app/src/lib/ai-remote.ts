@@ -15,28 +15,32 @@ export interface RemoteAIResult {
 }
 
 const STORAGE_KEY = 'cra_remote_ai_config';
+const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_AI_REMOTE_ENDPOINT || 'https://api.openai.com/v1/chat/completions';
+const DEFAULT_MODEL = process.env.NEXT_PUBLIC_AI_REMOTE_MODEL || 'gpt-4o-mini';
+const DEFAULT_API_KEY = process.env.NEXT_PUBLIC_AI_REMOTE_API_KEY || '';
+const DEFAULT_INCLUDE_FIELDS = process.env.NEXT_PUBLIC_AI_REMOTE_INCLUDE_FIELDS === 'true';
 
 export function loadRemoteAIConfig(): RemoteAIConfig {
   if (typeof window === 'undefined') {
-    return { baseUrl: '', model: '', apiKey: '', includeFields: false };
+    return { baseUrl: DEFAULT_BASE_URL, model: DEFAULT_MODEL, apiKey: DEFAULT_API_KEY, includeFields: DEFAULT_INCLUDE_FIELDS };
   }
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
       return {
-        baseUrl: 'https://api.openai.com/v1/chat/completions',
-        model: 'gpt-4o-mini',
-        apiKey: '',
-        includeFields: false
+        baseUrl: DEFAULT_BASE_URL,
+        model: DEFAULT_MODEL,
+        apiKey: DEFAULT_API_KEY,
+        includeFields: DEFAULT_INCLUDE_FIELDS
       };
     }
     return JSON.parse(stored) as RemoteAIConfig;
   } catch {
     return {
-      baseUrl: 'https://api.openai.com/v1/chat/completions',
-      model: 'gpt-4o-mini',
-      apiKey: '',
-      includeFields: false
+      baseUrl: DEFAULT_BASE_URL,
+      model: DEFAULT_MODEL,
+      apiKey: DEFAULT_API_KEY,
+      includeFields: DEFAULT_INCLUDE_FIELDS
     };
   }
 }

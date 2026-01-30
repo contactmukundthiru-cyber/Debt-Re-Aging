@@ -126,7 +126,7 @@ export function useAnalysis(): UseAnalysisReturn {
       let deadlines: DeadlineTracker | null = null;
       let collectorMatch: CollectorMatch | null = null;
       let metro2Validation: Metro2ValidationResult | null = null;
-      let impactAssessment: ImpactAssessment | null = null;
+      let impactAssessment: ForensicImpactAssessment | null = null;
 
       // Score Impact
       try {

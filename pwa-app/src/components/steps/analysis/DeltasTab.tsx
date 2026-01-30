@@ -1,6 +1,31 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Zap, 
+  Workflow, 
+  Cpu, 
+  ShieldCheck, 
+  History, 
+  Play, 
+  Pause, 
+  Download, 
+  FileText, 
+  Clock, 
+  AlertTriangle, 
+  CheckCircle, 
+  Eye, 
+  Target, 
+  Radiation, 
+  Fingerprint,
+  Activity,
+  ArrowRight,
+  TrendingUp,
+  Boxes,
+  Hash
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 import { DeltaResult, SeriesInsight, SeriesSnapshot, exportComparisonDossier, computeExpectedRemovalDate, exportComparisonCsv } from '../../../lib/delta';
 import { exportComparisonDossierPdf } from '../../../lib/dossier-pdf';
 
@@ -193,781 +218,658 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
   }
 
   return (
-    <div className="fade-in space-y-10">
-      {/* Hero Header */}
-      <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-orange-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
-
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
-              <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-orange-400 font-mono">Forensic Comparison</span>
+    <div className="fade-in space-y-12 pb-24">
+      {/* SECTION_HEADER::FORENSIC_RECONSTRUCTION */}
+      <div className="relative p-12 bg-slate-950 rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden group">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[120px] -mr-64 -mt-64 animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[120px] -ml-40 -mb-40" />
+        
+        <div className="relative z-10 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-12">
+          <div className="flex-1 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="px-4 py-1.5 rounded-full bg-orange-500/20 border border-orange-500/30 backdrop-blur-md">
+                <span className="text-[10px] font-black text-orange-400 uppercase tracking-[0.4em] font-mono">Dossier Drift Replay</span>
+              </div>
+              <div className="h-px w-24 bg-gradient-to-r from-orange-500/50 to-transparent" />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Delta <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-rose-400">Analysis</span>
+            
+            <h2 className="text-6xl font-black text-white tracking-tighter uppercase font-mono italic leading-none">
+              Forensic <span className="text-orange-500">Reconstruction</span>
             </h2>
-            <p className="text-slate-400 text-sm max-w-lg">Tracking changes between credit report snapshots. Detects illegal modifications, re-aging patterns, and data manipulation over time.</p>
+            
+            <p className="text-slate-400 text-lg leading-relaxed font-medium max-w-3xl">
+              Structural variance analysis across <span className="text-white">SERIES::{seriesSnapshots.length}</span>. Detecting unauthorized metadata shifts, illegal re-aging vectors, and institutional data manipulation within the credit ecosystem.
+            </p>
           </div>
 
-          <div className="flex gap-4">
-            <div className="px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-center">
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Changes</p>
-              <p className="text-2xl font-bold tabular-nums">{deltas.length}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full xl:w-auto">
+            <div className="bg-white/5 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl group/metric">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 font-mono">DRIFT_COUNT::01</p>
+              <p className="text-5xl font-black text-white tabular-nums tracking-tighter">{deltas.length}</p>
+              <div className="h-1 w-full bg-slate-800 rounded-full mt-4 overflow-hidden">
+                <div className="h-full bg-orange-500 w-full" />
+              </div>
             </div>
-            <div className="px-6 py-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center">
-              <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-1">Negative</p>
-              <p className="text-2xl font-bold text-rose-400 tabular-nums">{negativeCount}</p>
+            
+            <div className="bg-rose-500/10 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-rose-500/20 shadow-2xl group/metric">
+              <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-3 font-mono">RISK_VECTORS::02</p>
+              <p className="text-5xl font-black text-rose-500 tabular-nums tracking-tighter">{negativeCount}</p>
+              <div className="h-1 w-full bg-rose-500/20 rounded-full mt-4 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(negativeCount / Math.max(1, deltas.length)) * 100}%` }}
+                  className="h-full bg-rose-500" 
+                />
+              </div>
             </div>
-            <div className="px-6 py-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-              <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Positive</p>
-              <p className="text-2xl font-bold text-emerald-400 tabular-nums">{positiveCount}</p>
+
+            <div className="bg-emerald-500/10 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-emerald-500/20 shadow-2xl group/metric">
+              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3 font-mono">FIX_VECTORS::03</p>
+              <p className="text-5xl font-black text-emerald-500 tabular-nums tracking-tighter">{positiveCount}</p>
+              <div className="h-1 w-full bg-emerald-500/20 rounded-full mt-4 overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(positiveCount / Math.max(1, deltas.length)) * 100}%` }}
+                  className="h-full bg-emerald-500" 
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {seriesInsights.length > 0 && (
-        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Series Forensics</p>
-              <h3 className="text-lg font-bold dark:text-white">Multi-report pattern detection</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">{seriesInsights.length} patterns</span>
+        <div className="relative p-12 bg-white dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800/60 rounded-[3rem] shadow-3xl overflow-hidden group">
+          <div className="absolute top-0 right-0 p-12 opacity-[0.03] transition-transform group-hover:rotate-12 group-hover:scale-125">
+             <Fingerprint className="w-48 h-48" />
           </div>
-          <div className="grid gap-4">
-            {prioritizedInsights.map(insight => (
-              <div key={insight.id} className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
-                <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${
-                    insight.severity === 'high' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
-                    insight.severity === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                    'bg-slate-100 text-slate-500 border-slate-200'
-                  }`}>
-                    {insight.severity}
-                  </span>
-                  <h4 className="text-sm font-semibold dark:text-white">{insight.title}</h4>
-                  <span className="text-[10px] font-mono text-slate-400">Score {insightScore(insight)}%</span>
+          
+          <div className="flex flex-wrap items-end justify-between gap-8 mb-12">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Target className="w-5 h-5 text-orange-500" />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-orange-500 font-mono">Strategic Intelligence</p>
+              </div>
+              <h3 className="text-4xl font-black dark:text-white tracking-tighter uppercase font-mono italic">
+                Cross-Series <span className="text-slate-500">Pattern Vectors</span>
+              </h3>
+            </div>
+            
+            <div className="flex items-center gap-4">
+               <div className="px-6 py-2 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">
+                   {seriesInsights.length} DETECTION_NODES
+                 </span>
+               </div>
+            </div>
+          </div>
+          
+          <div className="grid xl:grid-cols-2 gap-8">
+            {prioritizedInsights.map((insight, idx) => (
+              <motion.div 
+                key={insight.id} 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-slate-800 p-10 bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl shadow-sm hover:shadow-2xl hover:border-orange-500/20 group/node"
+              >
+                <div className="flex items-start justify-between gap-6 mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover/node:rotate-6",
+                      insight.severity === 'high' ? 'bg-rose-500/20 text-rose-500' :
+                      insight.severity === 'medium' ? 'bg-amber-500/20 text-amber-500' :
+                      'bg-slate-500/20 text-slate-500'
+                    )}>
+                      {insight.type === 'reaging' ? <Radiation className="w-7 h-7" /> : 
+                       insight.type === 'removal_extension' ? <Activity className="w-7 h-7" /> :
+                       <Zap className="w-7 h-7" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={cn(
+                          "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md",
+                          insight.severity === 'high' ? 'bg-rose-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                        )}>
+                          {insight.severity}_SEVERITY
+                        </span>
+                        <span className="text-[10px] font-black text-slate-400 font-mono tracking-widest">NODE::{insight.id.slice(0, 4).toUpperCase()}</span>
+                      </div>
+                      <h4 className="text-xl font-black dark:text-white uppercase tracking-tighter font-mono">{insight.title}</h4>
+                    </div>
+                  </div>
+                  
+                  <div className="text-right">
+                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest font-mono mb-1">PROBABILITY</p>
+                    <p className="text-2xl font-black text-indigo-500 font-mono tabular-nums">{insightScore(insight)}%</p>
+                  </div>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">{insight.summary}</p>
-                <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
-                  {insight.evidence.map(item => (
-                    <span key={item} className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">{item}</span>
+
+                <p className="text-base text-slate-600 dark:text-slate-400 mb-8 leading-relaxed font-medium">
+                  {insight.summary}
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  {insight.evidence.map((evidence, eIdx) => (
+                    <div key={eIdx} className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/50 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500/50" />
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-widest font-mono">{evidence}</span>
+                    </div>
                   ))}
                 </div>
-              </div>
+                
+                <div className="absolute bottom-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl -mr-16 -mb-16 opacity-0 group-hover/node:opacity-100 transition-opacity" />
+              </motion.div>
             ))}
           </div>
         </div>
       )}
 
-      {seriesSnapshots.length > 0 && (
-        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Report Timeline</p>
-              <h3 className="text-lg font-bold dark:text-white">Snapshot drift across time</h3>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-slate-400">{displaySnapshots.length} snapshots</span>
-              <button
-                type="button"
-                className={`px-2 py-1 rounded-full border text-[10px] uppercase tracking-widest ${
-                  showChangedSnapshotsOnly ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' : 'bg-slate-100 text-slate-500 border-slate-200'
-                }`}
-                onClick={() => setShowChangedSnapshotsOnly((prev) => !prev)}
-              >
-                {showChangedSnapshotsOnly ? 'Changes Only' : 'Show All'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                onClick={() => {
-                  const content = exportComparisonDossier(deltas, seriesInsights, seriesSnapshots);
-                  const blob = new Blob([content], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = 'forensic_comparison_dossier.txt';
-                  link.click();
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                Export Dossier
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                onClick={() => exportComparisonDossierPdf(deltas, seriesInsights, seriesSnapshots, 'forensic_comparison_dossier.pdf', evidenceReadiness)}
-              >
-                Export PDF
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                onClick={() => setReplayPlaying((prev) => !prev)}
-              >
-                {replayPlaying ? 'Stop Replay' : 'Play Replay'}
-              </button>
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-slate-400">
-                Speed
-                <input
-                  type="range"
-                  min={700}
-                  max={2200}
-                  step={200}
-                  value={replaySpeed}
-                  onChange={(e) => setReplaySpeed(Number(e.target.value))}
-                />
-              </div>
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-slate-400">
-                Scrub
-                <input
-                  type="range"
-                  min={0}
-                  max={Math.max(0, displaySnapshots.length - 1)}
-                  step={1}
-                  value={replayIndex}
-                  onChange={(e) => {
-                    setReplayIndex(Number(e.target.value));
-                    setReplayPlaying(false);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          {displaySnapshots.length > 0 && (
-            <div className="mb-4">
-              <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                <div
-                  className="h-full bg-indigo-500 transition-all duration-500"
-                  style={{ width: `${displaySnapshots.length <= 1 ? 100 : Math.round((replayIndex / (displaySnapshots.length - 1)) * 100)}%` }}
-                />
-              </div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-2">Replay progress</p>
-            </div>
-          )}
-          {expectedRemoval && (
-            <div className="mb-4 flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-widest text-slate-400">
-              <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
-                Expected removal: {expectedRemoval.expected.toLocaleDateString('en-US')}
-              </span>
-              {removalDeltaDays !== null && (
-                <span className={`px-2 py-1 rounded-lg ${removalDeltaDays > 30 ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
-                  Delta: {removalDeltaDays > 0 ? `+${removalDeltaDays}` : removalDeltaDays} days
-                </span>
-              )}
-            </div>
-          )}
-          <div className="space-y-3">
-            {displaySnapshots.map((snapshot, idx) => {
-              const prev = displaySnapshots[idx - 1];
-              const dofdShift = prev?.dofd && snapshot.dofd && prev.dofd !== snapshot.dofd;
-              const removalShift = prev?.removal && snapshot.removal && prev.removal !== snapshot.removal;
-              const statusShift = prev?.status && snapshot.status && prev.status !== snapshot.status;
-              const valueShift = prev?.value && snapshot.value && prev.value !== snapshot.value;
-              const lastPayShift = prev?.lastPayment && snapshot.lastPayment && prev.lastPayment !== snapshot.lastPayment;
-              const reportedShift = prev?.reported && snapshot.reported && prev.reported !== snapshot.reported;
-              return (
-              <div
-                key={snapshot.timestamp}
-                className={`grid md:grid-cols-[160px\_1fr] gap-4 rounded-2xl border p-4 transition-all duration-500 ${
-                  replayPlaying && replayIndex === idx
-                    ? 'border-indigo-500/60 bg-indigo-500/5 scale-[1.01]'
-                    : 'border-slate-200/70 dark:border-slate-800/70 bg-white/70 dark:bg-slate-900/40 opacity-80'
-                }`}
-              >
-                <div>
-                  <p className="text-xs font-semibold dark:text-white">{snapshot.label}</p>
-                  <p className="text-[10px] uppercase tracking-widest text-slate-400">Snapshot</p>
-                </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-slate-600 dark:text-slate-400">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400">DOFD</span>
-                    <p className={`font-mono ${dofdShift ? 'text-rose-500 font-semibold' : ''}`}>{snapshot.dofd || '—'}</p>
+      <div className="grid lg:grid-cols-12 gap-12">
+        {/* REPLAY_ENGINE::TEMPORAL_STREAM */}
+        <div className="lg:col-span-7 space-y-8">
+           <div className="relative p-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/60 rounded-[3rem] shadow-3xl overflow-hidden">
+              <div className="flex items-start justify-between mb-12">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 rounded-3xl bg-indigo-500 text-white flex items-center justify-center shadow-2xl shadow-indigo-500/30">
+                    <History className="w-8 h-8" />
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400">Removal</span>
-                    <p className={`font-mono ${removalShift ? 'text-amber-500 font-semibold' : ''}`}>{snapshot.removal || '—'}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400">Stated Value</span>
-                    <p className={`font-mono ${valueShift ? 'text-indigo-500 font-semibold' : ''}`}>{snapshot.value || '—'}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400">Status</span>
-                    <p className={`font-mono ${statusShift ? 'text-blue-500 font-semibold' : ''}`}>{snapshot.status || '—'}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400">Last Pay</span>
-                    <p className={`font-mono ${lastPayShift ? 'text-emerald-500 font-semibold' : ''}`}>{snapshot.lastPayment || '—'}</p>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400">Reported</span>
-                    <p className={`font-mono ${reportedShift ? 'text-rose-500 font-semibold' : ''}`}>{snapshot.reported || '—'}</p>
+                    <h3 className="text-2xl font-black dark:text-white tracking-tighter uppercase font-mono">Temporal Reconstruction</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] font-mono mt-1">Replaying {displaySnapshots.length} Sequence States</p>
                   </div>
                 </div>
-                {changeHighlights[snapshot.timestamp]?.length > 0 && (
-                  <div className="md:col-span-2">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Field Change Summary</p>
-                    <div className="flex flex-wrap gap-2 text-[10px] text-slate-500">
-                      {changeHighlights[snapshot.timestamp].map(change => (
-                        <button
-                          key={change.field}
-                          type="button"
-                          className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] uppercase tracking-widest text-slate-500"
-                          onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: change.field === 'DOFD' ? 'dofd' : change.field === 'Removal' ? 'estimatedRemovalDate' : change.field === 'Stated Value' ? 'currentValue' : change.field === 'Status' ? 'accountStatus' : change.field === 'Last Pay' ? 'dateLastPayment' : 'dateReportedOrUpdated' } }))}
-                        >
-                          {change.field}: {change.from || '—'} → {change.to || '—'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {(dofdShift || removalShift || statusShift || valueShift || reportedShift) && (
-                  <div className="md:col-span-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest">
-                    {dofdShift && (
-                      <span
-                        className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20"
-                        title={`Previous DOFD: ${prev?.dofd || '—'} → ${snapshot.dofd || '—'}`}
-                        onClick={() => setActiveInsightId(findInsightByType('reaging')?.id || null)}
-                      >
-                        DOFD Shift
-                      </span>
-                    )}
-                    {removalShift && (
-                      <span
-                        className="px-2 py-1 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                        title={`Previous Removal: ${prev?.removal || '—'} → ${snapshot.removal || '—'}`}
-                        onClick={() => setActiveInsightId(findInsightByType('removal_extension')?.id || null)}
-                      >
-                        Removal Shift
-                      </span>
-                    )}
-                    {statusShift && (
-                      <span
-                        className="px-2 py-1 rounded-lg bg-blue-500/10 text-blue-500 border border-blue-500/20"
-                        title={`Previous Status: ${prev?.status || '—'} → ${snapshot.status || '—'}`}
-                        onClick={() => setActiveInsightId(findInsightByType('status_flip')?.id || null)}
-                      >
-                        Status Shift
-                      </span>
-                    )}
-                    {valueShift && (
-                      <span
-                        className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
-                        title={`Previous Value: ${prev?.value || '—'} → ${snapshot.value || '—'}`}
-                        onClick={() => setActiveInsightId(findInsightByType('value_shift')?.id || null)}
-                      >
-                        Value Shift
-                      </span>
-                    )}
-                    {reportedShift && (
-                      <span
-                        className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20"
-                        title={`Previous Reported: ${prev?.reported || '—'} → ${snapshot.reported || '—'}`}
-                        onClick={() => setActiveInsightId(findInsightByType('reporting_shift')?.id || null)}
-                      >
-                        Reporting Shift
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            )})}
-          </div>
-          {seriesInsights.length > 0 && (
-            <div className="mt-6 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Anomaly Markers</p>
-              <div className="flex flex-wrap gap-2">
-                {prioritizedInsights.map(insight => (
-                  <button
-                    key={insight.id}
+                
+                <div className="flex items-center gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                     type="button"
-                    className={`px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest border ${
-                      insight.severity === 'high' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
-                      insight.severity === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                      'bg-slate-100 text-slate-500 border-slate-200'
-                    }`}
-                    onClick={() => setActiveInsightId(insight.id)}
+                    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-950 text-white shadow-3xl border border-white/10"
+                    onClick={() => setReplayPlaying((prev) => !prev)}
                   >
-                    {insight.title}
+                    {replayPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-current" />}
+                  </motion.button>
+                  
+                  <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 mx-2" />
+
+                  <button
+                    type="button"
+                    className="px-6 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                    onClick={() => exportComparisonDossierPdf(deltas, seriesInsights, seriesSnapshots, 'forensic_comparison_dossier.pdf', evidenceReadiness)}
+                  >
+                    <div className="flex items-center gap-3">
+                       <FileText className="w-4 h-4" />
+                       Download Bundle
+                    </div>
                   </button>
-                ))}
-              </div>
-              {activeInsight && (
-                <div className="mt-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-4 text-xs text-slate-600 dark:text-slate-400">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">{activeInsight.title}</p>
-                    <button
-                      type="button"
-                      className="text-[10px] uppercase tracking-widest text-blue-500"
-                      onClick={() => setDrawerOpen(true)}
-                    >
-                      Open Evidence Drawer
-                    </button>
-                  </div>
-                  <p className="mb-2">{activeInsight.summary}</p>
-                  <ul className="space-y-1">
-                    {activeInsight.evidence.map(item => (
-                      <li key={item}>• {item}</li>
-                    ))}
-                  </ul>
                 </div>
-              )}
-            </div>
-          )}
-          <div className="mt-6 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Liability Drift</p>
-            <div className="flex items-end gap-2 h-20">
-              {displaySnapshots.map((snapshot, idx) => {
-                const prev = displaySnapshots[idx - 1];
-                const dofdShift = prev?.dofd && snapshot.dofd && prev.dofd !== snapshot.dofd;
-                const removalShift = prev?.removal && snapshot.removal && prev.removal !== snapshot.removal;
-                const statusShift = prev?.status && snapshot.status && prev.status !== snapshot.status;
-                const raw = snapshot.value || '';
-                const value = Number.parseFloat(raw.replace(/[^0-9.-]/g, ''));
-                const height = Number.isFinite(value) ? Math.max(8, Math.min(100, Math.round((value / 10000) * 100))) : 8;
-                return (
-                  <div key={snapshot.timestamp} className="flex flex-col items-center gap-2">
-                    <div className="relative">
-                      <div
-                        className={`w-4 rounded-full transition-all duration-700 ${replayPlaying && replayIndex !== idx ? 'bg-indigo-500/20' : 'bg-indigo-500/70'}`}
-                        style={{ height: `${height}%` }}
-                      />
-                      {(dofdShift || removalShift || statusShift) && (
-                        <div
-                          className="absolute -top-2 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-rose-500"
-                          title={`Anomaly: ${dofdShift ? 'DOFD shift' : ''}${removalShift ? ' Removal shift' : ''}${statusShift ? ' Status shift' : ''}`}
-                        />
-                      )}
+              </div>
+
+              {/* CONTROLS::SPEED_AND_SCRUB */}
+              <div className="grid md:grid-cols-2 gap-12 mb-12">
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-3 h-3 text-indigo-500" />
+                      <span className="text-[9px] font-black uppercase tracking-widest font-mono text-slate-500">Replay Velocity</span>
                     </div>
-                    <span className="text-[10px] text-slate-400">{snapshot.label.split(',')[0]}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {seriesInsights.length > 0 && (
-        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400">Forensic Summary</p>
-              <h3 className="text-lg font-bold dark:text-white">Highest-impact anomalies</h3>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-              <span>Confidence {confidenceScore}%</span>
-              <span className={`px-2 py-1 rounded-full text-[9px] uppercase tracking-widest border ${
-                readinessTag === 'court_ready' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                readinessTag === 'review_ready' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
-                'bg-rose-500/10 text-rose-500 border-rose-500/20'
-              }`}>
-                {readinessTag.replace('_', ' ')}
-              </span>
-            </div>
-          </div>
-          <div className="mb-4 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-widest text-slate-400">
-            <span>Filter severity</span>
-            {(['all', 'high', 'medium', 'low'] as const).map(level => (
-              <button
-                key={level}
-                type="button"
-                className={`px-2 py-1 rounded-full border ${
-                  severityFilter === level ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' : 'bg-slate-100 text-slate-500 border-slate-200'
-                }`}
-                onClick={() => setSeverityFilter(level)}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-          <div className="mb-4">
-            <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 transition-all"
-                style={{ width: `${confidenceScore}%` }}
-              />
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-2">Blend of severity + readiness</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-4 text-xs text-slate-600 dark:text-slate-400">
-            <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/10">
-              <p className="text-[10px] uppercase tracking-widest text-rose-500 mb-1">High Severity</p>
-              <p className="text-2xl font-bold text-rose-500">{summaryStats.highCount}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
-              <p className="text-[10px] uppercase tracking-widest text-amber-500 mb-1">Medium Severity</p>
-              <p className="text-2xl font-bold text-amber-500">{summaryStats.mediumCount}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-slate-100 border border-slate-200">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Low Severity</p>
-              <p className="text-2xl font-bold text-slate-600">{summaryStats.lowCount}</p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Anomaly Mix</p>
-            <div className="flex flex-wrap gap-2">
-              {typeBreakdown.map(item => (
-                <span key={item.key} className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] uppercase tracking-widest text-slate-500">
-                  {item.label} {item.count}
-                </span>
-              ))}
-            </div>
-          </div>
-          {summaryStats.strongest && (
-            <div className="mt-4 rounded-xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40 text-xs text-slate-600 dark:text-slate-400">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Top Anomaly</p>
-              <p className="font-semibold text-slate-800 dark:text-slate-200">{summaryStats.strongest.title}</p>
-              <p className="mt-2">{summaryStats.strongest.summary}</p>
-            </div>
-          )}
-          <div className="mt-4 rounded-xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40 text-xs text-slate-600 dark:text-slate-400">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Next Best Action</p>
-            <p className="text-sm font-semibold dark:text-white mb-3">
-              {readinessTag === 'court_ready'
-                ? 'Export dossier bundle and move to attorney review.'
-                : readinessTag === 'review_ready'
-                  ? 'Resolve timeline blockers and validate removal dates.'
-                  : 'Complete evidence checklist to strengthen admissibility.'}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'timeline' } }))}
-              >
-                Open Timeline
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'discovery' } }))}
-              >
-                Evidence Checklist
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 5 } }))}
-              >
-                Export Pack
-              </button>
-            </div>
-          </div>
-          {filteredInsights.length > 0 && (
-            <div className="mt-4">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Priority Order</p>
-              <div className="flex flex-wrap gap-2">
-                {filteredInsights.slice(0, 5).map(insight => (
-                  <span key={insight.id} className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] uppercase tracking-widest text-slate-500">
-                    {insight.title}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-          {slaWindows && (
-        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400">SLA Windows</p>
-              <h3 className="text-lg font-bold dark:text-white">Reinvestigation timing</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">{latestSnapshot?.bureau || 'Bureau'} SLA</span>
-          </div>
-          {slaStatus && (
-            <div className="mb-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest">
-              <span className={`px-2 py-1 rounded-lg border ${
-                slaStatus.status === 'breach' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
-                slaStatus.status === 'warning' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-              }`}>
-                {slaStatus.status === 'breach' ? 'SLA Breach' : slaStatus.status === 'warning' ? `Approaching ${slaWindows.baseDays}-day` : 'On track'}
-              </span>
-              <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500">
-                30-day: {slaStatus.daysTo30} days
-              </span>
-              <span className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500">
-                45-day: {slaStatus.daysTo45} days
-              </span>
-            </div>
-          )}
-          <div className="grid md:grid-cols-3 gap-4 text-xs text-slate-600 dark:text-slate-400">
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-1">Reported</p>
-              <p className="font-mono">{slaWindows.reportedDate.toLocaleDateString('en-US')}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10">
-              <p className="text-[10px] uppercase tracking-widest text-blue-500 mb-1">{slaWindows.baseDays}-Day SLA</p>
-              <p className="font-mono text-blue-700">{slaWindows.day30.toLocaleDateString('en-US')}</p>
-            </div>
-            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-              <p className="text-[10px] uppercase tracking-widest text-amber-500 mb-1">45-Day SLA</p>
-              <p className="font-mono text-amber-700">{slaWindows.day45.toLocaleDateString('en-US')}</p>
-            </div>
-          </div>
-          {slaWindows.extended && (
-            <p className="mt-3 text-[10px] uppercase tracking-widest text-amber-500">Extended SLA applied due to investigation status.</p>
-          )}
-        </div>
-      )}
-
-      {drawerOpen && activeInsight && (
-        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400">Anomaly Evidence Drawer</p>
-              <h3 className="text-lg font-bold dark:text-white">{activeInsight.title}</h3>
-            </div>
-            <span className="text-[10px] font-mono text-slate-400">Score {insightScore(activeInsight)}%</span>
-            <button
-              type="button"
-              className="text-[10px] uppercase tracking-widest text-slate-400"
-              onClick={() => setDrawerOpen(false)}
-            >
-              Close
-            </button>
-          </div>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{activeInsight.summary}</p>
-          <div className="grid md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-400">
-            <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Evidence Extracts</p>
-              <ul className="space-y-1">
-                {activeInsight.evidence.map(item => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-              <div className="mt-4">
-                <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Jump to Fields</p>
-                <div className="flex flex-wrap gap-2">
-                  {activeInsight.type === 'reaging' && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: 'dofd' } }))}
-                    >
-                      DOFD
-                    </button>
-                  )}
-                  {activeInsight.type === 'removal_extension' && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: 'estimatedRemovalDate' } }))}
-                    >
-                      Removal Date
-                    </button>
-                  )}
-                  {activeInsight.type === 'status_flip' && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: 'accountStatus' } }))}
-                    >
-                      Account Status
-                    </button>
-                  )}
-                  {activeInsight.type === 'value_shift' && (
-                    <button
-                      type="button"
-                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: 'currentValue' } }))}
-                    >
-                      Stated Value
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-4">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Recommended Actions</p>
-              <ul className="space-y-1">
-                <li>• Verify date fields in Step 3.</li>
-                <li>• Add supporting documents to evidence checklist.</li>
-                <li>• Review SLA deadlines and escalation triggers.</li>
-              </ul>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                  onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 3 } }))}
-                >
-                  Open Verification
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                  onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'deadlines' } }))}
-                >
-                  Review Deadlines
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delta Cards */}
-      <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400">Delta Filters</p>
-            <h3 className="text-lg font-bold dark:text-white">Impact breakdown</h3>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-widest">
-            <input
-              type="text"
-              className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-[10px]"
-              placeholder="Search deltas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button
-              type="button"
-              className="px-2 py-1 rounded-full border bg-slate-100 text-slate-500"
-              onClick={() => setSearchTerm('')}
-            >
-              Clear
-            </button>
-            <div className="flex items-center gap-2">
-              {[
-                { label: 'DOFD', term: 'dofd' },
-                { label: 'Removal', term: 'removal' },
-                { label: 'Balance', term: 'balance' },
-                { label: 'Status', term: 'status' }
-              ].map((filter) => (
-                <button
-                  key={filter.label}
-                  type="button"
-                  className={`px-2 py-1 rounded-full border ${
-                    searchTerm.toLowerCase().includes(filter.term)
-                      ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20'
-                      : 'bg-slate-100 text-slate-500 border-slate-200'
-                  }`}
-                  onClick={() => setSearchTerm(filter.term)}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-            <span className="text-[10px] uppercase tracking-widest text-slate-400">
-              {sortedDeltas.length} / {deltas.length} results
-            </span>
-            <select
-              className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-[10px]"
-              value={deltaSort}
-              onChange={(e) => setDeltaSort(e.target.value as typeof deltaSort)}
-            >
-              <option value="impact">Sort: Impact</option>
-              <option value="field">Sort: Field</option>
-              <option value="direction">Sort: Before → After</option>
-            </select>
-            {(['all', 'negative', 'positive', 'neutral'] as const).map(level => (
-              <button
-                key={level}
-                type="button"
-                className={`px-2 py-1 rounded-full border ${
-                  impactFilter === level ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' : 'bg-slate-100 text-slate-500 border-slate-200'
-                }`}
-                onClick={() => setImpactFilter(level)}
-              >
-                {level}
-                {level !== 'all' && (
-                  <span className="ml-1 text-[9px] font-mono text-slate-400">
-                    {impactCounts[level]}
-                  </span>
-                )}
-              </button>
-            ))}
-            <button
-              type="button"
-              className="px-2 py-1 rounded-full border bg-slate-900 text-white"
-              onClick={() => {
-                const csv = exportComparisonCsv(sortedDeltas);
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'filtered_deltas.csv';
-                link.click();
-                URL.revokeObjectURL(url);
-              }}
-            >
-              Export CSV
-            </button>
-          </div>
-        </div>
-        <div className="space-y-4">
-          {sortedDeltas.map((delta, i) => {
-          const impactConfig = {
-            negative: { color: 'border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20', icon: 'text-rose-500', badge: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
-            positive: { color: 'border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20', icon: 'text-emerald-500', badge: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-            neutral: { color: 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900', icon: 'text-slate-400', badge: 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700' }
-          }[delta.impact || 'neutral'];
-
-          return (
-            <div
-              key={i}
-              className={`premium-card p-6 ${impactConfig.color} transition-all hover:-translate-y-0.5 group overflow-hidden relative`}
-            >
-              {/* Background decorative element */}
-              {delta.impact === 'negative' && (
-                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
-              )}
-
-              <div className="flex items-start gap-6 relative z-10">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${impactConfig.badge} border transition-transform group-hover:scale-110`}>
-                  {delta.impact === 'negative' ? (
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                  ) : delta.impact === 'positive' ? (
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-                  ) : (
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><circle cx="12" cy="12" r="3" /></svg>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${impactConfig.badge}`}>
-                      {delta.impact || 'Changed'}
+                    <span className="text-[10px] font-black text-indigo-500 font-mono tracking-tighter bg-indigo-500/10 px-2 py-0.5 rounded-md">
+                      {Math.round((2200 - replaySpeed) / 15)}X_REALTIME
                     </span>
-                    <h4 className="text-lg font-bold dark:text-white tracking-tight">{delta.field}</h4>
                   </div>
-
-                  <div className="flex items-center gap-4 mb-4 flex-wrap">
+                  <input
+                    type="range"
+                    min={700}
+                    max={2200}
+                    step={200}
+                    value={replaySpeed}
+                    onChange={(e) => setReplaySpeed(Number(e.target.value))}
+                    className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                  />
+                </div>
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Before:</span>
-                      <code className="text-sm font-mono px-3 py-1 bg-slate-100 dark:bg-slate-950 rounded-lg text-slate-600 dark:text-slate-400 line-through">{delta.oldValue || '—'}</code>
+                       <Workflow className="w-3 h-3 text-orange-500" />
+                       <span className="text-[9px] font-black uppercase tracking-widest font-mono text-slate-500">Sequence Scrub</span>
                     </div>
-                    <svg className="w-4 h-4 text-slate-300 dark:text-slate-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">After:</span>
-                      <code className={`text-sm font-mono px-3 py-1 rounded-lg font-bold ${delta.impact === 'negative' ? 'bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400' :
-                          delta.impact === 'positive' ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400' :
-                            'bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-300'
-                        }`}>{delta.newValue || '—'}</code>
-                    </div>
+                     <span className="text-[10px] font-black text-orange-500 font-mono tracking-tighter bg-orange-500/10 px-2 py-0.5 rounded-md">
+                       NODE::{replayIndex + 1} / {displaySnapshots.length}
+                     </span>
                   </div>
-
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{delta.description}</p>
+                  <input
+                    type="range"
+                    min={0}
+                    max={Math.max(0, displaySnapshots.length - 1)}
+                    step={1}
+                    value={replayIndex}
+                    onChange={(e) => {
+                      setReplayIndex(Number(e.target.value));
+                      setReplayPlaying(false);
+                    }}
+                    className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                  />
                 </div>
               </div>
-            </div>
-          );
-          })}
-          {sortedDeltas.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-sm text-slate-500 text-center">
-              No deltas match the current filter.
-            </div>
-          )}
+
+              {/* STREAM::ENTITY_NODES */}
+              <div className="space-y-6 max-h-[800px] overflow-y-auto pr-6 custom-scrollbar">
+                <AnimatePresence mode="popLayout">
+                  {displaySnapshots.map((snapshot, idx) => {
+                    const prev = displaySnapshots[idx - 1];
+                    const isFocus = replayIndex === idx;
+                    const shifts = [
+                      { label: 'DOFD', val: snapshot.dofd, shift: prev?.dofd && snapshot.dofd && prev.dofd !== snapshot.dofd, color: 'text-rose-500' },
+                      { label: 'Removal', val: snapshot.removal, shift: prev?.removal && snapshot.removal && prev.removal !== snapshot.removal, color: 'text-orange-500' },
+                      { label: 'Liability', val: snapshot.value, shift: prev?.value && snapshot.value && prev.value !== snapshot.value, color: 'text-indigo-500' },
+                      { label: 'Status', val: snapshot.status, shift: prev?.status && snapshot.status && prev.status !== snapshot.status, color: 'text-blue-500' }
+                    ];
+
+                    return (
+                      <motion.div
+                        key={snapshot.timestamp}
+                        layout
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ 
+                          opacity: isFocus ? 1 : 0.4, 
+                          scale: isFocus ? 1 : 0.98, 
+                          x: 0,
+                          filter: isFocus ? 'blur(0px)' : 'blur(0.5px)'
+                        }}
+                        className={cn(
+                          "p-8 rounded-[2.5rem] border transition-all duration-700",
+                          isFocus 
+                            ? "bg-slate-950 text-white border-indigo-500/50 shadow-3xl ring-1 ring-indigo-500/20"
+                            : "bg-slate-50 dark:bg-slate-900/10 border-slate-100 dark:border-slate-800/40"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-4 mb-8">
+                           <div className="flex items-center gap-4">
+                              <span className={cn(
+                                "w-10 h-10 rounded-xl border flex items-center justify-center text-[10px] font-black font-mono shadow-md",
+                                isFocus ? "bg-indigo-500 border-indigo-400 text-white" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400"
+                              )}>
+                                {String(idx + 1).padStart(2, '0')}
+                              </span>
+                              <div>
+                                <h5 className="text-lg font-black tracking-tight uppercase font-mono">{snapshot.label}</h5>
+                                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 font-mono mt-0.5">Stream_State::Verified</p>
+                              </div>
+                           </div>
+                           {isFocus && (
+                              <div className="flex items-center gap-3 px-4 py-1.5 bg-indigo-500/20 rounded-full border border-indigo-500/30">
+                                 <Activity className="w-3 h-3 text-indigo-400 animate-pulse" />
+                                 <span className="text-[9px] font-black uppercase tracking-[0.2em] font-mono text-indigo-400">Processing_Payload</span>
+                              </div>
+                           )}
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                           {shifts.map(s => (
+                              <div key={s.label} className="space-y-1">
+                                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono">{s.label}</p>
+                                 <p className={cn(
+                                   "text-[13px] font-black tabular-nums font-mono",
+                                   s.shift ? s.color : isFocus ? "text-white" : "text-slate-600 dark:text-slate-400"
+                                 )}>
+                                   {s.val || '—'}
+                                 </p>
+                                 {s.shift && (
+                                   <div className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest animate-pulse mt-1">
+                                      <div className={cn("w-1 h-1 rounded-full", s.color.replace('text-', 'bg-'))} />
+                                      <span className={cn("font-mono", s.color)}>DRIFT_DETECTED</span>
+                                   </div>
+                                 )}
+                              </div>
+                           ))}
+                        </div>
+
+                        {changeHighlights[snapshot.timestamp]?.length > 0 && isFocus && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-8 pt-8 border-t border-white/10 space-y-4"
+                          >
+                             <div className="flex items-center gap-2">
+                               <Cpu className="w-3 h-3 text-slate-500" />
+                               <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono">Sequence Delta Metadata</p>
+                             </div>
+                             <div className="flex flex-wrap gap-4">
+                                {changeHighlights[snapshot.timestamp].map((c, cIdx) => (
+                                   <div key={cIdx} className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-[1.2rem] flex items-center gap-4 shadow-sm">
+                                      <span className="text-[10px] font-black text-slate-400 font-mono tracking-tighter uppercase">{c.field}</span>
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-[10px] font-bold text-slate-600 font-mono line-through opacity-50">{c.from || 'EMPTY'}</span>
+                                        <ArrowRight className="w-3 h-3 text-indigo-500" />
+                                        <span className="text-[10px] font-black text-indigo-400 font-mono">{c.to || 'NULL'}</span>
+                                      </div>
+                                   </div>
+                                ))}
+                             </div>
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+           </div>
+        </div>
+
+        {/* RIGHT_COLUMN::ANALYTICS */}
+        <div className="lg:col-span-5 space-y-12">
+           {/* METRICS::CONFIDENCE_SCORE */}
+           <div className="relative p-10 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/60 rounded-[3rem] shadow-3xl overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 via-rose-500 to-indigo-500" />
+              
+              <div className="flex items-start justify-between mb-10">
+                <div className="space-y-2">
+                   <div className="flex items-center gap-2">
+                      <Target className="w-4 h-4 text-indigo-500" />
+                      <h4 className="text-xl font-black dark:text-white tracking-tighter uppercase font-mono">Dossier Integrity</h4>
+                   </div>
+                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Forensic Confidence Rating</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-5xl font-black text-indigo-500 font-mono tabular-nums tracking-tighter">{confidenceScore}%</span>
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <div className="h-6 w-full bg-slate-100 dark:bg-slate-800/50 rounded-2xl overflow-hidden shadow-inner p-1.5 border border-slate-200/50 dark:border-slate-800">
+                   <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${confidenceScore}%` }}
+                    className="h-full bg-gradient-to-r from-orange-500 to-indigo-500 rounded-xl relative"
+                   >
+                     <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,.1)_50%,rgba(255,255,255,.1)_75%,transparent_75%,transparent)] bg-[length:20px_20px] animate-[progress_1s_linear_infinite]" />
+                   </motion.div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-6">
+                   <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 space-y-2 group/stat">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Risk Status</p>
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "w-2 h-2 rounded-full",
+                          readinessTag === 'court_ready' ? 'bg-emerald-500 animate-pulse' : readinessTag === 'review_ready' ? 'bg-orange-500 animate-pulse' : 'bg-rose-500 animate-pulse'
+                        )} />
+                        <p className={cn(
+                          "text-xs font-black uppercase tracking-widest font-mono",
+                          readinessTag === 'court_ready' ? 'text-emerald-500' : readinessTag === 'review_ready' ? 'text-orange-500' : 'text-rose-500'
+                        )}>
+                          {readinessTag.replace('_', ' ')}
+                        </p>
+                      </div>
+                   </div>
+                   <div className="p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 space-y-2">
+                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Structural Variation</p>
+                       <p className="text-xs font-black text-indigo-500 uppercase tracking-widest font-mono">DETECTED_DRIFT</p>
+                   </div>
+                </div>
+
+                <div className="pt-10 border-t border-slate-100 dark:border-slate-800 space-y-5">
+                   <div className="flex items-center gap-2">
+                      <Boxes className="w-3 h-3 text-slate-400" />
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Anomaly Vector Distribution</p>
+                   </div>
+                   <div className="flex flex-wrap gap-2">
+                     {typeBreakdown.map(item => (
+                       <div key={item.key} className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 flex items-center gap-3">
+                         <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest font-mono">{item.label}</span>
+                         <span className="text-[10px] font-black text-indigo-500 font-mono">::{item.count}</span>
+                       </div>
+                     ))}
+                   </div>
+                </div>
+              </div>
+           </div>
+
+           {/* MONITOR::SLA_GUARD */}
+           {slaWindows && (
+             <div className="relative p-10 bg-slate-950 text-white rounded-[3rem] shadow-3xl overflow-hidden group">
+               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-rose-500/10 opacity-50" />
+               <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]" />
+               
+               <div className="relative z-10">
+                 <div className="flex items-center gap-5 mb-10">
+                    <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-500 shadow-xl shadow-orange-500/10">
+                       <Clock className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-black tracking-tighter uppercase font-mono">Timeline SLA Guard</h4>
+                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono mt-1">Investigation Discovery Window</p>
+                    </div>
+                 </div>
+
+                 <div className="space-y-8">
+                    <div className="space-y-3">
+                       <div className="flex justify-between items-end">
+                          <div className="space-y-1">
+                             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono">Current Status</p>
+                             <p className={cn(
+                               "text-xs font-black uppercase tracking-widest font-mono",
+                               slaStatus?.status === 'breach' ? 'text-rose-500' : slaStatus?.status === 'warning' ? 'text-orange-500' : 'text-emerald-500'
+                             )}>
+                               {slaStatus?.status === 'breach' ? 'PROTOCOL_BREACH' : 'PROTOCOL_COMPLIANCE'}
+                             </p>
+                          </div>
+                          <span className="text-[10px] font-black text-slate-500 font-mono">
+                            {Math.round(Math.max(0, 100 - ((slaStatus?.daysTo30 || 0) / 30 * 100)))}%_EXP_THRESHOLD
+                          </span>
+                       </div>
+                       <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/10">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.max(0, 100 - ((slaStatus?.daysTo30 || 0) / 30 * 100))}%` }}
+                            className={cn(
+                              "h-full rounded-full shadow-2xl",
+                              slaStatus?.status === 'breach' ? 'bg-rose-500 shadow-rose-500/40' : 'bg-emerald-500 shadow-emerald-500/40'
+                            )}
+                          />
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                       <div className="p-5 rounded-[1.8rem] bg-white/5 border border-white/10 space-y-1">
+                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono">30D Discovery</p>
+                          <div className="flex items-center justify-between">
+                             <span className="text-lg font-black font-mono tabular-nums">{slaStatus?.daysTo30}D</span>
+                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-lg shadow-indigo-500/50" />
+                          </div>
+                       </div>
+                       <div className="p-5 rounded-[1.8rem] bg-white/5 border border-white/10 space-y-1">
+                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono">45D Statutory</p>
+                          <div className="flex items-center justify-between">
+                             <span className="text-lg font-black font-mono tabular-nums">{slaStatus?.daysTo45}D</span>
+                             <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50" />
+                          </div>
+                       </div>
+                    </div>
+                    
+                    <div className="pt-8 border-t border-white/5 flex items-center justify-between">
+                       <div className="space-y-1">
+                          <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] font-mono">Sequence Start</p>
+                          <p className="text-xs font-black font-mono tracking-tighter">{slaWindows.reportedDate.toLocaleDateString('en-US')}</p>
+                       </div>
+                       <div className="h-8 w-px bg-white/5" />
+                       <div className="text-right space-y-1">
+                          <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] font-mono">SLA Termination</p>
+                          <p className="text-xs font-black font-mono tracking-tighter text-orange-400">{slaWindows.day30.toLocaleDateString('en-US')}</p>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+             </div>
+           )}
+
+           {/* PROTOCOL::DECISION_HUB */}
+           <div className="relative p-12 bg-indigo-600 text-white rounded-[3rem] shadow-4xl overflow-hidden group">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32" />
+              <div className="relative z-10 space-y-10">
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                       <ShieldCheck className="w-6 h-6" />
+                       <h4 className="text-2xl font-black tracking-tighter uppercase font-mono italic">Decision Protocol</h4>
+                    </div>
+                    <p className="text-indigo-100 text-base font-medium leading-relaxed">
+                       {readinessTag === 'court_ready'
+                         ? 'Forensic reconstruction is complete. Institutional patterns verified. Proceed to federal escalation or litigation bundle.'
+                         : 'Reconstruction incomplete. Additional sequence metadata required to bypass institutional defenses.'}
+                    </p>
+                 </div>
+                 
+                 <div className="space-y-4">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'timeline' } }))}
+                      className="w-full py-5 px-8 rounded-2xl bg-white text-indigo-600 font-black text-xs uppercase tracking-[0.2em] hover:bg-indigo-50 transition-all shadow-xl flex items-center justify-between group"
+                    >
+                      Audit Temporal Map
+                      <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'discovery' } }))}
+                      className="w-full py-5 px-8 rounded-2xl bg-indigo-500 text-white font-black text-xs uppercase tracking-[0.2em] border border-white/20 hover:bg-indigo-400 transition-all flex items-center justify-between group"
+                    >
+                      Catalogue Evidence
+                      <Boxes className="w-5 h-5 opacity-50" />
+                    </motion.button>
+                 </div>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      {/* FEED::SEQUENCE_LOG */}
+      <div className="space-y-12 mt-24">
+        <div className="flex flex-col xl:flex-row items-center justify-between gap-12">
+           <div className="space-y-2">
+              <h3 className="text-4xl font-black dark:text-white tracking-tighter uppercase font-mono italic">Sequence <span className="text-slate-500">Log</span></h3>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono">Institutional Liability Deltas</p>
+           </div>
+           
+           <div className="flex flex-wrap items-center gap-2 bg-slate-100 dark:bg-slate-900/50 p-2 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-inner">
+             {(['all', 'negative', 'positive', 'neutral'] as const).map(level => (
+               <button
+                 key={level}
+                 onClick={() => setImpactFilter(level)}
+                 className={cn(
+                   "px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden",
+                   impactFilter === level 
+                     ? "bg-slate-950 text-white shadow-2xl scale-105" 
+                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                 )}
+               >
+                 {level} <span className="text-[9px] opacity-40 ml-2">[{level === 'all' ? deltas.length : impactCounts[level]}]</span>
+               </button>
+             ))}
+           </div>
+        </div>
+
+        <div className="grid gap-8">
+          <AnimatePresence mode="popLayout">
+            {sortedDeltas.map((delta, i) => {
+              const impactConfig = {
+                negative: { color: 'border-rose-500/30 bg-rose-50/10 dark:bg-rose-950/20', icon: <AlertTriangle className="w-10 h-10 text-rose-500" />, label: 'RISK_INCREASE', badge: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
+                positive: { color: 'border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-950/20', icon: <CheckCircle className="w-10 h-10 text-emerald-500" />, label: 'LIABILITY_DECREASE', badge: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
+                neutral: { color: 'border-slate-200 dark:border-slate-800/60 bg-white dark:bg-slate-950/30', icon: <Eye className="w-10 h-10 text-slate-400" />, label: 'STRUCTURAL_CHANGE', badge: 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700' }
+              }[delta.impact || 'neutral'];
+
+              return (
+                <motion.div
+                  key={delta.field + i}
+                  layout
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className={cn(
+                    "relative p-12 rounded-[3.5rem] border-2 shadow-sm transition-all hover:shadow-4xl hover:scale-[1.01] group overflow-hidden",
+                    impactConfig.color
+                  )}
+                >
+                  <div className="absolute top-0 right-0 p-12 opacity-[0.03] transition-transform group-hover:scale-125">
+                     <Hash className="w-48 h-48" />
+                  </div>
+
+                  <div className="relative z-10 flex flex-col lg:flex-row items-center gap-16">
+                    <div className={cn(
+                      "w-24 h-24 rounded-[2.5rem] flex items-center justify-center shrink-0 border-2 shadow-2xl transition-transform group-hover:rotate-12",
+                      impactConfig.badge
+                    )}>
+                      {impactConfig.icon}
+                    </div>
+
+                    <div className="flex-1 space-y-8 w-full">
+                      <div className="flex flex-wrap items-center gap-6">
+                        <span className={cn(
+                          "text-[9px] font-black uppercase tracking-[0.4em] px-5 py-2 rounded-full border shadow-sm font-mono",
+                          impactConfig.badge
+                        )}>
+                          {impactConfig.label}
+                        </span>
+                        <h4 className="text-3xl font-black dark:text-white tracking-tighter uppercase font-mono italic">{delta.field}</h4>
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-8 items-center">
+                        <div className="space-y-3">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Sequence Prior</p>
+                           <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/60 rounded-[1.8rem] border border-slate-200 dark:border-slate-800 shadow-inner group/val">
+                              <code className="text-sm font-black text-slate-400 font-mono line-through opacity-40 tracking-tighter block truncate">{delta.oldValue || 'UNDEFINED'}</code>
+                           </div>
+                        </div>
+                        
+                        <div className="hidden xl:flex justify-center">
+                           <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <ArrowRight className="w-5 h-5 text-indigo-500" />
+                           </div>
+                        </div>
+
+                        <div className="space-y-3">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Sequence Resolution</p>
+                           <div className={cn(
+                             "px-6 py-4 rounded-[1.8rem] border shadow-2xl transition-all group-hover:shadow-indigo-500/10",
+                             impactConfig.badge.split(' ')[0],
+                             "bg-white dark:bg-slate-950"
+                           )}>
+                              <code className={cn(
+                                "text-sm font-black font-mono tracking-tighter block truncate",
+                                delta.impact === 'negative' ? 'text-rose-500' : delta.impact === 'positive' ? 'text-emerald-500' : 'text-slate-600 dark:text-slate-300'
+                              )}>
+                                {delta.newValue || 'NULL'}
+                              </code>
+                           </div>
+                        </div>
+
+                        <div className="hidden xl:block text-right">
+                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest font-mono mb-1">DRIFT_ID</p>
+                           <p className="text-[10px] font-bold text-slate-500 font-mono uppercase">#{delta.field.slice(0, 3)}_{i+1000}</p>
+                        </div>
+                      </div>
+
+                      <p className="text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-4xl">
+                        {delta.description}
+                      </p>
+                    </div>
+                    
+                    <motion.button 
+                      whileHover={{ scale: 1.1, x: 5 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: delta.field.toLowerCase() } }))}
+                      className="p-6 rounded-[2.5rem] bg-slate-950 text-white shadow-4xl border border-white/10 shrink-0"
+                    >
+                       <Eye className="w-6 h-6" />
+                    </motion.button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
       </div>
     </div>
