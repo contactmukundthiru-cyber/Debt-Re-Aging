@@ -40,7 +40,7 @@ const METRO2_REQUIREMENTS = {
   collectionRequired: [
     'originalCreditor',
     'dofd',
-    'currentBalance',
+    'currentValue',
     'accountStatus'
   ],
 
@@ -231,14 +231,14 @@ function validateBalances(
   errors: Metro2Error[],
   warnings: Metro2Warning[]
 ): void {
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
 
   // Negative balance check
   if (current < 0) {
     errors.push({
       code: 'M2-BAL-001',
-      field: 'currentBalance',
+      field: 'currentValue',
       message: 'Balance cannot be negative',
       requirement: 'Metro 2 requires non-negative balance values',
       severity: 'error'
@@ -249,7 +249,7 @@ function validateBalances(
   if (original > 0 && current > original * 3) {
     warnings.push({
       code: 'M2-BAL-002',
-      field: 'currentBalance',
+      field: 'currentValue',
       message: `Current balance ($${current}) exceeds original ($${original}) by more than 200%`,
       suggestion: 'Verify fees and interest are properly documented'
     });
@@ -260,9 +260,9 @@ function validateBalances(
   if ((status.includes('paid') || status.includes('closed')) && current > 0) {
     errors.push({
       code: 'M2-BAL-003',
-      field: 'currentBalance',
+      field: 'currentValue',
       message: `Account status is "${status}" but balance is $${current}`,
-      requirement: 'Paid/Closed accounts must report $0 balance per Metro 2',
+      requirement: 'Paid/Closed accounts must report zero value balance per Metro 2',
       severity: 'critical'
     });
   }
@@ -278,7 +278,7 @@ function validateStatus(
 ): void {
   const status = fields.accountStatus || '';
   const accountType = (fields.accountType || '').toLowerCase();
-  const balance = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const balance = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
 
   // Collection with "Open" status but no recent activity
   if (accountType.includes('collection') && status.toLowerCase() === 'open') {
@@ -441,7 +441,7 @@ function generateRecommendations(errors: Metro2Error[], warnings: Metro2Warning[
     }
 
     if (criticalErrors.some(e => e.code.includes('BAL'))) {
-      recommendations.push('Balance errors on paid accounts must be corrected to $0 under Metro 2 guidelines.');
+      recommendations.push('Balance errors on paid accounts must be corrected to zero value under Metro 2 guidelines.');
     }
   }
 
@@ -522,7 +522,7 @@ export function getMetro2FieldReference(field: string): string {
   const references: Record<string, string> = {
     'dofd': 'Field 25 - Date of First Delinquency',
     'dateOpened': 'Field 11 - Date Opened',
-    'currentBalance': 'Field 21 - Current Balance',
+    'currentValue': 'Field 21 - Current Balance',
     'originalAmount': 'Field 22 - Original Loan Amount / Original Limit',
     'accountStatus': 'Field 17 - Account Status',
     'paymentHistory': 'Field 17A - Payment Rating',

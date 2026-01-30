@@ -6,6 +6,8 @@
 import { CreditFields, RuleFlag, RiskProfile } from './types';
 import { ForensicImpactAssessment, assessForensicImpact } from './impact-assessment-engine';
 
+export type ImpactAssessment = ForensicImpactAssessment;
+
 export interface EvidenceItem {
   id: string;
   category: 'primary' | 'supporting' | 'reference';

@@ -93,7 +93,7 @@ export function generateDisputeLetter(
   // Subject line
   letter += `RE: FORMAL DISPUTE - ${config.type === 'validation' ? 'DEBT VALIDATION REQUEST' : 'REQUEST FOR INVESTIGATION'}\n`;
   letter += `Account: ${fields.originalCreditor || fields.furnisherOrCollector || '[ACCOUNT NAME]'}\n`;
-  if (fields.currentBalance) letter += `Reported Balance: ${fields.currentBalance}\n`;
+  if (fields.currentValue) letter += `Reported Stated Value: ${fields.currentValue}\n`;
   letter += `\n`;
 
   // Identification
@@ -170,9 +170,9 @@ export function generateDisputeLetter(
     letter += `NOTICE OF INTENT:\n\n`;
     letter += `Please be advised that I am documenting all violations for potential legal action. `;
     letter += `Under FCRA § 616 and § 617, I may be entitled to recover:\n`;
-    letter += `- Actual damages suffered\n`;
-    letter += `- Statutory damages of $100 to $1,000 per violation\n`;
-    letter += `- Punitive damages for willful noncompliance\n`;
+    letter += `- Evaluation of actual impact categories\n`;
+    letter += `- Statutory liability for non-compliance per violation\n`;
+    letter += `- Accountability for willful noncompliance\n`;
     letter += `- Attorney's fees and costs\n\n`;
     letter += `Your response to this dispute will be considered in determining whether your conduct constitutes willful noncompliance.\n\n`;
   }
@@ -230,7 +230,7 @@ export function generateValidationLetter(
 
   letter += `RE: DEBT VALIDATION REQUEST PURSUANT TO FDCPA § 809(b)\n`;
   letter += `Alleged Account: ${fields.originalCreditor || '[ORIGINAL CREDITOR]'}\n`;
-  letter += `Claimed Amount: ${fields.currentBalance || '[AMOUNT]'}\n\n`;
+  letter += `Claimed Amount: ${fields.currentValue || '[AMOUNT]'}\n\n`;
 
   letter += `Dear Sir or Madam:\n\n`;
 
@@ -271,7 +271,7 @@ export function generateValidationLetter(
     letter += `Be advised that:\n`;
     letter += `- Reporting unverified debt to credit bureaus violates FDCPA § 807(8)\n`;
     letter += `- Continuing collection without validation violates FDCPA § 809(b)\n`;
-    letter += `- These violations carry statutory damages of up to $1,000\n`;
+    letter += `- These violations carry statutory liability of up to 1,000 unit liability\n`;
     letter += `- I am maintaining detailed records for potential litigation\n\n`;
   }
 
@@ -395,16 +395,16 @@ export function generateIntentToSueLetter(
 
   letter += `DAMAGES CLAIMED:\n\n`;
   letter += `Pursuant to FCRA §§ 616-617 and FDCPA § 813, I intend to seek:\n`;
-  letter += `- Actual damages suffered as a result of your violations\n`;
-  letter += `- Statutory damages of $100 to $1,000 per FCRA violation\n`;
-  letter += `- Statutory damages up to $1,000 under FDCPA\n`;
-  letter += `- Punitive damages for willful noncompliance\n`;
+  letter += `- Actual impact suffered as a result of your violations\n`;
+  letter += `- Statutory liability of 100 units to 1,000 unit liability per FCRA violation\n`;
+  letter += `- Statutory liability up to 1,000 unit liability under FDCPA\n`;
+  letter += `- Accountability for willful noncompliance\n`;
   letter += `- Reasonable attorney's fees and costs\n\n`;
 
   letter += `SETTLEMENT DEMAND:\n\n`;
   letter += `To avoid the expense and inconvenience of litigation, I am willing to discuss settlement. Any settlement must include:\n`;
   letter += `1. Complete deletion of this tradeline from all credit bureaus\n`;
-  letter += `2. Monetary compensation for damages caused\n`;
+  letter += `2. Monetary compensation for impact caused\n`;
   letter += `3. Written confirmation that no further reporting will occur\n\n`;
 
   letter += `TIME TO RESPOND:\n\n`;

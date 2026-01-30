@@ -71,7 +71,7 @@ export const COLLECTOR_DATABASE: CollectorProfile[] = [
       'Re-aging of debt collection dates',
       'Suing on time-barred debt',
       'Inadequate debt validation',
-      'Incorrect balance reporting',
+      'Incorrect value reporting',
       'Continuing collection after disputes'
     ],
     regulatoryActions: [
@@ -168,7 +168,7 @@ export const COLLECTOR_DATABASE: CollectorProfile[] = [
       'Pursuing time-barred debts',
       'Insufficient validation documentation',
       'Re-aging collection accounts',
-      'Inaccurate balance reporting'
+      'Inaccurate value reporting'
     ],
     regulatoryActions: [],
     contact: {},

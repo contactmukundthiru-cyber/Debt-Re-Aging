@@ -1,6 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  AlertTriangle, 
+  Zap, 
+  ShieldCheck, 
+  Search, 
+  Activity, 
+  ChevronRight,
+  Clock,
+  Briefcase,
+  FileText
+} from 'lucide-react';
+import { cn } from '../../lib/utils';
 import { ANALYSIS_TABS, TabId, LetterType } from '../../lib/constants';
 import { SeriesInsight, SeriesSnapshot, SeriesSnapshotOption, computeExpectedRemovalDate } from '../../lib/delta';
 import { parseDate } from '../../lib/rules';
@@ -443,31 +456,72 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
 
   return (
     <div className="fade-in pb-20">
-      {/* Evidence Readiness Header */}
-      <div className="mb-10 p-6 glass-panel flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl shadow-emerald-900/5">
-        <div className="flex items-center gap-6 w-full md:w-auto">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-            <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+      {/* Forensic Intelligence Header */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="lg:col-span-2 bg-slate-950 rounded-[40px] p-8 text-white relative overflow-hidden shadow-2xl border border-slate-800"
+        >
+          <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+            <ShieldCheck size={200} />
           </div>
-          <div className="flex-grow">
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 mb-2">Litigation Readiness Score</h3>
-            <div className="flex items-center gap-4">
-              <div className="flex-grow h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-1000 ease-out ${readiness > 80 ? 'bg-emerald-500' : readiness > 40 ? 'bg-blue-500' : 'bg-slate-900 dark:bg-white'}`}
-                  style={{ width: `${readiness}%` }}
-                />
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-emerald-500/30">
+                Institutional Grade Analysis
+              </span>
+              <span className="bg-slate-800 text-slate-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-slate-700">
+                v5.0 PRO
+              </span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight mb-4">Case Statistics</h2>
+            <div className="flex items-center gap-12">
+              <div>
+                <p className="text-[10px] uppercase text-slate-500 font-bold mb-1 tracking-widest">Impact Factor</p>
+                <div className="flex items-end gap-2">
+                  <span className="text-5xl font-black text-white">{readiness}</span>
+                  <span className="text-slate-500 font-bold mb-1 text-sm">/ 100</span>
+                </div>
               </div>
-              <span className="text-lg font-bold tabular-nums dark:text-white">{readiness}%</span>
+              <div className="h-12 w-px bg-slate-800" />
+              <div className="flex gap-10">
+                <div>
+                  <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Signals</p>
+                  <p className="text-2xl font-bold text-white">{flags.length}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Conflicts</p>
+                  <p className="text-2xl font-bold text-rose-500">{smartRecommendations.length}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase text-slate-500 font-bold mb-1">Deltas</p>
+                  <p className="text-2xl font-bold text-orange-400">{seriesInsights?.length ?? 0}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <button
-          onClick={() => setActiveTab('discovery')}
-          className="btn btn-secondary !py-2.5 !px-6 !text-[10px] !uppercase !tracking-widest !font-bold !rounded-xl !border-slate-200 dark:!border-slate-800"
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-slate-900 rounded-[40px] p-8 border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col justify-between"
         >
-          Conduct Audit
-        </button>
+          <div>
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest mb-2">Audit Status</p>
+            <h3 className="text-xl font-bold dark:text-white mb-4">Conduct Forensic Audit</h3>
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">Systematic verification of data integrity across all reported fields.</p>
+          </div>
+          <button
+            onClick={() => setActiveTab('discovery')}
+            className="w-full flex items-center justify-center gap-2 py-4 px-6 bg-slate-950 dark:bg-emerald-500 text-white dark:text-slate-950 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+          >
+            <Search size={14} />
+            Initialize Audit
+          </button>
+        </motion.div>
       </div>
 
       {smartRecommendations.length > 0 && (
@@ -755,7 +809,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
                     <button
                       type="button"
                       className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => setActiveTab(item.tab)}
+                      onClick={() => setActiveTab(item.tab!)}
                     >
                       Open {item.tab}
                     </button>
@@ -895,129 +949,168 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
         readiness={readiness}
       />
 
-      {/* Main Command View */}
-      <div className="grid lg:grid-cols-12 gap-6 mb-10">
-        {/* Left Column: Violations & Risk (High Density) */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="premium-card bg-slate-900/40 border-slate-800/60 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-800/60 flex items-center justify-between bg-slate-900/20">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-mono flex items-center gap-2">
-                <svg className="w-4 h-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                Violation Log
-              </h3>
-              <span className="text-[10px] font-mono text-slate-600 uppercase italic">FCRA/FDCPA CORE</span>
-            </div>
-            <div className="p-0 max-h-[500px] overflow-y-auto scrollbar-thin">
-              {flags.map((flag, idx) => (
-                <div key={idx} className="border-b border-slate-800/40 last:border-0 p-5 hover:bg-slate-800/20 transition-colors group">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full ${flag.severity === 'critical' ? 'bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.8)]' : flag.severity === 'high' ? 'bg-rose-500' : flag.severity === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                      {flag.ruleName}
-                    </h4>
-                    <span className={`text-[9px] font-mono font-bold bg-slate-800 px-2 py-0.5 rounded uppercase ${flag.severity === 'critical' ? 'text-indigo-400 border border-indigo-500/30' : 'text-slate-500'}`}>{flag.severity}</span>
-                  </div>
-                  <p className="text-xs text-slate-400 leading-relaxed mb-3 font-medium">{flag.explanation}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {flag.legalCitations.slice(0, 2).map((cite, i) => (
-                      <span key={i} className="text-[9px] font-mono text-emerald-500/80 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded">{cite}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Action Plan & Intelligence */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Executive Action Plan */}
-          <div className="premium-card bg-slate-900/40 border-slate-800/60">
-            <div className="px-6 py-4 border-b border-slate-800/60 bg-slate-900/20">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-mono flex items-center gap-2">
-                <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-                Action Plan
-              </h3>
-            </div>
-            <div className="p-6 space-y-4">
-              {analytics?.actions.slice(0, 4).map((action, i) => (
-                <div key={i} className="flex gap-3 group">
-                  <div className="mt-1 shrink-0">
-                    <div className={`w-1.5 h-6 rounded-full ${action.priority === 'immediate' ? 'bg-rose-500' : 'bg-slate-700'}`} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-200 mb-1 group-hover:text-emerald-400 transition-colors">{action.action}</p>
-                    <p className="text-[10px] text-slate-500 leading-tight font-medium">{action.reason}</p>
-                  </div>
-                </div>
-              ))}
-              <button 
-                onClick={() => setActiveTab('lettereditor')}
-                className="w-full mt-4 py-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-slate-950 transition-all"
-              >
-                Execute Documents
-              </button>
-            </div>
-          </div>
-
-          {/* AI Intelligence Brief */}
-          <div className="premium-card bg-slate-950 border-indigo-500/20 p-6 overflow-hidden relative group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-all" />
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-4 font-mono">Agent Briefing</p>
-            <p className="text-[11px] text-slate-300 leading-relaxed font-medium italic mb-6">
-              "{riskProfile.summary.substring(0, 200)}..."
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
-                <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Risk Tier</p>
-                 <p className={`text-xs font-black uppercase ${riskProfile.riskLevel === 'critical' ? 'text-indigo-400 animate-pulse' : riskProfile.riskLevel === 'high' ? 'text-rose-500' : 'text-emerald-500'}`}>{riskProfile.riskLevel}</p>
-
-              </div>
-              <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800">
-                <p className="text-[8px] font-bold text-slate-500 uppercase mb-1">Litigation</p>
-                <p className="text-xs font-black uppercase text-indigo-400">{riskProfile.litigationPotential ? 'High' : 'Low'}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Main Command View moved into Overview tab below */}
 
       {/* Legacy Score Dashboard (Removing or replacing) */}
 
 
-      {/* Tabs Menu */}
-      <div className="border-b border-gray-200 dark:border-gray-700 mb-10 no-print sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md z-40">
-        <div
+      {/* Forensic Tab Navigation */}
+      <div className="sticky top-0 z-50 py-6 mb-12 -mx-4 px-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800/50 no-print transition-all">
+        <div 
           ref={tabsRef}
-          className="flex gap-8 overflow-x-auto py-4 scrollbar-hide"
-          role="tablist"
+          className="max-w-7xl mx-auto flex items-center justify-between gap-8"
         >
-          {ANALYSIS_TABS.map((tab) => {
-            const isSelected = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                id={`tab-${tab.id}`}
-                data-tab={tab.id}
-                aria-selected={isSelected}
-                onClick={() => setActiveTab(tab.id)}
-                onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
-                className={`pb-2 text-[10px] uppercase tracking-[0.2em] font-black border-b-2 transition-all whitespace-nowrap ${isSelected
-                  ? 'border-slate-900 text-slate-900 dark:border-white dark:text-white'
-                  : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-                  }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {ANALYSIS_TABS.map((tab) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  id={`tab-${tab.id}`}
+                  data-tab={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "relative px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all",
+                    isSelected 
+                      ? "text-white" 
+                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  )}
+                >
+                  {isSelected && (
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-slate-950 dark:bg-emerald-500 rounded-full shadow-lg shadow-slate-950/20"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          
+          <div className="hidden md:flex items-center gap-4">
+            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+            <button className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors">
+              Compare Mode
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Tab Content Rendering */}
       <div className="mb-8 min-h-[600px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {activeTab === 'overview' && (
+          <div className="space-y-10">
+            <CaseSummaryDashboard
+              flags={flags}
+              riskProfile={riskProfile}
+              readiness={readiness}
+            />
+
+            {/* Main Command View */}
+            <div className="grid lg:grid-cols-12 gap-8">
+              {/* Left Column: Violations & Risk (High Density) */}
+              <div className="lg:col-span-8 space-y-6">
+                <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl">
+                  <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
+                       <AlertTriangle size={14} className="text-rose-500" />
+                       Violation Log
+                    </h3>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase italic">FCRA/FDCPA CORE</span>
+                  </div>
+                  <div className="p-0 max-h-[600px] overflow-y-auto scrollbar-hide">
+                    {flags.map((flag, idx) => (
+                      <div key={idx} className="border-b border-slate-50 dark:border-slate-800/40 last:border-0 p-8 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors group">
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <h4 className="text-base font-bold dark:text-white flex items-center gap-3">
+                            <span className={cn(
+                              "w-2 h-2 rounded-full",
+                              flag.severity === 'critical' ? "bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)]" : 
+                              flag.severity === 'high' ? "bg-rose-500" : "bg-orange-500"
+                            )} />
+                            {flag.ruleName}
+                          </h4>
+                          <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full uppercase tracking-widest">{flag.severity}</span>
+                        </div>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6 font-medium">{flag.explanation}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {flag.legalCitations.slice(0, 3).map((cite, i) => (
+                            <span key={i} className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/10 px-3 py-1 rounded-lg uppercase tracking-wider">{cite}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Action Plan & Intelligence */}
+              <div className="lg:col-span-4 space-y-8">
+                {/* Executive Action Plan */}
+                <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                  <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
+                      <Zap size={14} className="text-emerald-500" />
+                      Execution Plan
+                    </h3>
+                  </div>
+                  <div className="p-8 space-y-6">
+                    {analytics?.actions.slice(0, 5).map((action, i) => (
+                      <div key={i} className="flex gap-4 group">
+                        <div className="mt-1 shrink-0">
+                          <div className={cn(
+                            "w-1 h-8 rounded-full transition-all",
+                            action.priority === 'immediate' ? "bg-rose-500" : "bg-slate-200 dark:bg-slate-700 group-hover:bg-emerald-500"
+                          )} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold dark:text-white mb-1 group-hover:text-emerald-500 transition-colors">{action.action}</p>
+                          <p className="text-xs text-slate-500 leading-relaxed font-medium">{action.reason}</p>
+                        </div>
+                      </div>
+                    ))}
+                    <button 
+                      onClick={() => setActiveTab('lettereditor')}
+                      className="w-full mt-6 py-4 bg-slate-950 dark:bg-emerald-500 text-white dark:text-slate-950 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-transform hover:scale-[1.02]"
+                    >
+                      Execute Legal Package
+                    </button>
+                  </div>
+                </div>
+
+                {/* AI Intelligence Brief */}
+                <div className="bg-slate-950 rounded-[32px] p-8 text-white relative overflow-hidden shadow-2xl border border-slate-800 group">
+                  <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                    <ShieldCheck size={100} />
+                  </div>
+                  <div className="relative z-10">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-orange-400 mb-6 font-mono">Agent Briefing</p>
+                    <p className="text-sm text-slate-300 leading-relaxed font-medium italic mb-8 border-l-2 border-orange-500/30 pl-4">
+                      "{riskProfile?.summary?.substring(0, 180)}..."
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                        <p className="text-[9px] font-bold text-slate-500 uppercase mb-2">Risk Strategy</p>
+                        <p className={cn(
+                          "text-xs font-bold uppercase tracking-widest",
+                          riskProfile?.riskLevel === 'critical' ? 'text-indigo-400 animate-pulse' : 'text-rose-500'
+                        )}>{riskProfile?.riskLevel}</p>
+                      </div>
+                      <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800">
+                        <p className="text-[9px] font-bold text-slate-500 uppercase mb-2">Litigation Potential</p>
+                        <p className="text-xs font-bold uppercase text-orange-400 tracking-widest">{riskProfile?.litigationPotential ? 'Elevated' : 'Standard'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'violations' && (
           <ViolationsTab
             flags={flags}

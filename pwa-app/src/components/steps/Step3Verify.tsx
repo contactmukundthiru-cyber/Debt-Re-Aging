@@ -54,6 +54,7 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
     });
   };
 
+  const dateFields = FIELD_CONFIG.filter(f => f.section === 'dates');
   const valueFields = FIELD_CONFIG.filter(f => f.section === 'values');
 
   const dateIssues = dateFields

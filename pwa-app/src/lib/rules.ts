@@ -829,3 +829,4 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
  * Export everything needed
  */
 export { RULE_DEFINITIONS, STATE_SOL, parseDate };
+export type { CreditFields, RuleFlag, RiskProfile } from './types';

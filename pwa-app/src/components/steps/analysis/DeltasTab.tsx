@@ -25,6 +25,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
   const [severityFilter, setSeverityFilter] = React.useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [deltaSort, setDeltaSort] = React.useState<'impact' | 'field' | 'direction'>('impact');
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [showChangedSnapshotsOnly, setShowChangedSnapshotsOnly] = React.useState(false);
   const insightScore = (insight: SeriesInsight) => {
     const base = insight.severity === 'high' ? 90 : insight.severity === 'medium' ? 70 : 50;
     const readinessBoost = evidenceReadiness >= 75 ? 8 : evidenceReadiness >= 50 ? 4 : 0;
@@ -68,13 +69,39 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
     return sorted;
   }, [deltaSort, filteredDeltas]);
 
+  const impactCounts = React.useMemo(() => {
+    return deltas.reduce((acc, delta) => {
+      acc[delta.impact] += 1;
+      return acc;
+    }, { negative: 0, positive: 0, neutral: 0 });
+  }, [deltas]);
+
+  const displaySnapshots = React.useMemo(() => {
+    if (!showChangedSnapshotsOnly) return seriesSnapshots;
+    return seriesSnapshots.filter((snapshot, idx) => {
+      const prev = seriesSnapshots[idx - 1];
+      if (!prev) return true;
+      return prev.dofd !== snapshot.dofd
+        || prev.removal !== snapshot.removal
+        || prev.value !== snapshot.value
+        || prev.status !== snapshot.status
+        || prev.lastPayment !== snapshot.lastPayment
+        || prev.reported !== snapshot.reported;
+    });
+  }, [seriesSnapshots, showChangedSnapshotsOnly]);
+
   React.useEffect(() => {
-    if (!replayPlaying || seriesSnapshots.length === 0) return;
+    if (!replayPlaying || displaySnapshots.length === 0) return;
     const handle = window.setInterval(() => {
-      setReplayIndex((prev) => (prev + 1) % seriesSnapshots.length);
+      setReplayIndex((prev) => (prev + 1) % displaySnapshots.length);
     }, replaySpeed);
     return () => window.clearInterval(handle);
-  }, [replayPlaying, replaySpeed, seriesSnapshots.length]);
+  }, [displaySnapshots.length, replayPlaying, replaySpeed]);
+
+  React.useEffect(() => {
+    if (displaySnapshots.length === 0) return;
+    setReplayIndex((prev) => Math.min(prev, displaySnapshots.length - 1));
+  }, [displaySnapshots.length]);
 
   const latestSnapshot = seriesSnapshots[seriesSnapshots.length - 1];
   const expectedRemoval = computeExpectedRemovalDate(latestSnapshot?.dofd, latestSnapshot?.bureau);
@@ -137,7 +164,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
     ];
   }, [seriesInsights]);
   const changeHighlights = React.useMemo(() => {
-    const highlights: Record<number, { field: string; from?: string; to?: string }[]> = {};
+    const highlights: Record<string, { field: string; from?: string; to?: string }[]> = {};
     seriesSnapshots.forEach((snapshot, idx) => {
       const prev = seriesSnapshots[idx - 1];
       if (!prev) return;
@@ -148,7 +175,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
       if (prev.status !== snapshot.status) changed.push({ field: 'Status', from: prev.status, to: snapshot.status });
       if (prev.lastPayment !== snapshot.lastPayment) changed.push({ field: 'Last Pay', from: prev.lastPayment, to: snapshot.lastPayment });
       if (prev.reported !== snapshot.reported) changed.push({ field: 'Reported', from: prev.reported, to: snapshot.reported });
-      highlights[idx] = changed;
+      highlights[snapshot.timestamp] = changed;
     });
     return highlights;
   }, [seriesSnapshots]);
@@ -244,7 +271,16 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
               <h3 className="text-lg font-bold dark:text-white">Snapshot drift across time</h3>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-slate-400">{seriesSnapshots.length} snapshots</span>
+              <span className="text-xs font-mono text-slate-400">{displaySnapshots.length} snapshots</span>
+              <button
+                type="button"
+                className={`px-2 py-1 rounded-full border text-[10px] uppercase tracking-widest ${
+                  showChangedSnapshotsOnly ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' : 'bg-slate-100 text-slate-500 border-slate-200'
+                }`}
+                onClick={() => setShowChangedSnapshotsOnly((prev) => !prev)}
+              >
+                {showChangedSnapshotsOnly ? 'Changes Only' : 'Show All'}
+              </button>
               <button
                 type="button"
                 className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
@@ -291,7 +327,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                 <input
                   type="range"
                   min={0}
-                  max={Math.max(0, seriesSnapshots.length - 1)}
+                  max={Math.max(0, displaySnapshots.length - 1)}
                   step={1}
                   value={replayIndex}
                   onChange={(e) => {
@@ -302,12 +338,12 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
               </div>
             </div>
           </div>
-          {seriesSnapshots.length > 0 && (
+          {displaySnapshots.length > 0 && (
             <div className="mb-4">
               <div className="h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 transition-all duration-500"
-                  style={{ width: `${seriesSnapshots.length <= 1 ? 100 : Math.round((replayIndex / (seriesSnapshots.length - 1)) * 100)}%` }}
+                  style={{ width: `${displaySnapshots.length <= 1 ? 100 : Math.round((replayIndex / (displaySnapshots.length - 1)) * 100)}%` }}
                 />
               </div>
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-2">Replay progress</p>
@@ -326,8 +362,8 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
             </div>
           )}
           <div className="space-y-3">
-            {seriesSnapshots.map((snapshot, idx) => {
-              const prev = seriesSnapshots[idx - 1];
+            {displaySnapshots.map((snapshot, idx) => {
+              const prev = displaySnapshots[idx - 1];
               const dofdShift = prev?.dofd && snapshot.dofd && prev.dofd !== snapshot.dofd;
               const removalShift = prev?.removal && snapshot.removal && prev.removal !== snapshot.removal;
               const statusShift = prev?.status && snapshot.status && prev.status !== snapshot.status;
@@ -373,11 +409,11 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                     <p className={`font-mono ${reportedShift ? 'text-rose-500 font-semibold' : ''}`}>{snapshot.reported || '—'}</p>
                   </div>
                 </div>
-                {changeHighlights[idx]?.length > 0 && (
+                {changeHighlights[snapshot.timestamp]?.length > 0 && (
                   <div className="md:col-span-2">
                     <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Field Change Summary</p>
                     <div className="flex flex-wrap gap-2 text-[10px] text-slate-500">
-                      {changeHighlights[idx].map(change => (
+                      {changeHighlights[snapshot.timestamp].map(change => (
                         <button
                           key={change.field}
                           type="button"
@@ -390,7 +426,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                     </div>
                   </div>
                 )}
-                {(dofdShift || removalShift || statusShift || balanceShift || reportedShift) && (
+                {(dofdShift || removalShift || statusShift || valueShift || reportedShift) && (
                   <div className="md:col-span-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest">
                     {dofdShift && (
                       <span
@@ -484,10 +520,10 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
             </div>
           )}
           <div className="mt-6 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Value Drift</p>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Liability Drift</p>
             <div className="flex items-end gap-2 h-20">
-              {seriesSnapshots.map((snapshot, idx) => {
-                const prev = seriesSnapshots[idx - 1];
+              {displaySnapshots.map((snapshot, idx) => {
+                const prev = displaySnapshots[idx - 1];
                 const dofdShift = prev?.dofd && snapshot.dofd && prev.dofd !== snapshot.dofd;
                 const removalShift = prev?.removal && snapshot.removal && prev.removal !== snapshot.removal;
                 const statusShift = prev?.status && snapshot.status && prev.status !== snapshot.status;
@@ -801,6 +837,27 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
             >
               Clear
             </button>
+            <div className="flex items-center gap-2">
+              {[
+                { label: 'DOFD', term: 'dofd' },
+                { label: 'Removal', term: 'removal' },
+                { label: 'Balance', term: 'balance' },
+                { label: 'Status', term: 'status' }
+              ].map((filter) => (
+                <button
+                  key={filter.label}
+                  type="button"
+                  className={`px-2 py-1 rounded-full border ${
+                    searchTerm.toLowerCase().includes(filter.term)
+                      ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20'
+                      : 'bg-slate-100 text-slate-500 border-slate-200'
+                  }`}
+                  onClick={() => setSearchTerm(filter.term)}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
             <span className="text-[10px] uppercase tracking-widest text-slate-400">
               {sortedDeltas.length} / {deltas.length} results
             </span>
@@ -823,6 +880,11 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                 onClick={() => setImpactFilter(level)}
               >
                 {level}
+                {level !== 'all' && (
+                  <span className="ml-1 text-[9px] font-mono text-slate-400">
+                    {impactCounts[level]}
+                  </span>
+                )}
               </button>
             ))}
             <button

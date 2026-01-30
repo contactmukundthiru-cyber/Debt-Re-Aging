@@ -158,7 +158,7 @@ export function buildOutcomeNarrative(pkg: AttorneyPackage): string {
   lines.push(`Generated: ${new Date(pkg.generatedAt).toLocaleString()}`);
   lines.push('');
   lines.push(`Account: ${pkg.caseSummary.creditor} (${pkg.caseSummary.accountType})`);
-  lines.push(`Balance: ${pkg.caseSummary.balance}`);
+  lines.push(`Stated Value: ${pkg.caseSummary.balance}`);
   lines.push(`Violations: ${pkg.caseSummary.totalViolations} total • ${pkg.caseSummary.highSeverityCount} high severity`);
   lines.push(`Case Strength: ${pkg.caseSummary.caseStrength.toUpperCase()} • Litigation potential: ${pkg.caseSummary.litigationPotential ? 'YES' : 'NO'}`);
   lines.push('');
@@ -241,7 +241,7 @@ export function buildAttorneyPackage(
       accountType: fields.accountType || 'Unknown',
       creditor: fields.originalCreditor || 'Unknown',
       collector: fields.furnisherOrCollector,
-      balance: fields.currentBalance || '$0',
+      balance: fields.currentValue || 'zero value',
       totalViolations: flags.length,
       highSeverityCount: flags.filter(f => f.severity === 'high').length,
       caseStrength: riskProfile.disputeStrength === 'strong' ? 'strong' :
@@ -294,7 +294,7 @@ function generateViolationAnalysis(flag: RuleFlag, fields: CreditFields): string
     'B1': `The DOFD (${fields.dofd || 'unknown'}) occurs after the Date Opened (${fields.dateOpened || 'unknown'}), which is chronologically impossible and suggests data manipulation or reporting error.`,
     'B2': `The account was opened on ${fields.dateOpened || 'unknown'}, but the DOFD is reported as ${fields.dofd || 'unknown'}. A gap of more than 6 months between account opening and first delinquency, combined with collection status, strongly indicates re-aging.`,
     'B3': `The DOFD (${fields.dofd || 'unknown'}) is reported after the charge-off date (${fields.chargeOffDate || 'unknown'}). This is impossible - an account must be delinquent before it can be charged off.`,
-    'D1': `The account shows status "${fields.accountStatus || 'unknown'}" but reports a balance of ${fields.currentBalance || 'unknown'}. A paid or closed account should report $0 balance.`,
+    'D1': `The account shows status "${fields.accountStatus || 'unknown'}" but reports a balance of ${fields.currentValue || 'unknown'}. A paid or closed account should report zero value balance.`,
     'K6': `Based on the reported DOFD of ${fields.dofd || 'unknown'}, this account has exceeded the 7-year + 180-day reporting limit under FCRA §605 and must be removed.`,
     'S1': `Based on the last payment date of ${fields.dateLastPayment || 'unknown'} and the state of ${fields.stateCode || 'unknown'}, this debt may have exceeded the statute of limitations for legal collection.`
   };
@@ -389,7 +389,7 @@ function buildLegalAnalysis(
 
   if (flags.some(f => ['B1', 'B2', 'B3'].includes(f.ruleId))) {
     strengths.push('Clear evidence of date manipulation (re-aging)');
-    strengths.push('Re-aging violations often indicate willful conduct supporting punitive damages');
+    strengths.push('Re-aging violations often indicate willful conduct supporting accountability impact');
   }
 
   if (flags.some(f => f.ruleId === 'K6')) {
@@ -416,7 +416,7 @@ function buildLegalAnalysis(
   // Generate recommendations
   if (flags.some(f => f.severity === 'high')) {
     recommendations.push('File FCRA lawsuit in federal court');
-    recommendations.push('Demand jury trial for enhanced damages potential');
+    recommendations.push('Demand jury trial for enhanced impact potential');
   }
 
   if (flags.some(f => ['B1', 'B2', 'B3'].includes(f.ruleId))) {
@@ -425,7 +425,7 @@ function buildLegalAnalysis(
   }
 
   recommendations.push('Preserve all credit report evidence with timestamps');
-  recommendations.push('Document any actual damages (credit denials, higher rates)');
+  recommendations.push('Document any actual impact (credit denials, higher rates)');
 
   return {
     applicableStatutes: statutes,
@@ -553,7 +553,7 @@ function buildEvidenceChecklist(flags: RuleFlag[], fields: CreditFields): Attorn
     source: 'Client'
   });
 
-  // Damages evidence
+  // Impact evidence
   checklist.push({
     item: 'Credit denial letters',
     status: 'optional',
@@ -635,7 +635,7 @@ export function formatAttorneyPackage(pkg: AttorneyPackage): string {
   lines.push(`Account Type: ${pkg.caseSummary.accountType}`);
   lines.push(`Original Creditor: ${pkg.caseSummary.creditor}`);
   if (pkg.caseSummary.collector) lines.push(`Current Collector: ${pkg.caseSummary.collector}`);
-  lines.push(`Reported Balance: ${pkg.caseSummary.balance}`);
+  lines.push(`Reported Stated Value: ${pkg.caseSummary.balance}`);
   lines.push('');
   lines.push(`Total Violations: ${pkg.caseSummary.totalViolations}`);
   lines.push(`High Severity: ${pkg.caseSummary.highSeverityCount}`);
@@ -643,10 +643,10 @@ export function formatAttorneyPackage(pkg: AttorneyPackage): string {
   lines.push(`Litigation Potential: ${pkg.caseSummary.litigationPotential ? 'YES' : 'NO'}`);
   lines.push('');
   lines.push('ESTIMATED DAMAGES:');
-  lines.push(`  Statutory: $${pkg.caseSummary.estimatedDamages.statutory.min} - $${pkg.caseSummary.estimatedDamages.statutory.max}`);
-  lines.push(`  Actual: $${pkg.caseSummary.estimatedDamages.actual}`);
-  lines.push(`  Punitive Possible: ${pkg.caseSummary.estimatedDamages.punitive ? 'YES' : 'NO'}`);
-  lines.push(`  TOTAL RANGE: $${pkg.caseSummary.estimatedDamages.total.min} - $${pkg.caseSummary.estimatedDamages.total.max}`);
+  lines.push(`  Statutory: $${pkg.caseSummary.estimatedImpact.statutory.min} - $${pkg.caseSummary.estimatedImpact.statutory.max}`);
+  lines.push(`  Actual: $${pkg.caseSummary.estimatedImpact.actual}`);
+  lines.push(`  Punitive Possible: ${pkg.caseSummary.estimatedImpact.punitive ? 'YES' : 'NO'}`);
+  lines.push(`  TOTAL RANGE: $${pkg.caseSummary.estimatedImpact.total.min} - $${pkg.caseSummary.estimatedImpact.total.max}`);
   lines.push('');
 
   lines.push('═'.repeat(70));
@@ -668,7 +668,7 @@ export function formatAttorneyPackage(pkg: AttorneyPackage): string {
   lines.push('APPLICABLE STATUTES:');
   pkg.legalAnalysis.applicableStatutes.forEach(s => {
     lines.push(`  ${s.statute} (${s.section})`);
-    lines.push(`    Damages: ${s.damages}`);
+    lines.push(`    Impact: ${s.impact}`);
     lines.push(`    Relevance: ${s.relevance}`);
     lines.push('');
   });

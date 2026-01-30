@@ -64,7 +64,7 @@ const FIELD_LABELS: Record<string, string> = {
   dofd: 'Date of First Delinquency',
   dateOpened: 'Date Opened',
   chargeOffDate: 'Charge-Off Date',
-  currentBalance: 'Current Balance',
+  currentValue: 'Current Balance',
   originalAmount: 'Original Amount',
   accountStatus: 'Account Status',
   paymentHistory: 'Payment History',
@@ -167,7 +167,7 @@ function normalizeCreditorName(name: string): string {
 function findDiscrepancies(bureaus: ComparisonResult['bureaus']): Discrepancy[] {
   const discrepancies: Discrepancy[] = [];
   const fieldsToCompare: (keyof CreditFields)[] = [
-    'dofd', 'dateOpened', 'chargeOffDate', 'currentBalance',
+    'dofd', 'dateOpened', 'chargeOffDate', 'currentValue',
     'originalAmount', 'accountStatus', 'estimatedRemovalDate',
     'dateLastPayment'
   ];
@@ -223,7 +223,7 @@ function createDiscrepancy(field: string, values: Discrepancy['values']): Discre
     recommendation = 'Dispute to ensure removal date is 7 years + 180 days from the earliest DOFD across all bureaus.';
   }
   // Balance discrepancies
-  else if (field === 'currentBalance') {
+  else if (field === 'currentValue') {
     const amounts = Object.values(values).filter(v => v).map(v => parseFloat(v!.replace(/[$,]/g, '')));
     const diff = Math.max(...amounts) - Math.min(...amounts);
     if (diff > 500) {
@@ -232,7 +232,7 @@ function createDiscrepancy(field: string, values: Discrepancy['values']): Discre
       recommendation = 'Demand itemized accounting from furnisher. Dispute higher balances as inaccurate.';
     } else {
       severity = 'minor';
-      explanation = 'Minor balance discrepancy, possibly due to different reporting dates.';
+      explanation = 'Minor value discrepancy, possibly due to different reporting dates.';
       recommendation = 'Document for completeness; may not require immediate action.';
     }
   }

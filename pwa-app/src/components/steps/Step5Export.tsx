@@ -581,17 +581,17 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                     <p className="heading-md dark:text-white">{impactAssessment.statutory.eligible ? 'Qualified' : 'Unknown'}</p>
                   </div>
                   <div>
-                    <p className="label text-xs text-gray-500 dark:text-gray-400">Actual Impact</p>
-                    <p className="heading-md dark:text-white">{impactAssessment.actual.severity.toUpperCase()}</p>
+                    <p className="label text-xs text-gray-500 dark:text-gray-400">Culpability</p>
+                    <p className="heading-md dark:text-white">{impactAssessment.culpability.level.toUpperCase()}</p>
                   </div>
                   <div>
-                    <p className="label text-xs text-gray-500 dark:text-gray-400">Civil Risk</p>
-                    <p className="heading-md dark:text-white">{impactAssessment.civilAccountability.possible ? 'HIGH' : 'LOW'}</p>
+                    <p className="label text-xs text-gray-500 dark:text-gray-400">Litigation</p>
+                    <p className="heading-md dark:text-white">{impactAssessment.litigationViability.strength.toUpperCase()}</p>
                   </div>
                   <div>
                     <p className="label text-xs text-gray-500 dark:text-gray-400">Severity</p>
-                    <p className={`heading-md ${impactAssessment.overallRisk === 'critical' ? 'text-red-600' : 'text-blue-600'}`}>
-                      {impactAssessment.overallRisk.toUpperCase()}
+                    <p className={`heading-md ${impactAssessment.executiveSummary.overallSeverity === 'critical' ? 'text-red-600' : 'text-blue-600'}`}>
+                      {impactAssessment.executiveSummary.overallSeverity.toUpperCase()}
                     </p>
                   </div>
                 </div>
@@ -723,7 +723,7 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                   type="button"
                   className="w-full px-4 py-2 bg-emerald-500/10 text-emerald-600 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition-all"
                   onClick={() => {
-                    const content = `AFFIDAVIT OF FORENSIC ACCURACY\n\nI, ${consumer.name || '[NAME]'}, declare under penalty of perjury that the data extracted from the credit report and verified on ${new Date().toLocaleDateString()} is accurate to the best of my knowledge.\n\nCase ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}\nDate: ${new Date().toISOString()}\n\nVerified Flags: ${flags.length}\nOverall Impact: ${impactAssessment ? impactAssessment.overallRisk.toUpperCase() : 'N/A'}\n\nSignature: __________________________`;
+                    const content = `AFFIDAVIT OF FORENSIC ACCURACY\n\nI, ${consumer.name || '[NAME]'}, declare under penalty of perjury that the data extracted from the credit report and verified on ${new Date().toLocaleDateString()} is accurate to the best of my knowledge.\n\nCase ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}\nDate: ${new Date().toISOString()}\n\nVerified Flags: ${flags.length}\nOverall Impact: ${impactAssessment ? impactAssessment.executiveSummary.overallSeverity.toUpperCase() : 'N/A'}\n\nSignature: __________________________`;
                     downloadPdfFile(content, 'forensic_affidavit.pdf');
                   }}
                 >

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { RuleFlag, CreditFields, RiskProfile } from '../../../lib/rules';
+import { RuleFlag, CreditFields, RiskProfile } from '../../../lib/types';
 import { PatternInsight, TimelineEvent } from '../../../lib/analytics';
 import { performAIAnalysis, AIAnalysisResult, AIFinding } from '../../../lib/ai-analysis';
 import { loadRemoteAIConfig, saveRemoteAIConfig, clearRemoteAIConfig, runRemoteAnalysis, RemoteAIConfig, RemoteAIResult } from '../../../lib/ai-remote';

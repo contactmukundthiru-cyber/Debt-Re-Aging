@@ -177,7 +177,7 @@ function estimateCurrentImpact(fields: CreditFields, flags: RuleFlag[]): number 
   }
 
   // Balance factor
-  const balance = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const balance = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   if (balance > 5000) {
     impact += 15;
   } else if (balance > 1000) {
@@ -239,7 +239,7 @@ function calculatePaymentHistoryGain(fields: CreditFields, flags: RuleFlag[]): n
 function calculateAmountsOwedGain(fields: CreditFields): number {
   let gain = 0;
 
-  const balance = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const balance = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
 
   if (balance > 0) {
@@ -293,7 +293,7 @@ function getPaymentHistoryExplanation(fields: CreditFields, flags: RuleFlag[]): 
  * Get amounts owed explanation
  */
 function getAmountsOwedExplanation(fields: CreditFields): string {
-  const balance = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const balance = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
 
   if (balance > 5000) {
     return `The $${balance.toLocaleString()} reported balance significantly impacts your debt burden calculation.`;
@@ -353,7 +353,7 @@ function calculateConfidence(fields: CreditFields, flags: RuleFlag[]): 'high' | 
 
   // More data = higher confidence
   if (fields.dofd) confidence++;
-  if (fields.currentBalance) confidence++;
+  if (fields.currentValue) confidence++;
   if (fields.accountType) confidence++;
   if (fields.accountStatus) confidence++;
   if (fields.chargeOffDate) confidence++;

@@ -18,6 +18,7 @@ const serif = Fraunces({
 const mono = IBM_Plex_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
 });
 

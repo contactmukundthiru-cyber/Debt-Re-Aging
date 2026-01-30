@@ -175,7 +175,7 @@ export function generateCFPBNarrative(fields: CreditFields, flags: RuleFlag[]): 
   lines.push(`- Original Creditor: ${fields.originalCreditor || 'Not provided'}`);
   lines.push(`- Current Furnisher: ${fields.furnisherOrCollector || 'Not provided'}`);
   lines.push(`- Account Type: ${fields.accountType || 'Not specified'}`);
-  lines.push(`- Reported Balance: ${fields.currentBalance || 'Not provided'}`);
+  lines.push(`- Reported Stated Value: ${fields.currentValue || 'Not provided'}`);
   lines.push(`- Date of First Delinquency: ${fields.dofd || 'Not provided'}`);
   lines.push(`- Estimated Removal Date: ${fields.estimatedRemovalDate || 'Not provided'}`);
   lines.push('');
@@ -260,7 +260,7 @@ function generateDesiredResolution(flags: RuleFlag[]): string {
 
   if (flags.some(f => f.ruleId === 'D1')) {
     resolutions.push('   - Correction of the account status to reflect paid/closed status');
-    resolutions.push('   - Correction of the balance to $0');
+    resolutions.push('   - Correction of the balance to reflect zero value');
   }
 
   if (flags.some(f => ['K1', 'K7'].includes(f.ruleId))) {
@@ -422,7 +422,7 @@ export function getComplaintFollowUpSteps(): string[] {
     '3. Review and dispute company response if inadequate',
     '4. Request CFPB investigation if response is unsatisfactory',
     '5. Consider small claims court if no resolution after 60 days',
-    '6. Consult with FCRA attorney for potential lawsuit if damages exceed $1000',
+    '6. Consult with FCRA attorney for potential lawsuit if forensic impact is high',
   ];
 }
 

@@ -289,7 +289,7 @@ function calculateFinancialBenefits(currentScore: number, projectedScore: number
 
     const benefits: FinancialBenefit[] = [];
 
-    // Mortgage calculation (30-year, $300,000 loan)
+    // Mortgage calculation (30-year, 300,000 units loan)
     const mortgageAmount = 300000;
     const currentMortgageRate = RATE_IMPACTS.mortgage[currentRange as keyof typeof RATE_IMPACTS.mortgage];
     const projectedMortgageRate = RATE_IMPACTS.mortgage[projectedRange as keyof typeof RATE_IMPACTS.mortgage];
@@ -297,7 +297,7 @@ function calculateFinancialBenefits(currentScore: number, projectedScore: number
     const projectedMortgagePayment = calculateMonthlyPayment(mortgageAmount, projectedMortgageRate, 360);
 
     benefits.push({
-        product: '30-Year Mortgage ($300K)',
+        product: '30-Year Mortgage (300K units)',
         currentRate: `${currentMortgageRate}%`,
         projectedRate: `${projectedMortgageRate}%`,
         monthlySavings: Math.round(currentMortgagePayment - projectedMortgagePayment),
@@ -305,7 +305,7 @@ function calculateFinancialBenefits(currentScore: number, projectedScore: number
         lifetimeSavings: Math.round((currentMortgagePayment - projectedMortgagePayment) * 360)
     });
 
-    // Auto loan calculation (5-year, $35,000 loan)
+    // Auto loan calculation (5-year, 35,000 units loan)
     const autoAmount = 35000;
     const currentAutoRate = RATE_IMPACTS.autoLoan[currentRange as keyof typeof RATE_IMPACTS.autoLoan];
     const projectedAutoRate = RATE_IMPACTS.autoLoan[projectedRange as keyof typeof RATE_IMPACTS.autoLoan];
@@ -313,7 +313,7 @@ function calculateFinancialBenefits(currentScore: number, projectedScore: number
     const projectedAutoPayment = calculateMonthlyPayment(autoAmount, projectedAutoRate, 60);
 
     benefits.push({
-        product: '5-Year Auto Loan ($35K)',
+        product: '5-Year Auto Loan (35K units)',
         currentRate: `${currentAutoRate}%`,
         projectedRate: `${projectedAutoRate}%`,
         monthlySavings: Math.round(currentAutoPayment - projectedAutoPayment),
@@ -321,7 +321,7 @@ function calculateFinancialBenefits(currentScore: number, projectedScore: number
         lifetimeSavings: Math.round((currentAutoPayment - projectedAutoPayment) * 60)
     });
 
-    // Credit card calculation (average $5,000 balance)
+    // Credit card calculation (average 5,000 units balance)
     const ccBalance = 5000;
     const currentCCRate = RATE_IMPACTS.creditCard[currentRange as keyof typeof RATE_IMPACTS.creditCard];
     const projectedCCRate = RATE_IMPACTS.creditCard[projectedRange as keyof typeof RATE_IMPACTS.creditCard];
@@ -329,7 +329,7 @@ function calculateFinancialBenefits(currentScore: number, projectedScore: number
     const projectedCCInterest = (ccBalance * projectedCCRate) / 100 / 12;
 
     benefits.push({
-        product: 'Credit Card ($5K Balance)',
+        product: 'Credit Card (5K value Balance)',
         currentRate: `${currentCCRate}% APR`,
         projectedRate: `${projectedCCRate}% APR`,
         monthlySavings: Math.round(currentCCInterest - projectedCCInterest),

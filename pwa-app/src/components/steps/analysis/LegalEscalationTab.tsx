@@ -21,8 +21,7 @@ const LegalEscalationTab: React.FC<LegalEscalationTabProps> = ({
     const [activeDocument, setActiveDocument] = useState<'affidavit' | 'cfpb' | 'attorney'>('affidavit');
 
     const consumer: ConsumerInfo = consumerInfo || {
-        firstName: '[FIRST NAME]',
-        lastName: '[LAST NAME]',
+        name: '[FULL NAME]',
         address: '[ADDRESS]',
         city: '[CITY]',
         state: '[STATE]',
@@ -55,7 +54,7 @@ I have previously disputed this information, but the bureau responded with a gen
         return `ATTORNEY CASE REFERRAL SUMMARY
 [PRIVILEGED AND CONFIDENTIAL - ATTORNEY WORK PRODUCT]
 
-CLIENT: ${consumer.firstName} ${consumer.lastName}
+CLIENT: ${consumer.name}
 DATE: ${new Date().toLocaleDateString()}
 CASE ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}
 

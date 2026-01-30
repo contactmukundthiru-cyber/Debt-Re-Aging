@@ -1,4 +1,4 @@
-import { findRelevantPrecedents, searchPrecedents, calculateAverageDamages, formatForDispute } from '../lib/legal-precedents';
+import { findRelevantPrecedents, searchPrecedents, calculateAverageImpact, formatForDispute } from '../lib/legal-precedents';
 
 describe('legal precedents', () => {
   test('findRelevantPrecedents returns matches', () => {
@@ -14,10 +14,10 @@ describe('legal precedents', () => {
     expect(results.some(r => r.name.includes('Safeco'))).toBe(true);
   });
 
-  test('calculateAverageDamages computes correctly', () => {
-    const damages = calculateAverageDamages(['B1']);
-    expect(damages.averageStatutory).toBeDefined();
-    expect(damages.sampleSize).toBeGreaterThan(0);
+  test('calculateAverageImpact computes correctly', () => {
+    const impact = calculateAverageImpact(['B1']);
+    expect(impact.averageSeverity).toBeDefined();
+    expect(impact.sampleSize).toBeGreaterThan(0);
   });
 
   test('formatForDispute returns formatted string', () => {

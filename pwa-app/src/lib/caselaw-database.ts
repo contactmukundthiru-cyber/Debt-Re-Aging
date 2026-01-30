@@ -20,7 +20,7 @@ export interface CaseLawEntry {
   violationTypes: string[];
   holding: string;
   keyPrinciple: string;
-  damages: {
+  impact score: {
     statutory?: number;
     actual?: number;
     punitive?: number;
@@ -41,7 +41,7 @@ export type CaseLawCategory =
   | 'reinvestigation'
   | 'furnisher_duty'
   | 'willfulness'
-  | 'actual_damages'
+  | 'actual_impact score'
   | 'mixed_file'
   | 'identity_theft'
   | 'medical_debt'
@@ -68,7 +68,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['DOFD manipulation', 'Re-aging'],
     holding: 'CRA violated FCRA by failing to correct re-aged DOFD after consumer dispute.',
     keyPrinciple: 'The DOFD cannot be reset by debt sales, transfers, or payments.',
-    damages: { statutory: 1000, actual: 5000, punitive: 10000, attorneyFees: 25000, total: 41000 },
+    impact score: { statutory: 1000, actual: 5000, punitive: 10000, attorneyFees: 25000, total: 41000 },
     applicableRules: ['B1', 'B4', 'B6', 'K6', 'B1-ADV'],
     quotableLanguage: [
       'The date of first delinquency is a historical fact that cannot be changed by subsequent events.',
@@ -88,7 +88,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Re-aging', 'Reporting period'],
     holding: 'Defendant liable for re-aging debt by reporting incorrect DOFD.',
     keyPrinciple: 'Furnishers must report accurate DOFD; re-aging extends illegal harm.',
-    damages: { statutory: 1000, actual: 7500, attorneyFees: 15000, total: 23500 },
+    impact score: { statutory: 1000, actual: 7500, attorneyFees: 15000, total: 23500 },
     applicableRules: ['B1', 'B2', 'B5', 'K6'],
     quotableLanguage: [
       'Re-aging is a form of deception that harms consumers by extending negative information beyond the statutory period.'
@@ -106,8 +106,8 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     category: 'reaging',
     violationTypes: ['Re-aging', 'DOFD falsification'],
     holding: 'Bank willfully violated FCRA by re-aging account to extend reporting.',
-    keyPrinciple: 'Willful re-aging supports punitive damages.',
-    damages: { statutory: 1000, punitive: 25000, attorneyFees: 40000, total: 66000 },
+    keyPrinciple: 'Willful re-aging supports punitive accountability.',
+    impact score: { statutory: 1000, punitive: 25000, attorneyFees: 40000, total: 66000 },
     applicableRules: ['B1', 'B4', 'B5', 'K6', 'B1-ADV'],
     quotableLanguage: [
       'Willful FCRA violations occur when the defendant knowingly or recklessly disregards its duties.',
@@ -129,7 +129,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Parroting', 'Inadequate reinvestigation'],
     holding: 'CRA cannot simply parrot furnisher response; must conduct meaningful investigation.',
     keyPrinciple: 'Verification requires more than repeating the furnisher\'s position.',
-    damages: { statutory: 1000, actual: 25000, punitive: 50000, attorneyFees: 35000, total: 111000 },
+    impact score: { statutory: 1000, actual: 25000, punitive: 50000, attorneyFees: 35000, total: 111000 },
     applicableRules: ['V1', 'V2', 'V3'],
     quotableLanguage: [
       'A credit bureau cannot simply accept a furnisher\'s word; it has an independent duty to investigate.',
@@ -149,7 +149,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['No investigation', 'Furnisher duty'],
     holding: 'Furnisher must conduct reasonable investigation upon notice of dispute.',
     keyPrinciple: 'Furnisher duty under 623(b) requires actual investigation.',
-    damages: { statutory: 1000, actual: 10000, attorneyFees: 45000, total: 56000 },
+    impact score: { statutory: 1000, actual: 10000, attorneyFees: 45000, total: 56000 },
     applicableRules: ['V2', 'FD1', 'FD2'],
     quotableLanguage: [
       'The furnisher\'s investigation must be reasonable, not merely perfunctory.',
@@ -169,7 +169,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Timeliness', 'Investigation delay'],
     holding: '30-day investigation period is mandatory; delays are per se violations.',
     keyPrinciple: 'Investigation must be completed within 30 days.',
-    damages: { statutory: 1000, attorneyFees: 20000, total: 21000 },
+    impact score: { statutory: 1000, attorneyFees: 20000, total: 21000 },
     applicableRules: ['TV2', 'V2'],
     quotableLanguage: [
       'The 30-day period is not merely advisory; it is a statutory requirement.',
@@ -189,7 +189,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Furnisher investigation', 'Supporting documents'],
     holding: 'Furnisher must review all relevant information provided by CRA.',
     keyPrinciple: 'Investigation must consider consumer\'s supporting documentation.',
-    damages: { statutory: 1000, actual: 15000, attorneyFees: 50000, total: 66000 },
+    impact score: { statutory: 1000, actual: 15000, attorneyFees: 50000, total: 66000 },
     applicableRules: ['V4', 'FD1'],
     quotableLanguage: [
       'A furnisher cannot ignore relevant information forwarded by the CRA.',
@@ -211,7 +211,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Willfulness standard'],
     holding: 'Willful FCRA violation requires reckless disregard of statutory duty.',
     keyPrinciple: 'Recklessness satisfies willfulness; negligence does not.',
-    damages: {},
+    impact score: {},
     applicableRules: ['ALL'],
     quotableLanguage: [
       'A company does not act in reckless disregard unless the action is not only wrong but also involves an unjustifiably high risk of harm.',
@@ -228,10 +228,10 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     court: '4th Circuit',
     year: 2008,
     category: 'willfulness',
-    violationTypes: ['Willful noncompliance', 'Punitive damages'],
-    holding: 'Punitive damages available for willful FCRA violations.',
+    violationTypes: ['Willful noncompliance', 'Punitive impact score'],
+    holding: 'Punitive impact score available for willful FCRA violations.',
     keyPrinciple: 'Pattern of violations supports willfulness finding.',
-    damages: { statutory: 1000, actual: 20000, punitive: 80000, attorneyFees: 60000, total: 161000 },
+    impact score: { statutory: 1000, actual: 20000, punitive: 80000, attorneyFees: 60000, total: 161000 },
     applicableRules: ['B1', 'B4', 'FD1', 'XB1'],
     quotableLanguage: [
       'A pattern of violations across multiple consumers suggests willful disregard.',
@@ -242,18 +242,18 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     precedentialValue: 'binding'
   },
 
-  // ========== ACTUAL DAMAGES CASES ==========
+  // ========== ACTUAL IMPACT CASES ==========
   {
     id: 'bach-first-union',
     name: 'Bach v. First Union National Bank',
     citation: '149 Fed. Appx. 354 (6th Cir. 2005)',
     court: '6th Circuit',
     year: 2005,
-    category: 'actual_damages',
+    category: 'actual_impact score',
     violationTypes: ['Credit denial', 'Emotional distress'],
-    holding: 'Emotional distress damages recoverable under FCRA.',
-    keyPrinciple: 'Actual damages include emotional distress from credit reporting errors.',
-    damages: { actual: 50000, punitive: 100000, attorneyFees: 75000, total: 225000 },
+    holding: 'Emotional distress impact score recoverable under FCRA.',
+    keyPrinciple: 'Actual impact score include emotional distress from credit reporting errors.',
+    impact score: { actual: 50000, punitive: 100000, attorneyFees: 75000, total: 225000 },
     applicableRules: ['ALL'],
     quotableLanguage: [
       'Emotional distress caused by credit reporting errors is compensable.',
@@ -269,14 +269,14 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     citation: '510 F.3d 495 (4th Cir. 2007)',
     court: '4th Circuit',
     year: 2007,
-    category: 'actual_damages',
+    category: 'actual_impact score',
     violationTypes: ['Emotional distress', 'Humiliation'],
-    holding: 'Humiliation and mental anguish from credit errors are actual damages.',
-    keyPrinciple: 'Consumer testimony can support emotional distress damages.',
-    damages: { actual: 75000, attorneyFees: 40000, total: 115000 },
+    holding: 'Humiliation and mental anguish from credit errors are actual impact score.',
+    keyPrinciple: 'Consumer testimony can support emotional distress impact score.',
+    impact score: { actual: 75000, attorneyFees: 40000, total: 115000 },
     applicableRules: ['ALL'],
     quotableLanguage: [
-      'The FCRA provides for actual damages, which include emotional distress.',
+      'The FCRA provides for actual impact score, which include emotional distress.',
       'Embarrassment and humiliation from credit denials are compensable harms.'
     ],
     distinguishingFactors: ['Detailed testimony', 'Corroborating witnesses'],
@@ -295,7 +295,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Zombie debt', 'Obsolete information'],
     holding: 'Reporting debt beyond 7-year period is per se FCRA violation.',
     keyPrinciple: 'Time-expired debt cannot be reported regardless of verification.',
-    damages: { statutory: 1000, actual: 10000, attorneyFees: 25000, total: 36000 },
+    impact score: { statutory: 1000, actual: 10000, attorneyFees: 25000, total: 36000 },
     applicableRules: ['K6', 'ZD1', 'ZD2', 'ZD3'],
     quotableLanguage: [
       'The 7-year reporting period is an absolute limit, not subject to verification.',
@@ -317,7 +317,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Mixed file', 'Wrong person'],
     holding: 'CRA liable for mixing files of persons with similar names.',
     keyPrinciple: 'CRAs must have procedures to prevent mixed files.',
-    damages: { statutory: 1000, actual: 30000, punitive: 60000, attorneyFees: 50000, total: 141000 },
+    impact score: { statutory: 1000, actual: 30000, punitive: 60000, attorneyFees: 50000, total: 141000 },
     applicableRules: ['MIXED_FILE', 'V1'],
     quotableLanguage: [
       'Credit bureaus have a duty to maintain reasonable procedures to assure maximum possible accuracy.',
@@ -338,14 +338,14 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     category: 'bankruptcy',
     violationTypes: ['Bankruptcy discharge', 'Collection after discharge'],
     holding: 'Collecting on discharged debt violates both bankruptcy code and FCRA.',
-    keyPrinciple: 'Discharged debts must be reported with $0 balance.',
-    damages: { actual: 25000, punitive: 50000, attorneyFees: 40000, total: 115000 },
+    keyPrinciple: 'Discharged debts must be reported with 0 points balance.',
+    impact score: { actual: 25000, punitive: 50000, attorneyFees: 40000, total: 115000 },
     applicableRules: ['CP1', 'R1', 'BANKRUPTCY_VIOLATION'],
     quotableLanguage: [
       'Reporting a balance on a discharged debt violates both the discharge injunction and the FCRA.',
       'The discharge order is a permanent bar to collection activity.'
     ],
-    distinguishingFactors: ['Clear discharge', 'Continued balance reporting'],
+    distinguishingFactors: ['Clear discharge', 'Continued value reporting'],
     jurisdiction: '3rd Circuit',
     precedentialValue: 'persuasive'
   },
@@ -358,16 +358,16 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     court: 'CFPB Rulemaking',
     year: 2023,
     category: 'medical_debt',
-    violationTypes: ['Medical debt', 'Under $500', 'Paid medical debt'],
-    holding: 'Medical debts under $500 and paid medical debts cannot be reported.',
+    violationTypes: ['Medical debt', 'Under 500 points', 'Paid medical debt'],
+    holding: 'Medical debts under 500 points and paid medical debts cannot be reported.',
     keyPrinciple: 'Enhanced protections for medical debt on credit reports.',
-    damages: {},
+    impact score: {},
     applicableRules: ['H1', 'H2', 'H3', 'H4', 'MEDICAL_IMPROPER_REPORTING'],
     quotableLanguage: [
       'Medical debt has unique characteristics that distinguish it from other consumer debt.',
       'Consumers should not be penalized for medical emergencies they could not anticipate.'
     ],
-    distinguishingFactors: ['Medical debt type', 'Amount under $500', 'Paid status'],
+    distinguishingFactors: ['Medical debt type', 'Amount under 500 points', 'Paid status'],
     jurisdiction: 'United States',
     precedentialValue: 'binding'
   },
@@ -383,7 +383,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Time-barred debt', 'Suit on SOL-expired debt'],
     holding: 'Filing suit on time-barred debt violates FDCPA.',
     keyPrinciple: 'Collecting on time-barred debt through litigation is deceptive.',
-    damages: { statutory: 1000, actual: 5000, attorneyFees: 30000, total: 36000 },
+    impact score: { statutory: 1000, actual: 5000, attorneyFees: 30000, total: 36000 },
     applicableRules: ['S1', 'CP3', 'ZOMBIE_SOL_EXPIRED'],
     quotableLanguage: [
       'Filing a lawsuit to collect a time-barred debt is inherently deceptive.',
@@ -403,7 +403,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['False threats', 'Deceptive practices'],
     holding: 'Threatening legal action without intent to sue violates FDCPA.',
     keyPrinciple: 'Threats must be intended to be carried out.',
-    damages: { statutory: 1000, attorneyFees: 15000, total: 16000 },
+    impact score: { statutory: 1000, attorneyFees: 15000, total: 16000 },
     applicableRules: ['CP4', 'COLLECTION_DECEPTION'],
     quotableLanguage: [
       'A threat is deceptive if the collector does not intend to follow through.',
@@ -425,7 +425,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Furnisher duty', 'Reasonable procedures'],
     holding: 'Furnishers must have reasonable procedures to ensure accuracy.',
     keyPrinciple: 'Furnisher duty extends to maintaining accurate records.',
-    damages: { statutory: 1000, actual: 15000, attorneyFees: 35000, total: 51000 },
+    impact score: { statutory: 1000, actual: 15000, attorneyFees: 35000, total: 51000 },
     applicableRules: ['FD1', 'FD2', 'FD3'],
     quotableLanguage: [
       'Furnishers have an independent duty to report accurate information.',
@@ -445,7 +445,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Direct dispute', 'Furnisher investigation'],
     holding: 'Furnisher must investigate disputes sent directly by consumers.',
     keyPrinciple: '623(a)(8) creates direct dispute rights against furnishers.',
-    damages: { statutory: 1000, actual: 8000, attorneyFees: 25000, total: 34000 },
+    impact score: { statutory: 1000, actual: 8000, attorneyFees: 25000, total: 34000 },
     applicableRules: ['FD1', 'V2'],
     quotableLanguage: [
       'The 2003 FACT Act created a direct dispute mechanism with furnishers.',
@@ -467,7 +467,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Maximum possible accuracy', 'Procedures'],
     holding: 'CRAs must follow reasonable procedures to assure maximum possible accuracy.',
     keyPrinciple: 'Maximum possible accuracy is the standard, not perfection.',
-    damages: { statutory: 1000, actual: 20000, attorneyFees: 45000, total: 66000 },
+    impact score: { statutory: 1000, actual: 20000, attorneyFees: 45000, total: 66000 },
     applicableRules: ['V1', 'V2', 'V3'],
     quotableLanguage: [
       'The FCRA requires reasonable procedures, not perfect results.',
@@ -487,7 +487,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Reinvestigation duty', 'Beyond parroting'],
     holding: 'Reinvestigation requires more than verifying furnisher says data is correct.',
     keyPrinciple: 'Investigation must be meaningful and substantive.',
-    damages: { statutory: 1000, actual: 35000, punitive: 70000, attorneyFees: 55000, total: 161000 },
+    impact score: { statutory: 1000, actual: 35000, punitive: 70000, attorneyFees: 55000, total: 161000 },
     applicableRules: ['V1', 'V2'],
     quotableLanguage: [
       'Simply verifying that the furnisher maintains the same position is not a reinvestigation.',
@@ -507,7 +507,7 @@ export const CASE_LAW_DATABASE: CaseLawEntry[] = [
     violationTypes: ['Furnisher accuracy', 'Dispute response'],
     holding: 'Furnisher must correct inaccurate information after dispute.',
     keyPrinciple: 'Furnisher liability attaches when aware of inaccuracy.',
-    damages: { statutory: 1000, actual: 12000, attorneyFees: 30000, total: 43000 },
+    impact score: { statutory: 1000, actual: 12000, attorneyFees: 30000, total: 43000 },
     applicableRules: ['FD1', 'FD3'],
     quotableLanguage: [
       'Once on notice of a dispute, the furnisher cannot simply ignore it.',
@@ -563,10 +563,10 @@ export function getLandmarkCases(): CaseLawEntry[] {
 /**
  * Get cases with highest damage awards
  */
-export function getHighDamageCases(minDamages: number = 50000): CaseLawEntry[] {
+export function getHighDamageCases(minImpact Score: number = 50000): CaseLawEntry[] {
   return CASE_LAW_DATABASE
-    .filter(c => (c.damages.total || 0) >= minDamages)
-    .sort((a, b) => (b.damages.total || 0) - (a.damages.total || 0));
+    .filter(c => (c.impact score.total || 0) >= minImpact Score)
+    .sort((a, b) => (b.impact score.total || 0) - (a.impact score.total || 0));
 }
 
 /**
@@ -626,15 +626,15 @@ export function getDamageStats(category: CaseLawCategory): {
   maxTotal: number;
   caseCount: number;
 } {
-  const cases = searchByCategory(category).filter(c => c.damages.total);
+  const cases = searchByCategory(category).filter(c => c.impact score.total);
 
   if (cases.length === 0) {
     return { avgStatutory: 0, avgActual: 0, avgTotal: 0, maxTotal: 0, caseCount: 0 };
   }
 
-  const totals = cases.map(c => c.damages.total || 0);
-  const statutory = cases.map(c => c.damages.statutory || 0);
-  const actual = cases.map(c => c.damages.actual || 0);
+  const totals = cases.map(c => c.impact score.total || 0);
+  const statutory = cases.map(c => c.impact score.statutory || 0);
+  const actual = cases.map(c => c.impact score.actual || 0);
 
   return {
     avgStatutory: Math.round(statutory.reduce((a, b) => a + b, 0) / cases.length),

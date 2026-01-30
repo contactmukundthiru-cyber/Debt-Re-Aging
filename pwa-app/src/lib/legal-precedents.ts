@@ -13,7 +13,7 @@ export interface LegalPrecedent {
   holding: string;
   relevantRules: string[];
   keywords: string[];
-  damagesAwarded?: {
+  impact scoreAwarded?: {
     statutory?: number;
     actual?: number;
     punitive?: number;
@@ -35,7 +35,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'Court held that reporting an incorrect DOFD violates FCRA accuracy requirements. The 7-year period begins from the original DOFD, not subsequent events.',
     relevantRules: ['B1', 'B2', 'B3', 'K6'],
     keywords: ['dofd', 're-aging', 'date manipulation', '7-year rule'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       statutory: 1000,
       attorneyFees: 45000
     },
@@ -52,7 +52,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'FCRA requires reporting accurate DOFD. CRAs have duty to maintain reasonable procedures to ensure accuracy.',
     relevantRules: ['B1', 'B2', 'K6'],
     keywords: ['dofd', 'accuracy', 'cra procedures'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       actual: 15000,
       statutory: 1000,
       attorneyFees: 55000
@@ -61,7 +61,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     fullCitation: 'DiTommaso v. Experian Info. Solutions, Inc., 236 F.Supp.3d 1173 (S.D. Cal. 2017)'
   },
 
-  // Willful Violation / Punitive Damages
+  // Willful Violation / Punitive Impact Score
   {
     id: 'safeco-v-burr',
     name: 'Safeco Insurance Co. v. Burr',
@@ -71,7 +71,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     summary: 'Landmark case defining "willful" violation under FCRA.',
     holding: 'A company "willfully" violates FCRA when it acts knowing or in reckless disregard of whether its conduct violates the statute. Reckless disregard occurs when the defendant runs a risk of violating the law substantially greater than the risk associated with a reading that was merely careless.',
     relevantRules: ['B1', 'B2', 'B3', 'K6'],
-    keywords: ['willful', 'reckless', 'punitive damages', 'statutory damages'],
+    keywords: ['willful', 'reckless', 'punitive accountability', 'statutory liability'],
     significance: 'landmark',
     fullCitation: 'Safeco Ins. Co. of Am. v. Burr, 551 U.S. 47 (2007)'
   },
@@ -81,11 +81,11 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     citation: '526 F.3d 142',
     court: '4th Circuit',
     year: 2008,
-    summary: 'Consumer awarded punitive damages for willful FCRA violations.',
-    holding: 'When a furnisher continues to report inaccurate information after receiving dispute notice and fails to conduct reasonable investigation, punitive damages may be awarded.',
+    summary: 'Consumer awarded punitive accountability for willful FCRA violations.',
+    holding: 'When a furnisher continues to report inaccurate information after receiving dispute notice and fails to conduct reasonable investigation, punitive accountability may be awarded.',
     relevantRules: ['D1', 'K1'],
-    keywords: ['punitive damages', 'investigation', 'dispute'],
-    damagesAwarded: {
+    keywords: ['punitive accountability', 'investigation', 'dispute'],
+    impact scoreAwarded: {
       actual: 50000,
       punitive: 80000,
       attorneyFees: 95000
@@ -105,7 +105,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'CRAs must complete reinvestigation within 30 days of receiving dispute. Failure to do so is an independent FCRA violation.',
     relevantRules: ['K6'],
     keywords: ['30-day', 'investigation', 'reinvestigation'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       statutory: 1000,
       attorneyFees: 35000
     },
@@ -124,7 +124,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'Furnishers have independent duty under FCRA §623(b) to conduct reasonable investigation upon receiving notice of dispute. This duty is not satisfied by merely verifying internal records.',
     relevantRules: ['D1', 'M1', 'M2'],
     keywords: ['furnisher', 'investigation', 'dispute'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       actual: 35000,
       attorneyFees: 65000
     },
@@ -143,7 +143,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'Continuing to report information known to be disputed and potentially inaccurate demonstrates willful noncompliance with FCRA.',
     relevantRules: ['D1', 'K6'],
     keywords: ['willful', 'continuing violation', 'disputed'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       actual: 10000,
       punitive: 25000
     },
@@ -162,7 +162,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'Filing suit on a debt known to be time-barred may violate FDCPA as a false representation that the debt is legally enforceable.',
     relevantRules: ['S1'],
     keywords: ['time-barred', 'statute of limitations', 'fdcpa'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       statutory: 1000,
       attorneyFees: 12000
     },
@@ -181,7 +181,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'Collector who receives validation request must cease collection until validation is provided. Continuing collection without validation violates FDCPA §809(b).',
     relevantRules: ['S1'],
     keywords: ['validation', 'cease collection', 'fdcpa'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       statutory: 1000,
       attorneyFees: 25000
     },
@@ -200,7 +200,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'Reporting a balance on an account that has been paid in full is inaccurate and violates FCRA accuracy requirements.',
     relevantRules: ['D1', 'K1'],
     keywords: ['paid account', 'balance', 'accuracy'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       actual: 5000,
       statutory: 1000,
       attorneyFees: 40000
@@ -220,7 +220,7 @@ export const LEGAL_PRECEDENTS: LegalPrecedent[] = [
     holding: 'Supreme Court affirmed that plaintiffs have standing to sue for FCRA violations where inaccurate information was disseminated to third parties, even without proof of concrete harm.',
     relevantRules: ['M1', 'M2'],
     keywords: ['class action', 'standing', 'inaccurate reporting'],
-    damagesAwarded: {
+    impact scoreAwarded: {
       statutory: 8000000,
       punitive: 52000000
     },
@@ -310,12 +310,12 @@ export function generateCaseLawSection(ruleIds: string[]): string {
       lines.push(`\n${p.name}`);
       lines.push(`${p.fullCitation}`);
       lines.push(`Holding: ${p.holding}`);
-      if (p.damagesAwarded) {
-        const damages = Object.entries(p.damagesAwarded)
+      if (p.impact scoreAwarded) {
+        const impact score = Object.entries(p.impact scoreAwarded)
           .filter(([, v]) => v)
           .map(([k, v]) => `${k}: $${v?.toLocaleString()}`)
           .join(', ');
-        lines.push(`Damages: ${damages}`);
+        lines.push(`Impact Score: ${impact score}`);
       }
     });
   }
@@ -335,21 +335,21 @@ export function generateCaseLawSection(ruleIds: string[]): string {
 }
 
 /**
- * Calculate average damages from precedents
+ * Calculate average impact score from precedents
  */
-export function calculateAverageDamages(ruleIds: string[]): {
-  averageStatutory: number;
+export function calculateAverageImpact Score(ruleIds: string[]): {
+  averageSeverity: number;
   averageActual: number;
   averagePunitive: number;
   averageAttorneyFees: number;
   sampleSize: number;
 } {
   const precedents = findRelevantPrecedents(ruleIds);
-  const withDamages = precedents.filter(p => p.damagesAwarded);
+  const withImpact Score = precedents.filter(p => p.impact scoreAwarded);
 
-  if (withDamages.length === 0) {
+  if (withImpact Score.length === 0) {
     return {
-      averageStatutory: 1000, // Default FCRA statutory
+      averageSeverity: 1000, // Default FCRA statutory
       averageActual: 15000,
       averagePunitive: 0,
       averageAttorneyFees: 40000,
@@ -357,19 +357,19 @@ export function calculateAverageDamages(ruleIds: string[]): {
     };
   }
 
-  const totals = withDamages.reduce((acc, p) => {
-    if (p.damagesAwarded?.statutory) acc.statutory += p.damagesAwarded.statutory;
-    if (p.damagesAwarded?.actual) acc.actual += p.damagesAwarded.actual;
-    if (p.damagesAwarded?.punitive) acc.punitive += p.damagesAwarded.punitive;
-    if (p.damagesAwarded?.attorneyFees) acc.attorneyFees += p.damagesAwarded.attorneyFees;
+  const totals = withImpact Score.reduce((acc, p) => {
+    if (p.impact scoreAwarded?.statutory) acc.statutory += p.impact scoreAwarded.statutory;
+    if (p.impact scoreAwarded?.actual) acc.actual += p.impact scoreAwarded.actual;
+    if (p.impact scoreAwarded?.punitive) acc.punitive += p.impact scoreAwarded.punitive;
+    if (p.impact scoreAwarded?.attorneyFees) acc.attorneyFees += p.impact scoreAwarded.attorneyFees;
     return acc;
   }, { statutory: 0, actual: 0, punitive: 0, attorneyFees: 0 });
 
   return {
-    averageStatutory: Math.round(totals.statutory / withDamages.length),
-    averageActual: Math.round(totals.actual / withDamages.length),
-    averagePunitive: Math.round(totals.punitive / withDamages.length),
-    averageAttorneyFees: Math.round(totals.attorneyFees / withDamages.length),
-    sampleSize: withDamages.length
+    averageSeverity: Math.round(totals.statutory / withImpact Score.length),
+    averageActual: Math.round(totals.actual / withImpact Score.length),
+    averagePunitive: Math.round(totals.punitive / withImpact Score.length),
+    averageAttorneyFees: Math.round(totals.attorneyFees / withImpact Score.length),
+    sampleSize: withImpact Score.length
   };
 }

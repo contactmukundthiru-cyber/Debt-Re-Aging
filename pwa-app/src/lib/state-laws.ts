@@ -80,7 +80,7 @@ export const STATE_LAWS: Record<string, StateLawProfile> = {
       'Rosenthal Act extends FDCPA to original creditors',
       'Debt buyers must provide extensive documentation',
       'Strong medical debt protections (SB 1061)',
-      '$1,000 statutory damages per violation under Rosenthal'
+      '1,000 unit liability statutory liability per violation under Rosenthal'
     ],
     regulatoryBody: {
       name: 'California DFPI',
@@ -165,7 +165,7 @@ export const STATE_LAWS: Record<string, StateLawProfile> = {
       hasIdentityTheftProtections: true, hasPrivateRightOfAction: true
     },
     keyStatutes: ['N.J.S.A. 2A:14-1 (SOL)', 'N.J.S.A. 56:8-1 (Consumer Fraud Act)'],
-    specialNotes: ['CFA is one of the strongest in the nation', 'Treble damages and attorney fees'],
+    specialNotes: ['CFA is one of the strongest in the nation', 'Treble impact and attorney fees'],
     regulatoryBody: { name: 'NJ Division of Consumer Affairs', url: 'https://njconsumeraffairs.gov' }
   },
   PA: {
@@ -198,7 +198,7 @@ export const STATE_LAWS: Record<string, StateLawProfile> = {
     specialNotes: [
       'Collection Agency Act requires licensing',
       'Medical debt cannot appear on credit reports if paid within 365 days',
-      'Strong Consumer Fraud Act with treble damages'
+      'Strong Consumer Fraud Act with treble impact'
     ],
     regulatoryBody: { name: 'Illinois Attorney General', url: 'https://illinoisattorneygeneral.gov' }
   },
@@ -218,7 +218,7 @@ export const STATE_LAWS: Record<string, StateLawProfile> = {
     ],
     specialNotes: [
       'Very strong 93A consumer protection statute',
-      'Multiple damages (up to 3x) plus attorney fees',
+      'Multiple impact (up to 3x) plus attorney fees',
       'Detailed debt collection regulations'
     ],
     regulatoryBody: { name: 'Massachusetts Attorney General', url: 'https://mass.gov/ago' }
@@ -324,7 +324,7 @@ export function generateStateGuidance(
   stateCode: string,
   dateLastPayment?: string,
   accountType?: string,
-  currentBalance?: string
+  currentValue?: string
 ): {
   solStatus: 'expired' | 'expiring' | 'active' | 'unknown';
   solExpiry?: string;

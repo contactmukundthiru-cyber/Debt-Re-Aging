@@ -22,7 +22,7 @@ describe('rule engine', () => {
   test('D1: Paid status with balance', () => {
     const fields = {
       accountStatus: 'Paid',
-      currentBalance: '100'
+      currentValue: '100'
     };
     const flags = runRules(fields);
     expect(flags.some(f => f.ruleId === 'D1')).toBe(true);
@@ -62,7 +62,7 @@ describe('rule engine', () => {
   test('M2: Transferred with balance', () => {
     const fields = {
       accountStatus: 'Sold/Transferred',
-      currentBalance: '500'
+      currentValue: '500'
     };
     const flags = runRules(fields);
     expect(flags.some(f => f.ruleId === 'M2')).toBe(true);
@@ -71,7 +71,7 @@ describe('rule engine', () => {
   test('K7: Interest Rate Violation', () => {
     const fields = {
       stateCode: 'CA',
-      currentBalance: '2000',
+      currentValue: '2000',
       originalAmount: '1000',
       dofd: '2023-01-01' // ~1 year ago, 100% interest > 10% cap
     };
@@ -81,7 +81,7 @@ describe('rule engine', () => {
 
   test('K1: Balance increase after charge-off', () => {
     const fields = {
-      currentBalance: '3000',
+      currentValue: '3000',
       originalAmount: '1000'
     };
     const flags = runRules(fields);

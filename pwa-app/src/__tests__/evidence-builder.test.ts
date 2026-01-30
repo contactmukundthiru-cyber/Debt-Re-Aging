@@ -5,7 +5,7 @@ describe('evidence builder', () => {
   const sampleFields: CreditFields = {
     originalCreditor: 'Target Bank',
     furnisherOrCollector: 'Bad Collection',
-    currentBalance: '1000',
+    currentValue: '1000',
     dofd: '2020-01-01',
     dateOpened: '2019-01-01'
   };

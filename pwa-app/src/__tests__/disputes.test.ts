@@ -5,7 +5,7 @@ describe('dispute letter generator', () => {
   const sampleFields = {
     originalCreditor: 'Target Bank',
     furnisherOrCollector: 'Bad Collection',
-    currentBalance: '1,000'
+    currentValue: '1,000'
   };
 
   const sampleFlags: RuleFlag[] = [

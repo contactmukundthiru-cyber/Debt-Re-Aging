@@ -17,7 +17,7 @@ describe('advanced rule engine', () => {
   test('runAdvancedRules handles medical debt', () => {
     const medicalFields: CreditFields = {
       accountType: 'medical',
-      currentBalance: '250'
+      currentValue: '250'
     };
     const flags = runAdvancedRules(medicalFields);
     expect(flags.some(f => f.ruleId === 'H2')).toBe(true);

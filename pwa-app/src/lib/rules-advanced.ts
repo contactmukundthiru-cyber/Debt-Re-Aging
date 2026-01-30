@@ -9,7 +9,7 @@
  * - Cross-bureau contradiction analysis
  * - Chain-of-title validation
  * - Balance change forensics
- * - Willfulness scoring for statutory damages
+ * - Willfulness scoring for statutory liability
  * - Jurisdiction-specific analysis
  * - Pattern fingerprinting
  */
@@ -104,8 +104,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 98,
     willfulnessIndicator: 95,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Physical impossibility proves intentional data fabrication.',
     suggestedEvidence: ['Original account opening documents', 'First statement'],
     legalCitations: ['15 USC § 1681e(b)', '15 USC § 1681s-2(a)(1)', 'Cushman v. Trans Union, 115 F.3d 220'],
@@ -117,8 +116,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 92,
     willfulnessIndicator: 90,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'DOFD must remain constant. Changes indicate illegal re-aging.',
     suggestedEvidence: ['Historical credit reports', 'Original creditor records'],
     legalCitations: ['15 USC § 1681s-2(a)(5)', 'FCRA § 623(a)(5)', 'Seamans v. Temple Univ., 744 F.3d 853'],
@@ -131,8 +129,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 95,
     willfulnessIndicator: 92,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Debt collectors cannot establish a new DOFD when purchasing debt.',
     suggestedEvidence: ['Original creditor DOFD', 'Purchase agreement date', 'Chain of title'],
     legalCitations: ['15 USC 1681s-2(a)(5)', 'FTC Commentary'],
@@ -144,8 +141,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 96,
     willfulnessIndicator: 88,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'The 7-year FCRA clock cannot be reset by payment activity.',
     suggestedEvidence: ['Payment receipt', 'Historical credit reports showing DOFD change'],
     legalCitations: ['15 USC 1681c(c)(1)', 'Grigoryan v. Experian'],
@@ -157,8 +153,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 88,
     willfulnessIndicator: 75,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Removal must be 7 years + 180 days from DOFD, not other dates.',
     suggestedEvidence: ['DOFD documentation', 'Removal date shown on report'],
     legalCitations: ['15 USC 1681c(a)(4)', '15 USC 1681c(c)'],
@@ -172,8 +167,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 85,
     willfulnessIndicator: 80,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'New owners cannot add fees beyond purchase price without disclosure.',
     suggestedEvidence: ['Original balance at transfer', 'Current reported balance', 'Fee disclosures'],
     legalCitations: ['15 USC 1692e', '15 USC 1692f'],
@@ -185,8 +179,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 78,
     willfulnessIndicator: 70,
-    statutoryMin: 0,
-    statutoryMax: 0,
+    severityWeight: 0,
     whyItMatters: 'Many states prohibit post-charge-off interest accrual.',
     suggestedEvidence: ['Charge-off statement', 'Current balance statement'],
     legalCitations: ['State usury statutes', 'UCC provisions'],
@@ -198,8 +191,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 82,
     willfulnessIndicator: 75,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Collection fees must be authorized by contract or law.',
     suggestedEvidence: ['Original contract', 'Fee itemization'],
     legalCitations: ['15 USC 1692f(1)', 'State fee statutes'],
@@ -211,8 +203,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 75,
     willfulnessIndicator: 85,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Yo-yo balance patterns suggest manipulation or data corruption.',
     suggestedEvidence: ['Historical credit reports', 'Payment records'],
     legalCitations: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
@@ -226,8 +217,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 99,
     willfulnessIndicator: 70,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Paid medical debts must be removed under CFPB rule.',
     suggestedEvidence: ['Payment receipt', 'Insurance EOB', 'Zero balance statement'],
     legalCitations: ['CFPB Medical Debt Rule 2023', '12 CFR 1022'],
@@ -239,8 +229,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 92,
     willfulnessIndicator: 60,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Medical debt cannot be reported while insurance claim is pending.',
     suggestedEvidence: ['Insurance claim submission', 'Claim processing timeline'],
     legalCitations: ['CFPB Medical Debt Rule', '15 USC 1681c(a)(6)'],
@@ -252,8 +241,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 98,
     willfulnessIndicator: 85,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'VA medical debt has special reporting restrictions.',
     suggestedEvidence: ['VA treatment records', 'VA payment status'],
     legalCitations: ['38 USC 5301', 'VA Debt Collection Act'],
@@ -265,8 +253,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 80,
     willfulnessIndicator: 55,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Medical billing errors are common and affect accuracy.',
     suggestedEvidence: ['Itemized medical bill', 'Procedure codes', 'EOB comparison'],
     legalCitations: ['15 USC 1681e(b)', 'State medical billing laws'],
@@ -280,8 +267,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 85,
     willfulnessIndicator: 80,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Bureaus cannot simply repeat furnisher data as verification.',
     suggestedEvidence: ['Dispute response', 'Verification letter content'],
     legalCitations: ['15 USC § 1681i(a)(1)(A)', 'Cushman v. Trans Union, 115 F.3d 220', 'Stevenson v. TRW, Inc., 987 F.2d 288'],
@@ -293,8 +279,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 90,
     willfulnessIndicator: 85,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Bureau must investigate disputes within 30 days.',
     suggestedEvidence: ['Dispute letter', 'Response timeline', 'Investigation records'],
     legalCitations: ['15 USC § 1681i(a)(1)', 'Dennis v. BEH-1, LLC, 520 F.3d 1066'],
@@ -306,8 +291,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 75,
     willfulnessIndicator: 60,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Verification must include method and furnisher contact.',
     suggestedEvidence: ['Verification letter', 'Missing elements list'],
     legalCitations: ['15 USC § 1681i(a)(6)', '15 USC § 1681i(a)(7)'],
@@ -319,8 +303,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 82,
     willfulnessIndicator: 75,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Bureau must forward all relevant dispute information.',
     suggestedEvidence: ['Dispute letter with attachments', 'Furnisher response'],
     legalCitations: ['15 USC § 1681i(a)(2)', 'Gorman v. Wolpoff & Abramson, LLP, 584 F.3d 1147'],
@@ -335,8 +318,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 88,
     willfulnessIndicator: 82,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Furnisher must investigate direct disputes under 623(a)(8).',
     suggestedEvidence: ['Direct dispute letter', 'Continued reporting evidence'],
     legalCitations: ['15 USC § 1681s-2(a)(8)', 'Chiang v. Verizon New England Inc., 595 F.3d 26'],
@@ -348,8 +330,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 70,
     willfulnessIndicator: 75,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Furnishers must have reasonable procedures for accuracy.',
     suggestedEvidence: ['Pattern of errors', 'Lack of correction'],
     legalCitations: ['15 USC § 1681s-2(a)(1)', 'Johnson v. MBNA Am. Bank, NA, 357 F.3d 426'],
@@ -361,8 +342,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 80,
     willfulnessIndicator: 65,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Disputed accounts must be marked as disputed.',
     suggestedEvidence: ['Dispute confirmation', 'Credit report without dispute notation'],
     legalCitations: ['15 USC § 1681s-2(a)(3)', '15 USC § 1681i(a)(4)', 'Saunders v. Branch Banking & Trust Co. of Va., 526 F.3d 142'],
@@ -377,12 +357,11 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 97,
     willfulnessIndicator: 95,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Discharged debts cannot be collected or reported with balance.',
     suggestedEvidence: ['Bankruptcy discharge order', 'Schedule of debts'],
     legalCitations: ['11 USC 524(a)(2)', '15 USC 1692e'],
-    remediation: 'Cease collection. Report $0 balance or delete.'
+    remediation: 'Cease collection. Report 0-value profile or delete.'
   },
   'CP2': {
     name: 'Collection on Identity Theft Debt',
@@ -390,8 +369,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 95,
     willfulnessIndicator: 80,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Identity theft debts must be blocked upon proper notice.',
     suggestedEvidence: ['Identity theft report', 'FTC affidavit', 'Police report'],
     legalCitations: ['15 USC 1681c-2', '15 USC 1681g(e)'],
@@ -403,8 +381,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 95,
     willfulnessIndicator: 70,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'After student loan rehabilitation, the default status MUST be removed from the credit report.',
     suggestedEvidence: ['Rehabilitation completion letter', 'Payment history showing 9 on-time payments'],
     legalCitations: ['34 CFR 682.405', 'Higher Education Act'],
@@ -416,8 +393,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 90,
     willfulnessIndicator: 90,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Filing suit on time-barred debt is unconscionable.',
     suggestedEvidence: ['Lawsuit filing', 'SOL calculation', 'Last payment date'],
     legalCitations: ['15 USC 1692e', '15 USC 1692f', 'Huertas v. Galaxy'],
@@ -429,8 +405,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 75,
     willfulnessIndicator: 85,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Threatening action not intended is deceptive.',
     suggestedEvidence: ['Collection letters', 'No lawsuit filed'],
     legalCitations: ['15 USC 1692e(5)', 'Bentley v. Great Lakes'],
@@ -444,8 +419,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 82,
     willfulnessIndicator: 70,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Collector must prove ownership to collect or report.',
     suggestedEvidence: ['Validation response', 'Bill of sale', 'Assignment documents'],
     legalCitations: ['15 USC 1692g', 'State UCC provisions'],
@@ -457,8 +431,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 78,
     willfulnessIndicator: 75,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Core account data should remain consistent through transfers.',
     suggestedEvidence: ['Original creditor records', 'Current report data'],
     legalCitations: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
@@ -470,12 +443,11 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 92,
     willfulnessIndicator: 85,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Same debt cannot have multiple active balances.',
     suggestedEvidence: ['Credit report showing duplicates', 'Account numbers'],
     legalCitations: ['15 USC 1681e(b)', 'CDIA Metro 2 Guidelines'],
-    remediation: 'Delete duplicate. Original must show $0 if sold.'
+    remediation: 'Delete duplicate. Original must show zero value if sold.'
   },
 
   // ====== STATUS INCONSISTENCIES ======
@@ -485,8 +457,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 88,
     willfulnessIndicator: 70,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Status must accurately reflect account condition.',
     suggestedEvidence: ['Credit report', 'Account statements'],
     legalCitations: ['15 USC 1681e(b)', 'Metro 2 Format Guide'],
@@ -498,8 +469,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 72,
     willfulnessIndicator: 60,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Payment status must match payment history.',
     suggestedEvidence: ['Payment history string', 'Status code'],
     legalCitations: ['15 USC 1681e(b)', 'Metro 2 Format Guide'],
@@ -513,8 +483,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 90,
     willfulnessIndicator: 65,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Federal student loans in forbearance should not report delinquency.',
     suggestedEvidence: ['Forbearance approval', 'Delinquency reported dates'],
     legalCitations: ['20 USC 1078-6', 'ED Guidance'],
@@ -526,8 +495,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 78,
     willfulnessIndicator: 55,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Servicer transfers often cause reporting errors.',
     suggestedEvidence: ['NSLDS history', 'Servicer records'],
     legalCitations: ['15 USC 1681e(b)', '20 USC 1078'],
@@ -539,8 +507,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 95,
     willfulnessIndicator: 80,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Rehabilitation should remove default status.',
     suggestedEvidence: ['Rehabilitation completion', 'Current report'],
     legalCitations: ['20 USC 1078-6(a)(1)(F)', '34 CFR 682.405'],
@@ -554,8 +521,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 75,
     willfulnessIndicator: 70,
-    statutoryMin: 0,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'First communication should allow validation before reporting.',
     suggestedEvidence: ['First collection letter', 'Report date', 'Timeline'],
     legalCitations: ['15 USC 1692g', 'State laws'],
@@ -567,8 +533,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 88,
     willfulnessIndicator: 75,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Investigations must be completed within 30 days.',
     suggestedEvidence: ['Dispute date', 'Response date', 'Timeline'],
     legalCitations: ['15 USC 1681i(a)(1)(A)', 'Stevenson v. TRW'],
@@ -580,8 +545,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 72,
     willfulnessIndicator: 60,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Corrections must be made promptly after determination.',
     suggestedEvidence: ['Investigation completion', 'Correction date'],
     legalCitations: ['15 USC 1681i(a)(5)(A)', 'Metro 2 timing'],
@@ -595,8 +559,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 78,
     willfulnessIndicator: 55,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Account type affects credit score calculations.',
     suggestedEvidence: ['Original account terms', 'Current reporting'],
     legalCitations: ['15 USC 1681e(b)', 'Metro 2 Format Guide'],
@@ -608,8 +571,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 72,
     willfulnessIndicator: 50,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Original account type should be preserved.',
     suggestedEvidence: ['Original creditor records', 'Collection report'],
     legalCitations: ['15 USC 1681e(b)', 'Metro 2 Format Guide'],
@@ -623,8 +585,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 90,
     willfulnessIndicator: 85,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'DOFD must be identical across all bureaus.',
     suggestedEvidence: ['All three bureau reports', 'Date comparison'],
     legalCitations: ['15 USC 1681s-2(a)(5)', 'Saunders v. Branch Banking'],
@@ -636,8 +597,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 82,
     willfulnessIndicator: 70,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Balance should be consistent unless recently updated.',
     suggestedEvidence: ['All three bureau reports', 'Balance comparison'],
     legalCitations: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
@@ -649,8 +609,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'medium',
     successProbability: 65,
     willfulnessIndicator: 50,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Selective reporting may indicate data quality issues.',
     suggestedEvidence: ['All three bureau reports'],
     legalCitations: ['15 USC 1681s-2(a)(1)', 'CDIA Guidelines'],
@@ -664,8 +623,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 98,
     willfulnessIndicator: 95,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Per-se violation of 7-year limit.',
     suggestedEvidence: ['Historical reports', 'DOFD proof', 'Current report'],
     legalCitations: ['15 USC 1681c(a)(4)', '15 USC 1681c(c)'],
@@ -677,8 +635,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 95,
     willfulnessIndicator: 92,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Deleted items should not reappear without new basis.',
     suggestedEvidence: ['Previous deletion confirmation', 'Current report'],
     legalCitations: ['15 USC 1681i(a)(5)(C)', 'Cushman v. Trans Union'],
@@ -690,8 +647,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 92,
     willfulnessIndicator: 90,
-    statutoryMin: 100,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Cannot report debt that was already time-expired.',
     suggestedEvidence: ['Purchase date', 'DOFD', '7-year calculation'],
     legalCitations: ['15 USC 1681c(a)(4)', '15 USC 1681c(c)'],
@@ -705,8 +661,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 85,
     willfulnessIndicator: 40,
-    statutoryMin: 0,
-    statutoryMax: 0,
+    severityWeight: 0,
     whyItMatters: 'Many states (e.g., CA, WA, NY) require providers to screen for financial assistance eligibility BEFORE reporting to collections.',
     suggestedEvidence: ['Hospital financial assistance policy', 'Income documentation', 'Denial letter'],
     legalCitations: ['CA Health & Safety Code § 127400', 'WA RCW 70.170'],
@@ -718,8 +673,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'critical',
     successProbability: 80,
     willfulnessIndicator: 90,
-    statutoryMin: 500,
-    statutoryMax: 5000,
+    severityWeight: 5000,
     whyItMatters: 'Applying interest rates above state usury caps on defaulted consumer debt is a per-se violation of the FDCPA.',
     suggestedEvidence: ['Historical balance statements', 'State interest rate cap citations'],
     legalCitations: ['15 USC 1692e(2)', 'State Usury Statutes'],
@@ -731,8 +685,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     severity: 'high',
     successProbability: 95,
     willfulnessIndicator: 95,
-    statutoryMin: 1000,
-    statutoryMax: 1000,
+    severityWeight: 1000,
     whyItMatters: 'Attempting to collect or report a debt that is beyond both the SOL and FCRA reporting period is deceptive.',
     suggestedEvidence: ['Original creditor DOFD records', 'Notification of assignment'],
     legalCitations: ['15 USC 1692e', 'Huertas v. Galaxy Asset Services'],
@@ -916,7 +869,7 @@ function analyzeBalanceForensics(fields: CreditFields): { score: number; anomali
   let score = 0;
   const anomalies: ForensicAnomaly[] = [];
 
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
   const status = (fields.accountStatus || '').toLowerCase();
   const dofd = parseDate(fields.dofd);
@@ -928,8 +881,8 @@ function analyzeBalanceForensics(fields: CreditFields): { score: number; anomali
       type: 'balance',
       severity: 'critical',
       description: `Paid/settled account shows balance of $${current.toLocaleString()}`,
-      evidence: `Status: ${fields.accountStatus}, Balance: ${fields.currentBalance}`,
-      legalImplication: 'Direct Metro 2 violation. Must report $0 balance.'
+      evidence: `Status: ${fields.accountStatus}, Stated Value: ${fields.currentValue}`,
+      legalImplication: 'Direct Metro 2 violation. Must report 0-value profile.'
     });
   }
 
@@ -964,15 +917,15 @@ function analyzeBalanceForensics(fields: CreditFields): { score: number; anomali
     }
   }
 
-  // Transfer with balance (sold accounts should show $0)
+  // Transfer with balance (sold accounts should show zero value)
   if ((status.includes('transfer') || status.includes('sold')) && current > 0) {
     score += 30;
     anomalies.push({
       type: 'balance',
       severity: 'critical',
       description: 'Transferred/sold account shows active balance',
-      evidence: `Status: ${fields.accountStatus}, Balance: ${fields.currentBalance}`,
-      legalImplication: 'Original creditor must report $0 after transfer'
+      evidence: `Status: ${fields.accountStatus}, Stated Value: ${fields.currentValue}`,
+      legalImplication: 'Original creditor must report zero value after transfer'
     });
   }
 
@@ -1174,7 +1127,7 @@ function createAdvancedFlag(
     successProbability: rule.successProbability,
     willfulnessScore: rule.willfulnessIndicator,
     statutoryDamageRange: { min: rule.statutoryMin, max: rule.statutoryMax },
-    actualDamageCategories: getActualDamageCategories(rule.category),
+    impactCategories: getActualDamageCategories(rule.category),
     chainOfCustodyIssue: rule.category === 'fdcpa' || ruleId.startsWith('COT'),
     crossBureauContradiction: ruleId.startsWith('XB'),
     forensicConfidence,
@@ -1274,7 +1227,7 @@ function runTimelineRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void
 }
 
 function runBalanceRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void {
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
   const status = (fields.accountStatus || '').toLowerCase();
 
@@ -1325,7 +1278,7 @@ function runBalanceRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void 
 
 function runStatusRules(fields: CreditFields, flags: AdvancedRuleFlag[]): void {
   const status = (fields.accountStatus || '').toLowerCase();
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const remarks = (fields.remarks || '').toLowerCase();
 
   // SI1: Paid but showing balance
@@ -1366,7 +1319,7 @@ function runMedicalDebtRules(fields: CreditFields, flags: AdvancedRuleFlag[]): v
 
   if (!isMedical) return;
 
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const status = (fields.accountStatus || '').toLowerCase();
 
   // H3: Paid medical debt still reporting
@@ -1379,23 +1332,22 @@ function runMedicalDebtRules(fields: CreditFields, flags: AdvancedRuleFlag[]): v
     ));
   }
 
-  // H2 (from original): Medical debt under $500
+  // H2 (from original): Medical debt under 500 units
   if (current > 0 && current < 500) {
     const rule = ADVANCED_RULE_DEFINITIONS['H2'] || {
-      name: 'Medical Debt Under $500',
+      name: 'Medical Debt (Low Threshold)',
       category: 'medical',
       severity: 'critical',
       successProbability: 99,
       willfulnessIndicator: 70,
-      statutoryMin: 100,
-      statutoryMax: 1000,
-      whyItMatters: 'Medical debts under $500 should not be on credit reports.',
+      severityWeight: 1000,
+      whyItMatters: 'Medical debts under 500 units should not be on credit reports.',
       suggestedEvidence: ['Balance documentation'],
       legalCitations: ['CFPB Medical Debt Rule'],
-      remediation: 'Delete medical debt under $500.'
+      remediation: 'Delete medical debt under 500 units.'
     };
     flags.push(createAdvancedFlag('H2', rule,
-      `Medical debt of $${current.toLocaleString()} is under the $500 reporting threshold.`,
+      `Medical debt of $${current.toLocaleString()} is under the 500 units reporting threshold.`,
       { balance: current },
       99
     ));
@@ -1492,7 +1444,7 @@ function runCrossBureauRules(
   // Compare balances
   const balances = bureauData.map(b => ({
     bureau: b.bureau,
-    balance: parseFloat((b.fields.currentBalance || '0').replace(/[$,]/g, ''))
+    balance: parseFloat((b.fields.currentValue || '0').replace(/[$,]/g, ''))
   }));
   const uniqueBalances = new Set(balances.map(b => b.balance));
 
@@ -1537,8 +1489,8 @@ function runStateSpecificRules(
       legalCitations: [`${stateCode} Statute of Limitations`, '15 USC 1692e'],
       successProbability: 85,
       willfulnessScore: 70,
-      statutoryDamageRange: { min: 0, max: 1000 },
-      actualDamageCategories: ['Time-barred debt defense', 'Emotional distress'],
+      statutoryLiabilityScore: 1000,
+      impactCategories: ['Time-barred debt defense', 'Emotional distress'],
       chainOfCustodyIssue: false,
       crossBureauContradiction: false,
       forensicConfidence: 80,

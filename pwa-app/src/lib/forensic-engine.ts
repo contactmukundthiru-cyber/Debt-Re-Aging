@@ -85,7 +85,7 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
     // 2. Duplicate Detection (DU1)
     const groups: Record<string, string[]> = {};
     accounts.forEach(acc => {
-        const balance = (acc.fields.currentBalance || '0').replace(/[$,]/g, '').trim();
+        const balance = (acc.fields.currentValue || '0').replace(/[$,]/g, '').trim();
         const creditor = (acc.fields.originalCreditor || acc.fields.furnisherOrCollector || '')
             .toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 12);
         

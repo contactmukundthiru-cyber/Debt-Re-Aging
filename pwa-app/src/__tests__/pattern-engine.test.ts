@@ -25,10 +25,10 @@ describe('pattern engine', () => {
   test('detectPatterns identifies re-aging', () => {
     // B1 flag adds DOFD_MISMATCH
     // fields.estimatedRemovalDate > dofd + 7.5y adds REMOVAL_DATE_EXTENDED
-    // currentBalance > originalAmount * 1.5 adds BALANCE_EXCEEDS_ORIGINAL_SIGNIFICANTLY
+    // currentValue > originalAmount * 1.5 adds BALANCE_EXCEEDS_ORIGINAL_SIGNIFICANTLY
     const fieldsWithBalance = {
       ...sampleFields,
-      currentBalance: '3000',
+      currentValue: '3000',
       originalAmount: '1000'
     };
     const result = detectPatterns(fieldsWithBalance, sampleFlags);
@@ -39,7 +39,7 @@ describe('pattern engine', () => {
   test('detectPatterns handles medical debt', () => {
     const medicalFields: CreditFields = {
       accountType: 'medical',
-      currentBalance: '250' // < 500
+      currentValue: '250' // < 500
     };
     const medicalFlags: RuleFlag[] = [
       {

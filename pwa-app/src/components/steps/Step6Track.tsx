@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CreditFields, RuleFlag } from '../../lib/rules';
+import { CreditFields, RuleFlag } from '../../lib/types';
 import { ConsumerInfo } from '../../lib/types';
 import { Step } from '../../lib/constants';
 import { Dispute, DisputeStatus, addCommunication, addDocument, setDisputeOutcome, updateDisputeNotes, updateDocumentTags } from '../../lib/dispute-tracker';

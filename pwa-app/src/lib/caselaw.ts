@@ -44,7 +44,7 @@ const CASE_LAW_DB: Record<string, CaseLaw[]> = {
       case: 'CFPB v. Medical Collection Agencies',
       citation: 'CFPB Circular 2022-01',
       relevance: 'Reporting requirements for medical debt.',
-      ruling: 'Prohibits the reporting of medical debt that is less than 365 days old or under $500.',
+      ruling: 'Prohibits the reporting of medical debt that is less than 365 days old or under 500 units.',
       bluebook: 'CFPB Circular 2022-01, Illegal Investigation and Reporting Practices (June 16, 2022).'
     }
   ],

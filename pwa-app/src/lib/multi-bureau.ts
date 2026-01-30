@@ -4,8 +4,8 @@
  * to detect discrepancies and potential violations
  */
 
-import { CreditFields, RuleFlag } from './rules';
-import { runAdvancedRules, AdvancedRuleFlag } from './rules-advanced';
+import { CreditFields } from './types';
+import { runAdvancedRules } from './rules-advanced';
 
 export type BureauName = 'Equifax' | 'Experian' | 'TransUnion';
 
@@ -41,34 +41,36 @@ export interface BureauComparisonResult {
 // Field importance for discrepancy severity
 const CRITICAL_FIELDS: (keyof CreditFields)[] = [
     'dofd',
-    'currentBalance',
+    'currentValue',
     'chargeOffDate',
     'accountStatus',
     'dateOpened'
 ];
 
 const HIGH_IMPORTANCE_FIELDS: (keyof CreditFields)[] = [
-    'originalBalance',
-    'highBalance',
     'dateLastPayment',
-    'paymentStatus',
-    'creditLimit'
+    'paymentHistory',
+    'creditLimit',
+    'dateReportedOrUpdated',
+    'estimatedRemovalDate',
+    'initialValue'
 ];
 
 const FIELD_LABELS: Record<string, string> = {
     dofd: 'Date of First Delinquency',
-    currentBalance: 'Current Balance',
-    originalBalance: 'Original Balance',
-    highBalance: 'High Balance',
+    currentValue: 'Current Balance',
+    initialValue: 'Original Balance',
+    paymentHistory: 'Payment History',
     chargeOffDate: 'Charge-Off Date',
     dateOpened: 'Date Opened',
     dateLastPayment: 'Date of Last Payment',
     accountStatus: 'Account Status',
-    paymentStatus: 'Payment Status',
     creditLimit: 'Credit Limit',
+    dateReportedOrUpdated: 'Date Reported/Updated',
+    estimatedRemovalDate: 'Estimated Removal Date',
     furnisherOrCollector: 'Furnisher/Collector',
     originalCreditor: 'Original Creditor',
-    accountNumber: 'Account Number'
+    accountType: 'Account Type'
 };
 
 /**
@@ -193,8 +195,8 @@ function createDiscrepancy(
     if (fieldKey === 'dofd' && type === 'conflicting') {
         potentialViolation = 'FCRA § 605(c) - Conflicting DOFD dates suggest potential re-aging';
         recommendation = 'Request Method of Verification from all bureaus. The oldest DOFD should apply.';
-    } else if (fieldKey === 'currentBalance' && type === 'conflicting') {
-        potentialViolation = 'FCRA § 623(a)(1) - Inaccurate balance reporting across bureaus';
+    } else if (fieldKey === 'currentValue' && type === 'conflicting') {
+        potentialViolation = 'FCRA § 623(a)(1) - Inaccurate value reporting across bureaus';
         recommendation = 'Dispute the higher balance as inaccurate. Request debt validation.';
     } else if (fieldKey === 'chargeOffDate' && type === 'conflicting') {
         potentialViolation = 'FCRA § 623(a)(2) - Inconsistent charge-off dates indicate data integrity issues';

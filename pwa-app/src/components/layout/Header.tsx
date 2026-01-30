@@ -3,6 +3,22 @@
 import React, { useState } from 'react';
 import { SecurityModal } from '../SecurityModal';
 import { useApp } from '../../context/AppContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Shield, 
+  Settings, 
+  Bell, 
+  RotateCcw,
+  LayoutGrid,
+  FileText,
+  Activity,
+  ChevronDown,
+  Moon,
+  Sun,
+  Lock,
+  Search
+} from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -31,116 +47,136 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { state, dispatch } = useApp();
   const { showSecurityModal } = state;
+  const [showQuickMenu, setShowQuickMenu] = useState(false);
   const setIsSecurityModalOpen = (val: boolean) => dispatch({ type: 'SET_SECURITY_MODAL', payload: val });
-
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  const websiteRoot = basePath.replace(/\/pwa-app\/?$/, '');
-  const websiteHref = websiteRoot ? `${websiteRoot}/` : '/';
 
   return (
     <>
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md dark:bg-slate-950/80 dark:border-slate-800 sticky top-0 z-50 transition-all">
-        <div className="container py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-900/20">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+      <header className="sticky top-0 z-50 w-full bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/60 transition-colors duration-500 no-print">
+        <div className="mx-auto px-4 lg:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => reset()}
+              className="group flex items-center gap-3 active:scale-95 transition-transform"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-slate-950 dark:bg-white flex items-center justify-center shadow-lg group-hover:shadow-emerald-500/20 transition-all duration-500">
+                <Shield className="w-6 h-6 text-white dark:text-slate-950" />
               </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-emerald-600 dark:text-emerald-400">Forensic Investigation</p>
-                <h1 className="text-xl font-bold tracking-tight dark:text-white leading-tight">Case Factory <span className="text-slate-400 font-light">| Enterprise</span></h1>
+              <div className="hidden sm:block text-left">
+                <div className="flex items-center gap-1.5">
+                  <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none">
+                    Case Factory
+                  </h1>
+                  <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Pro</span>
+                </div>
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] mt-1">Forensic Integrity</p>
               </div>
+            </button>
+
+            <nav className="hidden lg:flex items-center gap-1">
+              {[
+                { label: 'Dashboard', active: step === 0 },
+                { label: 'Intelligence', active: step === 4 },
+                { label: 'Export', active: step === 5 },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  className={cn(
+                    "px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300",
+                    item.active 
+                      ? "bg-slate-950 dark:bg-white text-white dark:text-slate-900 shadow-lg" 
+                      : "text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-900"
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center bg-slate-100 dark:bg-slate-900 rounded-2xl px-3 py-1.5 border border-slate-200 dark:border-slate-800">
+              <Search className="w-4 h-4 text-slate-400 mr-2" />
+              <input 
+                type="text" 
+                placeholder="Search case data..." 
+                className="bg-transparent text-xs font-medium focus:outline-none w-32 xl:w-48 text-slate-900 dark:text-white placeholder:text-slate-400"
+              />
             </div>
-            <div className="flex items-center gap-4">
-              {typeof qualityScore === 'number' && (
-                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70">
-                  <span className="text-[9px] uppercase tracking-widest text-slate-500">Case Quality</span>
-                  <div className="w-20 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${qualityScore >= 85 ? 'bg-emerald-500' : qualityScore >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
-                      style={{ width: `${qualityScore}%` }}
-                    />
-                  </div>
-                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{qualityScore}%</span>
-                </div>
-              )}
-              {(missingFields || overdueDeadlines) ? (
-                <div className="hidden lg:flex items-center gap-2">
-                  {missingFields ? (
-                    <span className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                      {missingFields} missing fields
-                    </span>
-                  ) : null}
-                  {overdueDeadlines ? (
-                    <span className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20">
-                      {overdueDeadlines} overdue
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-              {(missingFields || overdueDeadlines) ? (
-                <div className="hidden lg:flex items-center gap-2">
-                  {missingFields ? (
-                    <button
-                      type="button"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 3 } }))}
-                      className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest border border-amber-500/20 text-amber-500 hover:bg-amber-500/10"
-                    >
-                      Review Fields
-                    </button>
-                  ) : null}
-                  {overdueDeadlines ? (
-                    <button
-                      type="button"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'deadlines' } }))}
-                      className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest border border-rose-500/20 text-rose-500 hover:bg-rose-500/10"
-                    >
-                      Deadlines
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
-              {/* Privacy Shield */}
-              <button
-                onClick={() => setIsSecurityModalOpen(true)}
-                className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/20 hover:bg-emerald-500/10 transition-all group"
+
+            <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
+
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setDarkMode(!darkMode)}
+                className="w-10 h-10 rounded-2xl flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900 transition-all active:scale-90"
               >
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-500">Zero-Trust Local Audit</span>
-                <svg className="w-3 h-3 text-emerald-600 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                </svg>
+                {darkMode ? <Sun className="w-5 h-5 text-amber-500" /> : <Moon className="w-5 h-5" />}
               </button>
 
-              <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
-
-
-              {/* Dark Mode Toggle */}
-              <button
-                type="button"
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 transition-all no-print"
-                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              <button 
+                className="w-10 h-10 rounded-2xl flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900 transition-all relative"
               >
-                {darkMode ? (
-                  <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" /></svg>
-                ) : (
-                  <svg className="w-4 h-4 text-slate-500" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
+                <Bell className="w-5 h-5" />
+                {overdueDeadlines && overdueDeadlines > 0 && (
+                  <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-slate-950" />
                 )}
               </button>
 
-              {step > 1 && (
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="btn btn-primary !py-2 !px-4 !text-xs !rounded-xl no-print"
-                >
-                  {translate('actions.newAnalysis') || 'New Case'}
-                </button>
-              )}
+              <button 
+                onClick={() => setShowQuickMenu(!showQuickMenu)}
+                className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-2xl bg-slate-950 dark:bg-white text-white dark:text-slate-950 hover:opacity-90 transition-all shadow-xl shadow-slate-900/20 active:scale-95 ml-2"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="text-xs font-bold hidden sm:block">Tools</span>
+                <ChevronDown className={cn("w-4 h-4 transition-transform", showQuickMenu && "rotate-180")} />
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Quick Tools Tray (Apple-style) */}
+        <AnimatePresence>
+          {showQuickMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="absolute top-20 right-4 w-72 bg-white/80 dark:bg-slate-900/80 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-4 backdrop-blur-2xl ring-1 ring-black/5 overflow-hidden"
+            >
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon: FileText, label: 'Reports', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                  { icon: Shield, label: 'Audit', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                  { icon: RotateCcw, label: 'Revisit', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+                  { icon: Settings, label: 'Settings', color: 'text-slate-500', bg: 'bg-slate-500/10' },
+                ].map((tool) => (
+                  <button 
+                    key={tool.label}
+                    className="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                  >
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-1", tool.bg)}>
+                      <tool.icon className={cn("w-6 h-6", tool.color)} />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{tool.label}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button 
+                  onClick={() => setIsSecurityModalOpen(true)}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                    <Lock className="w-4 h-4" />
+                    <span className="text-xs font-bold">Zero-Trust Protocol</span>
+                  </div>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <SecurityModal isOpen={showSecurityModal} onClose={() => setIsSecurityModalOpen(false)} />

@@ -283,11 +283,11 @@ function detectBalanceInflation(fields: Partial<CreditFields>): DetectedPattern 
   const evidence: string[] = [];
   let score = 0;
 
-  const currentBalance = parseFloat(String(fields.currentBalance).replace(/[^0-9.-]/g, '')) || 0;
+  const currentValue = parseFloat(String(fields.currentValue).replace(/[^0-9.-]/g, '')) || 0;
   const originalAmount = parseFloat(String(fields.originalAmount).replace(/[^0-9.-]/g, '')) || 0;
 
-  if (currentBalance > 0 && originalAmount > 0) {
-    const inflation = ((currentBalance - originalAmount) / originalAmount) * 100;
+  if (currentValue > 0 && originalAmount > 0) {
+    const inflation = ((currentValue - originalAmount) / originalAmount) * 100;
 
     if (inflation > 100) {
       evidence.push(`Balance is ${inflation.toFixed(0)}% higher than original amount`);
@@ -409,9 +409,9 @@ function detectStatusManipulation(
 
   // Check status vs balance
   const status = (fields.accountStatus || '').toLowerCase();
-  const currentBalance = parseFloat(String(fields.currentBalance).replace(/[^0-9.-]/g, '')) || 0;
+  const currentValue = parseFloat(String(fields.currentValue).replace(/[^0-9.-]/g, '')) || 0;
 
-  if ((status.includes('paid') || status.includes('closed')) && currentBalance > 0) {
+  if ((status.includes('paid') || status.includes('closed')) && currentValue > 0) {
     evidence.push('Closed/paid status but balance still reported');
     score += 25;
   }

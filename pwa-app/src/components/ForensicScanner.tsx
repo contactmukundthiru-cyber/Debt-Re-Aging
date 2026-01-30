@@ -17,7 +17,7 @@ const LOG_MESSAGES = [
     'Cross-Referencing FDCPA Headers...',
     'Analyzing Date of First Delinquency...',
     'Reconstructing Historical Ledger...',
-    'Calculating Statutory Damages...',
+    'Evaluating Forensic Impact...',
     'Preparing Liability Matrix...',
     'Finalizing Forensic Report...'
 ];

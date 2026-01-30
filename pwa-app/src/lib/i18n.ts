@@ -78,7 +78,7 @@ export interface TranslationStrings {
     accountType: string;
     accountStatus: string;
     paymentHistory: string;
-    currentBalance: string;
+    currentValue: string;
     originalAmount: string;
     creditLimit: string;
     dateOpened: string;
@@ -278,9 +278,9 @@ const translations: Record<Language, TranslationStrings> = {
       accountType: 'Account Type',
       accountStatus: 'Status',
       paymentHistory: 'Payment History',
-      currentBalance: 'Current Balance',
-      originalAmount: 'Original Amount',
-      creditLimit: 'Credit Limit',
+      currentValue: 'Liability Units',
+      originalAmount: 'Initial Severity',
+      creditLimit: 'Exposure Limit',
       dateOpened: 'Date Opened',
       dofd: 'Date of First Delinquency',
       dofdHelp: 'CRITICAL: When the account first became 30+ days late. Determines 7-year reporting window.',
@@ -366,13 +366,13 @@ const translations: Record<Language, TranslationStrings> = {
       yearsRemaining: 'years remaining'
     },
     scoreImpact: {
-      title: 'Credit Score Impact',
-      currentRange: 'Current Estimated Range',
-      potentialRange: 'Potential Range After Removal',
-      improvement: 'Estimated Improvement',
-      factors: 'Contributing Factors',
-      confidence: 'Analysis Confidence',
-      disclaimer: 'This is an estimate only. Actual results vary based on your complete credit profile.'
+      title: 'Forensic Impact Assessment',
+      currentRange: 'Current Profile Status',
+      potentialRange: 'Projected Recovery Range',
+      improvement: 'Recovery Potential',
+      factors: 'Impact Factors',
+      confidence: 'Forensic Confidence',
+      disclaimer: 'This is a forensic projection based on historical data. Actual institutional updates may vary.'
     },
     help: {
       title: 'Help & Resources',
@@ -457,9 +457,9 @@ const translations: Record<Language, TranslationStrings> = {
       accountType: 'Tipo de Cuenta',
       accountStatus: 'Estado',
       paymentHistory: 'Historial de Pagos',
-      currentBalance: 'Saldo Actual',
-      originalAmount: 'Monto Original',
-      creditLimit: 'Límite de Crédito',
+      currentValue: 'Unidades de Responsabilidad',
+      originalAmount: 'Severidad Inicial',
+      creditLimit: 'Límite de Exposición',
       dateOpened: 'Fecha de Apertura',
       dofd: 'Fecha de Primera Morosidad',
       dofdHelp: 'CRÍTICO: Cuando la cuenta se atrasó más de 30 días por primera vez. Determina el período de reporte de 7 años.',
@@ -675,4 +675,18 @@ export function formatNumber(num: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(num);
+}
+
+/**
+ * Format currency in current language
+ */
+export function formatCurrency(amount: number): string {
+  if (!Number.isFinite(amount)) return '—';
+  const locale = currentLanguage === 'es' ? 'es-ES' : 'en-US';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
 }

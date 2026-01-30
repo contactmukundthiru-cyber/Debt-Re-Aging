@@ -165,8 +165,8 @@ Creditor: ASSET ACCEPTANCE LLC
 Original Creditor: CHASE BANK
 Account Type: Collection / Factoring Company Account
 Account Status: Open / Past Due
-Balance: $4,219.00
-Original Amount: $1,850.00
+Value: 4,219.00
+Original Amount: 1,850.00
 Date Opened: 2018-11-12
 Date of First Delinquency: 2023-04-10
 Charge-Off Date: 2019-06-15
@@ -176,13 +176,13 @@ Payment History: 30 60 90 120 150 180 CO
 
 [FORENSIC NOTES]
 - DOFD (2023) is reported AFTER Charge-Off (2019), indicating illegal re-aging.
-- Balance ($4,219) is 228% of original amount without itemized fee disclosure.
+- Value (4,219) is 228% of original amount without itemized fee disclosure.
 - Estimated removal exceeds FCRA 7-year limit based on actual 2019 delinquency.
 
 ACCOUNT 2: DUPLICATE FRAUD INDICATOR
 Creditor: CAPITAL ONE
 Account Type: Credit Card
-Balance: $4,219.00
+Value: 4,219.00
 Status: Charged Off
 Date Opened: 2018-11-12
 Note: Data matches Account 1 exactly, indicating potential double-reporting violation.`;
@@ -206,7 +206,7 @@ export default function CreditReportAnalyzer() {
   const [seriesOptions, setSeriesOptions] = useState<SeriesSnapshotOption[]>([]);
   const [relevantCaseLaw, setRelevantCaseLaw] = useState<CaseLaw[]>([]);
   const [discoveryAnswers, setDiscoveryAnswers] = useState<Record<string, string>>({});
-  const [activeTab, setActiveTab] = useState<TabId>('actions');
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [activeParsedFields, setActiveParsedFields] = useState<ParsedFields | null>(null);
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const [showHelp, setShowHelp] = useState<string | null>(null);
@@ -451,7 +451,7 @@ export default function CreditReportAnalyzer() {
     setProcessing(true, 0, `Processing ${fileArray.length} source${fileArray.length > 1 ? 's' : ''}...`);
 
     try {
-      const extracted = [];
+      const extracted: { id: string; name: string; size: number; type: string; text: string }[] = [];
       for (const file of fileArray) {
         const text = await extractTextFromFile(file);
         extracted.push({

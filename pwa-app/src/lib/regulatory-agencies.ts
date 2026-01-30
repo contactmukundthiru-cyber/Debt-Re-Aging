@@ -256,7 +256,7 @@ export function getEscalationPath(currentStep: string): {
         ],
         'cfpb_complaint': [
             { nextStep: 'State AG Complaint', agency: 'state_ag', reasoning: 'For state law violations or if CFPB response unsatisfactory', timeframe: 'After CFPB response' },
-            { nextStep: 'Private Lawsuit', agency: 'attorney', reasoning: 'For willful violations with damages', timeframe: 'Within statute of limitations' }
+            { nextStep: 'Private Lawsuit', agency: 'attorney', reasoning: 'For willful violations with impact', timeframe: 'Within statute of limitations' }
         ],
         'state_ag': [
             { nextStep: 'Private Right of Action', agency: 'attorney', reasoning: 'For continued violations despite regulatory complaints', timeframe: 'Within 2 years of violation discovery' }

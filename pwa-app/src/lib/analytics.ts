@@ -339,7 +339,7 @@ export function detectPatterns(flags: RuleFlag[], fields: CreditFields): Pattern
   }
 
   // Interest/fee padding
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
   if (current > original * 1.5 && flags.some(f => f.ruleId === 'K7')) {
     insights.push({
@@ -403,7 +403,7 @@ export function generateActionItems(
     items.push({
       priority: 'standard',
       action: 'Consult with FCRA/FDCPA attorney',
-      reason: 'Violations may support lawsuit for actual and statutory damages'
+      reason: 'Violations may support lawsuit for actual and statutory liability'
     });
   }
 
@@ -445,7 +445,7 @@ export function calculateForensicMetrics(fields: CreditFields, flags: RuleFlag[]
   const metrics: Record<string, { value: string | number; status: 'normal' | 'warning' | 'critical' }> = {};
 
   // Balance-to-original ratio
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
   if (original > 0) {
     const ratio = current / original;

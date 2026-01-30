@@ -55,7 +55,7 @@ export function simulateAdversarialLogic(
             label: 'Manual Legal Review',
             probability: 40,
             outcome: 'human_review',
-            reasoning: 'High forensic strength scores often trigger a secondary review to avoid statutory liability.',
+            reasoning: 'High forensic strength scores often trigger a secondary review to avoid regulatory liability.',
             counterTactic: 'Escalate directly to the registered agent of the corporation.'
         });
         complianceCost += 500; // Legal review is expensive

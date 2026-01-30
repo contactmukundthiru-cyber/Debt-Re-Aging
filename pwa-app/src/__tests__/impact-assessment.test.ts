@@ -17,7 +17,7 @@ describe('Forensic Impact Assessment Engine', () => {
     ruleId: 'D1',
     ruleName: 'Paid with Balance',
     severity: 'medium',
-    explanation: 'Reporting non-zero balance.',
+    explanation: 'Reporting non-zero value.',
     whyItMatters: 'Accuracy.',
     suggestedEvidence: [],
     fieldValues: {},

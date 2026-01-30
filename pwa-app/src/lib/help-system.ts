@@ -81,9 +81,9 @@ const HELP_TIPS: HelpTip[] = [
         action: { label: 'Prepare CFPB Complaint', type: 'navigate', target: '/analysis?tab=narrative' }
     },
     {
-        id: 'statutory_damages',
-        title: 'Understanding FCRA Damages',
-        content: 'FCRA provides for: Actual damages (no cap), Statutory damages of $100-$1,000 per willful violation, Punitive damages (no cap for willful violations), Attorney fees and costs. Multiple violations can significantly increase recovery potential.',
+        id: 'statutory_liability',
+        title: 'Understanding FCRA Liability',
+        content: 'FCRA provides for: Actual impact (no cap), Statutory liability of 100 units-1,000 unit liability per willful violation, Accountability (no cap for willful violations), Attorney fees and costs. Multiple violations can significantly increase recovery potential.',
         category: 'legal',
         relatedTopics: ['fcra-616', 'fcra-617', 'lawsuit'],
         actionable: false
@@ -135,7 +135,7 @@ const CONTEXTUAL_GUIDES: ContextualGuide[] = [
             title: 'Multiple Violations Detected',
             content: 'With 3+ violations detected, you have a strong case. Consider: (1) Filing disputes with all bureaus, (2) Consulting an FCRA attorney, (3) Documenting everything for potential litigation.',
             category: 'violations',
-            relatedTopics: ['strategy', 'attorney', 'damages'],
+            relatedTopics: ['strategy', 'attorney', 'impact'],
             actionable: true,
             action: { label: 'View Recommendations', type: 'navigate', target: '/analysis?tab=actions' }
         }
@@ -281,7 +281,7 @@ export function getTutorialFlow(flowId: string): HelpTip[] {
         'collection_defense': [
             'collection_validation',
             'statute_of_limitations',
-            'statutory_damages',
+            'statutory_liability',
             'evidence_preservation'
         ]
     };

@@ -27,7 +27,7 @@ export interface PatternDefinition {
   optionalSignals: string[];
   minimumConfidence: number;
   legalBasis: string[];
-  damages: {
+  impact: {
     statutory: { min: number; max: number };
     actualCategories: string[];
     punitiveEligible: boolean;
@@ -86,7 +86,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['COLLECTOR_CHANGE', 'BALANCE_EXCEEDS_ORIGINAL_SIGNIFICANTLY', 'LATE_PURCHASE'],
     minimumConfidence: 75,
     legalBasis: ['15 USC 1681c(c)', '15 USC 1681s-2(a)(5)', 'Grigoryan v. Experian'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit denial', 'Higher interest rates', 'Emotional distress'],
       punitiveEligible: true,
@@ -108,7 +108,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['SMALL_PAYMENT_RECORDED', 'COLLECTOR_CONTACTED_BEFORE_PAYMENT'],
     minimumConfidence: 80,
     legalBasis: ['15 USC 1681c(c)(1)', 'FCRA Commentary', 'State consumer protection laws'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit denial', 'Deceptive practices', 'Emotional distress'],
       punitiveEligible: true,
@@ -118,7 +118,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
       'Document payment date and amount',
       'Compare pre/post payment DOFD',
       'Report to state AG for deceptive practices',
-      'This is often willful - damages may be higher'
+      'This is often willful - impact may be higher'
     ]
   },
   {
@@ -130,7 +130,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['ORIGINAL_CREDITOR_DOFD_DIFFERS', 'GAP_IN_REPORTING'],
     minimumConfidence: 85,
     legalBasis: ['15 USC 1681s-2(a)(5)', 'FTC Staff Opinion Letters', 'CFPB Guidance'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit denial', 'Wrongful collection', 'Emotional distress'],
       punitiveEligible: true,
@@ -154,7 +154,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['PREVIOUS_DELETION', 'NEW_COLLECTOR', 'AGED_DEBT_PURCHASE'],
     minimumConfidence: 90,
     legalBasis: ['15 USC 1681c(a)(4)', '15 USC 1681i(a)(5)(C)', 'Cushman v. Trans Union'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit damage', 'Harassment', 'Emotional distress'],
       punitiveEligible: true,
@@ -176,7 +176,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['LAWSUIT_FILED', 'THREATS_TO_SUE', 'CREDIT_REPORTING_CONTINUES'],
     minimumConfidence: 85,
     legalBasis: ['15 USC 1692e', '15 USC 1692f', 'Huertas v. Galaxy Asset', 'State SOL statutes'],
-    damages: {
+    impact: {
       statutory: { min: 0, max: 1000 },
       actualCategories: ['Wrongful collection', 'Emotional distress', 'Legal fees'],
       punitiveEligible: true,
@@ -200,7 +200,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['COLLECTION_FEES_ADDED', 'INTEREST_ABOVE_CAP', 'MULTIPLE_INCREASES'],
     minimumConfidence: 70,
     legalBasis: ['15 USC 1692f(1)', 'State usury laws', 'Contract terms'],
-    damages: {
+    impact: {
       statutory: { min: 0, max: 1000 },
       actualCategories: ['Overcharges', 'Emotional distress'],
       punitiveEligible: false,
@@ -222,7 +222,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['MULTIPLE_FLUCTUATIONS', 'BUREAU_DISCREPANCIES'],
     minimumConfidence: 65,
     legalBasis: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Data integrity', 'Credit damage'],
       punitiveEligible: false,
@@ -245,7 +245,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['QUICK_VERIFICATION', 'NO_DOCUMENTATION_REQUESTED'],
     minimumConfidence: 70,
     legalBasis: ['15 USC 1681i(a)(1)(A)', 'Cushman v. Trans Union', 'Dennis v. BEH-1'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit denial', 'Time spent', 'Emotional distress'],
       punitiveEligible: true,
@@ -267,7 +267,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['CERTIFIED_MAIL_PROOF', 'MULTIPLE_DISPUTES_IGNORED'],
     minimumConfidence: 90,
     legalBasis: ['15 USC 1681i(a)(1)', '15 USC 1681i(a)(5)'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Per-se violation', 'Credit damage'],
       punitiveEligible: true,
@@ -291,7 +291,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['CALLS_TO_WORK', 'THIRD_PARTY_CONTACT', 'FALSE_STATEMENTS'],
     minimumConfidence: 70,
     legalBasis: ['15 USC 1692d', '15 USC 1692c', '15 USC 1692e'],
-    damages: {
+    impact: {
       statutory: { min: 0, max: 1000 },
       actualCategories: ['Emotional distress', 'Time lost', 'Work impact'],
       punitiveEligible: true,
@@ -313,9 +313,9 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['FALSE_CREDITOR_IDENTITY', 'WRONG_CONSUMER', 'FAKE_LEGAL_THREATS'],
     minimumConfidence: 75,
     legalBasis: ['15 USC 1692e', '15 USC 1692f'],
-    damages: {
+    impact: {
       statutory: { min: 0, max: 1000 },
-      actualCategories: ['Actual damages', 'Emotional distress'],
+      actualCategories: ['Actual impact', 'Emotional distress'],
       punitiveEligible: true,
       classActionPotential: true
     },
@@ -337,7 +337,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['LESS_THAN_365_DAYS', 'BILLING_ERROR', 'VA_DEBT'],
     minimumConfidence: 80,
     legalBasis: ['CFPB Medical Debt Rule 2023', '15 USC 1681c(a)(6)', 'State medical debt laws'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit denial', 'Medical care impact', 'Emotional distress'],
       punitiveEligible: true,
@@ -361,7 +361,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['ACCOUNTS_NOT_YOURS', 'SIMILAR_NAME_PERSON'],
     minimumConfidence: 85,
     legalBasis: ['15 USC 1681e(b)', 'Williams v. First Advantage'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit denial', 'Employment denial', 'Emotional distress'],
       punitiveEligible: true,
@@ -383,7 +383,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['POLICE_REPORT_FILED', 'FTC_AFFIDAVIT_SUBMITTED'],
     minimumConfidence: 90,
     legalBasis: ['15 USC 1681c-2', '15 USC 1681g(e)', 'FACTA provisions'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit damage', 'Time spent', 'Emotional distress'],
       punitiveEligible: true,
@@ -407,7 +407,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['BALANCE_NOT_ZERO', 'NEGATIVE_STATUS_REPORTED'],
     minimumConfidence: 95,
     legalBasis: ['11 USC 524(a)(2)', '15 USC 1681c(a)(1)', 'In re Denby-Peterson'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Bankruptcy contempt', 'Credit damage', 'Emotional distress'],
       punitiveEligible: true,
@@ -416,7 +416,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     recommendations: [
       'Provide bankruptcy discharge order',
       'Cite 11 USC 524 violation',
-      'Request $0 balance reporting',
+      'Request zero value value reporting',
       'Can seek sanctions in bankruptcy court'
     ]
   },
@@ -431,7 +431,7 @@ export const PATTERN_LIBRARY: PatternDefinition[] = [
     optionalSignals: ['STATUS_DIFFERS', 'MISSING_FROM_BUREAU', 'DIFFERENT_CREDITOR_NAME'],
     minimumConfidence: 75,
     legalBasis: ['15 USC 1681s-2(a)(1)', '15 USC 1681e(b)', 'Saunders v. Branch Banking'],
-    damages: {
+    impact: {
       statutory: { min: 100, max: 1000 },
       actualCategories: ['Credit damage', 'Confusion', 'Time spent'],
       punitiveEligible: false,
@@ -521,7 +521,7 @@ function extractSignals(
   const removal = parseDate(fields.estimatedRemovalDate);
   const today = new Date();
 
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
   const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
   const status = (fields.accountStatus || '').toLowerCase();
   const accountType = (fields.accountType || '').toLowerCase();
@@ -592,7 +592,7 @@ function extractSignals(
     }
 
     const balances = options.crossBureauData.map(b =>
-      parseFloat((b.fields.currentBalance || '0').replace(/[$,]/g, ''))
+      parseFloat((b.fields.currentValue || '0').replace(/[$,]/g, ''))
     );
     const balanceMax = Math.max(...balances);
     const balanceMin = Math.min(...balances);
@@ -739,7 +739,7 @@ function generatePatternEvidence(
   }
 
   if (matchedSignals.includes('BALANCE_EXCEEDS_ORIGINAL_SIGNIFICANTLY')) {
-    const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
+    const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
     const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
     evidence.push({
       type: 'data',
@@ -775,8 +775,8 @@ function calculatePatternRiskScore(
   };
 
   const baseScore = confidence * severityMultiplier[pattern.severity];
-  const punitiveBonus = pattern.damages.punitiveEligible ? 10 : 0;
-  const classActionBonus = pattern.damages.classActionPotential ? 5 : 0;
+  const punitiveBonus = pattern.impact.punitiveEligible ? 10 : 0;
+  const classActionBonus = pattern.impact.classActionPotential ? 5 : 0;
 
   return Math.min(100, Math.round(baseScore + punitiveBonus + classActionBonus));
 }
@@ -791,26 +791,26 @@ function calculateLitigationValue(
 ): number {
   const confidenceMultiplier = confidence / 100;
 
-  // Statutory damages
-  const statutoryMid = (pattern.damages.statutory.min + pattern.damages.statutory.max) / 2;
+  // Statutory liability
+  const statutoryMid = (pattern.impact.statutory.min + pattern.impact.statutory.max) / 2;
   const statutoryValue = statutoryMid * confidenceMultiplier;
 
-  // Actual damages estimate (simplified)
-  const actualEstimate = pattern.damages.actualCategories.length * 500 * confidenceMultiplier;
+  // Actual impact estimate (simplified)
+  const actualEstimate = pattern.impact.actualCategories.length * 500 * confidenceMultiplier;
 
-  // Punitive damages if eligible
-  const punitiveEstimate = pattern.damages.punitiveEligible
+  // Accountability if eligible
+  const punitiveEstimate = pattern.impact.punitiveEligible
     ? (statutoryValue + actualEstimate) * 0.5
     : 0;
 
   // Attorney fees (typically 1/3 of recovery)
   const estimatedAttorneyFees = (statutoryValue + actualEstimate + punitiveEstimate) * 0.33;
 
-  // Add per-violation statutory damages
+  // Add per-violation statutory liability
   const violationCount = flags.filter(f => f.severity === 'high' || (f.severity as string) === 'critical').length;
-  const perViolationDamages = violationCount * 500;
+  const perViolationImpact = violationCount * 500;
 
-  return Math.round(statutoryValue + actualEstimate + punitiveEstimate + estimatedAttorneyFees + perViolationDamages);
+  return Math.round(statutoryValue + actualEstimate + punitiveEstimate + estimatedAttorneyFees + perViolationImpact);
 }
 
 /**
@@ -863,11 +863,11 @@ function generatePatternNarrative(
   let narrative = `Analysis reveals ${confidence} ${pattern.name}. `;
   narrative += pattern.description + '. ';
 
-  if (pattern.damages.punitiveEligible) {
-    narrative += 'This violation pattern may support punitive damages due to potential willfulness. ';
+  if (pattern.impact.punitiveEligible) {
+    narrative += 'This violation pattern may support accountability impact due to potential willfulness. ';
   }
 
-  if (pattern.damages.classActionPotential) {
+  if (pattern.impact.classActionPotential) {
     narrative += 'Similar violations against other consumers may support class action certification. ';
   }
 
@@ -904,11 +904,11 @@ function calculateAggregateLitigationValue(
   let maxTotal = 0;
 
   for (const pattern of patterns) {
-    minTotal += pattern.pattern.damages.statutory.min;
+    minTotal += pattern.pattern.impact.statutory.min;
     maxTotal += pattern.litigationValue;
   }
 
-  // Add potential actual damages and attorney fees
+  // Add potential actual impact and attorney fees
   maxTotal *= 1.5;
 
   return { min: minTotal, max: Math.round(maxTotal) };
@@ -963,7 +963,7 @@ function getExpectedOutcome(action: string): string {
     return 'Regulatory attention and potential enforcement';
   }
   if (action.includes('attorney') || action.includes('litigation')) {
-    return 'Legal action for damages recovery';
+    return 'Legal action for impact recovery';
   }
   return 'Evidence preservation and case building';
 }
@@ -993,7 +993,7 @@ function generateOverallNarrative(
 
   const maxValue = patterns.reduce((sum, p) => sum + p.litigationValue, 0);
   if (maxValue > 5000) {
-    narrative += `Estimated litigation value ranges from $${patterns.reduce((sum, p) => sum + p.pattern.damages.statutory.min, 0).toLocaleString()} to $${maxValue.toLocaleString()}. `;
+    narrative += `Estimated litigation value ranges from $${patterns.reduce((sum, p) => sum + p.pattern.impact.statutory.min, 0).toLocaleString()} to $${maxValue.toLocaleString()}. `;
     narrative += 'Consultation with an FCRA attorney is strongly recommended.';
   } else {
     narrative += 'Standard dispute procedures are recommended as the first step.';

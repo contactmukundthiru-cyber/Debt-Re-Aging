@@ -79,12 +79,12 @@ export function getSmartRecommendations(fields: Partial<CreditFields>): SmartRec
     }
 
     // 5. Zero balance but marked as "In Collections"
-    if (fields.currentBalance === '0' && fields.accountStatus === 'In Collections') {
+    if (fields.currentValue === '0' && fields.accountStatus === 'In Collections') {
         recommendations.push({
             id: 'zero-bal-collections',
             field: 'accountStatus',
             title: 'Paid Collection?',
-            description: 'Balance is $0 but status is "In Collections". If paid, status should be "Paid".',
+            description: 'Balance is zero value but status is "In Collections". If paid, status should be "Paid".',
             type: 'info',
             actionLabel: 'Set to Paid',
             suggestedValue: 'Paid'

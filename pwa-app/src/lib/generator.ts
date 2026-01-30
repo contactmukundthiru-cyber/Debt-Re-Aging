@@ -427,7 +427,7 @@ LEGAL OBLIGATIONS YOU ARE VIOLATING:
 ${hasReagingFlags ? `
 NOTICE OF ILLEGAL RE-AGING:
 The date discrepancies identified above indicate that your company may be engaged in illegal "debt re-aging" - the practice of reporting false dates to extend the 7-year reporting period under FCRA § 605. This constitutes:
-• Willful noncompliance with FCRA (subject to statutory damages per violation plus punitive damages)
+• Willful noncompliance with FCRA (subject to statutory liability per violation plus accountability impact)
 • Potential fraud and unfair debt collection practices
 ` : ''}
 ${hasFDCPAFlags ? `
@@ -449,9 +449,9 @@ NOTICE OF PRESERVED RIGHTS:
 
 This letter is sent without prejudice to any legal claims I may have. If you fail to comply, I reserve the right to:
 • File complaints with the CFPB, FTC, and state attorney general
-• Pursue statutory damages under FCRA
-• Seek actual damages for harm to my credit standing
-• Pursue punitive damages and attorney's fees
+• Pursue statutory liability under FCRA
+• Seek actual impact for harm to my credit standing
+• Pursue accountability impact and attorney's fees
 
 Your response is required within 30 days.
 
@@ -518,8 +518,8 @@ Any communication outside these narrow exceptions will constitute a violation of
 WARNING:
 
 Any further contact in violation of this cease and desist order will be documented and used as evidence in legal proceedings. Violations of the FDCPA are subject to:
-• Statutory damages per violation
-• Actual damages for reputational and credit harm
+• Statutory liability per violation
+• Actual impact for reputational and credit harm
 • Class action liability
 • Payment of consumer's attorney's fees
 
@@ -580,22 +580,22 @@ ${flags.map((f, i) => `${i + 1}. ${f.ruleId} - ${f.ruleName}
    Success Probability: ${f.successProbability}%
 `).join('\n')}
 
-DAMAGES SOUGHT:
+LIABILITY & IMPACT SOUGHT:
 
 If legal action becomes necessary, I will seek:
 
-1. STATUTORY DAMAGES under 15 U.S.C. § 1681n(a)(1)(A):
-   - Statutory damages per willful violation
+1. STATUTORY LIABILITY under 15 U.S.C. § 1681n(a)(1)(A):
+   - Statutory liability per willful violation
    - Documented violations: ${flags.length}
 
-2. ACTUAL DAMAGES for:
+2. ACTUAL IMPACT for:
    - Credit score deterioration
    - Denial of credit applications
    - Higher interest rates paid
    - Reputational harm
 
-3. PUNITIVE DAMAGES under 15 U.S.C. § 1681n(a)(2):
-   - For willful noncompliance, courts may award punitive damages without limitation
+3. ACCOUNTABILITY IMPACT under 15 U.S.C. § 1681n(a)(2):
+   - For willful noncompliance, courts may award accountability impact without limitation
 
 4. ATTORNEY'S FEES AND COSTS under 15 U.S.C. § 1681n(a)(3)
 
@@ -613,7 +613,7 @@ To avoid the expense and inconvenience of litigation for both parties, I am prep
 1. IMMEDIATELY delete all disputed information from all three credit bureaus
 2. Provide written confirmation of permanent deletion within 15 days
 3. Agree to cease all collection activities
-4. Pay appropriate settlement damages (to be negotiated)
+4. Pay appropriate remediation value (to be negotiated)
 
 DEADLINE:
 

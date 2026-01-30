@@ -63,7 +63,7 @@ export function reconstructMetro2Base(fields: Partial<CreditFields>): Metro2Segm
     });
 
     // Field 21: Current Balance
-    const balance = fields.currentBalance?.replace(/[$,.]/g, '') || '0';
+    const balance = fields.currentValue?.replace(/[$,.]/g, '') || '0';
     segments.push({
         position: 178, length: 9, label: 'Current Balance', value: balance.padStart(9, '0'),
         description: 'Total amount owed as of the date of report', standard: 'Numeric, no decimals', isValid: true

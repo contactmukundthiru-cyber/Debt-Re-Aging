@@ -22,6 +22,7 @@ export const ACCOUNT_TYPES = ['Collection', 'Charge-off', 'Credit Card', 'Instal
 export const STATUSES = ['Open', 'Closed', 'Paid', 'Settled', 'Transferred', 'Sold', 'Charged Off', 'In Collections'];
 
 export const ANALYSIS_TABS = [
+  { id: 'overview', label: 'Overview' },
   { id: 'violations', label: 'Violations' },
   { id: 'briefing', label: 'Case Brief' },
   { id: 'review', label: 'Review' },

@@ -195,7 +195,7 @@ const TimelineTab: React.FC<TimelineTabProps> = ({ timeline, bureau }) => {
       </div>
 
       {/* Main Timeline */}
-      <ForensicTimeline events={sortedEvents} />
+      <ForensicTimeline events={sortedEvents} bureau={bureau} />
     </div>
   );
 };

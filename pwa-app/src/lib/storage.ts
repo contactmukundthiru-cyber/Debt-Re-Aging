@@ -1,5 +1,7 @@
 import { CreditFields, RuleFlag, RiskProfile, AnalysisRecord } from './types';
 
+export type { AnalysisRecord } from './types';
+
 const STORAGE_KEY = 'credit_analyzer_history';
 const MAX_HISTORY = 20;
 

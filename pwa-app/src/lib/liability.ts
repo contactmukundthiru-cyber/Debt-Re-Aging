@@ -1,5 +1,5 @@
 /**
- * Statutory Liability & Damages Calculator
+ * Statutory Liability & Impact Calculator
  * 
  * Maps violations to specific legal penalties under FCRA and FDCPA.
  */

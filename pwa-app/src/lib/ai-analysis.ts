@@ -73,7 +73,7 @@ const VIOLATION_PATTERNS = {
         successRate: 0.85
     },
     dataMismatches: {
-        indicators: ['balance discrepancy', 'status conflict', 'date inconsistency'],
+        indicators: ['value discrepancy', 'status conflict', 'date inconsistency'],
         severity: 'high' as const,
         legalBasis: ['FCRA § 623(a)(1)', 'Metro 2 Guidelines'],
         successRate: 0.75
@@ -221,7 +221,7 @@ function generateKeyFindings(flags: RuleFlag[], patterns: PatternInsight[]): AIF
             id: `F${findingId++}`,
             category: 'anomaly',
             severity: 'high',
-            title: 'Balance Reporting Anomalies',
+            title: 'Value Reporting Anomalies',
             explanation: 'Inconsistent or inaccurate balance information detected, which may indicate improper data handling or intentional inflation.',
             evidence: balanceIssues.map(f => f.explanation),
             legalBasis: ['FCRA § 623(a)(1)', 'FCRA § 607(b)'],
@@ -277,8 +277,8 @@ function generateStrategicRecommendations(flags: RuleFlag[], riskProfile: RiskPr
         recommendations.push({
             priority: priority++,
             action: 'Consult FCRA Attorney',
-            reasoning: 'Multiple violations may warrant legal action. FCRA provides for statutory damages of $100-$1,000 per violation plus attorney fees.',
-            expectedOutcome: 'Potential settlement or damages recovery',
+            reasoning: 'Multiple violations may warrant legal action. FCRA provides for statutory liability of 100 points-1,000 points per violation plus attorney fees.',
+            expectedOutcome: 'Potential settlement or impact score recovery',
             timeframe: 'If disputes are not resolved',
             difficulty: 'complex'
         });

@@ -241,7 +241,7 @@ When SOL expires:
 - 30 days to dispute in writing
 - Cease communication upon request
 
-**Damages:**
+**Impact:**
 - Statutory liability for non-compliance
 - Liability for actual impact
 - Recovery of attorney's fees`,

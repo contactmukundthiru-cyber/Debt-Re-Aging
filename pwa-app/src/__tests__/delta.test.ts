@@ -13,8 +13,8 @@ describe('delta analysis', () => {
   });
 
   test('compareReports identifies value changes', () => {
-    const oldReport: CreditFields = { currentBalance: '500' };
-    const newReport: CreditFields = { currentBalance: '1000' };
+    const oldReport: CreditFields = { currentValue: '500' };
+    const newReport: CreditFields = { currentValue: '1000' };
     const results = compareReports(oldReport, newReport);
     expect(results[0].impact).toBe('negative');
     expect(results[0].description).toContain('Value increased');

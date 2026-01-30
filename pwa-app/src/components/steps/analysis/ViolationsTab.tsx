@@ -2,6 +2,21 @@
 
 import React from 'react';
 import { RuleFlag } from '../../../lib/rules';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  AlertTriangle, 
+  Search, 
+  Filter, 
+  Scale, 
+  ShieldCheck, 
+  Zap, 
+  ChevronDown,
+  Info,
+  BookOpen,
+  ClipboardList,
+  Target
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface ViolationsTabProps {
   flags: RuleFlag[];
@@ -27,41 +42,48 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
 
   if (flags.length === 0) {
     return (
-      <div className="premium-card p-16 text-center bg-slate-50 dark:bg-slate-950/20 border-dashed border-slate-200 dark:border-slate-800">
-        <svg className="w-20 h-20 mx-auto mb-6 text-emerald-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-        <h3 className="text-xl font-bold dark:text-white mb-2">Clean Audit Report</h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">No automatic violations were detected during the forensic scan. A manual review by a qualified credit law attorney is still recommended for hidden discrepancies.</p>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-slate-50 dark:bg-slate-900/50 rounded-[40px] p-24 text-center border-2 border-dashed border-slate-200 dark:border-slate-800"
+      >
+        <div className="w-24 h-24 bg-white dark:bg-slate-900 rounded-[32px] shadow-xl flex items-center justify-center mx-auto mb-8 border border-slate-100 dark:border-slate-800">
+          <ShieldCheck className="w-12 h-12 text-emerald-500" />
+        </div>
+        <h3 className="text-2xl font-bold dark:text-white mb-4 tracking-tight">Institutional Compliance Verified</h3>
+        <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">No forensic violations detected. The data set aligns with standard reporting protocols, though manual auditing remains recommended for subtle depth-discrepancies.</p>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search & Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-grow">
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+    <div className="space-y-8">
+      {/* Search & Filter - Institutional Grade */}
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="relative flex-grow group">
+          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+            <Search size={18} className="text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+          </div>
           <input
             type="text"
-            placeholder="Search violations, rules, or citations..."
-            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none dark:text-white"
+            placeholder="Search forensic patterns, rules, or citations..."
+            className="w-full pl-14 pr-6 py-5 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none dark:text-white shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+        
+        <div className="bg-slate-100 dark:bg-slate-900 p-1.5 rounded-[24px] flex gap-1 border border-slate-200 dark:border-slate-800">
           {(['all', 'high', 'medium', 'low'] as const).map(s => (
             <button
               key={s}
               onClick={() => setFilterSeverity(s)}
-              className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${filterSeverity === s
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+              className={cn(
+                "px-6 py-3 rounded-[18px] text-[10px] font-bold uppercase tracking-[0.2em] transition-all",
+                filterSeverity === s
+                  ? 'bg-white dark:bg-slate-800 text-slate-950 dark:text-white shadow-md'
                   : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
+              )}
             >
               {s}
             </button>
@@ -69,176 +91,207 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
         </div>
       </div>
 
-      {/* Summary Header */}
-      <div className="glass-panel p-6 flex flex-wrap items-center justify-between gap-6 mb-8">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+      {/* Results Overview */}
+      <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 border border-slate-200 dark:border-slate-800 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-6">
+          <div className="w-14 h-14 rounded-2xl bg-slate-950 dark:bg-white text-white dark:text-slate-950 flex items-center justify-center shadow-xl">
+            <Scale size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              {searchTerm || filterSeverity !== 'all' ? 'Matching Results' : 'Detected Violations'}
-            </p>
-            <p className="text-2xl font-bold dark:text-white tabular-nums">{filteredFlags.length} Issues</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Forensic Match Count</p>
+            <p className="text-2xl font-bold dark:text-white tabular-nums">{filteredFlags.length} <span className="text-slate-400 text-lg font-medium">Potential Issues</span></p>
           </div>
         </div>
-        <div className="flex gap-4">
+        
+        <div className="hidden md:flex gap-3">
           {['high', 'medium', 'low'].map(severity => {
             const count = flags.filter(f => f.severity === severity).length;
-            const colors = {
-              high: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-              medium: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-              low: 'bg-slate-500/10 text-slate-400 border-slate-500/20'
-            };
             return (
               <div
                 key={severity}
-                className={`px-4 py-2 rounded-xl border cursor-pointer transition-all hover:scale-105 active:scale-95 ${colors[severity as keyof typeof colors]} ${filterSeverity === severity ? 'ring-2 ring-slate-400 ring-offset-2 dark:ring-offset-slate-900' : ''}`}
-                onClick={() => setFilterSeverity(severity as any)}
+                className={cn(
+                  "px-5 py-2.5 rounded-2xl border flex items-center gap-3 transition-all",
+                  severity === 'high' ? "bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20 text-rose-600 dark:text-rose-400" :
+                  severity === 'medium' ? "bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/20 text-orange-600 dark:text-orange-400" :
+                  "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500"
+                )}
               >
-                <span className="text-[10px] font-bold uppercase tracking-widest">{severity}: </span>
-                <span className="text-sm font-bold tabular-nums">{count}</span>
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  severity === 'high' ? "bg-rose-500" : severity === 'medium' ? "bg-orange-500" : "bg-slate-400"
+                )} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">{severity}</span>
+                <span className="font-bold tabular-nums text-sm">{count}</span>
               </div>
             );
           })}
         </div>
       </div>
 
-      {filteredFlags.length === 0 && (searchTerm || filterSeverity !== 'all') && (
-        <div className="text-center py-20">
-          <p className="text-slate-500">No violations match your current filters.</p>
-          <button
-            onClick={() => { setSearchTerm(''); setFilterSeverity('all'); }}
-            className="text-emerald-500 font-bold mt-2 text-sm"
-          >
-            Clear all filters
-          </button>
-        </div>
-      )}
-
-      {/* Violation Cards */}
-      {filteredFlags.map((flag, i) => {
-        const isExpanded = expandedCard === i;
-        const severityConfig = {
-          high: { color: 'text-rose-500 bg-rose-500/10 border-rose-500/30', glow: 'shadow-rose-500/10', icon: '🔴' },
-          medium: { color: 'text-amber-500 bg-amber-500/10 border-amber-500/30', glow: 'shadow-amber-500/10', icon: '🟡' },
-          low: { color: 'text-slate-400 bg-slate-500/10 border-slate-500/30', glow: 'shadow-slate-500/10', icon: '⚪' }
-        }[flag.severity];
-
-        return (
-          <div
-            key={i}
-            className={`group transition-all duration-300 ${isExpanded ? `ring-2 ring-emerald-500/20 shadow-2xl ${severityConfig.glow}` : 'hover:shadow-xl hover:-translate-y-0.5'}`}
-          >
-            <div
-              className={`premium-card p-8 cursor-pointer transition-colors overflow-hidden relative ${isExpanded ? 'bg-white dark:bg-slate-900 border-emerald-500/30' : 'bg-white/80 dark:bg-slate-900/50'}`}
-              onClick={() => setExpandedCard(isExpanded ? null : i)}
+      {/* Animated Violation Cards */}
+      <div className="space-y-4">
+        {filteredFlags.map((flag, i) => {
+          const isExpanded = expandedCard === i;
+          
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              layout
+              className={cn(
+                "rounded-[32px] transition-all duration-500 border overflow-hidden",
+                isExpanded 
+                  ? "bg-white dark:bg-slate-900 border-emerald-500/40 shadow-[0_32px_64px_-16px_rgba(16,185,129,0.1)] ring-1 ring-emerald-500/20" 
+                  : "bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-900"
+              )}
             >
-              {/* Decorative Glow */}
-              {isExpanded && (
-                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-              )}
-
-              <div className="flex justify-between items-start gap-6 relative z-10">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border ${severityConfig.color}`}>
-                      {flag.severity}
-                    </span>
-                    <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-800">REF: {flag.ruleId}</span>
-                    <div className="flex items-center gap-2 ml-auto">
-                      <div className="h-1 w-16 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div className={`h-full transition-all duration-1000 ${flag.successProbability > 80 ? 'bg-emerald-500' : flag.successProbability > 50 ? 'bg-amber-500' : 'bg-slate-400'}`} style={{ width: `${flag.successProbability}%` }} />
+              <div 
+                className="p-8 cursor-pointer relative"
+                onClick={() => setExpandedCard(isExpanded ? null : i)}
+              >
+                {/* Header Row */}
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-5">
+                      <span className={cn(
+                        "text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full border",
+                        flag.severity === 'high' ? "bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/30 text-rose-600 dark:text-rose-400" :
+                        flag.severity === 'medium' ? "bg-orange-50 dark:bg-orange-500/10 border-orange-100 dark:border-orange-500/30 text-orange-600 dark:text-orange-400" :
+                        "bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-500"
+                      )}>
+                        {flag.severity} RISK
+                      </span>
+                      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-lg">RULE::{flag.ruleId}</span>
+                      
+                      <div className="flex items-center gap-3 ml-auto pr-8">
+                         <div className="text-right">
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Success Factor</p>
+                            <div className="flex items-center gap-2">
+                               <div className="h-1 w-20 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                 <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${flag.successProbability}%` }}
+                                    className={cn(
+                                        "h-full transition-all duration-1000",
+                                        flag.successProbability > 70 ? 'bg-emerald-500' : 'bg-orange-500'
+                                    )}
+                                 />
+                               </div>
+                               <span className="text-[10px] font-bold dark:text-white">{flag.successProbability}%</span>
+                            </div>
+                         </div>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-400 tabular-nums">{flag.successProbability}%</span>
                     </div>
+                    
+                    <h4 className="text-xl font-bold dark:text-white mb-3 group-hover:text-emerald-500 transition-colors">
+                      {flag.ruleName}
+                    </h4>
+                    <p className={cn(
+                      "text-sm leading-relaxed text-slate-600 dark:text-slate-400 transition-all",
+                      isExpanded ? "" : "line-clamp-2"
+                    )}>
+                      {flag.explanation}
+                    </p>
                   </div>
-                  <h4 className="text-xl font-bold tracking-tight dark:text-white mb-3 group-hover:text-emerald-500 transition-colors">
-                    {flag.ruleName}
-                  </h4>
-                  <p className={`text-sm text-slate-600 dark:text-slate-400 leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
-                    {flag.explanation}
-                  </p>
+
+                  <div className={cn(
+                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shrink-0",
+                    isExpanded ? "bg-emerald-500 text-white rotate-180" : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                  )}>
+                    <ChevronDown size={20} />
+                  </div>
                 </div>
-                <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 transition-all duration-300 ${isExpanded ? 'rotate-180 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500' : 'text-slate-400'}`}>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
 
-              {isExpanded && (
-                <div className="mt-10 pt-8 border-t border-slate-100 dark:border-slate-800 space-y-8 fade-in relative z-10">
-                  <div className="grid lg:grid-cols-2 gap-8">
-                    {/* Impact & Citations */}
-                    <div className="space-y-6">
-                      <div className="p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-950/30 border border-slate-100 dark:border-slate-800">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                          <div className="w-1 h-1 rounded-full bg-emerald-500" />
-                          Why This Matters
-                        </p>
-                        <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-                          {flag.whyItMatters}
-                        </p>
-                      </div>
-
-                      {flag.legalCitations.length > 0 && (
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Legal Foundation</p>
-                          <div className="flex flex-wrap gap-2">
-                            {flag.legalCitations.map((cite, j) => (
-                              <span key={j} className="text-[10px] font-mono px-3 py-1.5 bg-indigo-500/5 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-500/10">
-                                {cite}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Evidence & Tactics */}
-                    <div className="space-y-6">
-                      {flag.suggestedEvidence.length > 0 && (
-                        <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-4 flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                            Supporting Evidence
-                          </p>
-                          <ul className="space-y-3">
-                            {flag.suggestedEvidence.map((e, j) => (
-                              <li key={j} className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-300">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 shrink-0 shadow-[0_0_6px_rgba(16,185,129,0.5)]" />
-                                {e}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {flag.bureauTactics && Object.keys(flag.bureauTactics).length > 0 && (
-                        <div className="p-6 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-4 flex items-center gap-2">
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                            Bureau-Specific Strategy
-                          </p>
-                          <div className="space-y-3">
-                            {Object.entries(flag.bureauTactics).map(([bureau, tactic], j) => (
-                              <div key={j} className="bg-white/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-                                <span className="text-[9px] font-bold text-slate-900 dark:text-white uppercase mb-1 block">{bureau}</span>
-                                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-normal italic">"{tactic}"</p>
+                {/* Expanded Content */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-10 pt-10 border-t border-slate-100 dark:border-slate-800 space-y-10">
+                        <div className="grid lg:grid-cols-2 gap-10">
+                          {/* Left Column: Forensic Logic */}
+                          <div className="space-y-8">
+                            <div>
+                              <div className="flex items-center gap-2 mb-4">
+                                <Info size={14} className="text-emerald-500" />
+                                <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Strategic Impact</h5>
                               </div>
-                            ))}
+                              <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[24px] border border-slate-100 dark:border-slate-800">
+                                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300 italic">
+                                  "{flag.whyItMatters}"
+                                </p>
+                              </div>
+                            </div>
+
+                            {flag.legalCitations.length > 0 && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-4">
+                                  <BookOpen size={14} className="text-indigo-500" />
+                                  <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Institutional Foundation</h5>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {flag.legalCitations.map((cite, j) => (
+                                    <span key={j} className="text-[10px] font-bold px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 rounded-xl border border-indigo-500/10">
+                                      {cite}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Right Column: Tactical Evidence */}
+                          <div className="space-y-8">
+                            {flag.suggestedEvidence.length > 0 && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-4">
+                                  <ClipboardList size={14} className="text-orange-500" />
+                                  <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Verification Protocol</h5>
+                                </div>
+                                <div className="space-y-3">
+                                  {flag.suggestedEvidence.map((e, j) => (
+                                    <div key={j} className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
+                                      <Zap size={14} className="text-emerald-500" />
+                                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{e}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {flag.bureauTactics && Object.keys(flag.bureauTactics).length > 0 && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-4">
+                                  <Target size={14} className="text-rose-500" />
+                                  <h5 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Execution Vector</h5>
+                                </div>
+                                <div className="space-y-3">
+                                  {Object.entries(flag.bureauTactics).map(([bureau, tactic], j) => (
+                                    <div key={j} className="bg-slate-950 p-5 rounded-2xl border border-slate-800">
+                                      <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-2 block">{bureau} Target</span>
+                                      <p className="text-xs text-slate-400 leading-relaxed font-mono italic">"{tactic}"</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 };

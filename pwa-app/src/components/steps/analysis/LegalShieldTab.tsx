@@ -21,7 +21,7 @@ const LegalShieldTab: React.FC<LegalShieldTabProps> = ({ editableFields }) => {
     editableFields.stateCode,
     editableFields.dateLastPayment,
     editableFields.accountType,
-    editableFields.currentBalance
+    editableFields.currentValue
   );
   const stateInfo = getStateLaws(editableFields.stateCode);
 

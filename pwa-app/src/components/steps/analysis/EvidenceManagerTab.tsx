@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import {
     createEvidenceItem,
-    generateEvidencePackage,
+    createEvidencePackage,
     verifyEvidenceIntegrity,
     EvidenceItem,
-    EvidenceAuditTrial
+    EvidencePackage
 } from '../../../lib/evidence-custody';
 
 interface EvidenceManagerTabProps {
@@ -17,6 +17,12 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
     const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [verificationResult, setVerificationResult] = useState<Record<string, boolean>>({});
+    const [fileMap, setFileMap] = useState<Record<string, File>>({});
+    const [packageInfo, setPackageInfo] = useState<EvidencePackage | null>(null);
+    const auditLogs = React.useMemo(
+        () => evidence.flatMap(item => item.chainOfCustody),
+        [evidence]
+    );
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -26,8 +32,15 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
         const newItems: EvidenceItem[] = [];
 
         for (const file of Array.from(files)) {
-            const item = await createEvidenceItem(file, 'user-upload', 'Primary Evidence');
+            const item = await createEvidenceItem(file, {
+                source: 'User Upload',
+                obtainedBy: 'Consumer',
+                relevantTo: [caseId],
+                notes: 'Primary Evidence',
+                isOriginal: true
+            });
             newItems.push(item);
+            setFileMap(prev => ({ ...prev, [item.id]: file }));
         }
 
         setEvidence(prev => [...prev, ...newItems]);
@@ -35,8 +48,13 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
     };
 
     const handleVerify = async (item: EvidenceItem) => {
-        const isValid = await verifyEvidenceIntegrity(item);
-        setVerificationResult(prev => ({ ...prev, [item.id]: isValid }));
+        const file = fileMap[item.id];
+        if (!file) {
+            setVerificationResult(prev => ({ ...prev, [item.id]: false }));
+            return;
+        }
+        const result = await verifyEvidenceIntegrity(item, file);
+        setVerificationResult(prev => ({ ...prev, [item.id]: result.isValid }));
 
         setTimeout(() => {
             setVerificationResult(prev => {
@@ -66,6 +84,15 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
                     <button
                         disabled={evidence.length === 0}
                         className="btn btn-primary !bg-slate-900 !px-6 !py-3 !rounded-xl disabled:opacity-50"
+                        onClick={async () => {
+                            if (evidence.length === 0) return;
+                            const pkg = await createEvidencePackage(
+                                `Case ${caseId} Evidence Package`,
+                                evidence,
+                                `Evidence package for case ${caseId}.`
+                            );
+                            setPackageInfo(pkg);
+                        }}
                     >
                         Generate Case Package
                     </button>
@@ -86,6 +113,16 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
                     </div>
                 ))}
             </div>
+            {packageInfo && (
+                <div className="premium-card p-4 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200/70 dark:border-emerald-500/30">
+                    <p className="text-[10px] uppercase tracking-widest text-emerald-600 mb-2">Package Ready</p>
+                    <div className="flex flex-wrap gap-4 text-xs text-emerald-700 dark:text-emerald-200">
+                        <span>Package ID: {packageInfo.id}</span>
+                        <span>Total Size: {(packageInfo.totalSize / 1024).toFixed(1)} KB</span>
+                        <span>Integrity Hash: {packageInfo.integrityHash.slice(0, 12)}...</span>
+                    </div>
+                </div>
+            )}
 
             {/* Evidence Table */}
             <div className="premium-card overflow-hidden bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-xl">
@@ -115,7 +152,7 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold dark:text-white">{item.fileName}</p>
+                                                    <p className="text-sm font-bold dark:text-white">{item.filename}</p>
                                                     <p className="text-[10px] text-slate-400 uppercase">{item.type}</p>
                                                 </div>
                                             </div>
@@ -126,7 +163,7 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
                                             </code>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-xs text-slate-500">{new Date(item.timestamp).toLocaleString()}</p>
+                                            <p className="text-xs text-slate-500">{new Date(item.uploadedAt).toLocaleString()}</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
@@ -159,12 +196,12 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
 
             {/* Audit Logs */}
             <div className="premium-card p-8 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6">Chain of Custody Audit Trial</h3>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6">Chain of Custody Audit Trail</h3>
                 <div className="space-y-4">
-                    {evidence.length === 0 ? (
+                    {auditLogs.length === 0 ? (
                         <p className="text-xs text-slate-500 italic">No audit records available.</p>
                     ) : (
-                        evidence.flatMap(item => item.auditTrial).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 10).map((log, i) => (
+                        auditLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 10).map((log, i) => (
                             <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
                                 <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
                                     <div className="w-2 h-2 rounded-full bg-blue-500" />
@@ -174,8 +211,8 @@ const EvidenceManagerTab: React.FC<EvidenceManagerTabProps> = ({ caseId }) => {
                                         <span className="text-[10px] font-bold uppercase text-slate-400">{log.action}</span>
                                         <span className="text-[9px] font-mono text-slate-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
                                     </div>
-                                    <p className="text-xs dark:text-slate-300">{log.notes}</p>
-                                    <p className="text-[8px] font-mono text-slate-500 mt-2 uppercase">Actor: {log.performedBy}</p>
+                                    <p className="text-xs dark:text-slate-300">{log.details}</p>
+                                    <p className="text-[8px] font-mono text-slate-500 mt-2 uppercase">Actor: {log.actor}</p>
                                 </div>
                             </div>
                         ))

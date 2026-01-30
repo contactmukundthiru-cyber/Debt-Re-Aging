@@ -25,7 +25,7 @@ describe('dispute letter generator (PWA)', () => {
   const sampleFields: CreditFields = {
     originalCreditor: 'Target Bank',
     furnisherOrCollector: 'Bad Collection',
-    currentBalance: '1000'
+    currentValue: '1000'
   };
 
   const sampleFlags: RuleFlag[] = [

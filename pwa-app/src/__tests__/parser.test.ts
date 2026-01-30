@@ -169,7 +169,7 @@ describe('parseCreditReport', () => {
     it('should extract current balance', () => {
       const text = 'Current Value: 1,500.00\nStatus: Open';
       const result = parseCreditReport(text);
-      expect(result.currentBalance).toBeDefined();
+      expect(result.currentValue).toBeDefined();
     });
 
     it('should extract date of first delinquency', () => {
@@ -204,8 +204,8 @@ describe('parseCreditReport', () => {
     it('should assign valid confidence to numeric values', () => {
       const text = 'Current Value: 1,500.00';
       const result = parseCreditReport(text);
-      if (result.currentBalance) {
-        expect(['High', 'Medium', 'Low']).toContain(result.currentBalance.confidence);
+      if (result.currentValue) {
+        expect(['High', 'Medium', 'Low']).toContain(result.currentValue.confidence);
       }
     });
   });
@@ -352,7 +352,7 @@ Value: 1000
   test('getExtractionQuality calculates score', () => {
     const parsed: ParsedFields = {
       originalCreditor: { value: 'BANK', confidence: 'High', sourceText: 'BANK' },
-      currentBalance: { value: '100', confidence: 'High', sourceText: '100' },
+      currentValue: { value: '100', confidence: 'High', sourceText: '100' },
       dofd: { value: '2020-01-01', confidence: 'High', sourceText: '2020-01-01' }
     };
     const quality = getExtractionQuality(parsed);
@@ -365,7 +365,7 @@ Value: 1000
       dofd: '2019-01-01',
       dateOpened: '2020-01-01', // error: dofd before open
       accountStatus: 'Paid',
-      currentBalance: '500' // error: paid but value > 0
+      currentValue: '500' // error: paid but value > 0
     };
     const warnings = validateExtraction(fields);
     expect(warnings.length).toBeGreaterThan(0);
