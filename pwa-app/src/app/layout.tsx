@@ -1,21 +1,21 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Source_Serif_4, JetBrains_Mono } from 'next/font/google';
+import { Space_Grotesk, Fraunces, IBM_Plex_Mono } from 'next/font/google';
 import '../styles/globals.css';
 import { Providers } from './providers';
 
-const inter = Inter({
+const sans = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
 });
 
-const serif = Source_Serif_4({
+const serif = Fraunces({
   subsets: ['latin'],
   variable: '--font-serif',
   display: 'swap',
 });
 
-const mono = JetBrains_Mono({
+const mono = IBM_Plex_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
@@ -81,7 +81,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} ${serif.variable} ${mono.variable} antialiased`}>
+      <body className={`${sans.variable} ${serif.variable} ${mono.variable} antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

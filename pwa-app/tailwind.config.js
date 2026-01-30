@@ -43,9 +43,9 @@ module.exports = {
         }
       },
       fontFamily: {
-        serif: ['Source Serif 4', 'serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        serif: ['Fraunces', 'serif'],
+        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'monospace'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)',

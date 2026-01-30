@@ -113,6 +113,81 @@ export interface AttorneyPackage {
   };
 }
 
+function maskValue(value?: string): string {
+  if (!value) return 'REDACTED';
+  return value.length <= 2 ? 'REDACTED' : `${value.slice(0, 1)}***`;
+}
+
+function maskEmail(email?: string): string {
+  if (!email) return 'REDACTED';
+  const [user, domain] = email.split('@');
+  if (!domain) return maskValue(email);
+  return `${maskValue(user)}@${domain}`;
+}
+
+function maskPhone(phone?: string): string {
+  if (!phone) return 'REDACTED';
+  const digits = phone.replace(/\D/g, '');
+  return digits.length < 4 ? 'REDACTED' : `***${digits.slice(-4)}`;
+}
+
+export function redactAttorneyPackage(pkg: AttorneyPackage): AttorneyPackage {
+  return {
+    ...pkg,
+    client: {
+      ...pkg.client,
+      name: maskValue(pkg.client.name),
+      address: 'REDACTED',
+      city: '',
+      zip: 'REDACTED',
+      phone: maskPhone(pkg.client.phone),
+      email: maskEmail(pkg.client.email)
+    }
+  };
+}
+
+export function formatRedactedAttorneyPackage(pkg: AttorneyPackage): string {
+  return formatAttorneyPackage(redactAttorneyPackage(pkg));
+}
+
+export function buildOutcomeNarrative(pkg: AttorneyPackage): string {
+  const lines: string[] = [];
+  lines.push('OUTCOME NARRATIVE');
+  lines.push('='.repeat(60));
+  lines.push(`Case ID: ${pkg.caseId}`);
+  lines.push(`Generated: ${new Date(pkg.generatedAt).toLocaleString()}`);
+  lines.push('');
+  lines.push(`Account: ${pkg.caseSummary.creditor} (${pkg.caseSummary.accountType})`);
+  lines.push(`Balance: ${pkg.caseSummary.balance}`);
+  lines.push(`Violations: ${pkg.caseSummary.totalViolations} total • ${pkg.caseSummary.highSeverityCount} high severity`);
+  lines.push(`Case Strength: ${pkg.caseSummary.caseStrength.toUpperCase()} • Litigation potential: ${pkg.caseSummary.litigationPotential ? 'YES' : 'NO'}`);
+  lines.push('');
+  lines.push('TIMELINE SUMMARY');
+  pkg.timeline.forEach(event => {
+    lines.push(`- ${event.date}: ${event.event}${event.flagged ? ' (FLAGGED)' : ''}`);
+  });
+  lines.push('');
+  lines.push('VIOLATION OUTCOMES');
+  pkg.violations.slice(0, 5).forEach(v => {
+    lines.push(`- ${v.ruleName} (${v.ruleId}): ${v.analysis}`);
+  });
+  lines.push('');
+  lines.push('DEADLINES & RESPONSE WINDOWS');
+  pkg.deadlines.forEach(deadline => {
+    lines.push(`- ${deadline.type}: ${deadline.date} (${deadline.status}, ${deadline.daysRemaining} days)`);
+  });
+  lines.push('');
+  lines.push('LEGAL STRATEGY');
+  pkg.legalAnalysis.recommendations.forEach(rec => lines.push(`- ${rec}`));
+  lines.push('');
+  lines.push('EVIDENCE PRIORITIES');
+  pkg.evidenceChecklist
+    .filter(item => item.status === 'needed')
+    .slice(0, 6)
+    .forEach(item => lines.push(`- ${item.item} (${item.source})`));
+  return lines.join('\n');
+}
+
 /**
  * Build comprehensive attorney package
  */

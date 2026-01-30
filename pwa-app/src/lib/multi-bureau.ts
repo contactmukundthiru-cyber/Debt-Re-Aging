@@ -108,7 +108,16 @@ export function compareMultipleBureaus(bureauData: BureauData[]): BureauComparis
 
             if (missingBureaus.length > 0 && presentBureaus.length > 0) {
                 // Field is missing from some bureaus
-                discrepancies.push(createDiscrepancy(fieldKey, values, 'missing', missingBureaus));
+                const discrepancy = createDiscrepancy(fieldKey, values, 'missing', missingBureaus);
+                discrepancies.push(discrepancy);
+                
+                // Selective Reporting Violation detection
+                if (missingBureaus.length > 0 && presentBureaus.length > 0) {
+                    const opportunity = `Selective Reporting: ${FIELD_LABELS[fieldKey] || fieldKey} is reported to ${presentBureaus.join(' & ')} but withheld from ${missingBureaus.join(' & ')}. This may indicate a failure to maintain accurate records across all CRAs.`;
+                    if (!violationOpportunities.includes(opportunity)) {
+                        violationOpportunities.push(opportunity);
+                    }
+                }
             } else if (uniqueValues.size > 1) {
                 // Conflicting values across bureaus
                 const discrepancy = createDiscrepancy(fieldKey, values, 'conflicting', []);
@@ -123,7 +132,7 @@ export function compareMultipleBureaus(bureauData: BureauData[]): BureauComparis
 
                     const xbFlags = runAdvancedRules(bureauComparison[0].fields, {
                         crossBureauData: bureauComparison
-                    }).filter(f => f.ruleId.startsWith('XB'));
+                    }).filter(f => f.ruleId.startsWith('XB') || f.ruleId === 'ZD3');
 
                     xbFlags.forEach(f => {
                         const opportunity = `${f.ruleName}: ${f.explanation}`;

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RuleFlag, CreditFields, RiskProfile } from '../../../lib/rules';
 import { PatternInsight, TimelineEvent } from '../../../lib/analytics';
 import { performAIAnalysis, AIAnalysisResult, AIFinding } from '../../../lib/ai-analysis';
+import { loadRemoteAIConfig, saveRemoteAIConfig, clearRemoteAIConfig, runRemoteAnalysis, RemoteAIConfig, RemoteAIResult } from '../../../lib/ai-remote';
 
 interface AIAnalysisTabProps {
     flags: RuleFlag[];
@@ -24,6 +25,14 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
         performAIAnalysis(flags, fields, patterns, timeline, riskProfile),
         [flags, fields, patterns, timeline, riskProfile]
     );
+    const [remoteConfig, setRemoteConfig] = useState<RemoteAIConfig>(() => loadRemoteAIConfig());
+    const [remoteResult, setRemoteResult] = useState<RemoteAIResult | null>(null);
+    const [remoteError, setRemoteError] = useState<string | null>(null);
+    const [remoteLoading, setRemoteLoading] = useState(false);
+
+    useEffect(() => {
+        saveRemoteAIConfig(remoteConfig);
+    }, [remoteConfig]);
 
     const getSeverityColor = (severity: string) => {
         switch (severity) {
@@ -36,6 +45,124 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
 
     return (
         <div className="fade-in space-y-8 pb-12">
+            <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Optional Remote AI</p>
+                        <h3 className="text-lg font-bold dark:text-white">Bring your own API key (stateless)</h3>
+                    </div>
+                    <span className="text-xs font-mono text-slate-400">No accounts · No server storage</span>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-400">
+                    <label className="flex flex-col gap-2">
+                        <span className="uppercase tracking-widest">API Base URL</span>
+                        <input
+                            className="input rounded-xl"
+                            value={remoteConfig.baseUrl}
+                            onChange={(e) => setRemoteConfig({ ...remoteConfig, baseUrl: e.target.value })}
+                            placeholder="https://api.openai.com/v1/chat/completions"
+                        />
+                    </label>
+                    <label className="flex flex-col gap-2">
+                        <span className="uppercase tracking-widest">Model</span>
+                        <input
+                            className="input rounded-xl"
+                            value={remoteConfig.model}
+                            onChange={(e) => setRemoteConfig({ ...remoteConfig, model: e.target.value })}
+                            placeholder="gpt-4o-mini"
+                        />
+                    </label>
+                    <label className="flex flex-col gap-2 md:col-span-2">
+                        <span className="uppercase tracking-widest">API Key</span>
+                        <input
+                            className="input rounded-xl"
+                            type="password"
+                            value={remoteConfig.apiKey}
+                            onChange={(e) => setRemoteConfig({ ...remoteConfig, apiKey: e.target.value })}
+                            placeholder="sk-..."
+                        />
+                    </label>
+                    <label className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            checked={remoteConfig.includeFields}
+                            onChange={(e) => setRemoteConfig({ ...remoteConfig, includeFields: e.target.checked })}
+                        />
+                        <span>Include account fields in payload (optional)</span>
+                    </label>
+                    <div className="flex flex-wrap gap-3 md:col-span-2">
+                        <button
+                            type="button"
+                            className="btn btn-primary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+                            disabled={remoteLoading}
+                            onClick={async () => {
+                                setRemoteLoading(true);
+                                setRemoteError(null);
+                                try {
+                                    const result = await runRemoteAnalysis(remoteConfig, {
+                                        flags,
+                                        fields,
+                                        patterns,
+                                        timeline,
+                                        riskProfile
+                                    });
+                                    setRemoteResult(result);
+                                } catch (error) {
+                                    setRemoteError((error as Error).message);
+                                } finally {
+                                    setRemoteLoading(false);
+                                }
+                            }}
+                        >
+                            {remoteLoading ? 'Running...' : 'Run Remote Analysis'}
+                        </button>
+                        <button
+                            type="button"
+                            className="btn btn-secondary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+                            onClick={() => {
+                                clearRemoteAIConfig();
+                                setRemoteConfig(loadRemoteAIConfig());
+                                setRemoteResult(null);
+                                setRemoteError(null);
+                            }}
+                        >
+                            Clear Key
+                        </button>
+                    </div>
+                </div>
+                {remoteError && (
+                    <div className="mt-4 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600">
+                        {remoteError}
+                    </div>
+                )}
+                {remoteResult && (
+                    <div className="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Remote Summary</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">{remoteResult.summary}</p>
+                        <div className="grid md:grid-cols-2 gap-4 text-xs text-slate-500 dark:text-slate-400">
+                            <div>
+                                <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Key Risks</p>
+                                <ul className="space-y-1">
+                                    {remoteResult.keyRisks.map(item => (
+                                        <li key={item}>• {item}</li>
+                                    ))}
+                                    {remoteResult.keyRisks.length === 0 && <li>No risks returned.</li>}
+                                </ul>
+                            </div>
+                            <div>
+                                <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Recommended Actions</p>
+                                <ul className="space-y-1">
+                                    {remoteResult.recommendedActions.map(item => (
+                                        <li key={item}>• {item}</li>
+                                    ))}
+                                    {remoteResult.recommendedActions.length === 0 && <li>No actions returned.</li>}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             {/* Assessment Hero */}
             <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 relative overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />

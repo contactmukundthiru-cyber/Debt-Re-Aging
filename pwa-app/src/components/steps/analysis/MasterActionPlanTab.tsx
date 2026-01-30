@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { TabId } from '../../../lib/constants';
+import { TabId, LetterType } from '../../../lib/constants';
 
 interface ActionItem {
     id: string;
@@ -9,15 +9,26 @@ interface ActionItem {
     description: string;
     priority: 'high' | 'medium' | 'low';
     tabLink?: TabId;
+    letterType?: LetterType;
 }
 
 interface MasterActionPlanTabProps {
     actions?: ActionItem[];
     setActiveTab: (tab: TabId) => void;
+    setSelectedLetterType?: (type: LetterType) => void;
     onExport: () => void;
 }
 
-const MasterActionPlanTab: React.FC<MasterActionPlanTabProps> = ({ actions = [], setActiveTab, onExport }) => {
+const MasterActionPlanTab: React.FC<MasterActionPlanTabProps> = ({ actions = [], setActiveTab, setSelectedLetterType, onExport }) => {
+    const handleActionClick = (action: ActionItem) => {
+        if (action.letterType && setSelectedLetterType) {
+            setSelectedLetterType(action.letterType);
+            setActiveTab('lettereditor');
+        } else if (action.tabLink) {
+            setActiveTab(action.tabLink);
+        }
+    };
+
     return (
         <div className="fade-in space-y-8 pb-12">
             <div className="premium-card p-8 bg-slate-900 border-blue-900 relative overflow-hidden">
@@ -46,6 +57,27 @@ const MasterActionPlanTab: React.FC<MasterActionPlanTabProps> = ({ actions = [],
                             Go to Escalation Engine &rarr;
                         </button>
                     </div>
+
+                    {actions.map((action) => (
+                        <div key={action.id} className={`premium-card p-6 border-l-4 ${action.priority === 'high' ? 'border-l-rose-500' : action.priority === 'medium' ? 'border-l-blue-500' : 'border-l-slate-500'}`}>
+                            <div className="flex justify-between items-start mb-2">
+                                <h4 className="font-bold dark:text-white">{action.title}</h4>
+                                <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded ${
+                                    action.priority === 'high' ? 'bg-rose-100 text-rose-700' : 
+                                    action.priority === 'medium' ? 'bg-blue-100 text-blue-700' : 
+                                    'bg-slate-100 text-slate-700'
+                                }`}>
+                                    {action.priority} Priority
+                                </span>
+                            </div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                                {action.description}
+                            </p>
+                            <button onClick={() => handleActionClick(action)} className="text-xs font-bold text-blue-500 hover:underline">
+                                Execute Action &rarr;
+                            </button>
+                        </div>
+                    ))}
 
                     <div className="premium-card p-6 border-l-4 border-l-blue-500">
                         <div className="flex justify-between items-start mb-2">

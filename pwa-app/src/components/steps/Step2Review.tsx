@@ -53,6 +53,34 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
     return Number.isFinite(parsed) ? parsed : 0;
   };
 
+  const priorityQueue = useMemo(() => {
+    const scored = analyzedAccounts.map(account => {
+      const balanceScore = Math.min(parseBalance(account.fields.currentBalance) / 1000, 50);
+      const violationScore = account.flags.length * 8;
+      const riskScore = account.risk.overallScore;
+      return {
+        account,
+        score: Math.round(riskScore + violationScore + balanceScore),
+      };
+    });
+    return scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+  }, [analyzedAccounts, parseBalance]);
+
+  const getActionCue = (account: AnalyzedAccount) => {
+    if (account.flags.length >= 5) {
+      return 'Escalate to formal dispute package';
+    }
+    if ((account.fields.dateOfFirstDelinquency || '').length > 0) {
+      return 'Validate DOFD timeline against reporting history';
+    }
+    if (parseBalance(account.fields.currentBalance) > 5000) {
+      return 'Prioritize due to high balance impact';
+    }
+    return 'Review narrative for missing verification details';
+  };
+
   const sortedAccounts = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     const filtered = query
@@ -166,6 +194,57 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
         </div>
       )}
 
+      {analyzedAccounts.length > 1 && (
+        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 mb-10">
+          <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/50">
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Priority Queue</p>
+                <h3 className="text-xl font-semibold dark:text-white">Highest Impact Tradelines</h3>
+              </div>
+              <span className="text-xs font-mono text-slate-400">Auto-scored</span>
+            </div>
+            <div className="space-y-4">
+              {priorityQueue.map(({ account, score }) => (
+                <div key={account.id} className="flex items-center justify-between gap-4 border border-slate-200/70 dark:border-slate-800/70 rounded-2xl p-4 bg-white/70 dark:bg-slate-900/40">
+                  <div>
+                    <p className="text-sm font-semibold dark:text-white">
+                      {account.fields.furnisherOrCollector || account.fields.originalCreditor || 'Unknown Entity'}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{getActionCue(account)}</p>
+                  </div>
+                  <button
+                    onClick={() => analyzeAccount(account)}
+                    className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+                  >
+                    Open
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="premium-card p-6 border-emerald-500/30 bg-emerald-500/5">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-2">Triage Guidance</p>
+            <h3 className="text-xl font-semibold text-emerald-900 mb-4">Next Best Actions</h3>
+            <div className="space-y-3 text-sm text-emerald-900/80">
+              <div className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-emerald-900 text-white text-xs flex items-center justify-center">1</span>
+                <p>Start with the top account and validate DOFD, payment status, and balance accuracy in Step 3.</p>
+              </div>
+              <div className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-emerald-900 text-white text-xs flex items-center justify-center">2</span>
+                <p>Cross-check all bureaus for mismatched dates, dispute results, and prior dispute outcomes.</p>
+              </div>
+              <div className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-emerald-900 text-white text-xs flex items-center justify-center">3</span>
+                <p>Use the case health score to set priority reminders and draft escalation letters early.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {analyzedAccounts.length > 1 ? (
         <>
           <div className="premium-card p-6 mb-8 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
@@ -192,6 +271,7 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
                   <option value="risk">High Risk First</option>
                   <option value="violations">Violation Count</option>
                   <option value="balance">Highest Balance</option>
+                  <option value="name">Alphabetical</option>
                 </select>
               </div>
             </div>

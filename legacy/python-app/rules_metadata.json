@@ -87,6 +87,17 @@
     ],
     "legal_citations": ["FCRA_623_a1", "FCRA_616"]
   },
+  "E2": {
+    "name": "Impossible Reporting Timeline",
+    "severity": "high",
+    "description": "The date the account was last reported precedes the Date of First Delinquency.",
+    "why_it_matters": "A furnisher cannot report a delinquency status before the delinquency actually occurred. If the 'Date Reported' is earlier than the DOFD, the entire timeline is suspect and suggests fraudulent or automated re-aging errors.",
+    "suggested_evidence": [
+      "Credit report showing both dates",
+      "Account history from original creditor"
+    ],
+    "legal_citations": ["FCRA_623_a1", "FCRA_616"]
+  },
   "F1": {
     "name": "Payment Activity Without Balance Reduction",
     "severity": "high",
@@ -497,17 +508,51 @@
     ],
     "legal_citations": ["FCRA_605_a", "FDCPA_807_8"]
   },
-  "TB1": {
-    "name": "Treble Damage Risk Indicator",
-    "severity": "critical",
-    "description": "The combination of violations indicates a high potential for statutory treble damages under state law.",
-    "why_it_matters": "Certain states (like Massachusetts under 93A) allow for triple (treble) damages if a business practice is found to be willfully deceptive or unfair. Combining interest violations with re-aging tactics often meets this threshold.",
+  "SR1": {
+    "name": "State-Specific Regulatory Violation",
+    "severity": "medium",
+    "description": "Specific state-level consumer protection acts provide additional leverage for these inaccuracies.",
+    "why_it_matters": "While the FCRA is federal, many states (like CA, NY, MA) have consumer protection laws that are often stricter. Mentioning these specific state statutes (e.g., Rosenthal Act in CA or CCFA in NY) in a dispute can increase the 'legal risk' perceived by the furnisher.",
     "suggested_evidence": [
-      "Evidence of prior disputes ignored",
-      "Multiple concurrent violations on a single tradeline",
-      "Itemized interest statements"
+      "Proof of residency in the specific state",
+      "Documentation of collection contacts made within that state"
     ],
-    "legal_citations": ["MA_GL_93A", "NY_GBL_349"]
+    "legal_citations": ["FDCPA_816"]
+  },
+  "TB1": {
+    "name": "High-Confidence Systematic Violation",
+    "severity": "critical",
+    "description": "Multiple high-severity violations detected on a single tradeline, indicating a systemic failure in reporting accuracy.",
+    "why_it_matters": "When multiple independent errors (e.g., date drift, balance inaccuracy, and status conflict) occur on one account, it significantly increases the evidentiary weight that the reporting is not just occasionally incorrect, but fundamentally unreliable under the FCRA.",
+    "suggested_evidence": [
+      "Prior credit reports showing the progression of errors",
+      "Evidence of prior disputes that were not reasonably investigated",
+      "Itemized statement of account history"
+    ],
+    "legal_citations": ["FCRA_623_a", "FCRA_611_a"]
+  },
+  "M4": {
+    "name": "Account Status/Payment Profile Discordance",
+    "severity": "high",
+    "description": "The current account status contradicts the recent payment history profile.",
+    "why_it_matters": "Under Metro2 standards, the Account Status and Payment History Profile must be logically consistent. If the history shows a charge-off (C) but the status shows 'Current', or vice-versa, the data integrity is compromised. This is a clear Metro2 violation.",
+    "suggested_evidence": [
+      "Credit report showing Payment History grid",
+      "Account statements for the period in question"
+    ],
+    "legal_citations": ["FCRA_623_a1", "METRO2_BASE"]
+  },
+  "S3": {
+    "name": "Excessive Balance Growth (Negative Amortization)",
+    "severity": "medium",
+    "description": "The account balance has grown significantly beyond the original debt amount.",
+    "why_it_matters": "While interest and fees are often legal, growth exceeding 50% of the original principal without new charges suggests predatory interest rates or unauthorized fee stacking. This may violate the FDCPA or state-specific usury laws, and makes the reported balance questionable.",
+    "suggested_evidence": [
+      "Original debt contract",
+      "Itemized statement of interest and fees",
+      "Notice of debt assignment"
+    ],
+    "legal_citations": ["FDCPA_807_2A", "FDCPA_808_1"]
   },
   "M3": {
     "name": "Metro2 Status Code Conflict",
@@ -531,5 +576,39 @@
       "Notice of assignment showing single debt chain"
     ],
     "legal_citations": ["FCRA_623_a1", "FDCPA_807_2A"]
+  },
+  "PB1": {
+    "name": "Partial Payment Deception / SOL Baiting",
+    "severity": "high",
+    "description": "A payment was recorded just before the debt was scheduled for legal removal, potentially resetting the SOL.",
+    "why_it_matters": "Debt collectors often use high-pressure tactics to solicit a tiny 'acknowledgment' payment right before a debt reaches its 7-year expiration or its statute of limitations. In many states, this restarts the clock on their ability to sue you, even if the debt was nearly dead.",
+    "suggested_evidence": [
+      "Bank records showing exact payment date",
+      "Collector call logs from the 30 days prior to payment",
+      "Original DOFD proof showing the debt was near expiration"
+    ],
+    "legal_citations": ["FDCPA_807_8", "FCRA_605_c"]
+  },
+  "F3": {
+    "name": "Payment-to-Balance Ratio Anomaly",
+    "severity": "medium",
+    "description": "Past due amount is disproportionately high compared to total balance.",
+    "why_it_matters": "When the past due amount exceeds half of the total balance, it often indicates that interest and late fees are accumulating at a predatory rate. This can be used to challenge the 'character' of the debt under the FDCPA.",
+    "suggested_evidence": [
+      "Itemized statement of interest and fees",
+      "Original contract showing interest rate terms"
+    ],
+    "legal_citations": ["FDCPA_807_2A", "FDCPA_808_1"]
+  },
+  "J3": {
+    "name": "Missing Original Creditor (Chain of Title)",
+    "severity": "medium",
+    "description": "The collection account fails to list the original creditor.",
+    "why_it_matters": "Under the FCRA and FDCPA, you have a right to know the identity of the original creditor. If a collector cannot or will not name the original source of the debt, it may indicate a 'broken chain of title,' making the debt unenforceable.",
+    "suggested_evidence": [
+      "Prior credit reports showing the original creditor",
+      "Debt validation request results"
+    ],
+    "legal_citations": ["FDCPA_809_a5", "FCRA_605_a"]
   }
 }

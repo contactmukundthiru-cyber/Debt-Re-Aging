@@ -61,7 +61,7 @@ I am writing this letter as a formal dispute pursuant to my rights under the Fai
 
 ## Legal Basis and Statement of Dispute
 
-The following errors were identified through professional forensic timeline analysis. These errors are not merely clerical; they constitute potential violations of the FCRA's requirement for maximum possible accuracy.
+The following errors were identified through professional forensic timeline analysis. These errors are not merely clerical; they constitute potential violations of the FCRA's requirement for maximum possible accuracy and the CDIA's Metro2® reporting standards.
 
 {% if has_flags %}
 ### Specific Inconsistencies and Regulatory Violations:
@@ -72,6 +72,14 @@ The following errors were identified through professional forensic timeline anal
 **Analysis:** {{ flag.explanation }}
 
 **Impact:** {{ flag.why_it_matters }}
+
+{% if flag.rule_id == 'M3' %}
+**SYSTEM ALERT:** This violation involves a conflict in the raw Metro2® status codes. I request a manual review of the internal numeric status code provided by the furnisher, as the text description displayed to consumers is contradicts the internal data segment.
+{% endif %}
+
+{% if flag.rule_id == 'TB1' %}
+**Notice of Systematic Non-Compliance:** The high number of concurrent violations on this single tradeline indicates a systemic failure in your reporting accuracy. This level of inaccuracy warrants an immediate and thorough manual deletion of the entire tradeline.
+{% endif %}
 
 {% if flag.resolved_citations %}
 **Legal Authority Supporting This Dispute:**
@@ -110,7 +118,7 @@ Please be advised that under the FCRA:
 
 - You must conduct a reasonable investigation within 30 days (15 U.S.C. § 1681i(a)(1))
 - Failure to investigate or correct inaccurate information may constitute a willful violation
-- I reserve all rights to pursue statutory and actual damages for any violations
+- I reserve all rights to pursue appropriate legal and regulatory remedies for any continued reporting inaccuracies.
 
 I request that you process this dispute promptly and provide me with a written response regarding the results of your investigation.
 

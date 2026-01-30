@@ -28,7 +28,7 @@ REGULATORY_MAP = {
         "title": "FCRA § 616 (15 U.S.C. § 1681n)",
         "citation": "15 U.S.C. § 1681n",
         "description": "Civil liability for willful noncompliance.",
-        "detail": "Allows for statutory damages up to $1,000 and punitive damages for willful violations like intentional debt re-aging."
+        "detail": "Establishes liability for statutory and punitive damages, plus legal fees, for willful violations like intentional debt re-aging."
     },
     "METRO2": {
         "title": "CDIA Metro2 Reporting Standards",

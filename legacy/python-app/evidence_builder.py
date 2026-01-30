@@ -41,11 +41,11 @@ class LegalCitation:
 
 
 @dataclass
-class DamagesCalculation:
-    """Calculation of potential damages."""
+class ViolationImpact:
+    """Assessment of violation impact."""
     category: str
     description: str
-    amount: float
+    severity: str
     basis: str
     statutory_reference: str
 
@@ -72,7 +72,11 @@ class EvidencePacket:
 
     # Legal analysis
     applicable_statutes: List[LegalCitation]
-    damages_calculation: List[DamagesCalculation]
+    impact_assessment: List[ViolationImpact]
+
+    # Forensic analysis
+    chain_of_custody: List[Dict[str, str]]
+    integrity_checks: List[Dict[str, str]]
 
     # Supporting data
     raw_flags: List[Dict[str, Any]]
@@ -82,22 +86,21 @@ class EvidencePacket:
         result = asdict(self)
         result['evidence_items'] = [asdict(e) for e in self.evidence_items]
         result['applicable_statutes'] = [asdict(c) for c in self.applicable_statutes]
-        result['damages_calculation'] = [asdict(d) for d in self.damages_calculation]
+        result['impact_assessment'] = [asdict(d) for d in self.impact_assessment]
         return result
 
 
-# FCRA statutory damages reference
-FCRA_DAMAGES = {
+# FCRA liability reference
+FCRA_LIABILITY = {
     'negligent': {
-        'actual_damages': 'Actual damages suffered',
-        'attorneys_fees': 'Reasonable attorneys fees and costs',
+        'liability': 'Actual damages suffered',
+        'fees': 'Reasonable attorneys fees and costs',
         'statute': '15 U.S.C. § 1681o'
     },
     'willful': {
-        'statutory_min': 100,
-        'statutory_max': 1000,
+        'liability': 'Statutory damages',
         'punitive': 'Punitive damages as court may allow',
-        'attorneys_fees': 'Reasonable attorneys fees and costs',
+        'fees': 'Reasonable attorneys fees and costs',
         'statute': '15 U.S.C. § 1681n'
     }
 }
@@ -400,50 +403,94 @@ class EvidenceBuilder:
 
         return citations
 
-    def calculate_damages(self, flags: List[Dict[str, Any]], risk_profile: Dict[str, Any]) -> List[DamagesCalculation]:
-        """Calculate potential damages."""
-        damages = []
+    def assess_impact(self, flags: List[Dict[str, Any]], risk_profile: Dict[str, Any]) -> List[ViolationImpact]:
+        """Assess technical and statutory impact of violations."""
+        impacts = []
 
         high_count = len([f for f in flags if f.get('severity') == 'high'])
-        is_willful = risk_profile.get('litigation_potential', False) or high_count >= 2
+        critical_failure = risk_profile.get('litigation_potential', False) or high_count >= 2
 
-        if is_willful:
-            # Willful violation damages
-            damages.append(DamagesCalculation(
-                category='Statutory Damages (Willful)',
-                description='Per-violation statutory damages for willful FCRA violations',
-                amount=1000.0,  # Max per violation
-                basis=f'{high_count} high-severity violations × $100-$1,000 range',
+        if critical_failure:
+            # Impact of systemic/willful violations
+            impacts.append(ViolationImpact(
+                category='Statutory Liability (Willful)',
+                description='Potential for statutory damages due to willful FCRA violations',
+                severity='Critical',
+                basis=f'Detected {high_count} high-severity violations indicating systemic failure',
                 statutory_reference='15 U.S.C. § 1681n(a)(1)(A)'
             ))
 
-            damages.append(DamagesCalculation(
-                category='Punitive Damages',
-                description='Punitive damages for willful violations',
-                amount=0.0,  # TBD by court
-                basis='Amount determined by court based on egregiousness of conduct',
+            impacts.append(ViolationImpact(
+                category='Punitive Liability',
+                description='Exposure to punitive damages for reckless disregard of reporting standards',
+                severity='High',
+                basis='Egregious conduct or reckless disregard of Metro2/FCRA requirements',
                 statutory_reference='15 U.S.C. § 1681n(a)(2)'
             ))
         else:
-            # Negligent violation damages
-            damages.append(DamagesCalculation(
-                category='Actual Damages (Negligent)',
-                description='Actual damages suffered due to inaccurate reporting',
-                amount=0.0,  # To be documented
-                basis='Credit denials, higher interest rates, emotional distress',
+            # Impact of negligent violations
+            impacts.append(ViolationImpact(
+                category='Liability (Negligence)',
+                description='Technical errors resulting in inaccurate data reporting',
+                severity='Moderate',
+                basis='Failure to maintain reasonable procedures for accuracy',
                 statutory_reference='15 U.S.C. § 1681o(a)(1)'
             ))
 
-        # Attorney fees (always recoverable)
-        damages.append(DamagesCalculation(
-            category='Attorneys Fees and Costs',
-            description='Reasonable attorneys fees and litigation costs',
-            amount=0.0,  # TBD
-            basis='Fee-shifting provision makes FCRA cases viable for consumers',
+        # Attorney fees
+        impacts.append(ViolationImpact(
+            category='Legal Fee Recovery',
+            description='Mandatory recovery of reasonable attorneys fees and litigation costs',
+            severity='N/A',
+            basis='Fee-shifting provisions for successful consumer protection actions',
             statutory_reference='15 U.S.C. § 1681n(a)(3) / § 1681o(a)(2)'
         ))
 
-        return damages
+        return impacts
+
+    def build_chain_of_custody(self, fields: Dict[str, Any], flags: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+        """Construct a forensic chain of custody for the debt."""
+        chain = []
+        oc = fields.get('original_creditor')
+        furnisher = fields.get('furnisher_or_collector')
+        
+        if oc:
+            chain.append({
+                'entity': oc, 
+                'role': 'Original Creditor', 
+                'significance': 'Debt Originator / Account Source'
+            })
+            
+        if furnisher and furnisher != oc:
+            chain.append({
+                'entity': furnisher, 
+                'role': 'Current Holder / Servicer', 
+                'significance': 'Assignee responsible for accuracy'
+            })
+            
+        return chain
+
+    def run_integrity_checks(self, flags: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+        """Perform forensic data integrity verification."""
+        checks = []
+        
+        # Check 1: Timeline Consistency
+        timeline_fails = [f for f in flags if f.get('rule_id', '').startswith('B') or f.get('rule_id', '').startswith('A')]
+        checks.append({
+            'test': 'Temporal Consistency Audit',
+            'result': 'CRITICAL FAILURE' if timeline_fails else 'PASSED',
+            'detail': f"Detected {len(timeline_fails)} evidence-grade timeline re-aging indicators." if timeline_fails else "No chronological anomalies detected."
+        })
+        
+        # Check 2: Regulatory Logic
+        metro2_fails = [f for f in flags if f.get('rule_id', '').startswith('M')]
+        checks.append({
+            'test': 'Metro2 Structural Integrity',
+            'result': 'SYSTEMIC FAILURE' if metro2_fails else 'PASSED',
+            'detail': f"Identified {len(metro2_fails)} illogical status-to-code mapping variations." if metro2_fails else "Compliant with Metro2 data standards."
+        })
+        
+        return checks
 
     def build_packet(
         self,
@@ -481,7 +528,9 @@ class EvidenceBuilder:
             evidence_items=self.build_evidence_items(flags, fields, timeline_data),
             timeline_of_events=self.build_timeline(fields, flags),
             applicable_statutes=self.get_applicable_statutes(flags),
-            damages_calculation=self.calculate_damages(flags, risk_profile or {}),
+            impact_assessment=self.assess_impact(flags, risk_profile or {}),
+            chain_of_custody=self.build_chain_of_custody(fields, flags),
+            integrity_checks=self.run_integrity_checks(flags),
             raw_flags=flags,
             risk_profile=risk_profile or {}
         )
@@ -587,10 +636,36 @@ def render_evidence_builder(st):
         </div>
         """, unsafe_allow_html=True)
 
-        # Recommended Causes of Action
+        # Recommendations
         st.markdown("### Recommended Causes of Action")
         for cause in packet.recommended_causes_of_action:
             st.markdown(f"- {cause}")
+
+        # Forensic Data Integrity
+        st.markdown("---")
+        st.markdown("### Forensic Data Integrity Checks")
+        cols = st.columns(len(packet.integrity_checks))
+        for i, check in enumerate(packet.integrity_checks):
+            color = "#16a34a" if "PASSED" in check['result'] else "#dc2626"
+            cols[i].markdown(f"""
+            <div style="background: white; border: 1px solid #e2e8f0; border-top: 4px solid {color}; border-radius: 8px; padding: 12px; height: 100%;">
+                <div style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 600;">{check['test']}</div>
+                <div style="font-size: 0.9rem; font-weight: 700; color: {color}; margin: 4px 0;">{check['result']}</div>
+                <div style="font-size: 0.8rem; color: #1e293b;">{check['detail']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("### Forensic Chain of Custody")
+        for step in packet.chain_of_custody:
+            st.markdown(f"""
+            <div style="background: #f1f5f9; border-radius: 6px; padding: 10px; margin-bottom: 6px; border-left: 3px solid #64748b;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;">{step['entity']}</span>
+                    <span style="font-size: 0.75rem; color: #475569; background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">{step['role']}</span>
+                </div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">{step['significance']}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         # Defendants
         st.markdown("### Potential Defendants")
@@ -625,16 +700,17 @@ def render_evidence_builder(st):
                 st.markdown(f"**Full Text:**\n> {citation.full_text}")
                 st.markdown(f"**Relevance:** {citation.relevance_to_case}")
 
-        # Damages
-        st.markdown("### Potential Damages")
-        for damage in packet.damages_calculation:
+        # Impact Assessment
+        st.markdown("### Statutory Impact Assessment")
+        for impact in packet.impact_assessment:
             st.markdown(f"""
             <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px; padding: 12px; margin-bottom: 8px;">
-                <strong>{damage.category}</strong>
-                <div style="font-size: 0.85rem; color: #92400e;">{damage.description}</div>
+                <strong>{impact.category}</strong>
+                <div style="font-size: 0.85rem; color: #92400e;">{impact.description}</div>
                 <div style="font-size: 0.8rem; color: #78350f; margin-top: 4px;">
-                    Basis: {damage.basis}<br>
-                    Reference: {damage.statutory_reference}
+                    Severity: {impact.severity}<br>
+                    Basis: {impact.basis}<br>
+                    Reference: {impact.statutory_reference}
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -699,6 +775,20 @@ def generate_text_export(packet: EvidencePacket) -> str:
         lines.append(f"  Role: {defendant['role']}")
     lines.append("")
     lines.append("-" * 70)
+    lines.append("FORENSIC INTEGRITY AUDIT")
+    lines.append("-" * 70)
+    for check in packet.integrity_checks:
+        lines.append(f"[{check['result']}] {check['test']}")
+        lines.append(f"  Finding: {check['detail']}")
+    lines.append("")
+    lines.append("-" * 70)
+    lines.append("FORENSIC CHAIN OF CUSTODY")
+    lines.append("-" * 70)
+    for step in packet.chain_of_custody:
+        lines.append(f"{step['entity']} ({step['role']})")
+        lines.append(f"  Significance: {step['significance']}")
+    lines.append("")
+    lines.append("-" * 70)
     lines.append("EVIDENCE INVENTORY")
     lines.append("-" * 70)
     for item in packet.evidence_items:
@@ -723,13 +813,14 @@ def generate_text_export(packet: EvidencePacket) -> str:
         lines.append(f"  Relevance: {citation.relevance_to_case}")
     lines.append("")
     lines.append("-" * 70)
-    lines.append("POTENTIAL DAMAGES")
+    lines.append("STATUTORY IMPACT ASSESSMENT")
     lines.append("-" * 70)
-    for damage in packet.damages_calculation:
-        lines.append(f"\n{damage.category}")
-        lines.append(f"  {damage.description}")
-        lines.append(f"  Basis: {damage.basis}")
-        lines.append(f"  Reference: {damage.statutory_reference}")
+    for impact in packet.impact_assessment:
+        lines.append(f"\n{impact.category}")
+        lines.append(f"  {impact.description}")
+        lines.append(f"  Severity: {impact.severity}")
+        lines.append(f"  Basis: {impact.basis}")
+        lines.append(f"  Reference: {impact.statutory_reference}")
     lines.append("")
     lines.append("=" * 70)
     lines.append("END OF EVIDENCE PACKET")

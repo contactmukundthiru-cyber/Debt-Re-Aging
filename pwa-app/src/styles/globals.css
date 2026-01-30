@@ -1,5 +1,5 @@
 /* Institutional CSS - Credit Report Analyzer */
-@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -30,9 +30,16 @@
   --text-muted: #475569;
   --input-bg: #ffffff;
 
-  --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
-  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --mono: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'IBM Plex Mono', 'SF Mono', Monaco, monospace;
+
+  --page-bg: radial-gradient(1200px circle at 12% -10%, rgba(16, 185, 129, 0.16), transparent 60%),
+    radial-gradient(900px circle at 90% 0%, rgba(14, 116, 144, 0.12), transparent 55%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #ffffff 100%);
+  --page-grid: linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+  --page-grid-size: 140px 140px;
 
   /* Premium Elevations */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -54,6 +61,12 @@
   --input-bg: #0f172a;
   --glass-bg: rgba(15, 23, 42, 0.8);
   --glass-border: rgba(30, 41, 59, 0.5);
+
+  --page-bg: radial-gradient(900px circle at 15% -5%, rgba(16, 185, 129, 0.12), transparent 55%),
+    radial-gradient(700px circle at 85% 0%, rgba(56, 189, 248, 0.1), transparent 55%),
+    linear-gradient(180deg, #05070d 0%, #0b1220 45%, #05070d 100%);
+  --page-grid: linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
 
   --black: #ffffff;
   --white: #020617;
@@ -81,9 +94,29 @@
 
   body {
     @apply font-sans;
-    background: var(--bg-app);
+    background: var(--page-bg);
     color: var(--text-main);
+    position: relative;
+    min-height: 100%;
+    isolation: isolate;
+    --serif: var(--font-serif);
+    --sans: var(--font-sans);
+    --mono: var(--font-mono);
   }
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::after {
+  background-image: var(--page-grid);
+  background-size: var(--page-grid-size);
+  opacity: 0.25;
 }
 
 @layer components {

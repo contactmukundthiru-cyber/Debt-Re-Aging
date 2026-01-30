@@ -14,11 +14,15 @@ interface Step1InputProps {
   fileName: string | null;
   fileInputRef: React.RefObject<HTMLInputElement>;
   handleFileUpload: (file: File) => void;
+  handleFilesUpload: (files: FileList | File[]) => void;
   handleDrop: (e: React.DragEvent) => void;
   handleDragOver: (e: React.DragEvent) => void;
   handleDragLeave: (e: React.DragEvent) => void;
   processText: () => void;
   loadSample: () => void;
+  sources: { id: string; name: string; size: number; type: string }[];
+  removeSource: (id: string) => void;
+  clearSources: () => void;
   history: AnalysisRecord[];
   showHistory: boolean;
   setShowHistory: (val: boolean) => void;
@@ -38,11 +42,15 @@ export const Step1Input: React.FC<Step1InputProps> = ({
   setRawText,
   fileInputRef,
   handleFileUpload,
+  handleFilesUpload,
   handleDrop,
   handleDragOver,
   handleDragLeave,
   processText,
   loadSample,
+  sources,
+  removeSource,
+  clearSources,
   history,
   showHistory,
   setShowHistory,
@@ -121,7 +129,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
                     INITIATE SCAN
                   </button>
 
-                  <p className="text-sm text-slate-500 mb-2">or drag & drop credit report file</p>
+                  <p className="text-sm text-slate-500 mb-2">or drag & drop credit report files</p>
                   <p className="text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full inline-block">Supports PDF, PNG, JPG, TXT</p>
                 </div>
               </div>
@@ -131,8 +139,9 @@ export const Step1Input: React.FC<Step1InputProps> = ({
               ref={fileInputRef}
               type="file"
               accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.webp,.bmp,.tiff"
+              multiple
               className="sr-only"
-              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+              onChange={(e) => e.target.files && handleFilesUpload(e.target.files)}
               disabled={isProcessing}
             />
           </div>
@@ -178,6 +187,43 @@ export const Step1Input: React.FC<Step1InputProps> = ({
           Try Sample Data
         </button>
       </div>
+
+      {sources.length > 0 && (
+        <div className="premium-card p-6 mb-12 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Evidence Queue</p>
+              <h3 className="text-lg font-bold dark:text-white">Merged Intake Sources</h3>
+            </div>
+            <button
+              type="button"
+              onClick={clearSources}
+              className="btn btn-secondary !py-2 !px-4 !text-[10px] !uppercase !tracking-widest !rounded-xl"
+            >
+              Clear Batch
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {sources.map((source) => (
+              <div key={source.id} className="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+                <div>
+                  <p className="text-xs font-bold dark:text-white">{source.name}</p>
+                  <p className="text-[10px] text-slate-400">{Math.round(source.size / 1024)} KB • {source.type || 'unknown'}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeSource(source.id)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-6 mb-12">
         <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">

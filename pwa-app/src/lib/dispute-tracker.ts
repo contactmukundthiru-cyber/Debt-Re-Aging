@@ -83,6 +83,9 @@ export interface DisputeDocument {
   type: 'dispute_letter' | 'response' | 'evidence' | 'credit_report' | 'receipt' | 'other';
   dateAdded: string;
   notes?: string;
+  content?: string;
+  tags?: string[];
+  source?: string;
 }
 
 export interface DisputeOutcome {
@@ -244,6 +247,51 @@ export function addDocument(
   dispute.updatedAt = new Date().toISOString();
   saveDisputes(disputes);
 
+  return dispute;
+}
+
+/**
+ * Update dispute notes
+ */
+export function updateDisputeNotes(
+  disputeId: string,
+  notes: string
+): Dispute | null {
+  const disputes = loadDisputes();
+  const index = disputes.findIndex(d => d.id === disputeId);
+
+  if (index === -1) return null;
+
+  const dispute = disputes[index];
+  dispute.notes = notes;
+  dispute.updatedAt = new Date().toISOString();
+
+  saveDisputes(disputes);
+  return dispute;
+}
+
+/**
+ * Update document tags
+ */
+export function updateDocumentTags(
+  disputeId: string,
+  documentId: string,
+  tags: string[]
+): Dispute | null {
+  const disputes = loadDisputes();
+  const index = disputes.findIndex(d => d.id === disputeId);
+
+  if (index === -1) return null;
+
+  const dispute = disputes[index];
+  const doc = dispute.documents.find(item => item.id === documentId);
+
+  if (!doc) return null;
+
+  doc.tags = tags;
+  dispute.updatedAt = new Date().toISOString();
+
+  saveDisputes(disputes);
   return dispute;
 }
 

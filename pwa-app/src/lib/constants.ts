@@ -23,7 +23,10 @@ export const STATUSES = ['Open', 'Closed', 'Paid', 'Settled', 'Transferred', 'So
 
 export const ANALYSIS_TABS = [
   { id: 'violations', label: 'Violations' },
+  { id: 'briefing', label: 'Case Brief' },
+  { id: 'review', label: 'Review' },
   { id: 'aianalysis', label: 'AI Forensic Core' },
+  { id: 'deadlines', label: 'Deadlines' },
   { id: 'simulation', label: 'Tactical Simulator' },
   { id: 'liability', label: 'Liability Radar' },
   { id: 'escalation', label: 'Legal Escalation' },

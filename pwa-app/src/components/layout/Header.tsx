@@ -12,6 +12,9 @@ interface HeaderProps {
   step: number;
   reset: () => void;
   translate: (key: string) => string;
+  qualityScore?: number;
+  missingFields?: number;
+  overdueDeadlines?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,7 +24,10 @@ export const Header: React.FC<HeaderProps> = ({
   handleLanguageChange,
   step,
   reset,
-  translate
+  translate,
+  qualityScore,
+  missingFields,
+  overdueDeadlines
 }) => {
   const { state, dispatch } = useApp();
   const { showSecurityModal } = state;
@@ -46,6 +52,54 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {typeof qualityScore === 'number' && (
+                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70">
+                  <span className="text-[9px] uppercase tracking-widest text-slate-500">Case Quality</span>
+                  <div className="w-20 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${qualityScore >= 85 ? 'bg-emerald-500' : qualityScore >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
+                      style={{ width: `${qualityScore}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300">{qualityScore}%</span>
+                </div>
+              )}
+              {(missingFields || overdueDeadlines) ? (
+                <div className="hidden lg:flex items-center gap-2">
+                  {missingFields ? (
+                    <span className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                      {missingFields} missing fields
+                    </span>
+                  ) : null}
+                  {overdueDeadlines ? (
+                    <span className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                      {overdueDeadlines} overdue
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
+              {(missingFields || overdueDeadlines) ? (
+                <div className="hidden lg:flex items-center gap-2">
+                  {missingFields ? (
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 3 } }))}
+                      className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest border border-amber-500/20 text-amber-500 hover:bg-amber-500/10"
+                    >
+                      Review Fields
+                    </button>
+                  ) : null}
+                  {overdueDeadlines ? (
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'deadlines' } }))}
+                      className="px-3 py-1.5 rounded-full text-[9px] uppercase tracking-widest border border-rose-500/20 text-rose-500 hover:bg-rose-500/10"
+                    >
+                      Deadlines
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
               {/* Privacy Shield */}
               <button
                 onClick={() => setIsSecurityModalOpen(true)}

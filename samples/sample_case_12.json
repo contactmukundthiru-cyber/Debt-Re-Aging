@@ -1,0 +1,44 @@
+{
+  "case_metadata": {
+    "case_id": "888-2025-M2",
+    "consumer_name": "Marcus Aurelius (Corporate Audit)",
+    "state_code": "TX",
+    "reason_for_audit": "Institutional Integrity Check - Deceptive Subsidiary Reporting",
+    "target_rules": ["M3", "DU3", "M2"]
+  },
+  "accounts": [
+    {
+      "furnisher_or_collector": "Midland Funding LLC",
+      "original_creditor": "Citibank",
+      "account_number": "MID-7788",
+      "current_balance": "1250.00",
+      "account_status": "Paid",
+      "metro2_status_code": "97",
+      "date_opened": "2021-05-15",
+      "date_reported_or_updated": "2024-03-01",
+      "remarks": "Sold to another entity"
+    },
+    {
+      "furnisher_or_collector": "Midland Credit Management",
+      "original_creditor": "Citibank",
+      "account_number": "MCM-1122",
+      "current_balance": "1250.00",
+      "account_status": "Collection",
+      "metro2_status_code": "97",
+      "date_opened": "2023-10-10",
+      "date_reported_or_updated": "2024-03-05",
+      "remarks": "Purchased from Citicorp"
+    },
+    {
+      "furnisher_or_collector": "Portfolio Recovery Associates",
+      "original_creditor": "Capital One",
+      "account_number": "PRA-4455",
+      "current_balance": "850.00",
+      "account_status": "Transfer/Sold",
+      "metro2_status_code": "97",
+      "date_opened": "2020-01-20",
+      "date_reported_or_updated": "2024-02-15",
+      "remarks": "Account sold to another company"
+    }
+  ]
+}

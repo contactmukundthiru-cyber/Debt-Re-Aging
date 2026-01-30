@@ -34,6 +34,8 @@ export interface TimelineEvent {
   type: 'account' | 'delinquency' | 'chargeoff' | 'payment' | 'removal' | 'violation';
   description: string;
   flagged?: boolean;
+  tag?: string;
+  evidenceSnippets?: string[];
 }
 
 /**
@@ -135,7 +137,11 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
       label: 'Account Opened',
       type: 'account',
       description: `Account opened with ${fields.originalCreditor || 'creditor'}`,
-      flagged: flags.some(f => f.ruleId === 'E1' && f.fieldValues.field === 'dateOpened')
+      flagged: flags.some(f => f.ruleId === 'E1' && f.fieldValues.field === 'dateOpened'),
+      evidenceSnippets: flags
+        .filter(f => f.fieldValues.field === 'dateOpened')
+        .map(f => f.explanation)
+        .slice(0, 2)
     });
   }
 
@@ -145,7 +151,11 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
       label: 'Last Payment',
       type: 'payment',
       description: 'Last recorded payment on account',
-      flagged: false
+      flagged: flags.some(f => f.fieldValues.field === 'dateLastPayment'),
+      evidenceSnippets: flags
+        .filter(f => f.fieldValues.field === 'dateLastPayment')
+        .map(f => f.explanation)
+        .slice(0, 2)
     });
   }
 
@@ -155,7 +165,11 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
       label: 'Date of First Delinquency',
       type: 'delinquency',
       description: 'Account became 30+ days delinquent',
-      flagged: flags.some(f => ['B1', 'B2', 'B3', 'E1'].includes(f.ruleId) && f.fieldValues.dofd)
+      flagged: flags.some(f => ['B1', 'B2', 'B3', 'E1'].includes(f.ruleId) && f.fieldValues.dofd),
+      evidenceSnippets: flags
+        .filter(f => ['B1', 'B2', 'B3', 'E1'].includes(f.ruleId))
+        .map(f => f.explanation)
+        .slice(0, 3)
     });
   }
 
@@ -165,7 +179,11 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
       label: 'Charge-Off',
       type: 'chargeoff',
       description: 'Account charged off by creditor',
-      flagged: flags.some(f => f.ruleId === 'B3')
+      flagged: flags.some(f => f.ruleId === 'B3'),
+      evidenceSnippets: flags
+        .filter(f => f.ruleId === 'B3')
+        .map(f => f.explanation)
+        .slice(0, 2)
     });
   }
 
@@ -175,7 +193,11 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
       label: 'Est. Removal Date',
       type: 'removal',
       description: 'Expected removal from credit report',
-      flagged: flags.some(f => f.ruleId === 'B2' || f.ruleId === 'K6')
+      flagged: flags.some(f => f.ruleId === 'B2' || f.ruleId === 'K6'),
+      evidenceSnippets: flags
+        .filter(f => f.ruleId === 'B2' || f.ruleId === 'K6')
+        .map(f => f.explanation)
+        .slice(0, 2)
     });
   }
 

@@ -11,7 +11,7 @@ import { CreditFields, RuleFlag, RiskProfile, ConsumerInfo, AnalysisRecord } fro
 import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
 import { isPDF, extractPDFText, extractPDFTextViaOCR } from '../lib/pdf';
-import { compareReports, DeltaResult } from '../lib/delta';
+import { compareReports, compareReportSeries, buildReportSeries, buildReportSeriesOptions, DeltaResult, SeriesInsight, SeriesSnapshot, SeriesSnapshotOption } from '../lib/delta';
 import { getRelevantCaseLaw, CaseLaw } from '../lib/caselaw';
 import { generateStateGuidance, getStateLaws } from '../lib/state-laws';
 import {
@@ -103,7 +103,9 @@ import {
 } from '../lib/collector-database';
 import {
   buildAttorneyPackage,
-  formatAttorneyPackage
+  formatAttorneyPackage,
+  formatRedactedAttorneyPackage,
+  buildOutcomeNarrative
 } from '../lib/attorney-export';
 import {
   validateMetro2,
@@ -194,10 +196,14 @@ export default function CreditReportAnalyzer() {
 
   const [progressText, setProgressText] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
+  const [sources, setSources] = useState<{ id: string; name: string; size: number; type: string; text: string }[]>([]);
   const [analyzedAccounts, setAnalyzedAccounts] = useState<AnalyzedAccount[]>([]);
   const [executiveSummary, setExecutiveSummary] = useState<ForensicSummary | null>(null);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [deltas, setDeltas] = useState<DeltaResult[]>([]);
+  const [seriesInsights, setSeriesInsights] = useState<SeriesInsight[]>([]);
+  const [seriesSnapshots, setSeriesSnapshots] = useState<SeriesSnapshot[]>([]);
+  const [seriesOptions, setSeriesOptions] = useState<SeriesSnapshotOption[]>([]);
   const [relevantCaseLaw, setRelevantCaseLaw] = useState<CaseLaw[]>([]);
   const [discoveryAnswers, setDiscoveryAnswers] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<TabId>('actions');
@@ -387,54 +393,103 @@ export default function CreditReportAnalyzer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [step, rawText, analyzeText]);
 
-  const handleFileUpload = useCallback(async (file: File) => {
-    setProcessing(true, 0, 'Opening forensic scanner...');
-    setFileName(file.name);
+  useEffect(() => {
+    const handleNavigate = (event: Event) => {
+      const detail = (event as CustomEvent).detail as { step?: Step; tab?: TabId } | undefined;
+      if (!detail) return;
+      if (detail.step) setStep(detail.step);
+      if (detail.tab) setActiveTab(detail.tab);
+    };
+    window.addEventListener('cra:navigate', handleNavigate);
+    return () => window.removeEventListener('cra:navigate', handleNavigate);
+  }, [setActiveTab, setStep]);
+
+  const mergeSourcesText = useCallback((items: { name: string; size: number; type: string; text: string }[]) => {
+    return items
+      .map((item) => {
+        const meta = `[SOURCE:${item.name} | ${item.type || 'unknown'} | ${Math.round(item.size / 1024)}KB]`;
+        return `${meta}\n${item.text}`.trim();
+      })
+      .join('\n\n-----\n\n');
+  }, []);
+
+  const extractTextFromFile = useCallback(async (file: File) => {
+    if (file.size > maxUploadSizeMB * 1024 * 1024) {
+      throw new Error(`File exceeds ${maxUploadSizeMB}MB limit`);
+    }
+
+    let text = '';
+
+    if (isPDF(file)) {
+      setProcessing(true, undefined, `Extracting PDF text (${file.name})...`);
+      try {
+        text = await extractPDFText(file, (p) => setProcessing(true, Math.round(p * 100)));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '';
+        if (message.toLowerCase().includes('no selectable text')) {
+          setProcessing(true, undefined, `Running OCR on scanned PDF (${file.name})...`);
+          text = await extractPDFTextViaOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
+        } else {
+          throw error;
+        }
+      }
+    } else if (isImage(file)) {
+      setProcessing(true, undefined, `Running OCR (${file.name})...`);
+      text = await performOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
+    } else {
+      setProcessing(true, 100, `Reading file (${file.name})...`);
+      text = await file.text();
+    }
+
+    return text.trim();
+  }, [maxUploadSizeMB, setProcessing]);
+
+  const handleFilesUpload = useCallback(async (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    setProcessing(true, 0, `Processing ${fileArray.length} source${fileArray.length > 1 ? 's' : ''}...`);
 
     try {
-      if (file.size > maxUploadSizeMB * 1024 * 1024) {
-        throw new Error(`File exceeds ${maxUploadSizeMB}MB limit`);
+      const extracted = [];
+      for (const file of fileArray) {
+        const text = await extractTextFromFile(file);
+        extracted.push({
+          id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          text
+        });
       }
 
-      let text = '';
+      // Ensure scanner animation plays for at least 1.2s for that "sophisticated" feel
+      await new Promise(resolve => setTimeout(resolve, 1200));
 
-      if (isPDF(file)) {
-        setProcessing(true, undefined, 'Extracting PDF text...');
-        try {
-          text = await extractPDFText(file, (p) => setProcessing(true, Math.round(p * 100)));
-        } catch (error) {
-          const message = error instanceof Error ? error.message : '';
-          if (message.toLowerCase().includes('no selectable text')) {
-            setProcessing(true, undefined, 'Running OCR on scanned PDF...');
-            text = await extractPDFTextViaOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
-          } else {
-            throw error;
-          }
-        }
-      } else if (isImage(file)) {
-        setProcessing(true, undefined, 'Running OCR...');
-        text = await performOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
-      } else {
-        setProcessing(true, 100, 'Reading file...');
-      }
-
-      // Ensure scanner animation plays for at least 1.5s for that "sophisticated" feel
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      analyzeText(text, file.name);
+      setSources((prev) => {
+        const next = [...prev, ...extracted];
+        setRawText(mergeSourcesText(next));
+        setFileName(next.length > 1 ? 'batch-upload.txt' : next[0]?.name ?? null);
+        return next;
+      });
+      setProcessing(false, 100, 'Sources merged. Ready for analysis.');
     } catch (error) {
       console.error('Processing error:', error);
-      const message = error instanceof Error ? error.message : 'Unable to process the file.';
       setProcessing(false, 0, '');
     }
-  }, [analyzeText, showToast, maxUploadSizeMB]);
+  }, [extractTextFromFile, mergeSourcesText, setProcessing, setRawText]);
+
+  const handleFileUpload = useCallback(async (file: File) => {
+    await handleFilesUpload([file]);
+  }, [handleFilesUpload]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileUpload(file);
-  }, [handleFileUpload]);
+    if (e.dataTransfer.files.length > 0) {
+      handleFilesUpload(e.dataTransfer.files);
+    }
+  }, [handleFilesUpload]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -451,8 +506,24 @@ export default function CreditReportAnalyzer() {
   }, [rawText, analyzeText, fileName]);
 
   const loadSample = useCallback(() => {
+    setSources([]);
     analyzeText(SAMPLE_TEXT, 'sample_data.txt');
   }, [analyzeText]);
+
+  const removeSource = useCallback((id: string) => {
+    setSources((prev) => {
+      const next = prev.filter(source => source.id !== id);
+      setRawText(next.length > 0 ? mergeSourcesText(next) : '');
+      setFileName(next.length > 1 ? 'batch-upload.txt' : next[0]?.name ?? null);
+      return next;
+    });
+  }, [mergeSourcesText, setRawText]);
+
+  const clearSources = useCallback(() => {
+    setSources([]);
+    setRawText('');
+    setFileName(null);
+  }, [setRawText]);
 
   const runAnalysis = useCallback(async () => {
     setAnalyzing(true);
@@ -562,6 +633,9 @@ export default function CreditReportAnalyzer() {
       // If already analyzing, perform delta comparison
       const forensicDeltas = compareReports(record.fields, editableFields);
       setDeltas(forensicDeltas);
+      setSeriesInsights(compareReportSeries(history, editableFields));
+      setSeriesSnapshots(buildReportSeries(history, editableFields));
+      setSeriesOptions(buildReportSeriesOptions(history, editableFields));
       setActiveTab('deltas');
       setShowHistory(false);
       return;
@@ -574,7 +648,22 @@ export default function CreditReportAnalyzer() {
     setShowHistory(false);
     setActiveTab('violations');
     setStep(4);
-  }, [step, editableFields]);
+  }, [step, editableFields, history]);
+
+  useEffect(() => {
+    setSeriesInsights(compareReportSeries(history, editableFields));
+    setSeriesSnapshots(buildReportSeries(history, editableFields));
+    setSeriesOptions(buildReportSeriesOptions(history, editableFields));
+  }, [history, editableFields]);
+
+  const handleCompareSnapshots = useCallback((olderId: string, newerId: string) => {
+    const lookup = new Map(seriesOptions.map(option => [option.id, option.fields]));
+    const older = lookup.get(olderId);
+    const newer = lookup.get(newerId);
+    if (!older || !newer) return;
+    setDeltas(compareReports(older, newer));
+    setActiveTab('deltas');
+  }, [seriesOptions]);
 
   const removeFromHistory = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -703,7 +792,8 @@ export default function CreditReportAnalyzer() {
       { title: 'Cease and Desist Letter', content: generateCeaseDesistLetter(editableFields, consumerDetails, flags.map(f => f.explanation)) },
       { title: 'Intent to Sue Letter', content: generateIntentToSueLetter(editableFields, flags, consumerDetails) },
       { title: 'Evidence Package', content: formatEvidencePackage(buildEvidencePackage(editableFields, flags, riskProfile!, consumerDetails.name, consumerDetails.state)) },
-      { title: 'Attorney Package', content: formatAttorneyPackage(buildAttorneyPackage(editableFields, flags, riskProfile!, consumerDetails)) }
+      { title: 'Attorney Package', content: formatAttorneyPackage(buildAttorneyPackage(editableFields, flags, riskProfile!, consumerDetails)) },
+      { title: 'Redacted Attorney Package', content: formatRedactedAttorneyPackage(buildAttorneyPackage(editableFields, flags, riskProfile!, consumerDetails)) }
     ];
   }, [
     consumer,
@@ -782,10 +872,27 @@ export default function CreditReportAnalyzer() {
   const handleReset = useCallback(() => {
     resetApp();
     setFileName(null);
+    setSources([]);
     setAnalyzedAccounts([]);
     setSelectedAccountId(null);
     setExpandedCard(null);
   }, [resetApp]);
+
+  const caseQualityScore = useMemo(() => {
+    if (flags.length === 0) return 100;
+    const overdue = deadlines?.countdowns.filter(item => item.isExpired).length || 0;
+    const missingFields = ['dofd', 'dateLastPayment', 'stateCode'].filter(key => !(editableFields as any)[key]).length;
+    const score = 100 - (overdue * 8 + missingFields * 6 + flags.length * 2);
+    return Math.max(40, Math.min(100, score));
+  }, [deadlines?.countdowns, editableFields, flags.length]);
+
+  const missingFieldCount = useMemo(() => {
+    return ['dofd', 'dateLastPayment', 'stateCode'].filter(key => !(editableFields as any)[key]).length;
+  }, [editableFields]);
+
+  const overdueDeadlinesCount = useMemo(() => {
+    return deadlines?.countdowns.filter(item => item.isExpired).length || 0;
+  }, [deadlines?.countdowns]);
 
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -864,6 +971,9 @@ export default function CreditReportAnalyzer() {
         step={step}
         reset={handleReset}
         translate={translate}
+        qualityScore={caseQualityScore}
+        missingFields={missingFieldCount}
+        overdueDeadlines={overdueDeadlinesCount}
       />
 
       {/* Progress Steps */}
@@ -921,11 +1031,15 @@ export default function CreditReportAnalyzer() {
               fileName={fileName}
               fileInputRef={fileInputRef}
               handleFileUpload={handleFileUpload}
+              handleFilesUpload={handleFilesUpload}
               handleDrop={handleDrop}
               handleDragOver={handleDragOver}
               handleDragLeave={handleDragLeave}
               processText={processText}
               loadSample={loadSample}
+              sources={sources.map(({ id, name, size, type }) => ({ id, name, size, type }))}
+              removeSource={removeSource}
+              clearSources={clearSources}
               history={history}
               showHistory={showHistory}
               setShowHistory={setShowHistory}
@@ -979,6 +1093,7 @@ export default function CreditReportAnalyzer() {
               flags={flags}
               riskProfile={riskProfile}
               editableFields={editableFields}
+              rawText={rawText}
               consumer={consumer}
               discoveryAnswers={discoveryAnswers}
               setDiscoveryAnswers={setDiscoveryAnswers}
@@ -987,6 +1102,10 @@ export default function CreditReportAnalyzer() {
               expandedCard={expandedCard}
               setExpandedCard={setExpandedCard}
               deltas={deltas}
+              seriesInsights={seriesInsights}
+              seriesSnapshots={seriesSnapshots}
+              seriesOptions={seriesOptions}
+              onCompareSnapshots={handleCompareSnapshots}
               relevantCaseLaw={relevantCaseLaw}
               analytics={analytics}
               tabsRef={tabsRef}
@@ -1038,6 +1157,7 @@ export default function CreditReportAnalyzer() {
               editableFields={editableFields as CreditFields}
               flags={flags}
               riskProfile={riskProfile!}
+              discoveryAnswers={discoveryAnswers}
               damageEstimate={damageEstimate}
               translate={translate}
               downloadDocument={downloadDocument}
@@ -1048,6 +1168,8 @@ export default function CreditReportAnalyzer() {
               formatEvidencePackage={formatEvidencePackage}
               buildAttorneyPackage={buildAttorneyPackage}
               formatAttorneyPackage={formatAttorneyPackage}
+              formatRedactedAttorneyPackage={formatRedactedAttorneyPackage}
+              buildOutcomeNarrative={buildOutcomeNarrative}
               formatCurrency={formatCurrency}
               downloadAnalysisJson={downloadAnalysisJson}
               downloadCaseBundle={downloadCaseBundle}
@@ -1066,6 +1188,7 @@ export default function CreditReportAnalyzer() {
               disputeStats={disputeStats}
               setDisputeStats={setDisputeStats}
               editableFields={editableFields as CreditFields}
+              consumer={consumer}
               flags={flags}
               createDispute={createDispute}
               loadDisputes={loadDisputes}
@@ -1073,6 +1196,8 @@ export default function CreditReportAnalyzer() {
               updateDisputeStatus={updateDisputeStatus}
               setStep={setStep}
               reset={handleReset}
+              missingFields={missingFieldCount}
+              overdueDeadlines={overdueDeadlinesCount}
             />
           )}
         </div>

@@ -480,7 +480,7 @@ def render_step_4_checks():
                     <div style="background: {bg_color}; color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
                         Dispute Strength: {dispute_strength.upper()}
                     </div>
-                    {"<div style='margin-top: 8px; font-size: 0.8rem; color: " + text_color + ";'><strong>Litigation Potential</strong></div>" if litigation_potential else ""}
+                    {"<div style='margin-top: 8px; font-size: 0.8rem; color: " + text_color + ";'><strong>Litigation Potential Found</strong></div>" if litigation_potential else ""}
                 </div>
             </div>
         </div>

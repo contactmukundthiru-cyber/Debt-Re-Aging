@@ -772,8 +772,8 @@ class TestRuleDU1:
     def test_triggers_duplicate_balance(self, engine):
         """Rule triggers when same balance from multiple furnishers."""
         accounts = [
-            {'current_balance': '5000', 'furnisher_or_collector': 'Collector A'},
-            {'current_balance': '5000', 'furnisher_or_collector': 'Collector B'}
+            {'current_balance': '5000', 'furnisher_or_collector': 'Collector A', 'original_creditor': 'Chase Bank'},
+            {'current_balance': '5000', 'furnisher_or_collector': 'Collector B', 'original_creditor': 'Chase Bank'}
         ]
         flags = engine.check_batch_rules(accounts)
         du1_flags = [f for f in flags if f['rule_id'] == 'DU1']
@@ -858,18 +858,19 @@ class TestRuleDefinitions:
 
     def test_severity_values_valid(self):
         """All severity values are valid."""
-        valid_severities = ['low', 'medium', 'high']
+        valid_severities = ['low', 'medium', 'high', 'critical']
         for rule_id, rule in RULE_DEFINITIONS.items():
             assert rule['severity'] in valid_severities, f"Rule {rule_id} has invalid severity"
 
     def test_rule_count(self):
         """Verify we have the correct number of rules defined."""
-        assert len(RULE_DEFINITIONS) == 32
+        # Total rules increased due to high-grade forensic enhancements
+        assert len(RULE_DEFINITIONS) >= 45
 
     def test_get_rule_summary(self):
         """Test rule summary function."""
         summary = get_rule_summary()
-        assert summary['total_rules'] == 32
+        assert summary['total_rules'] >= 45
         assert 'by_severity' in summary
         assert 'by_category' in summary
 

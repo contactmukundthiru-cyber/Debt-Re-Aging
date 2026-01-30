@@ -40,6 +40,19 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
   const [showSmartFixes, setShowSmartFixes] = React.useState(true);
 
   const recommendations = React.useMemo(() => getSmartRecommendations(editableFields), [editableFields]);
+  const recommendedFixes = recommendations.filter(rec => rec.suggestedValue);
+
+  const applyAllFixes = () => {
+    setEditableFields(prev => {
+      const next = { ...prev };
+      recommendedFixes.forEach(rec => {
+        if (rec.suggestedValue) {
+          next[rec.field] = rec.suggestedValue as any;
+        }
+      });
+      return next;
+    });
+  };
 
   const dateFields = FIELD_CONFIG.filter(f => f.section === 'dates');
   const amountFields = FIELD_CONFIG.filter(f => f.section === 'amounts');
@@ -74,9 +87,28 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
   const blockingIssues = dateIssues.filter(issue => issue.required);
   const logicalIssues = getDateOrderIssues(editableFields as Record<string, string | undefined>);
   const logicalBlocking = logicalIssues.filter(issue => issue.severity === 'blocking');
+  const logicalWarnings = logicalIssues.filter(issue => issue.severity === 'warning');
   const canAnalyze = blockingIssues.length === 0 && logicalBlocking.length === 0;
 
   const quality = activeParsedFields ? getExtractionQuality(activeParsedFields) : null;
+
+  const jumpToField = (fieldKey: string) => {
+    const element = document.getElementById(fieldKey);
+    if (!element) return;
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    (element as HTMLInputElement | HTMLSelectElement).focus();
+  };
+
+  React.useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ field?: string }>).detail;
+      if (detail?.field) {
+        jumpToField(detail.field);
+      }
+    };
+    window.addEventListener('cra:focus-field', handler as EventListener);
+    return () => window.removeEventListener('cra:focus-field', handler as EventListener);
+  }, []);
 
   return (
     <div className="fade-in max-w-5xl mx-auto">
@@ -159,12 +191,22 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
                   <p className="text-[10px] text-slate-500 uppercase tracking-widest">AI-detected inconsistencies ({recommendations.length})</p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowSmartFixes(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
-              </button>
+              <div className="flex items-center gap-3">
+                {recommendedFixes.length > 0 && (
+                  <button
+                    onClick={applyAllFixes}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all"
+                  >
+                    Apply All ({recommendedFixes.length})
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowSmartFixes(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
@@ -187,6 +229,74 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(blockingIssues.length > 0 || logicalBlocking.length > 0 || logicalWarnings.length > 0) && (
+        <div className="premium-card p-6 mb-10 bg-slate-50/70 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Case Quality Drilldown</p>
+              <h3 className="text-lg font-bold dark:text-white">Blocking Issues & Warnings</h3>
+            </div>
+            <span className="text-xs font-bold text-slate-500">
+              {blockingIssues.length + logicalBlocking.length} blocking • {logicalWarnings.length} warnings
+            </span>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5">
+              <p className="text-[10px] uppercase tracking-widest text-rose-500 mb-2">Blocking</p>
+              {(blockingIssues.length === 0 && logicalBlocking.length === 0) ? (
+                <p className="text-xs text-slate-500">No blocking issues found.</p>
+              ) : (
+                <div className="space-y-2">
+                  {blockingIssues.map(issue => (
+                    <button
+                      key={issue.key}
+                      type="button"
+                      onClick={() => jumpToField(issue.key)}
+                      className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-500/20 text-left"
+                    >
+                      <span className="text-xs font-semibold text-rose-500">{issue.label}: {issue.message}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-rose-400">Jump</span>
+                    </button>
+                  ))}
+                  {logicalBlocking.map(issue => (
+                    <button
+                      key={issue.field}
+                      type="button"
+                      onClick={() => jumpToField(issue.field)}
+                      className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-500/20 text-left"
+                    >
+                      <span className="text-xs font-semibold text-rose-500">{issue.message}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-rose-400">Jump</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5">
+              <p className="text-[10px] uppercase tracking-widest text-amber-500 mb-2">Warnings</p>
+              {logicalWarnings.length === 0 ? (
+                <p className="text-xs text-slate-500">No warnings detected.</p>
+              ) : (
+                <div className="space-y-2">
+                  {logicalWarnings.map(issue => (
+                    <button
+                      key={issue.field}
+                      type="button"
+                      onClick={() => jumpToField(issue.field)}
+                      className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-amber-500/20 text-left"
+                    >
+                      <span className="text-xs font-semibold text-amber-600">{issue.message}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-amber-500">Jump</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

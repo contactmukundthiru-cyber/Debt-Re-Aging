@@ -6,11 +6,14 @@ All rules are transparent, documented, and produce human-readable explanations.
 
 import json
 import logging
+import inspect
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Callable, Type
 from pathlib import Path
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, field, fields as dc_fields
+from difflib import SequenceMatcher
 from dateutil.relativedelta import relativedelta
+from rapidfuzz import fuzz, process
 from app.utils import calculate_years_difference, estimate_removal_date, validate_iso_date
 from app.regulatory import REGULATORY_MAP
 
@@ -20,6 +23,79 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Known parent/subsidiary relationships for entity resolution
+SUBSIDIARY_MAP = {
+    'MIDLAND FUNDING': 'MIDLAND CREDIT MANAGEMENT',
+    'MIDLAND FUNDING LLC': 'MIDLAND CREDIT MANAGEMENT',
+    'MCM': 'MIDLAND CREDIT MANAGEMENT',
+    'MIDLAND CREDIT': 'MIDLAND CREDIT MANAGEMENT',
+    'ENCORE CAPITAL': 'MIDLAND CREDIT MANAGEMENT',
+    'ENCORE CAPITAL GROUP': 'MIDLAND CREDIT MANAGEMENT',
+    'PORTFOLIO RECOVERY': 'PRA GROUP',
+    'PORTFOLIO RECOVERY ASSOCIATES': 'PRA GROUP',
+    'PRA': 'PRA GROUP',
+    'LVNV': 'RESURGENT CAPITAL SERVICES',
+    'LVNV FUNDING': 'RESURGENT CAPITAL SERVICES',
+    'LVNV FUNDING LLC': 'RESURGENT CAPITAL SERVICES',
+    'SHERMAN FINANCIAL': 'RESURGENT CAPITAL SERVICES',
+    'SHERMAN STRATEGIC INVESTMENTS': 'RESURGENT CAPITAL SERVICES',
+    'CAVALRY SPV': 'CAVALRY PORTFOLIO SERVICES',
+    'JEFFERSON CAPITAL SYSTEMS': 'JEFFERSON CAPITAL',
+    'JCAP': 'JEFFERSON CAPITAL',
+    'ASSET ACCEPTANCE': 'MIDLAND CREDIT MANAGEMENT',
+    'CAVALRY SPV I': 'CAVALRY PORTFOLIO SERVICES',
+    'CAVALRY SPV II': 'CAVALRY PORTFOLIO SERVICES'
+}
+
+
+@dataclass(frozen=True)
+class TradelineModel:
+    """Standardized model for credit tradeline data to ensure forensic integrity."""
+    furnisher_or_collector: str = "Unknown"
+    original_creditor: str = "Unknown"
+    account_number: str = "Unknown"
+    account_type: str = "Unknown"
+    account_status: str = "Unknown"
+    current_balance: str = "0"
+    original_balance: str = "0"
+    credit_limit: str = "0"
+    date_opened: str = ""
+    date_reported: str = ""
+    date_last_payment: str = ""
+    dofd: str = ""  # Date of First Delinquency
+    estimated_removal_date: str = ""
+    state_code: str = ""
+    payment_profile: str = ""
+    report_source: str = "Unknown"
+    normalized_furnisher: str = "Unknown"
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'TradelineModel':
+        """Create a model from a raw dictionary, handling missing fields gracefully."""
+        # Use only fields defined in the dataclass
+        field_names = {f.name for f in dc_fields(cls)}
+        filtered_data = {k: v for k, v in data.items() if k in field_names}
+        return cls(**filtered_data)
+
+    def get_float(self, field_name: str) -> float:
+        """Safely parse a currency/numeric string to float."""
+        val = getattr(self, field_name, "0")
+        if not val or val == "Unknown": return 0.0
+        try:
+            return float(str(val).replace(',', '').replace('$', ''))
+        except (ValueError, TypeError):
+            return 0.0
+
+    def get_date(self, field_name: str) -> Optional[datetime]:
+        """Safely parse an ISO date string."""
+        val = getattr(self, field_name, "")
+        if not val or not validate_iso_date(val): return None
+        try:
+            return datetime.strptime(val, '%Y-%m-%d')
+        except ValueError:
+            return None
+
 
 @dataclass
 class RuleFlag:
@@ -57,14 +133,44 @@ RULE_DEFINITIONS = load_rule_definitions()
 
 class RuleEngine:
     """
-    Rule engine for detecting debt re-aging and timeline inconsistencies.
-
-    All rules are transparent and produce human-readable outputs.
+    Advanced Rule Engine for detecting debt re-aging and forensic inconsistencies.
+    
+    Uses an automated registry pattern for rule discovery and Pydantic-style data models.
     """
 
     def __init__(self):
         self.rules = load_rule_definitions()
         self.tolerance_days = 180  # 6 month tolerance for date comparisons
+        self._registry: List[Callable] = self._discover_rules()
+
+    def _discover_rules(self) -> List[Callable]:
+        """Automatically find and register all rule methods using introspection."""
+        methods = [
+            method_name for method_name in dir(self)
+            if method_name.startswith('_check_rule_') and callable(getattr(self, method_name))
+        ]
+        return [getattr(self, name) for name in methods]
+
+    def _fuzzy_match(self, s1: str, s2: str, threshold: float = 85.0) -> bool:
+        """
+        High-fidelity forensic string matching.
+        Uses RapidFuzz Token Set Ratio for robustness against word reordering and subsidiary aliasing.
+        """
+        if not s1 or not s2: return False
+        
+        s1_clean = s1.upper().strip()
+        s2_clean = s2.upper().strip()
+        
+        # Check direct subsidiary map
+        p1 = SUBSIDIARY_MAP.get(s1_clean, s1_clean)
+        p2 = SUBSIDIARY_MAP.get(s2_clean, s2_clean)
+        
+        if p1 == p2:
+            return True
+        
+        # RapidFuzz Token Set Ratio handles common OCR errors and partial name matches
+        # Note: RapidFuzz uses 0-100 scale, while difflib used 0.0-1.0
+        return fuzz.token_set_ratio(s1_clean, s2_clean) >= threshold
 
     def _create_flag(self, rule_id: str, explanation: str, field_values: Dict[str, Any]) -> RuleFlag:
         """Helper to create a RuleFlag from metadata."""
@@ -93,8 +199,29 @@ class RuleEngine:
         Detects systemic patterns across multiple tradelines from the same furnisher.
         """
         behavioral_flags = []
-        furnisher_map = {}
         
+        # New: Cross-Bureau Discrepancy (Rule C1 logic)
+        acct_source_map = {} # acct_num -> {source1: data, source2: data}
+        for i, acc in enumerate(accounts):
+            num = acc.get('account_number')
+            source = acc.get('report_source', 'Unknown')
+            if num and num != 'Unknown' and len(num) > 4:
+                if num not in acct_source_map: acct_source_map[num] = {}
+                acct_source_map[num][source] = acc
+
+        for num, sources in acct_source_map.items():
+            if len(sources) >= 2:
+                dates = {s: acc.get('dofd') for s, acc in sources.items() if acc.get('dofd')}
+                if len(set(dates.values())) > 1:
+                    behavioral_flags.append({
+                        'rule_id': 'C1',
+                        'rule_name': 'Cross-Source Date Discrepancy',
+                        'severity': 'high',
+                        'explanation': f"Critical Discrepancy: Account {num} shows different 'Date of First Delinquency' (DOFD) values across different bureaus ({', '.join([f'{k}: {v}' for k,v in dates.items()])}). This proves reporting inaccuracy.",
+                        'involved_indices': [i for i, acc in enumerate(accounts) if acc.get('account_number') == num]
+                    })
+
+        furnisher_map = {}
         for acc in accounts:
             furnisher = str(acc.get('furnisher_or_collector') or 'Unknown').strip().upper()
             if furnisher not in furnisher_map:
@@ -143,51 +270,56 @@ class RuleEngine:
         """
         flags = []
 
-        # Rule DU1: Duplicate Reporting by Balance and Creditor
-        seen_items = {}  # (balance, creditor_snippet) -> [account_info]
+        # Rule DU1: Duplicate Reporting by Balance and Creditor (Enhanced Fuzzy)
+        bal_groups = {} # balance_str -> [accounts]
 
         for i, acc in enumerate(accounts):
             balance = acc.get('current_balance')
-            creditor = str(acc.get('original_creditor') or '').strip().lower()
-            # Use first 5 chars of creditor for fuzzy matching if name varies slightly
-            cred_short = creditor[:8] if len(creditor) >= 8 else creditor
+            if not balance or balance in ['0', '0.00', '$0', '$0.00']: continue
             
-            if balance and balance != '0' and balance != '0.00':
-                try:
-                    bal_float = float(str(balance).replace(',', '').replace('$', ''))
-                    if bal_float > 0:
-                        bal_key = f"{bal_float:.2f}"
-                        key = (bal_key, cred_short)
-                        if key not in seen_items:
-                            seen_items[key] = []
-                        seen_items[key].append({
-                            'index': i,
-                            'furnisher': acc.get('furnisher_or_collector', 'Unknown'),
-                            'original_creditor': acc.get('original_creditor', ''),
-                            'date_opened': acc.get('date_opened', '')
-                        })
-                except (ValueError, TypeError):
-                    pass
+            try:
+                bal_float = float(str(balance).replace(',', '').replace('$', ''))
+                if bal_float > 0:
+                    bal_key = f"{bal_float:.2f}"
+                    if bal_key not in bal_groups: bal_groups[bal_key] = []
+                    bal_groups[bal_key].append({
+                        'index': i,
+                        'furnisher': acc.get('furnisher_or_collector', 'Unknown'),
+                        'original_creditor': str(acc.get('original_creditor') or '').strip(),
+                        'date_opened': acc.get('date_opened', '')
+                    })
+            except (ValueError, TypeError): pass
 
-        for (balance, cred_short), accounts_list in seen_items.items():
-            if len(accounts_list) >= 2:
-                # Filter to ensure we don't flag if it's just the same furnisher twice (though usually that's also a duplicate)
-                furnishers = [a['furnisher'] for a in accounts_list]
+        for bal, group in bal_groups.items():
+            if len(group) < 2: continue
+            
+            # Fuzzy match creditors within the same balance group
+            matched_indices = set()
+            for i in range(len(group)):
+                if i in matched_indices: continue
+                current_cluster = [group[i]]
+                for j in range(i + 1, len(group)):
+                    if j in matched_indices: continue
+                    if self._fuzzy_match(group[i]['original_creditor'], group[j]['original_creditor']):
+                        current_cluster.append(group[j])
+                        matched_indices.add(j)
                 
-                rule = self.rules.get('DU1', {})
-                flags.append({
-                    'rule_id': 'DU1',
-                    'rule_name': rule.get('name', 'Duplicate Reporting'),
-                    'severity': rule.get('severity', 'high'),
-                    'explanation': (
-                        f"Highly probable duplicate: Balance ${balance} for creditor '{accounts_list[0]['original_creditor']}' "
-                        f"reported by {len(accounts_list)} different furnishers: {', '.join(furnishers)}."
-                    ),
-                    'why_it_matters': rule.get('why_it_matters', ''),
-                    'suggested_evidence': rule.get('suggested_evidence', []),
-                    'involved_indices': [a['index'] for a in accounts_list],
-                    'legal_citations': rule.get('legal_citations', [])
-                })
+                if len(current_cluster) >= 2:
+                    furnishers = [a['furnisher'] for a in current_cluster]
+                    rule = self.rules.get('DU1', {})
+                    flags.append({
+                        'rule_id': 'DU1',
+                        'rule_name': rule.get('name', 'Duplicate Reporting'),
+                        'severity': rule.get('severity', 'high'),
+                        'explanation': (
+                            f"Highly probable duplicate: Balance ${bal} for creditor '{current_cluster[0]['original_creditor']}' "
+                            f"reported by {len(current_cluster)} furnishers: {', '.join(furnishers)}."
+                        ),
+                        'why_it_matters': rule.get('why_it_matters', ''),
+                        'suggested_evidence': rule.get('suggested_evidence', []),
+                        'involved_indices': [a['index'] for a in current_cluster],
+                        'legal_citations': rule.get('legal_citations', [])
+                    })
 
         # Rule J2: Multiple Collector Waterfall
         original_creditor_map = {}  # original_creditor -> [collectors]
@@ -225,34 +357,49 @@ class RuleEngine:
                     'legal_citations': rule.get('legal_citations', [])
                 })
 
-        # Rule DU2: Same Debt Different Account Numbers
-        potential_dupes = {}
+        # Rule DU2: Same Debt Different Account Numbers (Enhanced Fuzzy)
+        acct_clusters = [] # List of [ {index, creditor, balance, ...} ]
+
         for i, acc in enumerate(accounts):
-            orig = str(acc.get('original_creditor') or '').strip().lower()
+            orig = str(acc.get('original_creditor') or '').strip()
             balance = acc.get('current_balance', '0')
             try:
                 bal_float = float(str(balance).replace(',', '').replace('$', ''))
                 bal_bucket = round(bal_float / 100) * 100
             except (ValueError, TypeError):
                 bal_bucket = 0
-            except Exception as e:
-                logger.error(f"Unexpected error calculating balance bucket in DU2 check: {e}")
-                bal_bucket = 0
+            
+            if not orig or bal_bucket == 0: continue
 
-            if orig and bal_bucket > 0:
-                key = f"{orig}|{bal_bucket}"
-                if key not in potential_dupes:
-                    potential_dupes[key] = []
-                potential_dupes[key].append({
+            # Find matching cluster
+            found = False
+            for cluster in acct_clusters:
+                # Same bucket and fuzzy matching creditor
+                if cluster[0]['bal_bucket'] == bal_bucket and self._fuzzy_match(cluster[0]['orig'], orig):
+                    cluster.append({
+                        'index': i,
+                        'furnisher': acc.get('furnisher_or_collector', ''),
+                        'account_number': acc.get('account_number', ''),
+                        'balance': balance,
+                        'orig': orig,
+                        'bal_bucket': bal_bucket
+                    })
+                    found = True
+                    break
+            
+            if not found:
+                acct_clusters.append([{
                     'index': i,
                     'furnisher': acc.get('furnisher_or_collector', ''),
                     'account_number': acc.get('account_number', ''),
-                    'balance': balance
-                })
+                    'balance': balance,
+                    'orig': orig,
+                    'bal_bucket': bal_bucket
+                }])
 
-        for key, accts in potential_dupes.items():
-            if len(accts) >= 2:
-                acct_nums = set(a['account_number'] for a in accts if a['account_number'])
+        for cluster in acct_clusters:
+            if len(cluster) >= 2:
+                acct_nums = set(a['account_number'] for a in cluster if a['account_number'] and a['account_number'] != 'Unknown')
                 if len(acct_nums) >= 2:
                     rule = self.rules.get('DU2', {})
                     flags.append({
@@ -260,101 +407,81 @@ class RuleEngine:
                         'rule_name': rule.get('name', 'Different Account Numbers'),
                         'severity': rule.get('severity', 'medium'),
                         'explanation': (
-                            f"Multiple accounts with different numbers ({', '.join(acct_nums)}) appear to "
-                            f"reference the same original debt. Balances: {', '.join(a['balance'] for a in accts)}."
+                            f"Identified {len(cluster)} accounts with different numbers ({', '.join(acct_nums)}) that "
+                            f"reference the same underlying debt for '{cluster[0]['orig']}'. Balances are within the same range."
                         ),
                         'why_it_matters': rule.get('why_it_matters', ''),
                         'suggested_evidence': rule.get('suggested_evidence', []),
-                        'involved_indices': [a['index'] for a in accts],
+                        'involved_indices': [a['index'] for a in cluster],
                         'legal_citations': rule.get('legal_citations', [])
                     })
+
+        # Rule DU3: Subsidiary/Alias Duplicate Reporting (Institutional Forensic)
+        # Catches duplicates reported by different legal entities owned by the same parent (e.g. Midland vs MCM)
+        normalized_map = {} # normalized_name -> [indices]
+        for i, acc in enumerate(accounts):
+            norm = acc.get('normalized_furnisher')
+            if norm and norm != 'Unknown':
+                if norm not in normalized_map:
+                    normalized_map[norm] = []
+                normalized_map[norm].append(i)
+        
+        for norm_name, indices in normalized_map.items():
+            if len(indices) >= 2:
+                # Check if they look like the same debt (similar balance or original creditor)
+                # Group indices by original creditor snippet
+                creditor_groups = {}
+                for idx in indices:
+                    acc = accounts[idx]
+                    orig = str(acc.get('original_creditor') or '').strip().lower()[:10]
+                    if orig not in creditor_groups:
+                        creditor_groups[orig] = []
+                    creditor_groups[orig].append(idx)
+                
+                for orig_prefix, group_indices in creditor_groups.items():
+                    if len(group_indices) >= 2:
+                        furnishers = [accounts[idx].get('furnisher_or_collector', 'Unknown') for idx in group_indices]
+                        # Only flag if the actual names reported are different (otherwise DU1 handles it)
+                        if len(set(furnishers)) > 1:
+                            rule = self.rules.get('DU3', {})
+                            flags.append({
+                                'rule_id': 'DU3',
+                                'rule_name': rule.get('name', 'Subsidiary Duplicate Reporting'),
+                                'severity': rule.get('severity', 'high'),
+                                'explanation': (
+                                    f"Institutional Duplicate detected: The same debt for '{accounts[group_indices[0]]['original_creditor']}' "
+                                    f"is being reported by different subsidiaries of the same parent company ({norm_name.upper()}): "
+                                    f"{', '.join(furnishers)}. This often masks double-counting of the same liability."
+                                ),
+                                'why_it_matters': rule.get('why_it_matters', ''),
+                                'suggested_evidence': rule.get('suggested_evidence', []),
+                                'involved_indices': group_indices,
+                                'legal_citations': rule.get('legal_citations', [])
+                            })
 
         return flags
 
     def check_all_rules(self, fields: Dict[str, Any]) -> List[RuleFlag]:
         """
-        Run all rules against the provided fields.
+        Run all registered rules against the provided fields.
+        Uses automatic discovery to ensure zero maintenance when adding new rules.
         """
         flags = []
-
-        # Timeline rules (A-series)
-        for check in [self._check_rule_a1, self._check_rule_a2]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Re-aging indicators (B-series)
-        for check in [self._check_rule_b1, self._check_rule_b2]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Status/Balance rules (D-series)
-        flag = self._check_rule_d1(fields)
-        if flag: flags.append(flag)
-
-        # Data integrity (E-series)
-        flag = self._check_rule_e1(fields)
-        if flag: flags.append(flag)
-
-        # Payment/Balance manipulation (F-series)
-        for check in [self._check_rule_f1, self._check_rule_f2]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Fee/Interest abuse (G-series)
-        for check in [self._check_rule_g1, self._check_rule_g2]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Medical debt rules (H-series)
-        for check in [self._check_rule_h1, self._check_rule_h2, self._check_rule_h3]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Credit limit manipulation (I-series)
-        for check in [self._check_rule_i1, self._check_rule_i2]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Zombie debt (J-series)
-        flag = self._check_rule_j1(fields)
-        if flag: flags.append(flag)
-
-        # Bankruptcy rules (BK-series)
-        flag = self._check_rule_bk1(fields)
-        if flag: flags.append(flag)
-
-        # Student Loan rules (SL-series)
-        flag = self._check_rule_sl1(fields)
-        if flag: flags.append(flag)
-
-        # Advanced Audit rules (UC/ZR series)
-        for check in [self._check_rule_uc1, self._check_rule_zr1, self._check_rule_md1,
-                      self._check_rule_mil1, self._check_rule_cot1, self._check_rule_st1,
-                      self._check_rule_tb1]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Innovative rules (K-series)
-        for check in [self._check_rule_k1, self._check_rule_k2, self._check_rule_k3,
-                      self._check_rule_k4, self._check_rule_k5, self._check_rule_k6,
-                      self._check_rule_k7]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # SOL rules (S-series)
-        for check in [self._check_rule_s1, self._check_rule_s2]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Metro2 Compliance Rules (M-series)
-        for check in [self._check_rule_m1, self._check_rule_m2]:
-            flag = check(fields)
-            if flag: flags.append(flag)
-
-        # Lexical & Logic Consistency (L-series)
-        flag = self._check_rule_l1(fields)
-        if flag: flags.append(flag)
-
+        
+        # Pre-process for forensic integrity
+        model = TradelineModel.from_dict(fields)
+        
+        # Execute registered rules
+        for rule_func in self._registry:
+            try:
+                # Most rules currently expect Dict[str, Any], we pass fields
+                # but we could eventually migrate them to use TradelineModel
+                flag = rule_func(fields)
+                if flag:
+                    flags.append(flag)
+            except Exception as e:
+                logger.error(f"Error executing rule {rule_func.__name__}: {e}")
+        
         return flags
 
     def check_cross_bureau(self, bureau_data: List[Dict[str, Any]]) -> List[RuleFlag]:
@@ -544,6 +671,26 @@ class RuleEngine:
                     logger.error(f"Unexpected error in _check_rule_e1 for field {field}: {e}")
         return None
 
+    def _check_rule_e2(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """E2: Impossible Reporting Timeline (Reported < DOFD)"""
+        dofd = fields.get('dofd')
+        reported = fields.get('date_reported_or_updated')
+        
+        if not dofd or not reported: return None
+        if not validate_iso_date(dofd) or not validate_iso_date(reported): return None
+        
+        try:
+            dofd_dt = datetime.strptime(dofd, '%Y-%m-%d')
+            reported_dt = datetime.strptime(reported, '%Y-%m-%d')
+            
+            if reported_dt < dofd_dt:
+                return self._create_flag('E2',
+                    f"Impossible Timeline: The account was reported as updated on {reported}, which is BEFORE the Date of First Delinquency ({dofd}). Information cannot be reported before the delinquency occurred.",
+                    {'date_reported': reported, 'dofd': dofd})
+        except ValueError:
+            pass
+        return None
+
     # ============ PAYMENT/BALANCE MANIPULATION (F-series) ============
 
     def _check_rule_f1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -590,6 +737,27 @@ class RuleEngine:
             logger.debug(f"Invalid date format in F2 check: dofd={dofd}, activity={date_last_activity}")
         except Exception as e:
             logger.error(f"Unexpected error in _check_rule_f2: {e}")
+        return None
+
+    def _check_rule_f3(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """F3: Payment-to-Balance Ratio Anomaly"""
+        current_balance = fields.get('current_balance')
+        past_due_amount = fields.get('past_due_amount')
+        monthly_payment = fields.get('monthly_payment_amount')
+        
+        if not current_balance or not past_due_amount: return None
+        
+        try:
+            curr = float(str(current_balance).replace(',', '').replace('$', ''))
+            pdue = float(str(past_due_amount).replace(',', '').replace('$', ''))
+            
+            # If past due is greater than 50% of total balance on a standard tradeline
+            # This often indicates high-interest accumulation that outweighs any payments made
+            if curr > 0 and (pdue / curr) > 0.5:
+                return self._create_flag('F3',
+                    f"Payment-to-Balance Anomaly: The past due amount (${pdue:,.2f}) accounts for { (pdue/curr)*100:.1f}% of the total balance (${curr:,.2f}). This suggests the debt is spiraling due to predatory interest or fees, making it impossible to satisfy under FDCPA guidelines.",
+                    {'current_balance': curr, 'past_due': pdue, 'ratio': round(pdue/curr, 2)})
+        except (ValueError, TypeError, ZeroDivisionError): pass
         return None
 
     # ============ FEE/INTEREST ABUSE (G-series) ============
@@ -867,11 +1035,29 @@ class RuleEngine:
             # If the collection account was opened AFTER the SOL expired
             if opened_dt > sol_expiry:
                 months_after = (opened_dt.year - sol_expiry.year) * 12 + (opened_dt.month - sol_expiry.month)
+                
+                # Add tolling info if available
+                from app.state_sol import get_state_sol
+                state_sol = get_state_sol(state_code)
+                tolling_info = f" (Subject to tolling/clock-pausing rules defined in {state_sol.tolling_statute})" if state_sol and state_sol.tolling_statute else ""
+
                 if months_after > 3: # 3 month buffer
                     return self._create_flag('ZR1',
-                        f"Zombie Debt Detected: This account was opened/reported on {date_opened}, which is {months_after} months AFTER the legal statute of limitations for this debt expired ({sol_expiry.strftime('%Y-%m-%d')}). This is a common tactic for illegal debt resuscitation.",
+                        f"Zombie Debt Detected: This account was opened/reported on {date_opened}, which is {months_after} months AFTER the legal statute of limitations for this debt expired ({sol_expiry.strftime('%Y-%m-%d')}).{tolling_info} This is a characteristic of uncollectible debt resuscitation.",
                         {'dofd': dofd, 'sol_years': sol_years, 'sol_expiry': sol_expiry.strftime('%Y-%m-%d'), 'opened': date_opened})
         except ValueError: pass
+        return None
+
+    def _check_rule_j3(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """J3: Missing Original Creditor (Chain of Title)"""
+        account_type = str(fields.get('account_type') or '').lower()
+        orig_creditor = str(fields.get('original_creditor') or '').lower()
+        
+        if 'collection' in account_type:
+            if not orig_creditor or any(term in orig_creditor for term in ['unknown', 'none', 'n/a']):
+                return self._create_flag('J3',
+                    f"Chain of Title Defect: This account is listed as a collection, but the 'Original Creditor' is missing or marked as unknown. Reporting a collection without the original debt source is a violation of the FCRA's requirement for clarity.",
+                    {'account_type': account_type, 'original_creditor': orig_creditor})
         return None
 
     def _check_rule_md1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
@@ -1115,11 +1301,18 @@ class RuleEngine:
                 {'remarks': remarks, 'furnisher': furnisher})
         return None
 
-    def _check_rule_tb1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
-        """TB1: Treble Damage Risk Indicator"""
-        # This rule fires if there is a combination of High-Severity violations on one tradeline
-        # It's an aggregate rule called manually or via check_all_rules context
-        return None  # Will be handled by the aggregator for logic flow
+    def _check_rule_tb1_no_op(self, fields: Dict[str, Any]) -> None:
+        return None
+
+    def _check_rule_tb1(self, fields: Dict[str, Any], current_flags: List[RuleFlag]) -> Optional[RuleFlag]:
+        """TB1: High-Confidence Systematic Violation"""
+        high_severity_count = len([f for f in current_flags if f.severity == 'high' or f.severity == 'critical'])
+        
+        if high_severity_count >= 3:
+            return self._create_flag('TB1',
+                f"Systematic Audit Failure: This tradeline contains {high_severity_count} independent high-severity violations. This concentration of errors indicates a systemic reporting failure by the furnisher, providing strong evidentiary leverage for a full deletion request.",
+                {'violation_count': high_severity_count})
+        return None
 
     # ============ METRO2 COMPLIANCE RULES (M-series) ============
 
@@ -1168,6 +1361,67 @@ class RuleEngine:
                 logger.error(f"Unexpected error in _check_rule_m2: {e}")
         return None
 
+    def _check_rule_m3(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """M3: Metro2 Internal Status Code Conflict"""
+        m2_code = fields.get('metro2_status_code')
+        status_text = str(fields.get('account_status') or '').lower()
+
+        if not m2_code:
+            return None
+
+        # Standard Metro2 Status Interpretations
+        m2_definitions = {
+            "11": "current",
+            "13": "paid",
+            "62": "charge-off",
+            "64": "collection",
+            "71": "30 days past due",
+            "78": "60 days past due",
+            "80": "90 days past due",
+            "82": "120 days past due",
+            "83": "150 days past due",
+            "84": "180 days past due",
+            "97": "unpaid collection"
+        }
+
+        m2_desc = m2_definitions.get(str(m2_code))
+        if not m2_desc:
+            return None
+
+        # Check for significant conflicts
+        conflict = False
+        if m2_code in ["64", "97"] and any(s in status_text for s in ["current", "paid", "zero balance"]):
+            conflict = True
+        elif m2_code in ["11", "13"] and any(s in status_text for s in ["collection", "charge-off", "delinquent", "default"]):
+            conflict = True
+        elif m2_code == "62" and "charge-off" not in status_text and "collection" not in status_text:
+            # If code is 62 (CO) but text says something else like "Active"
+            if "current" in status_text or "paid" in status_text:
+                conflict = True
+
+        if conflict:
+            return self._create_flag('M3',
+                f"Metro2 Internal Conflict: The internal status code '{m2_code}' ({m2_desc.upper()}) contradicts the displayed status text '{status_text.upper()}'. This internal data mismatch is a common indicator of deceptive or negligent reporting practices.",
+                {'metro2_code': m2_code, 'status_text': status_text, 'interpreted_meaning': m2_desc})
+
+        return None
+
+    def _check_rule_m4(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """M4: Account Status/Payment Profile Discordance"""
+        status = str(fields.get('account_status') or '').upper()
+        profile = str(fields.get('payment_profile') or str(fields.get('payment_history') or '')).upper()
+        
+        if not profile or len(profile) < 1: return None
+        
+        # Check if latest month in profile (usually first char) is 'C' (Charge-off) but status is 'Current'
+        latest = profile[0]
+        if latest == 'C' and ('CURRENT' in status or 'PAYS AS AGREED' in status):
+            return self._create_flag('M4', 
+                f"Data Integrity Failure: The Payment Profile shows a 'Charge-off' (C) for the most recent month, but the Account Status is reported as '{status}'. These values are logically incompatible under Metro2 standards.",
+                {'status': status, 'latest_profile_char': latest})
+        
+        return None
+
     def _check_rule_l1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
         """L1: Lexical Consistency: Status vs History"""
         status = str(fields.get('account_status') or '').lower()
@@ -1203,6 +1457,54 @@ class RuleEngine:
                 return self._create_flag('ST1',
                     f"Stale Update Anomaly: This account was closed on {date_closed} but received a status update on {date_reported} (over 2 years later). Frequent updates on old, closed debt are often used to artificially influence credit scores.",
                     {'date_closed': date_closed, 'date_reported': date_reported})
+        except Exception: pass
+        return None
+
+    def _check_rule_sr1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """SR1: State-Specific Regulatory Flag"""
+        state = fields.get('state_code')
+        if not state: return None
+        
+        state = state.upper()
+        if state == 'CA':
+            # Mention Rosenthal Act for furnishers
+            return self._create_flag('SR1', 
+                "California Regulatory Flag: Under the Rosenthal Fair Debt Collection Practices Act (RFDCPA), both creditors and collectors must maintain rigorous standards for accuracy. The identified reporting failures are potentially actionable under CA Civil Code § 1788.",
+                {'state': 'CA'})
+        
+        if state == 'MA':
+            # Strong consumer protection
+            return self._create_flag('SR1',
+                "Massachusetts Regulatory Flag: Massachusetts provides expansive consumer protections under M.G.L. c. 93A. Inaccuracies in financial reporting are considered unfair or deceptive practices in this jurisdiction.",
+                {'state': 'MA'})
+
+        if state == 'NY':
+            # Mention CCFA
+            return self._create_flag('SR1',
+                "New York Regulatory Flag: The New York Consumer Credit Fairness Act (CCFA) has significantly tightened reporting and collection requirements. Inaccuracies on older debt may trigger enhanced liability under NY laws.",
+                {'state': 'NY'})
+        
+        return None
+        return None
+
+    def _check_rule_pb1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """PB1: Partial Payment Deception / SOL Baiting"""
+        last_pay = fields.get('date_last_payment')
+        removal_date = fields.get('estimated_removal_date')
+
+        if not last_pay or not removal_date: return None
+        if not validate_iso_date(last_pay) or not validate_iso_date(removal_date): return None
+
+        try:
+            pay_dt = datetime.strptime(last_pay, '%Y-%m-%d')
+            rem_dt = datetime.strptime(removal_date, '%Y-%m-%d')
+
+            # If a payment was made within 6 months of the expected removal date
+            days_until_removal = (rem_dt - pay_dt).days
+            if 0 < days_until_removal < 180:
+                return self._create_flag('PB1',
+                    f"Suspicious Payment Activity: A payment was recorded on {last_pay}, which is only {days_until_removal} days before this account was scheduled for removal ({removal_date}). This may indicate a 'reset' of the statute of limitations through targeted solicitation of a partial payment right before credit expiration.",
+                    {'date_last_payment': last_pay, 'removal_date': removal_date, 'days_before_removal': days_until_removal})
         except Exception: pass
         return None
 
@@ -1245,6 +1547,27 @@ class RuleEngine:
             logger.debug(f"Invalid date format in S2 check: dofd={dofd}, payment={date_last_payment}")
         except Exception as e:
             logger.error(f"Unexpected error in _check_rule_s2: {e}")
+        return None
+
+    def _check_rule_s3(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """S3: Excessive Balance Growth (Negative Amortization)"""
+        curr_str = fields.get('current_balance')
+        orig_str = fields.get('original_balance') or fields.get('credit_limit')
+        
+        if not curr_str or not orig_str: return None
+        
+        try:
+            curr = float(str(curr_str).replace(',', '').replace('$', ''))
+            orig = float(str(orig_str).replace(',', '').replace('$', ''))
+            
+            if orig > 0 and curr > (orig * 1.5):
+                growth_pct = ((curr - orig) / orig) * 100
+                return self._create_flag('S3',
+                    f"Excessive Balance Growth: The reported balance (${curr:,.2f}) is {growth_pct:.1f}% higher than the original amount (${orig:,.2f}). This indicates extreme interest/fee accumulation which may be challengeable as unauthorized under the FDCPA.",
+                    {'current': curr, 'original': orig, 'growth_pct': growth_pct})
+        except ValueError:
+            pass
+            
         return None
 
 
@@ -1522,14 +1845,14 @@ class PatternScorer:
         base_score = self.calculate_base_score(flags)
         patterns = self.detect_patterns(flags)
 
-        # Check for TB1 (Treble Damage) if multiple critical violations exist
+        # Check for TB1 (Systematic Violation) if multiple critical violations exist
         high_severity_rules = [f.get('rule_id') for f in flags if f.get('severity') in ['high', 'critical']]
         if len(high_severity_rules) >= 3:
             # Inject TB1 if not present
             if 'TB1' not in [f.get('rule_id') for f in flags]:
                 engine = RuleEngine()
                 tb1_flag = engine._create_flag('TB1', 
-                    f"Aggregate Risk: {len(high_severity_rules)} high/critical violations detected on a single tradeline. This significantly increases the legal weight and potential for statutory treble damages.",
+                    f"Aggregate Risk: {len(high_severity_rules)} high/critical violations detected on a single tradeline. This concentration of errors suggests a high probability of successful dispute due to systemic reporting failure.",
                     {'violation_count': len(high_severity_rules)})
                 flags.append(tb1_flag.to_dict())
 

@@ -31,31 +31,11 @@ export function generatePDFBlob(content: string): Blob {
   const doc = new jsPDF();
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(11);
-  const splitText = doc.splitTextToSize(content, 180);
-  doc.text(splitText, 15, 20);
-  return doc.output('blob');
-}
-
-function buildForensicReportDoc(
-  fields: CreditFields,
-  flags: RuleFlag[],
-  risk: RiskProfile,
-  caseLaw: CaseLaw[],
-  consumer: ConsumerInfo,
-  discoveryAnswers: Record<string, string>
-): jsPDF {
-  const doc = new jsPDF();
-  let y = 20;
-
-  // Header
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.text('Forensic Investigation Report', 105, y, { align: 'center' });
-  y += 10;
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Report ID: FIR-${Date.now().toString(36).toUpperCase()}`, 105, y, { align: 'center' });
+  doc.text(`Overall Risk Index: ${risk.overallScore}/100`, 20, y);
+  doc.text(`Dispute Strength: ${risk.disputeStrength.toUpperCase()}`, 100, y);
+  y += 7;
+  doc.text(`Litigation Potential: ${risk.litigationPotential ? 'HIGH' : 'LOW'}`, 20, y);
+  doc.text(`Forensic Confidence: ${Math.max(...flags.map(f => (f as any).forensicConfidence || 0), 0)}%`, 100, y);
   y += 15;
 
   // Subject Information
@@ -94,32 +74,17 @@ function buildForensicReportDoc(
   flags.forEach((flag, i) => {
     if (y > 250) { doc.addPage(); y = 20; }
     doc.setFont('helvetica', 'bold');
-    doc.text(`${i + 1}. ${flag.ruleName} [${flag.ruleId}]`, 20, y);
+    doc.text(`${i + 1}. ${flag.ruleName} [${flag.ruleId}] - ${flag.severity.toUpperCase()}`, 20, y);
     y += 5;
     doc.setFont('helvetica', 'normal');
     const lines = doc.splitTextToSize(flag.explanation, 160);
     doc.text(lines, 25, y);
     y += (lines.length * 4) + 2;
 
-    // Discovery Answers
-    if (flag.discoveryQuestions) {
-      flag.discoveryQuestions.forEach((q, j) => {
-        const ans = discoveryAnswers[`${flag.ruleId}-${j}`];
-        if (ans) {
-          if (y > 270) { doc.addPage(); y = 20; }
-          doc.setFont('helvetica', 'bold');
-          doc.text(`Q: ${q}`, 30, y);
-          y += 4;
-          doc.setFont('helvetica', 'italic');
-          const ansLines = doc.splitTextToSize(`A: ${ans}`, 150);
-          doc.text(ansLines, 30, y);
-          y += (ansLines.length * 4) + 2;
-          doc.setFont('helvetica', 'normal');
-        }
-      });
-    }
-
-    doc.text(`Success Prob: ${flag.successProbability}% | Citations: ${flag.legalCitations.join(', ')}`, 25, y);
+    // Citations and metadata
+    doc.setFontSize(8);
+    doc.text(`Success Prob: ${flag.successProbability}% | Willfulness: ${(flag as any).willfulnessScore || 'N/A'}% | Citations: ${flag.legalCitations.join(', ')}`, 25, y);
+    doc.setFontSize(9);
     y += 7;
   });
   y += 5;

@@ -5,6 +5,8 @@ import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { Step } from '../../lib/constants';
 import { DamageEstimate } from '../../lib/evidence-builder';
 import { ConsumerInfo } from '../../lib/generator';
+import { computeCaseHealth, formatExecutiveBrief } from '../../lib/case-health';
+import { AttorneyPackage } from '../../lib/attorney-export';
 
 type ExportTab = 'letters' | 'attorney' | 'evidence' | 'cfpb';
 
@@ -23,6 +25,7 @@ interface Step5ExportProps {
   editableFields: CreditFields;
   flags: RuleFlag[];
   riskProfile: RiskProfile;
+  discoveryAnswers: Record<string, string>;
   damageEstimate: DamageEstimate | null;
   translate: (key: string) => string;
   downloadDocument: (type: 'bureau' | 'validation' | 'cfpb' | 'summary', format?: 'pdf' | 'txt') => void;
@@ -33,6 +36,8 @@ interface Step5ExportProps {
   formatEvidencePackage: Function;
   buildAttorneyPackage: Function;
   formatAttorneyPackage: Function;
+  formatRedactedAttorneyPackage: Function;
+  buildOutcomeNarrative: (pkg: AttorneyPackage) => string;
   formatCurrency: (amount: number) => string;
   downloadAnalysisJson: () => void;
   downloadCaseBundle: () => void;
@@ -57,6 +62,7 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   editableFields,
   flags,
   riskProfile,
+  discoveryAnswers,
   damageEstimate,
   translate,
   downloadDocument,
@@ -67,6 +73,8 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   formatEvidencePackage,
   buildAttorneyPackage,
   formatAttorneyPackage,
+  formatRedactedAttorneyPackage,
+  buildOutcomeNarrative,
   formatCurrency,
   downloadAnalysisJson,
   downloadCaseBundle,
@@ -75,6 +83,23 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   downloadTextFile,
   downloadPdfFile
 }) => {
+  const caseHealth = computeCaseHealth(editableFields, flags, discoveryAnswers, riskProfile);
+  const executiveBrief = formatExecutiveBrief(caseHealth, editableFields, flags);
+  const attorneyPackage = React.useMemo(() => buildAttorneyPackage(editableFields, flags, riskProfile, {
+    name: consumer.name || '',
+    address: consumer.address || '',
+    city: consumer.city || '',
+    state: consumer.state || '',
+    zip: consumer.zip || '',
+    phone: consumer.phone,
+    email: consumer.email
+  }), [buildAttorneyPackage, consumer, editableFields, flags, riskProfile]);
+  const evidencePreview = React.useMemo(() => {
+    const pkg = buildEvidencePackage(editableFields, flags, riskProfile, consumer.name || 'Client', consumer.state || '');
+    return formatEvidencePackage(pkg).split('\n').slice(0, 10).join('\n');
+  }, [buildEvidencePackage, consumer.name, consumer.state, editableFields, flags, formatEvidencePackage, riskProfile]);
+  const outcomeNarrative = React.useMemo(() => buildOutcomeNarrative(attorneyPackage), [attorneyPackage, buildOutcomeNarrative]);
+
   return (
     <div className="fade-in max-w-5xl mx-auto">
       {/* Hero Header */}
@@ -93,6 +118,177 @@ const Step5Export: React.FC<Step5ExportProps> = ({
           <p className="text-slate-400 text-lg">
             Generate dispute letters, CFPB complaints, evidence packages, and attorney referral bundles with proper legal citations.
           </p>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 mb-10">
+        <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Executive Readiness</p>
+              <h3 className="text-lg font-bold dark:text-white">Case health snapshot</h3>
+            </div>
+            <span className="text-xs font-mono text-slate-400">Grade {caseHealth.grade}</span>
+          </div>
+          <div className="flex items-center gap-6 mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-slate-900 text-white flex flex-col items-center justify-center">
+              <span className="text-xs uppercase tracking-widest">Score</span>
+              <strong className="text-xl">{caseHealth.score}</strong>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{caseHealth.summary}</p>
+              <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div className="h-full bg-emerald-500" style={{ width: `${caseHealth.readiness}%` }} />
+              </div>
+              <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-2">Evidence readiness {caseHealth.readiness}%</p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Key Risks</p>
+              <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                {caseHealth.keyRisks.length > 0 ? caseHealth.keyRisks.map((risk, idx) => (
+                  <li key={idx}>{risk}</li>
+                )) : <li>No major risk flags detected.</li>}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-emerald-500/20 p-4 bg-emerald-500/5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-2">Recommendations</p>
+              <ul className="text-xs text-emerald-900/70 space-y-1">
+                {caseHealth.recommendations.map((rec, idx) => (
+                  <li key={idx}>{rec}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="premium-card p-6 border-indigo-500/20 bg-indigo-500/5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-2">Briefing Pack</p>
+          <h3 className="text-lg font-bold text-indigo-900 mb-4">Export the executive brief</h3>
+          <p className="text-sm text-indigo-900/70 mb-6">Generate a concise, shareable summary before sending legal packets.</p>
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              className="btn btn-primary !rounded-xl"
+              onClick={() => downloadTextFile(executiveBrief, 'executive_case_brief.txt')}
+            >
+              Download Brief (TXT)
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary !rounded-xl"
+              onClick={() => downloadAnalysisJson()}
+            >
+              Export Case Data (JSON)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="premium-card p-6 mb-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Export Preview</p>
+            <h3 className="text-lg font-bold dark:text-white">Live dossier snapshots</h3>
+          </div>
+          <span className="text-xs font-mono text-slate-400">Auto-refresh</span>
+        </div>
+        <div className="grid lg:grid-cols-3 gap-4">
+          <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Executive Brief</p>
+            <pre className="text-[11px] text-slate-600 dark:text-slate-400 whitespace-pre-wrap line-clamp-6">{executiveBrief}</pre>
+            <button
+              type="button"
+              className="mt-3 btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+              onClick={() => downloadTextFile(executiveBrief, 'executive_case_brief.txt')}
+            >
+              Download Brief
+            </button>
+          </div>
+          <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Evidence Package</p>
+            <pre className="text-[11px] text-slate-600 dark:text-slate-400 whitespace-pre-wrap line-clamp-6">{evidencePreview}</pre>
+            <button
+              type="button"
+              className="mt-3 btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+              onClick={() => downloadPdfFile(formatEvidencePackage(buildEvidencePackage(editableFields, flags, riskProfile, consumer.name || 'Client', consumer.state || '')), 'evidence_package.pdf')}
+            >
+              Export Evidence PDF
+            </button>
+          </div>
+          <div className="rounded-2xl border border-indigo-500/20 p-4 bg-indigo-500/5">
+            <p className="text-[10px] uppercase tracking-widest text-indigo-500 mb-2">Outcome Narrative</p>
+            <pre className="text-[11px] text-indigo-900/70 whitespace-pre-wrap line-clamp-6">{outcomeNarrative}</pre>
+            <button
+              type="button"
+              className="mt-3 btn btn-primary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+              onClick={() => downloadPdfFile(outcomeNarrative, 'outcome_narrative.pdf')}
+            >
+              Export Narrative PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="premium-card p-6 mb-10 bg-slate-50/60 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Export Gallery</p>
+            <h3 className="text-lg font-bold dark:text-white">One-click deliverables</h3>
+          </div>
+          <span className="text-xs font-mono text-slate-400">PDF + ZIP + TXT</span>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/80 dark:bg-slate-900/50">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Bureau Dispute</p>
+            <h4 className="text-sm font-semibold dark:text-white mb-2">Bureau Letter Pack</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Print-ready PDF letters with violations and evidence list.</p>
+            <button
+              type="button"
+              className="mt-3 btn btn-primary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+              onClick={() => downloadDocument('bureau', 'pdf')}
+            >
+              Download PDF
+            </button>
+          </div>
+          <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/80 dark:bg-slate-900/50">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Debt Validation</p>
+            <h4 className="text-sm font-semibold dark:text-white mb-2">Collector Validation</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">FDCPA-compliant validation letter and evidence checklist.</p>
+            <button
+              type="button"
+              className="mt-3 btn btn-secondary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+              onClick={() => downloadDocument('validation', 'pdf')}
+            >
+              Download PDF
+            </button>
+          </div>
+          <div className="rounded-2xl border border-indigo-500/20 p-4 bg-indigo-500/5">
+            <p className="text-[10px] uppercase tracking-widest text-indigo-500 mb-2">Regulatory</p>
+            <h4 className="text-sm font-semibold text-indigo-900 mb-2">CFPB Narrative</h4>
+            <p className="text-xs text-indigo-900/70">Generate the structured complaint narrative for submission.</p>
+            <button
+              type="button"
+              className="mt-3 btn btn-secondary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+              onClick={() => downloadDocument('cfpb', 'txt')}
+            >
+              Download TXT
+            </button>
+          </div>
+          <div className="rounded-2xl border border-emerald-500/20 p-4 bg-emerald-500/5">
+            <p className="text-[10px] uppercase tracking-widest text-emerald-600 mb-2">Full Bundle</p>
+            <h4 className="text-sm font-semibold text-emerald-900 mb-2">Case ZIP Bundle</h4>
+            <p className="text-xs text-emerald-900/70">Package all exports into a single ZIP for attorney handoff.</p>
+            <button
+              type="button"
+              className="mt-3 btn btn-primary !rounded-xl !px-4 !py-2 !text-[10px] !uppercase !tracking-widest"
+              onClick={downloadCaseBundleZip}
+              disabled={isBundling}
+            >
+              {isBundling ? 'Bundling...' : 'Download ZIP'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -221,6 +417,34 @@ const Step5Export: React.FC<Step5ExportProps> = ({
               >
                 Download Snapshot
               </button>
+            </div>
+
+            <div className="premium-card p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 bg-indigo-500/5 border-indigo-500/10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center shrink-0 text-indigo-500">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-5a2 2 0 012-2h2a2 2 0 012 2v5m-8 0h8m4 0h2M3 17h2m4-10h6m-6 4h6" /></svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold dark:text-white">Executive Case Brief</h3>
+                  <p className="text-sm text-slate-500">One-page health score for partners, leadership, or attorney intake.</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  className="btn btn-primary !rounded-xl !py-3 !px-6 shadow-xl shadow-indigo-900/10"
+                  onClick={() => downloadPdfFile(executiveBrief, 'executive_case_brief.pdf')}
+                >
+                  Export PDF
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary !rounded-xl !py-3 !px-6 dark:border-slate-700 dark:text-white"
+                  onClick={() => downloadTextFile(executiveBrief, 'executive_case_brief.txt')}
+                >
+                  Export TXT
+                </button>
+              </div>
             </div>
 
             <div className="premium-card p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 bg-emerald-500/5 border-emerald-500/10">
@@ -430,6 +654,56 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                     >
                       Export TXT
                     </button>
+                  </div>
+                  <div className="mt-6 p-4 rounded-2xl border border-dashed border-purple-500/30 bg-purple-500/5">
+                    <p className="text-[10px] uppercase tracking-widest text-purple-500 mb-2">Client/Attorney Handoff Mode</p>
+                    <p className="text-xs text-slate-500 mb-4">Generate a redacted version for safe sharing before engagement letters are signed.</p>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        className="px-5 py-2.5 bg-purple-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg transition-all active:scale-95"
+                        onClick={() => {
+                          const pkg = buildAttorneyPackage(
+                            editableFields,
+                            flags,
+                            riskProfile!,
+                            {
+                              name: consumer.name || '',
+                              address: consumer.address || '',
+                              city: '',
+                              state: consumer.state || '',
+                              zip: ''
+                            }
+                          );
+                          const content = formatRedactedAttorneyPackage(pkg);
+                          downloadPdfFile(content, 'attorney_redacted_packet.pdf');
+                        }}
+                      >
+                        Redacted PDF
+                      </button>
+                      <button
+                        type="button"
+                        className="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold uppercase tracking-widest transition-all hover:bg-slate-50 dark:hover:bg-slate-700"
+                        onClick={() => {
+                          const pkg = buildAttorneyPackage(
+                            editableFields,
+                            flags,
+                            riskProfile!,
+                            {
+                              name: consumer.name || '',
+                              address: consumer.address || '',
+                              city: '',
+                              state: consumer.state || '',
+                              zip: ''
+                            }
+                          );
+                          const content = formatRedactedAttorneyPackage(pkg);
+                          downloadTextFile(content, 'attorney_redacted_packet.txt');
+                        }}
+                      >
+                        Redacted TXT
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
