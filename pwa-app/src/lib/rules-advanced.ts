@@ -30,8 +30,8 @@ import { parseDate, RULE_DEFINITIONS, STATE_SOL } from './rules';
 export interface AdvancedRuleFlag extends Omit<RuleFlag, 'severity'> {
   severity: 'low' | 'medium' | 'high' | 'critical'; // Extended to include critical
   willfulnessScore: number; // 0-100, higher = more likely willful
-  statutoryDamageRange: { min: number; max: number };
-  actualDamageCategories: string[];
+  statutoryLiabilityScore: number;
+  impactCategories: string[];
   chainOfCustodyIssue: boolean;
   crossBureauContradiction: boolean;
   forensicConfidence: number; // 0-100
@@ -91,8 +91,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
   severity: 'low' | 'medium' | 'high' | 'critical';
   successProbability: number;
   willfulnessIndicator: number; // 0-100
-  statutoryMin: number;
-  statutoryMax: number;
+  severityWeight: number;
   whyItMatters: string;
   suggestedEvidence: string[];
   legalCitations: string[];

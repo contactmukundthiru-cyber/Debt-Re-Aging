@@ -10,7 +10,7 @@ export interface DeltaResult {
 
 export interface SeriesInsight {
   id: string;
-  type: 'reaging' | 'removal_extension' | 'balance_shift' | 'status_flip' | 'reporting_shift';
+  type: 'reaging' | 'removal_extension' | 'value_shift' | 'status_flip' | 'reporting_shift';
   severity: 'high' | 'medium' | 'low';
   title: string;
   summary: string;
@@ -22,7 +22,7 @@ export interface SeriesSnapshot {
   label: string;
   dofd?: string;
   removal?: string;
-  balance?: string;
+  value?: string;
   status?: string;
   reported?: string;
   lastPayment?: string;
@@ -77,7 +77,7 @@ export function exportComparisonDossier(
   lines.push('');
   lines.push('SNAPSHOT TIMELINE');
   snapshots.forEach(snapshot => {
-    lines.push(`- ${snapshot.label}: Bureau ${snapshot.bureau || '—'} | DOFD ${snapshot.dofd || '—'} | Removal ${snapshot.removal || '—'} | Balance ${snapshot.balance || '—'} | Status ${snapshot.status || '—'} | Last Pay ${snapshot.lastPayment || '—'} | Reported ${snapshot.reported || '—'}`);
+    lines.push(`- ${snapshot.label}: Bureau ${snapshot.bureau || '—'} | DOFD ${snapshot.dofd || '—'} | Removal ${snapshot.removal || '—'} | Value ${snapshot.value || '—'} | Status ${snapshot.status || '—'} | Last Pay ${snapshot.lastPayment || '—'} | Reported ${snapshot.reported || '—'}`);
   });
   lines.push('');
   lines.push('SERIES INSIGHTS');
@@ -110,7 +110,7 @@ export function exportComparisonDossier(
 export function compareReports(oldReport: CreditFields, newReport: CreditFields): DeltaResult[] {
   const deltas: DeltaResult[] = [];
   const fieldsToCompare: (keyof CreditFields)[] = [
-    'dofd', 'dateOpened', 'currentBalance', 'accountStatus', 
+    'dofd', 'dateOpened', 'currentValue', 'accountStatus', 
     'estimatedRemovalDate', 'chargeOffDate', 'dateLastPayment'
   ];
 
@@ -135,20 +135,20 @@ export function compareReports(oldReport: CreditFields, newReport: CreditFields)
           impact = 'positive';
           description = `Removal date accelerated. Item will fall off sooner.`;
         }
-      } else if (field === 'currentBalance') {
-        const oldBal = parseFloat((oldVal as string).replace(/[$,]/g, '')) || 0;
-        const newBal = parseFloat((newVal as string).replace(/[$,]/g, '')) || 0;
-        if (newBal > oldBal) {
+      } else if (field === 'currentValue') {
+        const oldNum = parseFloat((oldVal as string).replace(/[%,]/g, '')) || 0;
+        const newNum = parseFloat((newVal as string).replace(/[%,]/g, '')) || 0;
+        if (newNum > oldNum) {
           impact = 'negative';
-          description = `Balance increased by $${(newBal - oldBal).toFixed(2)}. Check for illegal fee stacking.`;
-        } else if (newBal < oldBal) {
+          description = `Value increased by ${(newNum - oldNum).toFixed(2)}. Check for reporting anomalies.`;
+        } else if (newNum < oldNum) {
           impact = 'positive';
-          description = `Balance decreased. Payments are being applied.`;
+          description = `Value decreased. Corrections are being applied.`;
         }
       } else if (field === 'accountStatus') {
-        if (oldVal.toLowerCase().includes('paid') && newVal.toLowerCase().includes('balance')) {
+        if (oldVal.toLowerCase().includes('paid') && newVal.toLowerCase().includes('value')) {
           impact = 'negative';
-          description = `Zombie Debt Alert: Account previously reported as PAID is now reporting a balance.`;
+          description = `Integrity Alert: Account previously reported as PAID is now reporting a value.`;
         } else if (oldVal.toLowerCase().includes('discharged') && newVal.toLowerCase().includes('collect')) {
           impact = 'negative';
           description = `Bankruptcy Violation: Discharged debt is being resuscitated for collection.`;
@@ -176,7 +176,7 @@ const parseDateSafe = (value?: string) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
-const parseBalanceSafe = (value?: string) => {
+const parseValueSafe = (value?: string) => {
   if (!value) return null;
   const cleaned = value.replace(/[^0-9.-]/g, '');
   const parsed = Number.parseFloat(cleaned);
@@ -305,20 +305,20 @@ export function compareReportSeries(records: AnalysisRecord[], current: CreditFi
   })();
   if (removalBeforeDofdInsight) insights.push(removalBeforeDofdInsight);
 
-  const balances = series
-    .map(item => ({ value: parseBalanceSafe(item.fields.currentBalance), raw: item.fields.currentBalance, stamp: item.timestamp }))
+  const numericalValues = series
+    .map(item => ({ value: parseValueSafe(item.fields.currentValue), raw: item.fields.currentValue, stamp: item.timestamp }))
     .filter(item => item.value !== null);
-  if (balances.length >= 2) {
-    const first = balances[0].value || 0;
-    const last = balances[balances.length - 1].value || 0;
+  if (numericalValues.length >= 2) {
+    const first = numericalValues[0].value || 0;
+    const last = numericalValues[numericalValues.length - 1].value || 0;
     if (last - first > 50) {
       insights.push({
-        id: 'series-balance',
-        type: 'balance_shift',
+        id: 'series-value',
+        type: 'value_shift',
         severity: 'medium',
-        title: 'Balance increased over time',
-        summary: `Balance rose by $${(last - first).toFixed(2)} across report snapshots.`,
-        evidence: balances.map(item => `${formatStamp(item.stamp)} → ${item.raw}`)
+        title: 'Value increased over time',
+        summary: `Value rose by ${(last - first).toFixed(2)} across report snapshots.`,
+        evidence: numericalValues.map(item => `${formatStamp(item.stamp)} → ${item.raw}`)
       });
     }
   }
@@ -326,22 +326,22 @@ export function compareReportSeries(records: AnalysisRecord[], current: CreditFi
   const lastPayments = series
     .map(item => ({ date: parseDateSafe(item.fields.dateLastPayment), raw: item.fields.dateLastPayment, stamp: item.timestamp }))
     .filter(item => item.date);
-  if (lastPayments.length >= 2 && balances.length >= 2) {
+  if (lastPayments.length >= 2 && numericalValues.length >= 2) {
     const firstPayment = lastPayments[0];
     const lastPayment = lastPayments[lastPayments.length - 1];
     const paymentShiftDays = Math.round((lastPayment.date!.getTime() - firstPayment.date!.getTime()) / (1000 * 60 * 60 * 24));
-    const balanceShift = (balances[balances.length - 1].value || 0) - (balances[0].value || 0);
-    if (paymentShiftDays > 120 && balanceShift > 50) {
+    const valueShift = (numericalValues[numericalValues.length - 1].value || 0) - (numericalValues[0].value || 0);
+    if (paymentShiftDays > 120 && valueShift > 50) {
       insights.push({
         id: 'series-payment-regression',
-        type: 'balance_shift',
+        type: 'value_shift',
         severity: 'medium',
         title: 'Payment history regression',
-        summary: 'Last payment date moved forward while balance increased, indicating potential fee stacking or revalidation.',
+        summary: 'Last payment date moved forward while value increased, indicating potential fee stacking or revalidation.',
         evidence: [
           `${formatStamp(firstPayment.stamp)} → ${firstPayment.raw}`,
           `${formatStamp(lastPayment.stamp)} → ${lastPayment.raw}`,
-          `Balance change: $${balanceShift.toFixed(2)}`
+          `Value change: ${valueShift.toFixed(2)}`
         ]
       });
     }
@@ -471,7 +471,7 @@ export function buildReportSeries(records: AnalysisRecord[], current: CreditFiel
     label: new Date(item.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     dofd: item.fields.dofd,
     removal: item.fields.estimatedRemovalDate,
-    balance: item.fields.currentBalance,
+    value: item.fields.currentValue,
     status: item.fields.accountStatus,
     reported: item.fields.dateReportedOrUpdated,
     lastPayment: item.fields.dateLastPayment,

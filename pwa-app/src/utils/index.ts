@@ -5,8 +5,8 @@
 // Validation
 export {
   isValidDateString,
-  sanitizeCurrency,
-  formatCurrency,
+  sanitizeNumericInput,
+  formatNumericValue,
   isValidEmail,
   isValidPhoneNumber,
   sanitizeHTML,
@@ -14,7 +14,7 @@ export {
   isValidStateCode,
   isValidAccountNumber,
   validateDateField,
-  validateCurrencyField,
+  validateNumericField,
   validateFields,
 } from './validation';
 export type { ValidationResult } from './validation';

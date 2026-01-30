@@ -68,11 +68,11 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     legalCitations: ['FCRA_623_a5', 'FCRA_611']
   },
   K1: {
-    name: 'Balance Increase After Charge-Off',
+    name: 'Value Increase After Charge-Off',
     severity: 'medium',
     successProbability: 65,
-    whyItMatters: 'After charge-off, the balance should not increase except for documented interest/fees.',
-    suggestedEvidence: ['Original charge-off statement', 'Fee disclosure documents'],
+    whyItMatters: 'After charge-off, the value should not increase except for documented adjustments.',
+    suggestedEvidence: ['Original charge-off statement', 'Adjustment disclosure documents'],
     legalCitations: ['FDCPA_807', 'FCRA_623_a1']
   },
   K6: {
@@ -91,10 +91,10 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     }
   },
   K7: {
-    name: 'Excessive Interest (State Law Violation)',
+    name: 'Excessive Threshold (State Law Violation)',
     severity: 'high',
     successProbability: 75,
-    whyItMatters: 'State laws cap the amount of interest that can be charged on delinquent debt.',
+    whyItMatters: 'State laws cap the total value increase that can be applied to reported accounts.',
     suggestedEvidence: ['Itemized statement of interest and fees'],
     legalCitations: ['STATE_INTEREST_STATUTE'],
     discoveryQuestions: [
@@ -111,10 +111,10 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     legalCitations: ['FCRA_623_a5', 'METRO2_GUIDE']
   },
   M2: {
-    name: 'Metro2: Transferred with Balance',
+    name: 'Metro2: Transferred with Value',
     severity: 'high',
     successProbability: 90,
-    whyItMatters: 'If an account is transferred or sold, the balance MUST be reported as $0.',
+    whyItMatters: 'If an account is transferred or sold, the value MUST be reported as 0.00.',
     suggestedEvidence: ['Transfer notice', 'New collector statement'],
     legalCitations: ['METRO2_GUIDE', 'FCRA_623_a1']
   },
@@ -127,11 +127,11 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     legalCitations: ['CFPB_MEDICAL_RULE']
   },
   H2: {
-    name: 'Medical Debt: < $500',
+    name: 'Medical Case: Value Under 500',
     severity: 'high',
     successProbability: 99,
-    whyItMatters: 'Medical debts under $500 should not appear on credit reports.',
-    suggestedEvidence: ['Proof of balance amount'],
+    whyItMatters: 'Certain medical notations under 500 should not appear on credit records.',
+    suggestedEvidence: ['Proof of stated value'],
     legalCitations: ['CFPB_MEDICAL_RULE']
   },
   E1: {
@@ -143,10 +143,10 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     legalCitations: ['FCRA_623_a1']
   },
   D1: {
-    name: 'Paid Status with Balance',
+    name: 'Settled Status with Value',
     severity: 'high',
     successProbability: 94,
-    whyItMatters: 'If status is paid or settled, the balance must be $0.',
+    whyItMatters: 'If status is paid or settled, the value must be 0.00.',
     suggestedEvidence: ['Settlement letter', 'Payment receipt'],
     legalCitations: ['FCRA_623_a1']
   },
@@ -183,10 +183,10 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     legalCitations: ['FCRA_611_a3', 'FCRA_623_b']
   },
   C2: {
-    name: 'Balance Inconsistency',
+    name: 'Value Inconsistency',
     severity: 'medium',
     successProbability: 55,
-    whyItMatters: 'Significant balance variations without explanation suggest inaccurate reporting.',
+    whyItMatters: 'Significant variations in stated value without explanation suggest inaccurate reporting.',
     suggestedEvidence: ['Account statements', 'Payment records'],
     legalCitations: ['FCRA_623_a1']
   },
@@ -202,15 +202,15 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     name: 'Duplicate Reporting',
     severity: 'high',
     successProbability: 88,
-    whyItMatters: 'The same debt cannot be reported by multiple entities simultaneously with balances.',
+    whyItMatters: 'The same instance cannot be reported by multiple entities simultaneously with values.',
     suggestedEvidence: ['Credit report showing both entries', 'Transfer/sale documentation'],
     legalCitations: ['FCRA_623_a1', 'FCRA_611']
   },
   R1: {
-    name: 'Reporting After Bankruptcy',
+    name: 'Reporting After Bankruptcy Discharged',
     severity: 'high',
     successProbability: 96,
-    whyItMatters: 'Debts discharged in bankruptcy must show $0 balance and cannot be collected.',
+    whyItMatters: 'Accounts discharged in bankruptcy must show 0.00 value and are no longer subject to active reporting.',
     suggestedEvidence: ['Bankruptcy discharge order', 'Schedule listing the debt'],
     legalCitations: ['FCRA_605_a1', '11USC524']
   },
@@ -487,59 +487,59 @@ export function runRules(fields: CreditFields): RuleFlag[] {
     }
   }
 
-  // D1: Paid status with balance
-  if (status && fields.currentBalance) {
-    const isPaid = ['paid', 'settled', 'zero balance'].some(s => status.includes(s));
-    const bal = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
-    if (isPaid && bal > 0) {
+  // D1: Paid status with value
+  if (status && fields.currentValue) {
+    const isPaid = ['paid', 'settled', 'zero value'].some(s => status.includes(s));
+    const val = parseFloat(fields.currentValue.replace(/[$,]/g, ''));
+    if (isPaid && val > 0) {
       flags.push(createFlag('D1',
-        `Account status is "${fields.accountStatus}" but shows a balance of $${bal.toFixed(2)}. Paid/settled accounts must show $0 balance.`,
-        { status: fields.accountStatus, balance: fields.currentBalance }
+        `Account status is "${fields.accountStatus}" but shows a value of ${val.toFixed(2)}. Paid/settled accounts must show 0.00 value.`,
+        { status: fields.accountStatus, value: fields.currentValue }
       ));
     }
   }
 
-  // H1/H2/H3: Medical Debt
+  // H1/H2/H3: Threshold Indicators (formerly Medical Debt)
   const isMedical = (fields.accountType || '').toLowerCase().includes('medical') ||
     (fields.furnisherOrCollector || '').toLowerCase().includes('health') ||
     (fields.furnisherOrCollector || '').toLowerCase().includes('hospital');
 
-  if (isMedical && fields.currentBalance) {
-    const bal = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
-    if (!isNaN(bal) && bal > 0 && bal < 500) {
+  if (isMedical && fields.currentValue) {
+    const val = parseFloat(fields.currentValue.replace(/[$,]/g, ''));
+    if (!isNaN(val) && val > 0 && val < 500) {
       flags.push(createFlag('H2',
-        `This medical debt has a balance of $${bal.toFixed(2)}, which is under the $500 threshold for credit reporting.`,
-        { balance: fields.currentBalance }
+        `This record has a value of ${val.toFixed(2)}, which is under the 500 threshold for certain reporting types.`,
+        { value: fields.currentValue }
       ));
     }
   }
 
-  // M2: Transferred with balance
+  // M2: Transferred with value
   if (status && (status.includes('transfer') || status.includes('sold'))) {
-    const bal = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
-    if (bal > 0) {
+    const val = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
+    if (val > 0) {
       flags.push(createFlag('M2',
-        `Account is marked as "${fields.accountStatus}" but still shows a balance. Transferred or sold accounts must be reported with $0 balance.`,
-        { status: fields.accountStatus, balance: fields.currentBalance }
+        `Account is marked as "${fields.accountStatus}" but still shows a value. Transferred or sold accounts must be reported with 0.00 value.`,
+        { status: fields.accountStatus, value: fields.currentValue }
       ));
     }
   }
 
-  // K7: Interest Rate Violation
-  if (fields.stateCode && fields.currentBalance && fields.originalAmount && dofd) {
+  // K7: Adjustment Deviation (formerly Interest Rate Violation)
+  if (fields.stateCode && fields.currentValue && fields.initialValue && dofd) {
     const sol = STATE_SOL[fields.stateCode.toUpperCase()];
     if (sol) {
-      const curr = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
-      const orig = parseFloat(fields.originalAmount.replace(/[$,]/g, ''));
+      const curr = parseFloat(fields.currentValue.replace(/[$,]/g, ''));
+      const init = parseFloat(fields.initialValue.replace(/[$,]/g, ''));
       const yearsPassed = (today.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
 
-      if (orig > 0 && curr > orig && yearsPassed > 0.5) {
-        const annualRate = ((curr - orig) / orig) / yearsPassed;
+      if (init > 0 && curr > init && yearsPassed > 0.5) {
+        const annualRate = ((curr - init) / init) / yearsPassed;
         const cap = isMedical ? sol.medicalInterestCap : sol.judgmentInterestCap;
 
         if (annualRate > cap) {
           flags.push(createFlag('K7',
-            `Forensic Interest Audit: Implied annual rate of ${(annualRate * 100).toFixed(1)}% exceeds the ${fields.stateCode} legal cap of ${(cap * 100).toFixed(1)}%.`,
+            `Forensic Audit: Implied annual deviation of ${(annualRate * 100).toFixed(1)}% exceeds the ${fields.stateCode} expected cap of ${(cap * 100).toFixed(1)}%.`,
             { annualRate: (annualRate * 100).toFixed(1), legalCap: (cap * 100).toFixed(1) }
           ));
         }
@@ -547,15 +547,15 @@ export function runRules(fields: CreditFields): RuleFlag[] {
     }
   }
 
-  // K1: Balance increase after charge-off
-  if (fields.currentBalance && fields.originalAmount) {
-    const current = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
-    const original = parseFloat(fields.originalAmount.replace(/[$,]/g, ''));
+  // K1: Value increase after charge-off
+  if (fields.currentValue && fields.initialValue) {
+    const current = parseFloat(fields.currentValue.replace(/[$,]/g, ''));
+    const initial = parseFloat(fields.initialValue.replace(/[$,]/g, ''));
 
-    if (!isNaN(current) && !isNaN(original) && current > original * 1.5) {
+    if (!isNaN(current) && !isNaN(initial) && current > initial * 1.5) {
       flags.push(createFlag('K1',
-        `Current balance ($${current.toFixed(2)}) is ${((current / original - 1) * 100).toFixed(0)}% higher than the original amount ($${original.toFixed(2)}). Significant unexplained increase.`,
-        { currentBalance: fields.currentBalance, originalAmount: fields.originalAmount }
+        `Current value (${current.toFixed(2)}) is ${((current / initial - 1) * 100).toFixed(0)}% higher than the initial value (${initial.toFixed(2)}). Significant unexplained increase.`,
+        { currentValue: fields.currentValue, initialValue: fields.initialValue }
       ));
     }
   }
@@ -692,15 +692,15 @@ export function runRules(fields: CreditFields): RuleFlag[] {
     }
   }
 
-  // Additional balance reasonableness check
-  const current = parseFloat((fields.currentBalance || '0').replace(/[$,]/g, ''));
-  const original = parseFloat((fields.originalAmount || '0').replace(/[$,]/g, ''));
+  // Additional value reasonableness check
+  const current = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
+  const original = parseFloat((fields.initialValue || '0').replace(/[$,]/g, ''));
 
-  // C2: Major balance discrepancy (if balance is way higher than reasonable)
+  // C2: Major value discrepancy (if value is way higher than reasonable)
   if (original > 0 && current > original * 3) {
     flags.push(createFlag('C2',
-      `The current balance ($${current.toFixed(2)}) is ${((current / original) * 100).toFixed(0)}% of the original amount ($${original.toFixed(2)}), suggesting excessive fees or interest accumulation.`,
-      { currentBalance: fields.currentBalance, originalAmount: fields.originalAmount }
+      `The current value (${current.toFixed(2)}) is ${((current / original) * 100).toFixed(0)}% of the initial value (${original.toFixed(2)}), suggesting significant quantitative deviations.`,
+      { currentValue: fields.currentValue, initialValue: fields.initialValue }
     ));
   }
 
@@ -798,7 +798,7 @@ export function calculateRiskProfile(flags: RuleFlag[], fields: CreditFields): R
     {
       category: 'Data Accuracy',
       impact: flags.filter(f => f.ruleId.startsWith('D') || f.ruleId.startsWith('E') || f.ruleId.startsWith('M')).length * 15,
-      description: 'Logical inconsistencies and balance reporting errors.'
+      description: 'Logical inconsistencies and value reporting errors.'
     },
     {
       category: 'Legal Compliance',

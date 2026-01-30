@@ -87,36 +87,31 @@ export interface DisputeStats {
 }
 
 // ============================================================================
-// Damage Estimation Types
+// Forensic Impact Types
 // ============================================================================
 
-export interface DamageEstimate {
+export interface ImpactAssessment {
   statutory: {
-    min: number;
-    max: number;
-    expected: number;
+    eligible: boolean;
+    basis: string;
   };
   actual: {
-    creditDenials: number;
-    emotionalDistress: number;
-    outOfPocket: number;
-    total: number;
+    creditDenials: boolean;
+    interestImpact: boolean;
+    outOfPocket: boolean;
+    total: string;
   };
-  punitive: {
+  civilAccountability: {
     eligible: boolean;
-    min: number;
-    max: number;
-    expected: number;
+    reasoning: string;
   };
-  attorneyFees: {
-    min: number;
-    max: number;
-    expected: number;
+  legalFees: {
+    eligible: boolean;
+    statute: string;
   };
-  total: {
-    min: number;
-    max: number;
-    expected: number;
+  summary: {
+    severity: string;
+    actionRequired: boolean;
   };
 }
 
@@ -208,7 +203,7 @@ export interface AttorneyPackage {
   consumer: ConsumerInfo;
   summary: CaseSummary;
   violations: DetailedViolation[];
-  damages: DamageEstimate;
+  impactAssessment: ImpactAssessment;
   evidence: EvidencePackage;
   recommendations: string[];
 }
@@ -226,7 +221,7 @@ export interface DetailedViolation {
   statute: string;
   description: string;
   evidence: string[];
-  damages: {
+  impactAssessment: {
     statutory: number;
     actual: number;
   };

@@ -4,14 +4,14 @@
 
 import {
   isValidDateString,
-  sanitizeCurrency,
-  formatCurrency,
+  sanitizeNumericInput,
+  formatNumericValue,
   isValidEmail,
   isValidPhoneNumber,
   isValidStateCode,
   isValidAccountNumber,
   validateDateField,
-  validateCurrencyField,
+  validateNumericField,
   validateFields,
 } from '../utils/validation';
 
@@ -40,41 +40,41 @@ describe('isValidDateString', () => {
   });
 });
 
-describe('sanitizeCurrency', () => {
+describe('sanitizeNumericInput', () => {
   test('removes non-numeric characters except decimal', () => {
-    expect(sanitizeCurrency('$1,234.56')).toBe('1234.56');
-    expect(sanitizeCurrency('USD 100.00')).toBe('100.00');
-    expect(sanitizeCurrency('1,000,000')).toBe('1000000');
+    expect(sanitizeNumericInput('1,234.56')).toBe('1234.56');
+    expect(sanitizeNumericInput('Value 100.00')).toBe('100.00');
+    expect(sanitizeNumericInput('1,000,000')).toBe('1000000');
   });
 
   test('handles multiple decimal points', () => {
-    expect(sanitizeCurrency('1.2.3')).toBe('1.23');
+    expect(sanitizeNumericInput('1.2.3')).toBe('1.23');
   });
 
   test('limits to 2 decimal places', () => {
-    expect(sanitizeCurrency('123.456')).toBe('123.45');
+    expect(sanitizeNumericInput('123.456')).toBe('123.45');
   });
 
   test('handles empty strings', () => {
-    expect(sanitizeCurrency('')).toBe('');
+    expect(sanitizeNumericInput('')).toBe('');
   });
 });
 
-describe('formatCurrency', () => {
-  test('formats numbers as USD', () => {
-    expect(formatCurrency(1234.56)).toBe('$1,234.56');
-    expect(formatCurrency(0)).toBe('$0.00');
-    expect(formatCurrency(1000000)).toBe('$1,000,000.00');
+describe('formatNumericValue', () => {
+  test('formats numbers with 2 decimal places', () => {
+    expect(formatNumericValue(1234.56)).toBe('1,234.56');
+    expect(formatNumericValue(0)).toBe('0.00');
+    expect(formatNumericValue(1000000)).toBe('1,000,000.00');
   });
 
   test('handles string input', () => {
-    expect(formatCurrency('1234.56')).toBe('$1,234.56');
-    expect(formatCurrency('$5,000')).toBe('$5,000.00');
+    expect(formatNumericValue('1234.56')).toBe('1,234.56');
+    expect(formatNumericValue('5,000')).toBe('5,000.00');
   });
 
   test('handles invalid input', () => {
-    expect(formatCurrency('invalid')).toBe('$0.00');
-    expect(formatCurrency(NaN)).toBe('$0.00');
+    expect(formatNumericValue('invalid')).toBe('0.00');
+    expect(formatNumericValue(NaN)).toBe('0.00');
   });
 });
 
@@ -167,30 +167,30 @@ describe('validateDateField', () => {
   });
 });
 
-describe('validateCurrencyField', () => {
-  test('validates required currency field', () => {
-    expect(validateCurrencyField(undefined, true, 'Balance')).toEqual({
+describe('validateNumericField', () => {
+  test('validates required numeric field', () => {
+    expect(validateNumericField(undefined, true, 'Value')).toEqual({
       valid: false,
-      message: 'Balance is required',
+      message: 'Value is required',
     });
 
-    expect(validateCurrencyField('$1,234.56', true)).toEqual({
+    expect(validateNumericField('1,234.56', true)).toEqual({
       valid: true,
       message: '',
     });
   });
 
-  test('rejects negative amounts', () => {
-    expect(validateCurrencyField('-100', false)).toEqual({
+  test('rejects negative values', () => {
+    expect(validateNumericField('-100', false)).toEqual({
       valid: false,
-      message: 'Amount cannot be negative',
+      message: 'Value cannot be negative',
     });
   });
 
-  test('rejects invalid amounts', () => {
-    expect(validateCurrencyField('abc', false)).toEqual({
+  test('rejects invalid values', () => {
+    expect(validateNumericField('abc', false)).toEqual({
       valid: false,
-      message: 'Enter a valid amount',
+      message: 'Enter a valid value',
     });
   });
 });

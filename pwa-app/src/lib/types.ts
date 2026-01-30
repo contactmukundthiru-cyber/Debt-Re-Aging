@@ -45,8 +45,9 @@ export interface CreditFields {
     furnisherOrCollector?: string;
     accountType?: string;
     accountStatus?: string;
-    currentBalance?: string;
-    originalAmount?: string;
+    currentValue?: string;
+    initialValue?: string;
+    creditLimit?: string;
     dateOpened?: string;
     dateReportedOrUpdated?: string;
     dofd?: string; // Date of First Delinquency

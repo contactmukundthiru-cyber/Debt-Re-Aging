@@ -396,6 +396,7 @@ const TimelineTab: React.FC<TimelineTabProps> = ({ timeline, bureau }) => {
               const inCluster = violationClusters.some(cluster => i >= cluster.start && i <= cluster.end);
               const evidenceStrength = event.evidenceSnippets ? Math.min(event.evidenceSnippets.length, 3) : 0;
               const severityScore = Math.min(100, (isViolation ? 70 : 20) + (gapSeverity === 'high' ? 20 : gapSeverity === 'medium' ? 12 : gapSeverity === 'low' ? 6 : 0) + evidenceStrength * 5);
+              const confidenceScore = Math.min(100, (isViolation ? 70 : 20) + evidenceStrength * 10);
 
               return (
                 <React.Fragment key={i}>
@@ -465,6 +466,9 @@ const TimelineTab: React.FC<TimelineTabProps> = ({ timeline, bureau }) => {
                           'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>
                           Severity {severityScore}%
+                        </span>
+                        <span className="px-2 py-1 rounded-full text-[9px] uppercase tracking-widest bg-slate-100 dark:bg-slate-800 text-slate-500">
+                          Confidence {confidenceScore}%
                         </span>
                         {inCluster && (
                           <span className="px-2 py-1 rounded-full text-[9px] uppercase tracking-widest bg-rose-500/10 text-rose-500 border border-rose-500/20">

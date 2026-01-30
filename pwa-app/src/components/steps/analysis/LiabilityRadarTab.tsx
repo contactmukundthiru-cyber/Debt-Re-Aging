@@ -25,19 +25,19 @@ const LiabilityRadarTab: React.FC<LiabilityRadarTabProps> = ({ flags }) => {
                             <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-rose-500 font-mono">Liability Risk Assessment</span>
                         </div>
                         <h2 className="text-4xl font-black text-white tracking-tight mb-2">
-                            Estimated <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">Statutory Liability</span>
+                            Forensic <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">Severity Assessment</span>
                         </h2>
                         <p className="text-slate-400 text-sm max-w-lg">
-                            Calculating the theoretical cost of non-compliance for the reporting entities based on detected violations.
+                            Assessing the qualitative impact of non-compliance for the reporting entities based on detected violations.
                         </p>
                     </div>
 
                     <div className="text-center p-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md min-w-[200px]">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 font-mono">Aggregated Liability</p>
-                        <p className="text-6xl font-black text-white tabular-nums">${liability.totalEstimatedLiability.toLocaleString()}</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 font-mono">Severity Score</p>
+                        <p className="text-6xl font-black text-white tabular-nums">{liability.overallSeverityScore}</p>
                         <div className="mt-4 flex items-center gap-2 justify-center">
-                            <span className={`h-2 w-2 rounded-full ${liability.totalEstimatedLiability > 2000 ? 'bg-rose-500' : 'bg-amber-500'}`} />
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{liability.totalEstimatedLiability > 2000 ? 'High Litigation Value' : 'Standard Value'}</span>
+                            <span className={`h-2 w-2 rounded-full ${liability.overallSeverityScore > 200 ? 'bg-rose-500' : 'bg-amber-500'}`} />
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{liability.overallSeverityScore > 200 ? 'Critical Severity' : 'Standard Severity'}</span>
                         </div>
                     </div>
                 </div>
@@ -58,17 +58,17 @@ const LiabilityRadarTab: React.FC<LiabilityRadarTabProps> = ({ flags }) => {
                                         <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest font-mono mb-1">{assessment.statute} &middot; {assessment.section}</p>
                                         <h4 className="text-lg font-bold dark:text-white">{assessment.violationType}</h4>
                                     </div>
-                                    <span className="text-xl font-black tabular-nums dark:text-white">${assessment.estimatedValue}</span>
+                                    <span className="text-xl font-black tabular-nums dark:text-white">{assessment.forensicSeverity}</span>
                                 </div>
 
                                 <div className="flex items-center gap-4">
                                     <div className="flex-grow h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                         <div
                                             className="h-full bg-rose-500"
-                                            style={{ width: `${(assessment.estimatedValue / 1000) * 100}%` }}
+                                            style={{ width: `${(assessment.forensicSeverity / 150) * 100}%` }}
                                         />
                                     </div>
-                                    <span className="text-[9px] font-bold text-slate-500 uppercase">Weight: {assessment.actualDamagesPotential}</span>
+                                    <span className="text-[9px] font-bold text-slate-500 uppercase">Impact: {assessment.impactPotential}</span>
                                 </div>
                             </div>
                         ))}
@@ -95,15 +95,15 @@ const LiabilityRadarTab: React.FC<LiabilityRadarTabProps> = ({ flags }) => {
 
                         <p className="text-sm text-slate-500 leading-relaxed mb-8">
                             {liability.litigationReady
-                                ? "The severity and volume of these violations meet the threshold for contingency-fee litigation. An attorney would likely view this as a high-value case due to 'Willful Non-Compliance' markers."
-                                : "These violations are best resolved through the administrative dispute process and CFPB escalation. If the bureau 'verifies' these items despite this evidence, the litigation value will increase significantly."
+                                ? "The severity and volume of these violations meet the threshold for contingency-fee litigation. An attorney would likely view this as a high-severity case due to 'Willful Non-Compliance' markers."
+                                : "These violations are best resolved through the administrative dispute process and CFPB escalation. If the bureau 'verifies' these items despite this evidence, the forensic weight will increase significantly."
                             }
                         </p>
 
                         <div className="space-y-4">
                             <div className="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                                <span className="text-xs font-bold text-slate-500">Punitive Multiplier</span>
-                                <span className="text-sm font-black dark:text-white">x{liability.punitiveMultipliers}.0</span>
+                                <span className="text-xs font-bold text-slate-500">Risk Multiplier</span>
+                                <span className="text-sm font-black dark:text-white">x{liability.riskMultiplier}.0</span>
                             </div>
                             <div className="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
                                 <span className="text-xs font-bold text-slate-500">Attorney Fee Potential</span>
@@ -113,9 +113,9 @@ const LiabilityRadarTab: React.FC<LiabilityRadarTabProps> = ({ flags }) => {
                     </div>
 
                     <div className="p-6 rounded-2xl bg-rose-500/5 border border-rose-500/10">
-                        <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-2 italic">Legal Disclaimer</h4>
+                        <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-2 italic">Forensic Disclaimer</h4>
                         <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                            This calculation is for strategic demonstration purposes only. Actual damages are determined by a court of law. This application is not a law firm and does not provide legal advice.
+                            This calculation is for strategic demonstration purposes only. It assesses statutory vulnerability rather than monetary value. This application is not a law firm and does not provide legal advice.
                         </p>
                     </div>
                 </div>

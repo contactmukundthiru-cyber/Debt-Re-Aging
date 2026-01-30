@@ -749,7 +749,7 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                 {
                   creditor: editableFields.originalCreditor || 'Unknown',
                   collector: editableFields.furnisherOrCollector || undefined,
-                  balance: editableFields.currentBalance || '$0',
+                  value: editableFields.currentValue || '0',
                   accountType: editableFields.accountType || 'Unknown'
                 },
                 'bureau',
@@ -1815,7 +1815,7 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                       })()}
                     </div>
                     <h4 className="heading-md dark:text-white">{dispute.account.creditor}</h4>
-                    <p className="body-sm text-gray-500 dark:text-gray-400">{dispute.account.accountType} · {dispute.account.balance}</p>
+                    <p className="body-sm text-gray-500 dark:text-gray-400">{dispute.account.accountType} · {dispute.account.value}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

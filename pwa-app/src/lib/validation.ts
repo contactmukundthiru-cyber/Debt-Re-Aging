@@ -19,15 +19,15 @@ export const getDateValidation = (value: string | undefined, required: boolean):
   return { valid: true, message: '' };
 };
 
-export const isValidCurrency = (value: string): boolean => {
+export const isValidNumeric = (value: string): boolean => {
   if (!value) return true;
-  const cleaned = value.replace(/[$,\s]/g, '');
+  const cleaned = value.replace(/[,\s]/g, '');
   return !Number.isNaN(Number(cleaned));
 };
 
-export const getCurrencyValidation = (value: string | undefined): { valid: boolean; message: string } => {
+export const getNumericValidation = (value: string | undefined): { valid: boolean; message: string } => {
   if (!value) return { valid: true, message: '' };
-  if (!isValidCurrency(value)) return { valid: false, message: 'Use numbers like 1234.56' };
+  if (!isValidNumeric(value)) return { valid: false, message: 'Use numbers like 1234.56' };
   return { valid: true, message: '' };
 };
 

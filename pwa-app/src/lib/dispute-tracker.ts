@@ -13,7 +13,7 @@ export interface Dispute {
     creditor: string;
     collector?: string;
     accountNumber?: string;
-    balance: string;
+    value: string;
     accountType: string;
   };
 

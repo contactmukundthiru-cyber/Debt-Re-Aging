@@ -41,7 +41,7 @@ This report documents timeline inconsistencies and potential violations identifi
 | **Original Creditor** | {{ fields.original_creditor or 'Same as above' }} |
 | **Account Type** | {{ fields.account_type or 'Unknown' }} |
 | **Account Number (Last 4)** | {{ fields.account_number[-4:] if fields.account_number else 'N/A' }} |
-| **Current Balance** | {{ fields.current_balance or '$0.00' }} |
+| **Current Balance** | {{ fields.current_balance or 'Not Reported' }} |
 | **Account Status** | {{ fields.account_status or 'Not Reported' }} |
 
 ---

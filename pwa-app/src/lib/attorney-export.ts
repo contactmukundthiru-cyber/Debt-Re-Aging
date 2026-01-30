@@ -4,7 +4,7 @@
  */
 
 import { CreditFields, RuleFlag, RiskProfile } from './rules';
-import { buildEvidencePackage, calculateDamages, EvidencePackage } from './evidence-builder';
+import { buildEvidencePackage, assessImpact, EvidencePackage, ImpactAssessment } from './evidence-builder';
 import { findCollector, formatCollectorReport, CollectorMatch } from './collector-database';
 import { buildDeadlineTracker, DeadlineTracker } from './countdown';
 
@@ -33,11 +33,11 @@ export interface AttorneyPackage {
     highSeverityCount: number;
     caseStrength: 'strong' | 'moderate' | 'weak';
     litigationPotential: boolean;
-    estimatedDamages: {
-      statutory: { min: number; max: number };
-      actual: number;
-      punitive: boolean;
-      total: { min: number; max: number };
+    forensicImpact: {
+      statutoryEligible: boolean;
+      actualImpact: string;
+      civilAccountability: boolean;
+      totalRisk: string;
     };
   };
 
@@ -84,7 +84,7 @@ export interface AttorneyPackage {
       statute: string;
       section: string;
       relevance: string;
-      damages: string;
+      impact: string;
     }[];
     strengths: string[];
     weaknesses: string[];
@@ -207,7 +207,7 @@ export function buildAttorneyPackage(
   proceduralHistory?: { date: string; action: string; result?: string }[]
 ): AttorneyPackage {
   const caseId = `ATT-${Date.now().toString(36).toUpperCase()}`;
-  const damages = calculateDamages(flags, fields);
+  const impact = assessImpact(flags, fields);
 
   // Find collector information
   let collectorIntel: AttorneyPackage['collectorIntel'] | undefined;
@@ -247,11 +247,11 @@ export function buildAttorneyPackage(
       caseStrength: riskProfile.disputeStrength === 'strong' ? 'strong' :
                     riskProfile.disputeStrength === 'moderate' ? 'moderate' : 'weak',
       litigationPotential: riskProfile.litigationPotential,
-      estimatedDamages: {
-        statutory: damages.statutory,
-        actual: damages.actual.estimated,
-        punitive: damages.punitive.possible,
-        total: damages.total
+      forensicImpact: {
+        statutoryEligible: impact.statutory.eligible,
+        actualImpact: impact.actual.severity,
+        civilAccountability: impact.civilAccountability.possible,
+        totalRisk: impact.overallRisk
       }
     },
 
@@ -282,7 +282,7 @@ export function buildAttorneyPackage(
 
     proceduralHistory: proceduralHistory || [],
 
-    feeAnalysis: analyzeFees(flags, riskProfile, damages)
+    feeAnalysis: analyzeFees(flags, riskProfile, impact)
   };
 }
 
@@ -443,34 +443,34 @@ function getStatuteDetails(cite: string, flag: RuleFlag): AttorneyPackage['legal
     'FCRA §605': {
       statute: 'Fair Credit Reporting Act §605',
       section: '15 U.S.C. § 1681c',
-      damages: 'Statutory $100-$1,000; Actual; Punitive for willful; Attorney fees'
+      impact: 'Statutory basis; Actual impact; Civil Liability; Attorney fees'
     },
     'FCRA §611': {
       statute: 'Fair Credit Reporting Act §611',
       section: '15 U.S.C. § 1681i',
-      damages: 'Statutory $100-$1,000; Actual; Punitive for willful; Attorney fees'
+      impact: 'Statutory basis; Actual impact; Civil Liability; Attorney fees'
     },
     'FCRA §623': {
       statute: 'Fair Credit Reporting Act §623',
       section: '15 U.S.C. § 1681s-2',
-      damages: 'Actual damages; Punitive for willful; Attorney fees (limited private right)'
+      impact: 'Actual impact; Civil Liability; Attorney fees (certain limitations applies)'
     },
     'FDCPA §807': {
       statute: 'Fair Debt Collection Practices Act §807',
       section: '15 U.S.C. § 1692e',
-      damages: 'Statutory up to $1,000; Actual; Attorney fees'
+      impact: 'Statutory basis; Actual impact; Attorney fees'
     },
     'FDCPA §809': {
       statute: 'Fair Debt Collection Practices Act §809',
       section: '15 U.S.C. § 1692g',
-      damages: 'Statutory up to $1,000; Actual; Attorney fees'
+      impact: 'Statutory basis; Actual impact; Attorney fees'
     }
   };
 
   const base = details[cite] || {
     statute: cite,
     section: 'See full text',
-    damages: 'Varies by violation type'
+    impact: 'Varies by violation type'
   };
 
   return {
@@ -575,27 +575,27 @@ function buildEvidenceChecklist(flags: RuleFlag[], fields: CreditFields): Attorn
 function analyzeFees(
   flags: RuleFlag[],
   riskProfile: RiskProfile,
-  damages: ReturnType<typeof calculateDamages>
+  impact: ImpactAssessment
 ): AttorneyPackage['feeAnalysis'] {
   const highCount = flags.filter(f => f.severity === 'high').length;
-  const contingencyViable = highCount >= 2 || damages.total.max >= 5000;
+  const contingencyViable = highCount >= 2 || impact.overallRisk === 'critical';
 
   let estimatedFees = '';
   if (contingencyViable) {
-    estimatedFees = 'Fee-shifting under FCRA makes contingency arrangement viable';
+    estimatedFees = 'Fee-shifting under FCRA makes this a high-value case for qualified counsel';
   } else {
-    estimatedFees = 'Limited damages may require hourly arrangement or hybrid fee structure';
+    estimatedFees = 'Regulatory violations support fee-shifting under relevant consumer statutes';
   }
 
   let notes = '';
   if (riskProfile.litigationPotential) {
-    notes = 'Strong case for fee-shifting. FCRA provides for attorney fees to prevailing plaintiffs. ';
+    notes = 'Strong case for fee-shifting. FCRA provides for mandatory attorney fees to prevailing plaintiffs. ';
   }
-  if (damages.punitive.possible) {
-    notes += 'Punitive damages potential enhances case value. ';
+  if (impact.civilAccountability.possible) {
+    notes += 'Civil Liability potential enhances case resolution. ';
   }
   if (highCount >= 3) {
-    notes += 'Multiple violations may support class action investigation.';
+    notes += 'Multiple violations supporting a pattern of non-compliance.';
   }
 
   return {

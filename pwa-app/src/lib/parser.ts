@@ -95,20 +95,22 @@ const FIELD_PATTERNS: Record<string, RegExp[]> = {
     /current\s*status[:\s]*([A-Za-z\s\-]+)/i,
     /account\s*condition[:\s]*([A-Za-z\s\-]+)/i,
   ],
-  currentBalance: [
+  currentValue: [
     /(?:current\s*)?balance[:\s]*\$?([\d,]+\.?\d*)/i,
     /(?:amount\s*)?owed[:\s]*\$?([\d,]+\.?\d*)/i,
     /balance\s*owed[:\s]*\$?([\d,]+\.?\d*)/i,
     /unpaid\s*balance[:\s]*\$?([\d,]+\.?\d*)/i,
     /\$\s*([\d,]+\.?\d*)\s*(?:balance|owed|due)/i,
     /remaining\s*balance[:\s]*\$?([\d,]+\.?\d*)/i,
+    /(?:stated\s*)?value[:\s]*([\d,]+\.?\d*)/i,
   ],
-  originalAmount: [
+  initialValue: [
     /original\s*(?:amount|balance|debt)[:\s]*\$?([\d,]+\.?\d*)/i,
     /(?:high\s*)?credit[:\s]*\$?([\d,]+\.?\d*)/i,
     /credit\s*limit[:\s]*\$?([\d,]+\.?\d*)/i,
     /original\s*loan\s*amount[:\s]*\$?([\d,]+\.?\d*)/i,
     /principal[:\s]*\$?([\d,]+\.?\d*)/i,
+    /initial\s*value[:\s]*([\d,]+\.?\d*)/i,
   ],
   creditLimit: [
     /credit\s*limit[:\s]*\$?([\d,]+\.?\d*)/i,
@@ -398,7 +400,7 @@ export function parseMultipleAccounts(text: string): ParsedAccount[] {
     const fields = fieldsToSimple(parsed);
     const quality = getExtractionQuality(parsed);
 
-    if (fields.furnisherOrCollector || fields.originalCreditor || fields.currentBalance) {
+    if (fields.furnisherOrCollector || fields.originalCreditor || fields.currentValue) {
       accounts.push({
         id: `account-${i + 1}`,
         fields,
@@ -437,7 +439,7 @@ export function getExtractionQuality(parsed: ParsedFields): { score: number; des
   const score = Math.round((highConf * 100 + medConf * 60 + (hasValue - highConf - medConf) * 20) / total);
 
   const details: string[] = [];
-  const criticalFields = ['dofd', 'currentBalance', 'furnisherOrCollector'];
+  const criticalFields = ['dofd', 'currentValue', 'furnisherOrCollector'];
   const missingCritical = criticalFields.filter(f => !parsed[f]?.value);
   if (missingCritical.length > 0) details.push(`Missing critical: ${missingCritical.join(', ')}`);
 
@@ -471,17 +473,17 @@ export function validateExtraction(fields: CreditFields): string[] {
     if (chargeOff < dofd) warnings.push('Charge-off date is before DOFD - verify dates');
   }
 
-  if (fields.currentBalance && fields.originalAmount) {
-    const current = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
-    const original = parseFloat(fields.originalAmount.replace(/[$,]/g, ''));
-    if (current > original * 3) warnings.push('Current balance is 3x+ original amount - verify figures');
+  if (fields.currentValue && fields.initialValue) {
+    const current = parseFloat(fields.currentValue.replace(/[$,]/g, ''));
+    const initial = parseFloat(fields.initialValue.replace(/[$,]/g, ''));
+    if (current > initial * 3) warnings.push('Current value is 3x+ initial value - verify figures');
   }
 
   if (fields.accountStatus) {
     const status = fields.accountStatus.toLowerCase();
-    if (status.includes('paid') && fields.currentBalance) {
-      const balance = parseFloat(fields.currentBalance.replace(/[$,]/g, ''));
-      if (balance > 0) warnings.push('Status shows paid but balance is not zero');
+    if (status.includes('paid') && fields.currentValue) {
+      const val = parseFloat(fields.currentValue.replace(/[$,]/g, ''));
+      if (val > 0) warnings.push('Status shows paid but value is not zero');
     }
   }
 

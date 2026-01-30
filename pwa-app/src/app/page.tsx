@@ -55,9 +55,9 @@ import {
 } from '../lib/cfpb-complaint';
 import {
   buildEvidencePackage,
-  calculateDamages,
+  assessImpact,
   formatEvidencePackage,
-  DamageEstimate
+  ImpactAssessment
 } from '../lib/evidence-builder';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -225,7 +225,7 @@ export default function CreditReportAnalyzer() {
   const [metro2Validation, setMetro2Validation] = useState<Metro2ValidationResult | null>(null);
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [disputeStats, setDisputeStats] = useState<ReturnType<typeof getDisputeStats> | null>(null);
-  const [damageEstimate, setDamageEstimate] = useState<DamageEstimate | null>(null);
+  const [impactAssessment, setImpactAssessment] = useState<ImpactAssessment | null>(null);
   const [showDisputeForm, setShowDisputeForm] = useState(false);
   const [selectedLetterType, setSelectedLetterType] = useState<LetterType>('bureau');
   const [exportTab, setExportTab] = useState<'letters' | 'cfpb' | 'evidence' | 'attorney'>('letters');
@@ -304,7 +304,7 @@ export default function CreditReportAnalyzer() {
   const analytics = useMemo(() => {
     if (!riskProfile || flags.length === 0) return null;
     return {
-      timeline: buildTimeline(editableFields, flags),
+      timeline: buildTimeline(editableFields, flags, rawText),
       breakdown: calculateScoreBreakdown(flags, editableFields),
       patterns: detectPatterns(flags, editableFields),
       actions: generateActionItems(flags, riskProfile, editableFields),
@@ -325,7 +325,7 @@ export default function CreditReportAnalyzer() {
     setDeadlines(null);
     setCollectorMatch(null);
     setMetro2Validation(null);
-    setDamageEstimate(null);
+    setImpactAssessment(null);
     setSelectedLetterType('bureau');
     setEditableLetter('');
     setExportTab('letters');
@@ -598,8 +598,8 @@ export default function CreditReportAnalyzer() {
 
       // 5. Damage Estimation
       try {
-        const damages = calculateDamages(detectedFlags, editableFields);
-        setDamageEstimate(damages);
+        const impact = assessImpact(detectedFlags, editableFields);
+        setImpactAssessment(impact);
       } catch (e) {
         console.warn('Damage estimation failed:', e);
       }
@@ -1158,7 +1158,7 @@ export default function CreditReportAnalyzer() {
               flags={flags}
               riskProfile={riskProfile!}
               discoveryAnswers={discoveryAnswers}
-              damageEstimate={damageEstimate}
+              impactAssessment={impactAssessment}
               translate={translate}
               downloadDocument={downloadDocument}
               generateCeaseDesistLetter={generateCeaseDesistLetter}

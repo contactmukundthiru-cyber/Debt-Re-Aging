@@ -3,7 +3,7 @@
 import React from 'react';
 import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { Step } from '../../lib/constants';
-import { DamageEstimate } from '../../lib/evidence-builder';
+import { ImpactAssessment } from '../../lib/evidence-builder';
 import { ConsumerInfo } from '../../lib/generator';
 import { computeCaseHealth, formatExecutiveBrief } from '../../lib/case-health';
 import { AttorneyPackage } from '../../lib/attorney-export';
@@ -26,7 +26,7 @@ interface Step5ExportProps {
   flags: RuleFlag[];
   riskProfile: RiskProfile;
   discoveryAnswers: Record<string, string>;
-  damageEstimate: DamageEstimate | null;
+  impactAssessment: ImpactAssessment | null;
   translate: (key: string) => string;
   downloadDocument: (type: 'bureau' | 'validation' | 'cfpb' | 'summary', format?: 'pdf' | 'txt') => void;
   generateCeaseDesistLetter: Function;
@@ -63,7 +63,7 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   flags,
   riskProfile,
   discoveryAnswers,
-  damageEstimate,
+  impactAssessment,
   translate,
   downloadDocument,
   generateCeaseDesistLetter,
@@ -572,21 +572,27 @@ const Step5Export: React.FC<Step5ExportProps> = ({
               </div>
             </div>
 
-            {damageEstimate && (
-              <div className="panel p-6 border-l-4 border-l-green-500 dark:bg-gray-800 dark:border-gray-700">
-                <h4 className="heading-sm mb-3 dark:text-white">Damage Calculation Summary</h4>
-                <div className="grid sm:grid-cols-3 gap-4 text-center">
+            {impactAssessment && (
+              <div className="panel p-6 border-l-4 border-l-blue-500 dark:bg-gray-800 dark:border-gray-700">
+                <h4 className="heading-sm mb-3 dark:text-white">Forensic Impact Summary</h4>
+                <div className="grid sm:grid-cols-4 gap-4 text-center">
                   <div>
-                    <p className="label text-xs text-gray-500 dark:text-gray-400">Statutory</p>
-                    <p className="heading-md dark:text-white">{formatCurrency(damageEstimate.statutory.min)} - {formatCurrency(damageEstimate.statutory.max)}</p>
+                    <p className="label text-xs text-gray-500 dark:text-gray-400">Legal Basis</p>
+                    <p className="heading-md dark:text-white">{impactAssessment.statutory.eligible ? 'Qualified' : 'Unknown'}</p>
                   </div>
                   <div>
-                    <p className="label text-xs text-gray-500 dark:text-gray-400">Actual</p>
-                    <p className="heading-md dark:text-white">{formatCurrency(damageEstimate.actual.estimated)}</p>
+                    <p className="label text-xs text-gray-500 dark:text-gray-400">Actual Impact</p>
+                    <p className="heading-md dark:text-white">{impactAssessment.actual.severity.toUpperCase()}</p>
                   </div>
                   <div>
-                    <p className="label text-xs text-gray-500 dark:text-gray-400">Total Potential</p>
-                    <p className="heading-md text-green-600">{formatCurrency(damageEstimate.total.min)} - {formatCurrency(damageEstimate.total.max)}</p>
+                    <p className="label text-xs text-gray-500 dark:text-gray-400">Civil Risk</p>
+                    <p className="heading-md dark:text-white">{impactAssessment.civilAccountability.possible ? 'HIGH' : 'LOW'}</p>
+                  </div>
+                  <div>
+                    <p className="label text-xs text-gray-500 dark:text-gray-400">Severity</p>
+                    <p className={`heading-md ${impactAssessment.overallRisk === 'critical' ? 'text-red-600' : 'text-blue-600'}`}>
+                      {impactAssessment.overallRisk.toUpperCase()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -717,7 +723,7 @@ const Step5Export: React.FC<Step5ExportProps> = ({
                   type="button"
                   className="w-full px-4 py-2 bg-emerald-500/10 text-emerald-600 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition-all"
                   onClick={() => {
-                    const content = `AFFIDAVIT OF FORENSIC ACCURACY\n\nI, ${consumer.name || '[NAME]'}, declare under penalty of perjury that the data extracted from the credit report and verified on ${new Date().toLocaleDateString()} is accurate to the best of my knowledge.\n\nCase ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}\nDate: ${new Date().toISOString()}\n\nVerified Flags: ${flags.length}\nTotal Exposure: ${damageEstimate ? damageEstimate.total.max : 'N/A'}\n\nSignature: __________________________`;
+                    const content = `AFFIDAVIT OF FORENSIC ACCURACY\n\nI, ${consumer.name || '[NAME]'}, declare under penalty of perjury that the data extracted from the credit report and verified on ${new Date().toLocaleDateString()} is accurate to the best of my knowledge.\n\nCase ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}\nDate: ${new Date().toISOString()}\n\nVerified Flags: ${flags.length}\nOverall Impact: ${impactAssessment ? impactAssessment.overallRisk.toUpperCase() : 'N/A'}\n\nSignature: __________________________`;
                     downloadPdfFile(content, 'forensic_affidavit.pdf');
                   }}
                 >
@@ -726,7 +732,7 @@ const Step5Export: React.FC<Step5ExportProps> = ({
               </div>
 
               <div className="panel p-6 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl">
-                <h4 className="text-base font-bold dark:text-white mb-2">Statutory Citation List</h4>
+                <h4 className="text-base font-bold dark:text-white mb-2">Legal Citation List</h4>
                 <p className="text-xs text-slate-500 mb-4">Export a list of all 15+ statutes mapped to the detected violations for legal research.</p>
                 <button
                   type="button"

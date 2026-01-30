@@ -628,7 +628,7 @@ function generateRecommendations(
       priority: 1,
       action: 'Consult with FCRA attorney for potential lawsuit',
       rationale: `Strong case with ${litigationScore}/100 litigation score`,
-      expectedOutcome: 'Statutory damages $1000+ per violation possible',
+      expectedOutcome: 'Regulatory enforcement action and civil liability possible',
     });
   }
 

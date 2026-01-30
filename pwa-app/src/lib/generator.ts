@@ -3,9 +3,8 @@
  */
 
 import { jsPDF } from 'jspdf';
-import { CreditFields, RuleFlag, RiskProfile } from './rules';
+import { CreditFields, RuleFlag, RiskProfile, ConsumerInfo } from './types';
 import { CaseLaw } from './caselaw';
-import { ConsumerInfo } from './types';
 export type { ConsumerInfo };
 
 /**
@@ -200,7 +199,7 @@ ${bureauName}
 
 RE: FORMAL DISPUTE UNDER FCRA § 611
 Account: ${creditorName}
-${fields.currentBalance ? `Balance Shown: $${fields.currentBalance}` : ''}
+${fields.currentValue ? `Stated Value: ${fields.currentValue}` : ''}
 
 Dear Sir/Madam:
 
@@ -260,7 +259,7 @@ ${creditorName}
 
 RE: DEBT VALIDATION REQUEST UNDER FDCPA § 809
 Alleged Account from: ${originalCreditor}
-${fields.currentBalance ? `Amount Claimed: $${fields.currentBalance}` : ''}
+${fields.currentValue ? `Stated Value: ${fields.currentValue}` : ''}
 
 SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
 
@@ -275,7 +274,7 @@ Please provide the following documentation:
 1. PROOF OF DEBT:
    - Complete payment history from the original creditor
    - The original signed contract or agreement bearing my signature
-   - Evidence of how you calculated the amount claimed
+   - Evidence of how you calculated the value reported
 
 2. CHAIN OF TITLE:
    - Documentation showing how you acquired this debt
@@ -347,8 +346,8 @@ Generated: ${today}
 | Original Creditor | ${fields.originalCreditor || 'Not Found'} |
 | Current Furnisher | ${fields.furnisherOrCollector || 'Not Found'} |
 | Account Type | ${fields.accountType || 'Not Found'} |
-| Current Balance | $${fields.currentBalance || '0'} |
-| Original Amount | $${fields.originalAmount || 'Not Found'} |
+| Current Stated Value | ${fields.currentValue || '0'} |
+| Initial Stated Value | ${fields.initialValue || 'Not Found'} |
 | Date Opened | ${fields.dateOpened || 'Not Found'} |
 | Date of First Delinquency | ${fields.dofd || 'NOT FOUND - CRITICAL'} |
 | Charge-Off Date | ${fields.chargeOffDate || 'Not Found'} |
@@ -407,7 +406,7 @@ ${creditorName}
 
 RE: FORMAL NOTICE OF DISPUTED INFORMATION AND DEMAND FOR CORRECTION
 Account Allegedly from: ${originalCreditor}
-${fields.currentBalance ? `Disputed Amount: $${fields.currentBalance}` : ''}
+${fields.currentValue ? `Disputed Value: ${fields.currentValue}` : ''}
 
 SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
 
@@ -428,7 +427,7 @@ LEGAL OBLIGATIONS YOU ARE VIOLATING:
 ${hasReagingFlags ? `
 NOTICE OF ILLEGAL RE-AGING:
 The date discrepancies identified above indicate that your company may be engaged in illegal "debt re-aging" - the practice of reporting false dates to extend the 7-year reporting period under FCRA § 605. This constitutes:
-• Willful noncompliance with FCRA (subject to statutory damages of $100-$1,000 per violation plus punitive damages)
+• Willful noncompliance with FCRA (subject to statutory damages per violation plus punitive damages)
 • Potential fraud and unfair debt collection practices
 ` : ''}
 ${hasFDCPAFlags ? `
@@ -450,7 +449,7 @@ NOTICE OF PRESERVED RIGHTS:
 
 This letter is sent without prejudice to any legal claims I may have. If you fail to comply, I reserve the right to:
 • File complaints with the CFPB, FTC, and state attorney general
-• Pursue statutory damages under FCRA (up to $1,000 per willful violation)
+• Pursue statutory damages under FCRA
 • Seek actual damages for harm to my credit standing
 • Pursue punitive damages and attorney's fees
 
@@ -488,7 +487,7 @@ ${creditorName}
 
 RE: CEASE AND DESIST COMMUNICATION
 Alleged Debt from: ${originalCreditor}
-${fields.currentBalance ? `Amount Claimed: $${fields.currentBalance}` : ''}
+${fields.currentValue ? `Stated Value: ${fields.currentValue}` : ''}
 
 SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
 
@@ -519,9 +518,9 @@ Any communication outside these narrow exceptions will constitute a violation of
 WARNING:
 
 Any further contact in violation of this cease and desist order will be documented and used as evidence in legal proceedings. Violations of the FDCPA are subject to:
-• Statutory damages up to $1,000 per violation
-• Actual damages for emotional distress and credit harm
-• Class action liability up to $500,000
+• Statutory damages per violation
+• Actual damages for reputational and credit harm
+• Class action liability
 • Payment of consumer's attorney's fees
 
 REQUIRED ACKNOWLEDGMENT:
@@ -551,11 +550,8 @@ export function generateIntentToSueLetter(
   const creditorName = fields.furnisherOrCollector || fields.originalCreditor || '[COMPANY NAME]';
 
   const highSeverityFlags = flags.filter(f => f.severity === 'high');
-  const totalPotentialDamages = flags.length * 1000; // $1000 per willful FCRA violation
 
-  return `${consumer.name}
-${consumer.address}
-${consumer.city}, ${consumer.state} ${consumer.zip}
+  return `${consumer.name}` + '\n' + `${consumer.address}` + '\n' + `${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
@@ -589,14 +585,14 @@ DAMAGES SOUGHT:
 If legal action becomes necessary, I will seek:
 
 1. STATUTORY DAMAGES under 15 U.S.C. § 1681n(a)(1)(A):
-   - $100 to $1,000 per willful violation
-   - Potential damages: $${totalPotentialDamages.toLocaleString()} (based on ${flags.length} documented violations)
+   - Statutory damages per willful violation
+   - Documented violations: ${flags.length}
 
 2. ACTUAL DAMAGES for:
    - Credit score deterioration
    - Denial of credit applications
    - Higher interest rates paid
-   - Emotional distress and reputational harm
+   - Reputational harm
 
 3. PUNITIVE DAMAGES under 15 U.S.C. § 1681n(a)(2):
    - For willful noncompliance, courts may award punitive damages without limitation
@@ -617,7 +613,7 @@ To avoid the expense and inconvenience of litigation for both parties, I am prep
 1. IMMEDIATELY delete all disputed information from all three credit bureaus
 2. Provide written confirmation of permanent deletion within 15 days
 3. Agree to cease all collection activities
-4. Pay settlement damages of $____________ (to be negotiated)
+4. Pay appropriate settlement damages (to be negotiated)
 
 DEADLINE:
 
@@ -665,11 +661,11 @@ export function generateCFPBNarrative(
   });
 
   narrative += `HARM CAUSED:\n`;
-  narrative += `This inaccurate reporting has caused material damage to my credit score and overall financial well-being. `;
+  narrative += `This inaccurate reporting has caused material damage to my credit standing and overall reputational well-being. `;
   if (flags.some(f => ['B1', 'B2', 'B3', 'K6'].includes(f.ruleId))) {
-    narrative += `Furthermore, the company appears to be engaging in illegal "debt re-aging" by manipulating reporting dates to extend the 7-year legal reporting limit under FCRA ?605.\n\n`;
+    narrative += `Furthermore, the company appears to be engaging in illegal "debt re-aging" by manipulating reporting dates to extend the 7-year legal reporting limit under FCRA § 605.\n\n`;
   } else {
-    narrative += `This constitutes a failure to maintain reasonable procedures to ensure maximum possible accuracy under FCRA ?607(b).\n\n`;
+    narrative += `This constitutes a failure to maintain reasonable procedures to ensure maximum possible accuracy under FCRA § 607(b).\n\n`;
   }
 
   narrative += `DESIRED RESOLUTION:\n`;

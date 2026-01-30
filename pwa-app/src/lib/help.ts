@@ -103,7 +103,7 @@ Re-aging violates:
 **Your Recourse:**
 
 - Dispute with credit bureaus
-- Sue under FCRA for $100-$1,000 per violation
+- Pursue federal legal remedies for statutory non-compliance
 - Report to CFPB and FTC`,
     relatedArticles: ['what-is-dofd', '7-year-rule', 'dispute-letter']
   },
@@ -199,11 +199,11 @@ When SOL expires:
 
 **Enforcement:**
 
-- Private lawsuits allowed
-- Statutory damages: $100-$1,000
-- Actual damages
-- Punitive damages for willful violations
-- Attorney's fees`,
+- Private legal action
+- Statutory liability for non-compliance
+- Liability for actual impact
+- Accountability for willful violations
+- Recovery of attorney's fees`,
     relatedArticles: ['fdcpa-basics', 'dispute-letter', 'suing-under-fcra']
   },
   'fdcpa-basics': {
@@ -242,9 +242,9 @@ When SOL expires:
 - Cease communication upon request
 
 **Damages:**
-- Up to $1,000 statutory damages
-- Actual damages
-- Attorney's fees`,
+- Statutory liability for non-compliance
+- Liability for actual impact
+- Recovery of attorney's fees`,
     relatedArticles: ['fcra-basics', 'debt-validation', 'cease-and-desist']
   },
   'debt-validation': {
@@ -294,7 +294,7 @@ export const GLOSSARY: Record<string, GlossaryTerm> = {
   'charge-off': {
     term: 'Charge-Off',
     definition: 'When a creditor writes off a debt as a loss, typically after 180 days of non-payment. The debt is still owed.',
-    example: 'A credit card issuer charges off your $5,000 balance after 6 months of missed payments.',
+    example: 'A credit card issuer charges off an account with a 5,000 unit value after 6 months of missed payments.',
     related: ['DOFD', 'collection', 'write-off']
   },
   furnisher: {

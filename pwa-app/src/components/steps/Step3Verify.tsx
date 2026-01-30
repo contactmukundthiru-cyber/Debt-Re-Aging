@@ -3,7 +3,7 @@
 import React from 'react';
 import { FIELD_CONFIG, ACCOUNT_TYPES, STATUSES, STATES, Step } from '../../lib/constants';
 import { ConsumerInfo } from '../../lib/types';
-import { getDateValidation, getCurrencyValidation, getDateOrderIssues } from '../../lib/validation';
+import { getDateValidation, getNumericValidation, getDateOrderIssues } from '../../lib/validation';
 import { CreditFields } from '../../lib/types';
 import { ParsedFields, getExtractionQuality } from '../../lib/parser';
 
@@ -54,8 +54,7 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
     });
   };
 
-  const dateFields = FIELD_CONFIG.filter(f => f.section === 'dates');
-  const amountFields = FIELD_CONFIG.filter(f => f.section === 'amounts');
+  const valueFields = FIELD_CONFIG.filter(f => f.section === 'values');
 
   const dateIssues = dateFields
     .map(field => {
@@ -71,10 +70,10 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
     })
     .filter(issue => !issue.valid);
 
-  const amountIssues = amountFields
+  const valueIssues = valueFields
     .map(field => {
       const value = (editableFields as Record<string, string>)[field.key] || '';
-      const validation = getCurrencyValidation(value);
+      const validation = getNumericValidation(value);
       return {
         key: field.key,
         label: field.label,
@@ -376,20 +375,20 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
             </div>
           </div>
 
-          {/* Amounts & Dates Section */}
+          {/* Numeric Valuations & Dates Section */}
           <div className="grid md:grid-cols-2 gap-8">
-            {/* Financial Section */}
+            {/* Quantitative Data Section */}
             <div className="premium-card overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
                 </div>
-                <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Financial Quantifiers</p>
+                <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Quantitative Indicators</p>
               </div>
               <div className="p-6 space-y-6">
-                {FIELD_CONFIG.filter(f => f.section === 'amounts').map(field => {
+                {FIELD_CONFIG.filter(f => f.section === 'values').map(field => {
                   const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
-                  const validation = getCurrencyValidation(fieldValue);
+                  const validation = getNumericValidation(fieldValue);
                   return (
                     <div key={field.key} className="relative group">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block">{field.label}</label>
@@ -399,7 +398,7 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
                           }`}
                         value={fieldValue}
                         onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                        placeholder="$0.00"
+                        placeholder="0.00"
                       />
                       {!validation.valid && <p className="text-[10px] text-red-500 mt-1 font-bold">{validation.message}</p>}
                     </div>

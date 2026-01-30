@@ -667,20 +667,12 @@ export function formatDate(date: Date | string): string {
 }
 
 /**
- * Format currency in current language
- */
-export function formatCurrency(amount: number): string {
-  const locale = currentLanguage === 'es' ? 'es-US' : 'en-US';
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: 'USD'
-  }).format(amount);
-}
-
-/**
  * Format number in current language
  */
 export function formatNumber(num: number): string {
   const locale = currentLanguage === 'es' ? 'es-ES' : 'en-US';
-  return new Intl.NumberFormat(locale).format(num);
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(num);
 }

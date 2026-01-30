@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { CreditFields, RuleFlag, RiskProfile } from '../../lib/rules';
+import { CreditFields, RuleFlag, RiskProfile } from '../../lib/types';
 import { ForensicSummary } from '../../lib/analytics';
 import { Step } from '../../lib/constants';
 import { ParsedFields } from '../../lib/parser';
@@ -43,10 +43,10 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   fieldsToSimple,
   parseCreditReport,
 }) => {
-  const [sortKey, setSortKey] = useState<'risk' | 'violations' | 'balance' | 'name'>('risk');
+  const [sortKey, setSortKey] = useState<'risk' | 'violations' | 'value' | 'name'>('risk');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const parseBalance = (value?: string) => {
+  const parseValue = (value?: string) => {
     if (!value) return 0;
     const cleaned = value.replace(/[^0-9.-]/g, '');
     const parsed = Number.parseFloat(cleaned);
@@ -55,28 +55,28 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
 
   const priorityQueue = useMemo(() => {
     const scored = analyzedAccounts.map(account => {
-      const balanceScore = Math.min(parseBalance(account.fields.currentBalance) / 1000, 50);
+      const amountScore = Math.min(parseValue(account.fields.currentValue) / 1000, 50);
       const violationScore = account.flags.length * 8;
       const riskScore = account.risk.overallScore;
       return {
         account,
-        score: Math.round(riskScore + violationScore + balanceScore),
+        score: Math.round(riskScore + violationScore + amountScore),
       };
     });
     return scored
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
-  }, [analyzedAccounts, parseBalance]);
+  }, [analyzedAccounts, parseValue]);
 
   const getActionCue = (account: AnalyzedAccount) => {
     if (account.flags.length >= 5) {
       return 'Escalate to formal dispute package';
     }
-    if ((account.fields.dateOfFirstDelinquency || '').length > 0) {
+    if ((account.fields.dofd || '').length > 0) {
       return 'Validate DOFD timeline against reporting history';
     }
-    if (parseBalance(account.fields.currentBalance) > 5000) {
-      return 'Prioritize due to high balance impact';
+    if (parseValue(account.fields.currentValue) > 5000) {
+      return 'Prioritize due to high reported value impact';
     }
     return 'Review narrative for missing verification details';
   };
@@ -94,8 +94,8 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
       if (sortKey === 'violations') {
         return b.flags.length - a.flags.length;
       }
-      if (sortKey === 'balance') {
-        return parseBalance(b.fields.currentBalance) - parseBalance(a.fields.currentBalance);
+      if (sortKey === 'value') {
+        return parseValue(b.fields.currentValue) - parseValue(a.fields.currentValue);
       }
       if (sortKey === 'name') {
         const aName = a.fields.furnisherOrCollector || a.fields.originalCreditor || '';
@@ -105,7 +105,7 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
       return b.risk.overallScore - a.risk.overallScore;
     });
     return cloned;
-  }, [analyzedAccounts, sortKey, searchTerm]);
+  }, [analyzedAccounts, sortKey, searchTerm, parseValue]);
 
   const analyzeAccount = (account: AnalyzedAccount) => {
     setEditableFields(account.fields);
@@ -160,8 +160,8 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
           </div>
           <div className="premium-card p-6 bg-emerald-500/5 border-emerald-500/20 shadow-xl overflow-hidden relative">
             <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-3 relative z-10">Est. Recovery</p>
-            <p className="text-4xl font-bold tabular-nums text-emerald-500 relative z-10">${executiveSummary.totalEstimatedDamages.toLocaleString()}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-3 relative z-10">Forensic Impact</p>
+            <p className="text-4xl font-bold tabular-nums text-emerald-500 relative z-10">{executiveSummary.totalAccounts > 0 ? 'Verified' : 'Pending'}</p>
           </div>
 
           {executiveSummary.discrepancies.length > 0 && (
@@ -230,7 +230,7 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
             <div className="space-y-3 text-sm text-emerald-900/80">
               <div className="flex gap-3">
                 <span className="w-6 h-6 rounded-full bg-emerald-900 text-white text-xs flex items-center justify-center">1</span>
-                <p>Start with the top account and validate DOFD, payment status, and balance accuracy in Step 3.</p>
+                <p>Start with the top account and validate DOFD, payment status, and value reporting in Step 3.</p>
               </div>
               <div className="flex gap-3">
                 <span className="w-6 h-6 rounded-full bg-emerald-900 text-white text-xs flex items-center justify-center">2</span>
@@ -270,7 +270,7 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
                 >
                   <option value="risk">High Risk First</option>
                   <option value="violations">Violation Count</option>
-                  <option value="balance">Highest Balance</option>
+                  <option value="value">Highest Value</option>
                   <option value="name">Alphabetical</option>
                 </select>
               </div>

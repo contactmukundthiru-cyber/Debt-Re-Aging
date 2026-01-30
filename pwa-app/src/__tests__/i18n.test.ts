@@ -1,4 +1,4 @@
-import { getLanguage, setLanguage, t, translate, getAvailableLanguages, formatDate, formatCurrency } from '../lib/i18n';
+import { getLanguage, setLanguage, t, translate, getAvailableLanguages, formatDate, formatNumber } from '../lib/i18n';
 
 describe('i18n system', () => {
   test('getLanguage and setLanguage', () => {
@@ -36,12 +36,11 @@ describe('i18n system', () => {
     expect(formatDate(date)).toContain('enero');
   });
 
-  test('formatCurrency uses correct locale', () => {
-    const amount = 1234.56;
+  test('formatNumber uses correct locale', () => {
+    const val = 1234.56;
     setLanguage('en');
-    expect(formatCurrency(amount)).toContain('$1,234.56');
+    expect(formatNumber(val)).toContain('1,234.56');
     setLanguage('es');
-    // In Spanish US it might still be $1,234.56 but the locale is set to es-US in the code
-    expect(formatCurrency(amount)).toContain('$1,234.56');
+    expect(formatNumber(val)).toContain('1.234,56');
   });
 });

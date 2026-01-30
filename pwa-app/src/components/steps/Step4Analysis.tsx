@@ -368,6 +368,54 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
     100 - (timelineIssues.filter(issue => issue.severity === 'blocking').length * 20)
       - (timelineIssues.filter(issue => issue.severity === 'warning').length * 10)
   );
+  const actionQueue = React.useMemo(() => {
+    const queue: Array<{ id: string; priority: 'critical' | 'high' | 'medium'; title: string; detail: string; field?: string; tab?: TabId }> = [];
+    timelineIssues.forEach(issue => {
+      queue.push({
+        id: `timeline-${issue.id}`,
+        priority: issue.severity === 'blocking' ? 'critical' : 'high',
+        title: issue.title,
+        detail: issue.description,
+        field: issue.field as string | undefined,
+        tab: 'timeline'
+      });
+    });
+    smartRecommendations.forEach(rec => {
+      queue.push({
+        id: `smart-${rec.id}`,
+        priority: rec.type === 'error' ? 'high' : rec.type === 'warning' ? 'medium' : 'medium',
+        title: rec.title,
+        detail: rec.description,
+        field: rec.field as string
+      });
+    });
+    (seriesInsights || []).slice(0, 3).forEach(insight => {
+      queue.push({
+        id: `series-${insight.id}`,
+        priority: insight.severity === 'high' ? 'high' : 'medium',
+        title: insight.title,
+        detail: insight.summary,
+        tab: 'deltas'
+      });
+    });
+    return queue
+      .sort((a, b) => {
+        const score = (item: typeof queue[number]) => item.priority === 'critical' ? 3 : item.priority === 'high' ? 2 : 1;
+        return score(b) - score(a);
+      })
+      .slice(0, 8);
+  }, [seriesInsights, smartRecommendations, timelineIssues]);
+
+  const analysisReadiness = React.useMemo(() => {
+    const blockers = timelineIssues.filter(issue => issue.severity === 'blocking').length;
+    const warnings = timelineIssues.filter(issue => issue.severity === 'warning').length;
+    const readinessScore = Math.max(0, Math.round(100 - blockers * 20 - warnings * 8 + readiness * 0.2));
+    return {
+      blockers,
+      warnings,
+      readinessScore
+    };
+  }, [readiness, timelineIssues]);
   const evidenceBySeverity = React.useMemo(() => {
     const levels: Array<'critical' | 'high' | 'medium' | 'low'> = ['critical', 'high', 'medium', 'low'];
     return levels.map(level => {
@@ -678,6 +726,82 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
           </div>
         </div>
       )}
+
+      {actionQueue.length > 0 && (
+        <div className="mb-10 premium-card p-6 bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Forensic Action Queue</p>
+              <h3 className="text-lg font-semibold dark:text-white">Top fixes to strengthen the case</h3>
+            </div>
+            <span className="text-xs font-mono text-slate-400">{actionQueue.length} priorities</span>
+          </div>
+          <div className="grid gap-3">
+            {actionQueue.map(item => (
+              <div key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
+                <div>
+                  <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded-full border ${
+                    item.priority === 'critical' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                    item.priority === 'high' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                    'bg-slate-100 text-slate-500 border-slate-200'
+                  }`}>
+                    {item.priority}
+                  </span>
+                  <p className="text-sm font-semibold dark:text-white mt-2">{item.title}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{item.detail}</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {item.tab && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+                      onClick={() => setActiveTab(item.tab)}
+                    >
+                      Open {item.tab}
+                    </button>
+                  )}
+                  {item.field && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: item.field } }))}
+                    >
+                      Fix Field
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="mb-10 premium-card p-6 bg-white/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Analysis Readiness</p>
+            <h3 className="text-lg font-semibold dark:text-white">Pre‑litigation readiness gate</h3>
+          </div>
+          <span className="text-xs font-mono text-slate-400">{analysisReadiness.readinessScore}%</span>
+        </div>
+        <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden mb-4">
+          <div className="h-full bg-emerald-500 transition-all" style={{ width: `${analysisReadiness.readinessScore}%` }} />
+        </div>
+        <div className="grid md:grid-cols-3 gap-4 text-xs text-slate-600 dark:text-slate-400">
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-rose-500 mb-1">Blocking Issues</p>
+            <p className="text-lg font-semibold text-rose-600">{analysisReadiness.blockers}</p>
+          </div>
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-amber-500 mb-1">Warnings</p>
+            <p className="text-lg font-semibold text-amber-600">{analysisReadiness.warnings}</p>
+          </div>
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-emerald-500 mb-1">Evidence Readiness</p>
+            <p className="text-lg font-semibold text-emerald-600">{readiness}%</p>
+          </div>
+        </div>
+      </div>
 
       <div className="mb-10 grid lg:grid-cols-[1.4fr_1fr] gap-6">
         <div className="premium-card p-6 border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60">

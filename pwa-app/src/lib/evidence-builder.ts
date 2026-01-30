@@ -3,7 +3,8 @@
  * Compiles comprehensive court-ready documentation
  */
 
-import { CreditFields, RuleFlag, RiskProfile } from './rules';
+import { CreditFields, RuleFlag, RiskProfile } from './types';
+import { ForensicImpactAssessment, assessForensicImpact } from './impact-assessment-engine';
 
 export interface EvidenceItem {
   id: string;
@@ -28,12 +29,12 @@ export interface EvidencePackage {
     creditor: string;
     collector?: string;
     accountNumber?: string;
-    balance: string;
+    value: string;
   };
   summary: {
     totalViolations: number;
     highSeverity: number;
-    estimatedDamages: DamageEstimate;
+    impactAssessment: ForensicImpactAssessment;
     caseStrength: 'strong' | 'moderate' | 'weak';
   };
   timeline: TimelineEntry[];
@@ -58,7 +59,7 @@ export interface ViolationDetail {
   description: string;
   evidence: string[];
   legalCitations: string[];
-  potentialDamages: string;
+  potentialImpact: string;
 }
 
 export interface LegalCitation {
@@ -66,15 +67,7 @@ export interface LegalCitation {
   section: string;
   title: string;
   relevance: string;
-  damages: string;
-}
-
-export interface DamageEstimate {
-  statutory: { min: number; max: number };
-  actual: { estimated: number; basis: string };
-  punitive: { possible: boolean; basis: string };
-  attorneyFees: boolean;
-  total: { min: number; max: number };
+  impact: string;
 }
 
 /**
@@ -100,12 +93,12 @@ export function buildEvidencePackage(
     account: {
       creditor: fields.originalCreditor || 'Unknown',
       collector: fields.furnisherOrCollector,
-      balance: fields.currentBalance || '$0'
+      value: fields.currentValue || '0.00'
     },
     summary: {
       totalViolations: flags.length,
       highSeverity: flags.filter(f => f.severity === 'high').length,
-      estimatedDamages: calculateDamages(flags, fields),
+      impactAssessment: assessImpact(flags, fields),
       caseStrength: riskProfile.disputeStrength === 'strong' ? 'strong' :
                     riskProfile.disputeStrength === 'moderate' ? 'moderate' : 'weak'
     },
@@ -127,70 +120,10 @@ function generateCaseId(): string {
 }
 
 /**
- * Calculate potential damages
+ * Assess impact of violations using the forensic engine
  */
-export function calculateDamages(flags: RuleFlag[], fields: CreditFields): DamageEstimate {
-  const highCount = flags.filter(f => f.severity === 'high').length;
-  const mediumCount = flags.filter(f => f.severity === 'medium').length;
-
-  // FCRA statutory damages: $100-$1,000 per violation
-  const statutoryMin = highCount * 100 + mediumCount * 100;
-  const statutoryMax = highCount * 1000 + mediumCount * 500;
-
-  // Actual damages estimation based on credit impact
-  const actualEstimate = estimateActualDamages(fields, flags);
-
-  // Punitive damages (up to 2x statutory for willful violations)
-  const willful = flags.some(f => ['B1', 'B2', 'B3'].includes(f.ruleId));
-
-  return {
-    statutory: { min: statutoryMin, max: statutoryMax },
-    actual: actualEstimate,
-    punitive: {
-      possible: willful && highCount >= 2,
-      basis: willful ? 'Pattern of re-aging suggests willful noncompliance' : 'Insufficient evidence of willfulness'
-    },
-    attorneyFees: true, // Always available under FCRA
-    total: {
-      min: statutoryMin + actualEstimate.estimated,
-      max: statutoryMax + actualEstimate.estimated + (willful ? statutoryMax * 2 : 0)
-    }
-  };
-}
-
-/**
- * Estimate actual damages
- */
-function estimateActualDamages(fields: CreditFields, flags: RuleFlag[]): { estimated: number; basis: string } {
-  let estimate = 0;
-  const bases: string[] = [];
-
-  // Credit denial costs
-  if (flags.some(f => f.severity === 'high')) {
-    estimate += 500;
-    bases.push('Potential credit denial costs ($500)');
-  }
-
-  // Higher interest rate costs
-  if (flags.length >= 2) {
-    estimate += 1000;
-    bases.push('Estimated higher interest rate costs ($1,000)');
-  }
-
-  // Emotional distress
-  if (flags.filter(f => f.severity === 'high').length >= 2) {
-    estimate += 2500;
-    bases.push('Emotional distress from multiple violations ($2,500)');
-  }
-
-  // Time spent disputing
-  estimate += 250; // Minimum for time value
-  bases.push('Time spent on dispute process ($250)');
-
-  return {
-    estimated: estimate,
-    basis: bases.join('; ')
-  };
+export function assessImpact(flags: RuleFlag[], fields: CreditFields): ForensicImpactAssessment {
+  return assessForensicImpact(flags, []);
 }
 
 /**
@@ -267,8 +200,8 @@ function buildViolationDetails(flags: RuleFlag[]): ViolationDetail[] {
     description: flag.explanation,
     evidence: flag.suggestedEvidence,
     legalCitations: flag.legalCitations,
-    potentialDamages: flag.severity === 'high' ? '$100-$1,000' :
-                      flag.severity === 'medium' ? '$100-$500' : 'Minimal'
+    potentialImpact: flag.severity === 'high' ? 'High Forensic Severity' :
+                      flag.severity === 'medium' ? 'Moderate Forensic Severity' : 'Contextual'
   }));
 }
 
@@ -316,7 +249,7 @@ function buildEvidenceList(flags: RuleFlag[], fields: CreditFields): EvidenceIte
     });
   }
 
-  // Balance/payment evidence
+  // Value/payment evidence
   if (flags.some(f => ['D1', 'K1', 'K7'].includes(f.ruleId))) {
     evidence.push({
       id: `EV-${idCounter++}`,
@@ -391,31 +324,31 @@ function buildLegalBasis(flags: RuleFlag[]): LegalCitation[] {
       statute: 'Fair Credit Reporting Act',
       section: '15 U.S.C. § 1681c',
       title: 'Requirements relating to information contained in consumer reports',
-      damages: 'Statutory: $100-$1,000; Actual; Punitive for willful; Attorney fees'
+      impact: 'Statutory Accountability; Punitive for Willful Noncompliance; Attorney Fee-Shifting'
     },
     'FCRA §611': {
       statute: 'Fair Credit Reporting Act',
       section: '15 U.S.C. § 1681i',
       title: 'Procedure in case of disputed accuracy',
-      damages: 'Statutory: $100-$1,000; Actual; Punitive for willful; Attorney fees'
+      impact: 'Statutory Accountability; Punitive for Willful Noncompliance; Attorney Fee-Shifting'
     },
     'FCRA §623': {
       statute: 'Fair Credit Reporting Act',
       section: '15 U.S.C. § 1681s-2',
       title: 'Responsibilities of furnishers of information',
-      damages: 'Actual damages; Punitive for willful; Attorney fees (private right limited)'
+      impact: 'Civil Liability; Punitive for Willful Noncompliance; Attorney Fee-Shifting'
     },
     'FDCPA §807': {
       statute: 'Fair Debt Collection Practices Act',
       section: '15 U.S.C. § 1692e',
       title: 'False or misleading representations',
-      damages: 'Statutory: up to $1,000; Actual; Attorney fees'
+      impact: 'Statutory Accountability; Civil Liability; Attorney Fee-Shifting'
     },
     'FDCPA §809': {
       statute: 'Fair Debt Collection Practices Act',
       section: '15 U.S.C. § 1692g',
       title: 'Validation of debts',
-      damages: 'Statutory: up to $1,000; Actual; Attorney fees'
+      impact: 'Statutory Accountability; Civil Liability; Attorney Fee-Shifting'
     }
   };
 
@@ -442,12 +375,12 @@ function buildRecommendations(flags: RuleFlag[], riskProfile: RiskProfile): stri
 
   // Always include
   recs.push('Preserve all evidence including original credit reports');
-  recs.push('Document any financial harm suffered (credit denials, higher rates)');
+  recs.push('Document any material impact on credit eligibility or reported terms');
 
   // Based on case strength
   if (riskProfile.litigationPotential) {
     recs.push('Consult with FCRA/consumer protection attorney');
-    recs.push('Consider formal litigation for maximum damages');
+    recs.push('Consider formal litigation to ensure full statutory compliance');
   }
 
   // Re-aging specific
@@ -464,7 +397,7 @@ function buildRecommendations(flags: RuleFlag[], riskProfile: RiskProfile): stri
 
   // Multiple violations
   if (flags.length >= 3) {
-    recs.push('Document pattern of violations for punitive damage claim');
+    recs.push('Document pattern of violations for forensic integrity assessment');
     recs.push('Consider class action investigation if others are similarly affected');
   }
 
@@ -492,7 +425,7 @@ export function formatEvidencePackage(pkg: EvidencePackage): string {
   lines.push('─'.repeat(70));
   lines.push(`Original Creditor: ${pkg.account.creditor}`);
   if (pkg.account.collector) lines.push(`Collection Agency: ${pkg.account.collector}`);
-  lines.push(`Reported Balance: ${pkg.account.balance}`);
+  lines.push(`Reported Value: ${pkg.account.value}`);
   lines.push('');
   lines.push('─'.repeat(70));
   lines.push('CASE SUMMARY');
@@ -501,12 +434,11 @@ export function formatEvidencePackage(pkg: EvidencePackage): string {
   lines.push(`High Severity: ${pkg.summary.highSeverity}`);
   lines.push(`Case Strength: ${pkg.summary.caseStrength.toUpperCase()}`);
   lines.push('');
-  lines.push('ESTIMATED DAMAGES:');
-  lines.push(`  Statutory: $${pkg.summary.estimatedDamages.statutory.min} - $${pkg.summary.estimatedDamages.statutory.max}`);
-  lines.push(`  Actual: $${pkg.summary.estimatedDamages.actual.estimated} (${pkg.summary.estimatedDamages.actual.basis})`);
-  lines.push(`  Punitive Possible: ${pkg.summary.estimatedDamages.punitive.possible ? 'Yes' : 'No'}`);
-  lines.push(`  Attorney Fees: Available under FCRA`);
-  lines.push(`  TOTAL RANGE: $${pkg.summary.estimatedDamages.total.min} - $${pkg.summary.estimatedDamages.total.max}`);
+  lines.push('LIABILITY ASSESSMENT:');
+  lines.push(`  Statutory Accountability: ${pkg.summary.impactAssessment.statutory.eligible ? 'ELIBIGLE' : 'PENDING'}`);
+  lines.push(`  Violation Logic: ${pkg.summary.impactAssessment.statutory.basis.join('; ')}`);
+  lines.push(`  Culpability Level: ${pkg.summary.impactAssessment.culpability.level.toUpperCase()}`);
+  lines.push(`  Attorney Fees: ${pkg.summary.impactAssessment.attorneyFees.recoverable ? 'RECOVERABLE' : 'PENDING'}`);
   lines.push('');
   lines.push('─'.repeat(70));
   lines.push('TIMELINE OF EVENTS');
@@ -526,7 +458,7 @@ export function formatEvidencePackage(pkg: EvidencePackage): string {
     lines.push(`${i + 1}. ${v.ruleName} [${v.ruleId}] - ${v.severity.toUpperCase()}`);
     lines.push(`   ${v.description}`);
     lines.push(`   Legal Basis: ${v.legalCitations.join(', ')}`);
-    lines.push(`   Potential Damages: ${v.potentialDamages}`);
+    lines.push(`   Forensic Impact: ${v.potentialImpact}`);
     lines.push('');
   });
   lines.push('─'.repeat(70));
@@ -550,7 +482,7 @@ export function formatEvidencePackage(pkg: EvidencePackage): string {
     lines.push(`Section: ${cite.section}`);
     lines.push(`Title: ${cite.title}`);
     lines.push(`Relevance: ${cite.relevance}`);
-    lines.push(`Damages Available: ${cite.damages}`);
+    lines.push(`Statutory Impact: ${cite.impact}`);
   });
   lines.push('');
   lines.push('─'.repeat(70));

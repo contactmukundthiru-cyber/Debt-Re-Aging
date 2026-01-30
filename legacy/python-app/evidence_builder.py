@@ -93,13 +93,13 @@ class EvidencePacket:
 # FCRA liability reference
 FCRA_LIABILITY = {
     'negligent': {
-        'liability': 'Actual damages suffered',
+        'liability': 'Actual impact suffered',
         'fees': 'Reasonable attorneys fees and costs',
         'statute': '15 U.S.C. § 1681o'
     },
     'willful': {
-        'liability': 'Statutory damages',
-        'punitive': 'Punitive damages as court may allow',
+        'liability': 'Civil Liability provisions',
+        'enforcement': 'Regulatory enforcement as allowed',
         'fees': 'Reasonable attorneys fees and costs',
         'statute': '15 U.S.C. § 1681n'
     }
@@ -114,7 +114,7 @@ CAUSES_OF_ACTION = {
         'elements': [
             'CRA reported inaccurate information',
             'CRA failed to follow reasonable procedures to assure accuracy',
-            'Consumer suffered damages'
+            'Consumer suffered negative impact'
         ]
     },
     'FCRA_1681i': {
@@ -210,7 +210,7 @@ class EvidenceBuilder:
                 summary.append(f"  - {p.get('pattern_name')} (Confidence: {p.get('confidence_score')}%)")
             summary.append("")
 
-        summary.append("Detailed analysis, evidence inventory, and damages calculations follow.")
+        summary.append("Detailed analysis, evidence inventory, and forensic integrity audit follow.")
 
         return "\n".join(summary)
 
@@ -413,16 +413,16 @@ class EvidenceBuilder:
         if critical_failure:
             # Impact of systemic/willful violations
             impacts.append(ViolationImpact(
-                category='Statutory Liability (Willful)',
-                description='Potential for statutory damages due to willful FCRA violations',
+                category='Civil Liability (Willful)',
+                description='Potential for enforcement action due to willful FCRA violations',
                 severity='Critical',
                 basis=f'Detected {high_count} high-severity violations indicating systemic failure',
                 statutory_reference='15 U.S.C. § 1681n(a)(1)(A)'
             ))
 
             impacts.append(ViolationImpact(
-                category='Punitive Liability',
-                description='Exposure to punitive damages for reckless disregard of reporting standards',
+                category='Civil Accountability',
+                description='Exposure to regulatory scrutiny and enforcement for reckless disregard',
                 severity='High',
                 basis='Egregious conduct or reckless disregard of Metro2/FCRA requirements',
                 statutory_reference='15 U.S.C. § 1681n(a)(2)'

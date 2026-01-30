@@ -10,44 +10,41 @@ export interface DamageAssessment {
     statute: 'FCRA' | 'FDCPA' | 'TILA' | 'STATE_LAW';
     section: string;
     violationType: string;
-    statutoryLimit: number;
-    actualDamagesPotential: 'low' | 'medium' | 'high';
-    estimatedValue: number;
+    forensicSeverity: number;
+    impactPotential: 'low' | 'medium' | 'high';
 }
 
 export interface LiabilityReport {
-    totalEstimatedLiability: number;
+    overallSeverityScore: number;
     assessments: DamageAssessment[];
-    punitiveMultipliers: number;
+    riskMultiplier: number;
     litigationReady: boolean;
 }
 
-const STATUTORY_RATES = {
-    FCRA_WILLFUL: 1000,
-    FCRA_NEGLIGENT: 500,
-    FDCPA_PER_ACTION: 1000,
-    STATE_TREBLE: 3 // Multiplier
+const SEVERITY_WEIGHTS = {
+    HIGH: 100,
+    MEDIUM: 50,
+    LOW: 10
 };
 
 export function calculateLiability(flags: RuleFlag[]): LiabilityReport {
     const assessments: DamageAssessment[] = [];
-    let totalValue = 0;
+    let totalScore = 0;
 
     flags.forEach(flag => {
         // FCRA Violations
         if (flag.legalCitations.some(c => c.includes('FCRA'))) {
-            const isWillful = flag.severity === 'high';
-            const value = isWillful ? STATUTORY_RATES.FCRA_WILLFUL : STATUTORY_RATES.FCRA_NEGLIGENT;
+            const isHigh = flag.severity === 'high';
+            const score = isHigh ? SEVERITY_WEIGHTS.HIGH : SEVERITY_WEIGHTS.MEDIUM;
 
             assessments.push({
                 statute: 'FCRA',
                 section: flag.legalCitations.find(c => c.includes('FCRA')) || '15 U.S.C. § 1681',
                 violationType: flag.ruleName,
-                statutoryLimit: 1000,
-                actualDamagesPotential: isWillful ? 'high' : 'medium',
-                estimatedValue: value
+                forensicSeverity: score,
+                impactPotential: isHigh ? 'high' : 'medium'
             });
-            totalValue += value;
+            totalScore += score;
         }
 
         // FDCPA Violations
@@ -56,22 +53,21 @@ export function calculateLiability(flags: RuleFlag[]): LiabilityReport {
                 statute: 'FDCPA',
                 section: flag.legalCitations.find(c => c.includes('FDCPA')) || '15 U.S.C. § 1692',
                 violationType: flag.ruleName,
-                statutoryLimit: 1000,
-                actualDamagesPotential: 'medium',
-                estimatedValue: STATUTORY_RATES.FDCPA_PER_ACTION
+                forensicSeverity: SEVERITY_WEIGHTS.HIGH,
+                impactPotential: 'high'
             });
-            totalValue += STATUTORY_RATES.FDCPA_PER_ACTION;
+            totalScore += SEVERITY_WEIGHTS.HIGH;
         }
     });
 
     return {
-        totalEstimatedLiability: totalValue,
+        overallSeverityScore: totalScore,
         assessments,
-        punitiveMultipliers: totalValue > 5000 ? 2 : 1,
-        litigationReady: assets_meet_threshold(totalValue, flags)
+        riskMultiplier: totalScore > 300 ? 2 : 1,
+        litigationReady: assets_meet_threshold(totalScore, flags)
     };
 }
 
-function assets_meet_threshold(value: number, flags: RuleFlag[]): boolean {
-    return value >= 2000 || flags.some(f => f.severity === 'high');
+function assets_meet_threshold(score: number, flags: RuleFlag[]): boolean {
+    return score >= 200 || flags.some(f => f.severity === 'high');
 }

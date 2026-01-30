@@ -16,6 +16,7 @@ from dateutil.relativedelta import relativedelta
 from rapidfuzz import fuzz, process
 from app.utils import calculate_years_difference, estimate_removal_date, validate_iso_date
 from app.regulatory import REGULATORY_MAP
+from app.constants import ENTITY_RESOLUTION_MAP
 
 # Configure logging
 logging.basicConfig(
@@ -23,30 +24,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-# Known parent/subsidiary relationships for entity resolution
-SUBSIDIARY_MAP = {
-    'MIDLAND FUNDING': 'MIDLAND CREDIT MANAGEMENT',
-    'MIDLAND FUNDING LLC': 'MIDLAND CREDIT MANAGEMENT',
-    'MCM': 'MIDLAND CREDIT MANAGEMENT',
-    'MIDLAND CREDIT': 'MIDLAND CREDIT MANAGEMENT',
-    'ENCORE CAPITAL': 'MIDLAND CREDIT MANAGEMENT',
-    'ENCORE CAPITAL GROUP': 'MIDLAND CREDIT MANAGEMENT',
-    'PORTFOLIO RECOVERY': 'PRA GROUP',
-    'PORTFOLIO RECOVERY ASSOCIATES': 'PRA GROUP',
-    'PRA': 'PRA GROUP',
-    'LVNV': 'RESURGENT CAPITAL SERVICES',
-    'LVNV FUNDING': 'RESURGENT CAPITAL SERVICES',
-    'LVNV FUNDING LLC': 'RESURGENT CAPITAL SERVICES',
-    'SHERMAN FINANCIAL': 'RESURGENT CAPITAL SERVICES',
-    'SHERMAN STRATEGIC INVESTMENTS': 'RESURGENT CAPITAL SERVICES',
-    'CAVALRY SPV': 'CAVALRY PORTFOLIO SERVICES',
-    'JEFFERSON CAPITAL SYSTEMS': 'JEFFERSON CAPITAL',
-    'JCAP': 'JEFFERSON CAPITAL',
-    'ASSET ACCEPTANCE': 'MIDLAND CREDIT MANAGEMENT',
-    'CAVALRY SPV I': 'CAVALRY PORTFOLIO SERVICES',
-    'CAVALRY SPV II': 'CAVALRY PORTFOLIO SERVICES'
-}
 
 
 @dataclass(frozen=True)
@@ -162,8 +139,8 @@ class RuleEngine:
         s2_clean = s2.upper().strip()
         
         # Check direct subsidiary map
-        p1 = SUBSIDIARY_MAP.get(s1_clean, s1_clean)
-        p2 = SUBSIDIARY_MAP.get(s2_clean, s2_clean)
+        p1 = ENTITY_RESOLUTION_MAP.get(s1_clean, s1_clean)
+        p2 = ENTITY_RESOLUTION_MAP.get(s2_clean, s2_clean)
         
         if p1 == p2:
             return True
@@ -261,6 +238,22 @@ class RuleEngine:
                     'suggested_evidence': ["Prior credit reports", "DOFD verification letters"],
                     'legal_citations': ["FCRA_623_a1", "FDCPA_807_8"]
                 })
+
+            # Pattern 3: Systemic Batch Execution (Multiple accounts updated on same day)
+            reporting_days = [datetime.strptime(a.get('date_reported'), '%Y-%m-%d').day 
+                            for a in f_accounts 
+                            if a.get('date_reported') and validate_iso_date(a.get('date_reported'))]
+            
+            if len(set(reporting_days)) == 1 and len(reporting_days) >= 3:
+                behavioral_flags.append({
+                    'rule_id': 'BEH_03',
+                    'rule_name': 'Systemic Batch Execution Pattern',
+                    'severity': 'medium',
+                    'explanation': f"Furnisher '{furnisher}' updated {len(reporting_days)} separate accounts on the EXACT same day of the month (Day {reporting_days[0]}). This is characteristic of automated batch reporting rather than individual account verification.",
+                    'why_it_matters': "The FCRA requires furnishers to maintain 'reasonable procedures' to ensure maximum possible accuracy. Over-reliance on batch automation without verification can lead to systemic reporting errors.",
+                    'suggested_evidence': ["Credit reports showing sequential month updates on the same date"],
+                    'legal_citations': ["FCRA_623_b"]
+                })
                 
         return behavioral_flags
 
@@ -312,7 +305,7 @@ class RuleEngine:
                         'rule_name': rule.get('name', 'Duplicate Reporting'),
                         'severity': rule.get('severity', 'high'),
                         'explanation': (
-                            f"Highly probable duplicate: Balance ${bal} for creditor '{current_cluster[0]['original_creditor']}' "
+                            f"Highly probable duplicate: Identical balance matching for creditor '{current_cluster[0]['original_creditor']}' "
                             f"reported by {len(current_cluster)} furnishers: {', '.join(furnishers)}."
                         ),
                         'why_it_matters': rule.get('why_it_matters', ''),
@@ -640,7 +633,7 @@ class RuleEngine:
             balance = float(str(balance_str).replace(',', '').replace('$', ''))
             if status in ['paid', 'settled', 'closed', 'paid in full', 'settled in full'] and balance > 0:
                 return self._create_flag('D1',
-                    f"The account status is '{status.upper()}', but a balance of ${balance:,.2f} is still being reported. If an account is paid or settled, the reported balance should be $0.",
+                    f"The account status is '{status.upper()}', but a non-zero balance is still being reported. If an account is paid or settled, the reported balance should be reported as fully satisfied (Zero).",
                     {'account_status': status, 'current_balance': balance})
         except (ValueError, TypeError):
             logger.debug(f"Could not parse balance in D1 check: {balance_str}")
@@ -708,7 +701,7 @@ class RuleEngine:
 
             if payment > 0 and curr_bal >= prev_bal:
                 return self._create_flag('F1',
-                    f"A payment of ${payment:,.2f} was recorded, but the balance did not decrease (was ${prev_bal:,.2f}, now ${curr_bal:,.2f}). Payments should reduce the balance.",
+                    f"A payment was recorded, but the balance did not decrease accordingly. Reported payments must reduce the principal balance.",
                     {'last_payment_amount': payment, 'previous_balance': prev_bal, 'current_balance': curr_bal})
         except (ValueError, TypeError): pass
         return None
@@ -755,7 +748,7 @@ class RuleEngine:
             # This often indicates high-interest accumulation that outweighs any payments made
             if curr > 0 and (pdue / curr) > 0.5:
                 return self._create_flag('F3',
-                    f"Payment-to-Balance Anomaly: The past due amount (${pdue:,.2f}) accounts for { (pdue/curr)*100:.1f}% of the total balance (${curr:,.2f}). This suggests the debt is spiraling due to predatory interest or fees, making it impossible to satisfy under FDCPA guidelines.",
+                    f"Payment-to-Balance Anomaly: The past due amount accounts for { (pdue/curr)*100:.1f}% of the total balance. This suggests the debt is spiraling due to predatory interest or fees, which may violate FDCPA guidelines on collection practices.",
                     {'current_balance': curr, 'past_due': pdue, 'ratio': round(pdue/curr, 2)})
         except (ValueError, TypeError, ZeroDivisionError): pass
         return None
@@ -778,7 +771,7 @@ class RuleEngine:
             if original > 0 and current > original * 1.5:
                 growth_pct = ((current - original) / original) * 100
                 return self._create_flag('G1',
-                    f"The current balance (${current:,.2f}) is {growth_pct:.0f}% higher than the original debt amount (${original:,.2f}). This excessive growth may indicate unauthorized fees or interest charges.",
+                    f"The current balance is {growth_pct:.0f}% higher than the original debt amount. This excessive growth indicates non-compliant fee stacking or unauthorized interest charges.",
                     {'current_balance': current, 'original_balance': original, 'growth_percentage': round(growth_pct, 1)})
         except (ValueError, TypeError): pass
         return None
@@ -799,7 +792,7 @@ class RuleEngine:
             if transfer > 0 and current > transfer * 1.05:
                 increase = current - transfer
                 return self._create_flag('G2',
-                    f"The balance increased by ${increase:,.2f} after transfer to this collector (from ${transfer:,.2f} to ${current:,.2f}). Debt balances should not increase when transferred.",
+                    f"The balance increased after transfer to this collector. Debt balances must remain static or decrease during institutional transfers.",
                     {'current_balance': current, 'balance_at_transfer': transfer, 'increase_amount': round(increase, 2)})
         except (ValueError, TypeError): pass
         return None
@@ -854,7 +847,7 @@ class RuleEngine:
         return None
 
     def _check_rule_h3(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
-        """H3: Medical debt under $500 threshold"""
+        """H3: Medical debt under statutory reporting threshold"""
         account_type = str(fields.get('account_type') or '').lower()
         industry_code = str(fields.get('industry_code') or '').lower()
         current_balance = fields.get('current_balance')
@@ -868,7 +861,7 @@ class RuleEngine:
             balance = float(str(current_balance).replace(',', '').replace('$', ''))
             if 0 < balance < 500:
                 return self._create_flag('H3',
-                    f"This medical debt has a balance of ${balance:,.2f}, which is under the $500 threshold. Under current credit bureau policies, medical debts under $500 should not appear on credit reports.",
+                    f"This medical debt has a balance below the federal statutory threshold. Under current credit bureau policies, medical debts below this threshold should not appear on credit reports.",
                     {'current_balance': balance, 'threshold': 500})
         except (ValueError, TypeError): pass
         return None
@@ -890,7 +883,7 @@ class RuleEngine:
 
             if balance > 0 and (limit == 0 or abs(limit - balance) < 1):
                 return self._create_flag('I1',
-                    f"This revolving account shows a balance of ${balance:,.2f} but the credit limit is reported as ${limit:,.2f}. This makes utilization appear as 100%, which unfairly damages credit scores.",
+                    f"This revolving account shows a balance equal to or exceeding the reported credit limit. This makes utilization appear as 100%, which unfairly damages credit scores.",
                     {'current_balance': balance, 'credit_limit': limit, 'implied_utilization': '100%'})
         except (ValueError, TypeError): pass
         return None
@@ -962,7 +955,7 @@ class RuleEngine:
             balance = float(str(balance_str).replace(',', '').replace('$', ''))
             if balance > 0:
                 return self._create_flag('BK1',
-                    f"This account is marked as involved in bankruptcy (Status/Remarks: {status or remarks}), but still reports a balance of ${balance:,.2f}. Once discharged, the balance must be reported as $0.",
+                    f"This account is marked as involved in bankruptcy, but still reports a non-zero balance. Once discharged, the balance must be reported as fully satisfied (Zero).",
                     {'account_status': status, 'remarks': remarks, 'current_balance': balance})
         except (ValueError, TypeError): pass
         return None
@@ -1009,7 +1002,7 @@ class RuleEngine:
                 
                 if implied_annual_rate > (cap + 0.02):  # 2% buffer for one-time legal fees
                     return self._create_flag('UC1',
-                        f"Forensic Audit detected Usury Clock Drift: The balance grew from ${orig:,.2f} to ${curr:,.2f} over {years_since_dofd:.1f} years, implying an annual interest rate of {implied_annual_rate*100:.1f}%. This exceeds the {state_data.state} legal cap of {cap*100:.1f}%.",
+                        f"Forensic Audit detected Usury Clock Drift: The implied annual interest rate of {implied_annual_rate*100:.1f}% exceeds the {state_data.state} legal cap. The reported balance growth exceeds the maximum allowable non-usurious limit.",
                         {'original': orig, 'current': curr, 'implied_rate': f"{implied_annual_rate*100:.1f}%", 'cap': f"{cap*100:.1f}%"})
         except (ValueError, TypeError): pass
         return None
@@ -1114,7 +1107,7 @@ class RuleEngine:
             balance = float(str(current_balance).replace(',', '').replace('$', ''))
             if balance >= 1000 and balance % 1000 == 0:
                 return self._create_flag('K2',
-                    f"The reported balance (${balance:,.2f}) is an exact round number. Real debt balances with interest and fees rarely end in exact thousands. Consider requesting an itemized statement to verify accuracy.",
+                    f"The reported balance is an abnormally exact round number. Automated algorithmic reporting often produces standardized values that differ from actual ledger balances. Verification of the itemized accounting is recommended.",
                     {'current_balance': balance})
         except (ValueError, TypeError): pass
         return None
@@ -1133,7 +1126,7 @@ class RuleEngine:
             if limit > 0 and high > limit * 1.2:
                 overage_pct = ((high - limit) / limit) * 100
                 return self._create_flag('K3',
-                    f"The high balance (${high:,.2f}) exceeds the credit limit (${limit:,.2f}) by {overage_pct:.0f}%. While some over-limit activity is possible, this significant difference may indicate incorrect data.",
+                    f"The highest reported balance exceeds the reported credit limit by {overage_pct:.0f}%. Significant over-limit deviations often indicate data integrity defects or uncredited payments.",
                     {'high_balance': high, 'credit_limit': limit, 'overage_percentage': round(overage_pct, 1)})
         except (ValueError, TypeError): pass
         return None
@@ -1179,7 +1172,7 @@ class RuleEngine:
 
             if months > 24 and payments > original * 0.5 and current > original:
                 return self._create_flag('K5',
-                    f"Over {months} months, payments of ${payments:,.2f} were made but the balance increased from ${original:,.2f} to ${current:,.2f}. This pattern indicates a minimum payment trap where payments don't cover interest.",
+                    f"Extended observation reveals that cumulative payments have not reduced the principal balance. This pattern indicates non-amortizing interest accumulation where payments fail to offset accruing finance charges.",
                     {'current_balance': current, 'original_balance': original, 'total_payments': payments, 'months_reviewed': months})
         except (ValueError, TypeError): pass
         return None
@@ -1214,6 +1207,43 @@ class RuleEngine:
             logger.error(f"Unexpected error in _check_rule_k6: {e}")
         return None
 
+    def _check_rule_s1(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """S1: Systemic Automated Refresh Pattern"""
+        balance = fields.get('current_balance', '0')
+        reported_date = fields.get('date_reported')
+        last_activity = fields.get('date_last_activity')
+        
+        if not reported_date: return None
+        
+        try:
+            # Inline currency parsing to avoid dependencies
+            bal_val = float(str(balance).replace(',', '').replace('$', ''))
+            if bal_val == 0 and last_activity and validate_iso_date(last_activity) and validate_iso_date(reported_date):
+                rep_dt = datetime.strptime(reported_date, '%Y-%m-%d')
+                act_dt = datetime.strptime(last_activity, '%Y-%m-%d')
+                
+                # If reported recently but last activity is > 6 months ago, it might be a refresh loop
+                if (rep_dt - act_dt).days > 180 and (datetime.now() - rep_dt).days < 60:
+                     return self._create_flag('S1',
+                        f"Automated Refresh: Account reported as active on {reported_date} despite zero balance and no consumer-initiated activity for { (rep_dt - act_dt).days // 30 } months.",
+                        {'date_reported': reported_date, 'date_last_activity': last_activity, 'balance': balance})
+        except Exception: pass
+        return None
+
+    def _check_rule_s2(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
+        """S2: Institutional Batch Reporting Bias (1st, 15th, 30th)"""
+        reported_date = fields.get('date_reported')
+        if not reported_date or not validate_iso_date(reported_date): return None
+        
+        try:
+            dt = datetime.strptime(reported_date, '%Y-%m-%d')
+            if dt.day in [1, 15, 28, 30, 31]:
+                 return self._create_flag('S2',
+                    f"Institutional Batch Cycle: The reported date ({reported_date}) falls on a standard automated window (day {dt.day}), suggests algorithmic reporting rather than individual validation.",
+                    {'date_reported': reported_date, 'day_of_month': dt.day})
+        except Exception: pass
+        return None
+
     def _check_rule_k7(self, fields: Dict[str, Any]) -> Optional[RuleFlag]:
         """K7: Interest Rate Violation (State-Specific Cap)"""
         from app.state_sol import get_state_sol
@@ -1245,7 +1275,7 @@ class RuleEngine:
                 if annual_rate > cap:
                     rule_name = 'Excessive Medical Interest' if is_medical else 'Excessive Collection Interest'
                     return self._create_flag('K7',
-                        f"Forensic Interest Audit: Implied annual rate of {annual_rate*100:.1f}% exceeds the {state_data.state} legal cap of {cap*100:.1f}%. Balance grew from ${orig:,.2f} to ${curr:,.2f}.",
+                        f"Forensic Interest Audit: Implied annual rate of {annual_rate*100:.1f}% exceeds the {state_data.state} legal cap. The reported balance growth indicates non-compliant fee accumulation.",
                         {'annual_interest_rate': f"{annual_rate*100:.1f}%", 'legal_cap': f"{cap*100:.1f}%"})
         except (ValueError, TypeError):
             logger.debug(f"Could not parse balances or date in K7 check: curr={current_balance}, orig={original_balance}, dofd={dofd}")
@@ -1563,7 +1593,7 @@ class RuleEngine:
             if orig > 0 and curr > (orig * 1.5):
                 growth_pct = ((curr - orig) / orig) * 100
                 return self._create_flag('S3',
-                    f"Excessive Balance Growth: The reported balance (${curr:,.2f}) is {growth_pct:.1f}% higher than the original amount (${orig:,.2f}). This indicates extreme interest/fee accumulation which may be challengeable as unauthorized under the FDCPA.",
+                    f"Excessive Balance Growth: The reported balance is {growth_pct:.1f}% higher than the original principal amount. High-magnitude balance growth indicates extreme interest and fee accumulation which may violate FDCPA protections against unauthorized collection amounts.",
                     {'current': curr, 'original': orig, 'growth_pct': growth_pct})
         except ValueError:
             pass

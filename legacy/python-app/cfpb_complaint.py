@@ -167,9 +167,9 @@ def generate_desired_resolution(flags: List[Dict], fields: Dict) -> str:
     # Request documentation
     resolutions.append("4. Copies of any documentation the furnisher claims supports the accuracy of this information")
 
-    # Statutory damages mention
+    # Compliance statement
     if any(f.get('severity') == 'high' for f in flags):
-        resolutions.append("5. If willful non-compliance is determined, I reserve my right to pursue statutory damages under 15 U.S.C. § 1681n")
+        resolutions.append("5. If willful non-compliance is determined, I urge the CFPB to take enforcement action under 15 U.S.C. § 1681n")
 
     return "\n".join(resolutions)
 

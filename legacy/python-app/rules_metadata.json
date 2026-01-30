@@ -477,7 +477,7 @@
     "name": "SCRA Interest Rate Violation",
     "severity": "critical",
     "description": "Interest rate on debt exceeds 6% during a period of active military service.",
-    "why_it_matters": "The Servicemembers Civil Relief Act (SCRA) mandates that interest on any debt incurred before active duty must be capped at 6% during the period of military service. Exceeding this is a federal violation and can lead to significant statutory damages.",
+    "why_it_matters": "The Servicemembers Civil Relief Act (SCRA) mandates that interest on any debt incurred before active duty must be capped at 6% during the period of military service. Exceeding this is a federal violation and warrants immediate regulatory review.",
     "suggested_evidence": [
       "Military service records (DD214 or active duty orders)",
       "Account statements showing interest rates",
@@ -610,5 +610,27 @@
       "Debt validation request results"
     ],
     "legal_citations": ["FDCPA_809_a5", "FCRA_605_a"]
+  },
+  "S1": {
+    "name": "Systemic Automated Refresh Pattern",
+    "severity": "medium",
+    "description": "The account exhibits an automated 'refresh' cycle where dates are updated without any activity.",
+    "why_it_matters": "Furnishers are required to report actual activity. Automated monthly reporting that 'refreshes' the date of last activity without a payment or consumer contact is used to keep debt 'fresh' on your report, which can be interpreted as a form of re-aging.",
+    "suggested_evidence": [
+      "Consecutive months of reports showing date changes without balance changes",
+      "Historical logs showing no consumer-initiated contact"
+    ],
+    "legal_citations": ["FCRA_623_a1"]
+  },
+  "S2": {
+    "name": "Institutional Batch Reporting Bias",
+    "severity": "low",
+    "description": "Account updates align perfectly with institutional batch cycles (e.g., 1st or 15th of the month).",
+    "why_it_matters": "When reporting dates align strictly with institutional batch windows across multiple distinct events, it suggests the use of automated 'template' reporting rather than individual account verification. This can be used to challenge the 'reasonable investigation' requirement of the FCRA.",
+    "suggested_evidence": [
+      "Analysis of multiple accounts from the same furnisher",
+      "Evidence of batch reporting dates (1st, 15th, 30th)"
+    ],
+    "legal_citations": ["FCRA_623_b"]
   }
 }

@@ -7,7 +7,8 @@ import { estimateScoreImpact, ScoreImpactEstimate } from '../lib/score-impact';
 import { buildDeadlineTracker, DeadlineTracker } from '../lib/countdown';
 import { findCollector, CollectorMatch } from '../lib/collector-database';
 import { validateMetro2, Metro2ValidationResult } from '../lib/metro2-validator';
-import { calculateDamages, DamageEstimate } from '../lib/evidence-builder';
+import { assessImpact } from '../lib/evidence-builder';
+import { ForensicImpactAssessment } from '../lib/impact-assessment-engine';
 import { saveAnalysis, getHistory, AnalysisRecord } from '../lib/storage';
 import {
   buildTimeline,
@@ -28,7 +29,7 @@ export interface AnalysisState {
   deadlines: DeadlineTracker | null;
   collectorMatch: CollectorMatch | null;
   metro2Validation: Metro2ValidationResult | null;
-  damageEstimate: DamageEstimate | null;
+  impactAssessment: ForensicImpactAssessment | null;
   isAnalyzing: boolean;
   errors: AnalysisError[];
 }
@@ -69,7 +70,7 @@ const initialState: AnalysisState = {
   deadlines: null,
   collectorMatch: null,
   metro2Validation: null,
-  damageEstimate: null,
+  impactAssessment: null,
   isAnalyzing: false,
   errors: [],
 };
@@ -125,7 +126,7 @@ export function useAnalysis(): UseAnalysisReturn {
       let deadlines: DeadlineTracker | null = null;
       let collectorMatch: CollectorMatch | null = null;
       let metro2Validation: Metro2ValidationResult | null = null;
-      let damageEstimate: DamageEstimate | null = null;
+      let impactAssessment: ImpactAssessment | null = null;
 
       // Score Impact
       try {
@@ -172,13 +173,13 @@ export function useAnalysis(): UseAnalysisReturn {
         });
       }
 
-      // Damage Estimation
+      // Impact Assessment
       try {
-        damageEstimate = calculateDamages(detectedFlags, fields);
+        impactAssessment = assessImpact(detectedFlags, fields);
       } catch (e) {
         errors.push({
-          feature: 'Damage Estimation',
-          message: e instanceof Error ? e.message : 'Failed to estimate damages',
+          feature: 'Impact Assessment',
+          message: e instanceof Error ? e.message : 'Failed to assess impact',
           recoverable: true,
         });
       }
@@ -199,7 +200,7 @@ export function useAnalysis(): UseAnalysisReturn {
         deadlines,
         collectorMatch,
         metro2Validation,
-        damageEstimate,
+        impactAssessment,
         isAnalyzing: false,
         errors,
       });
@@ -234,7 +235,7 @@ export function useAnalysis(): UseAnalysisReturn {
       deadlines: null,
       collectorMatch: null,
       metro2Validation: null,
-      damageEstimate: null,
+      impactAssessment: null,
       errors: [],
     }));
   }, []);

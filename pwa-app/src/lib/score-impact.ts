@@ -393,52 +393,24 @@ export function calculateCategoryJump(
 }
 
 /**
- * Estimate financial impact of score improvement
+ * Assess consumer impact of score improvement
  */
 export function estimateFinancialImpact(
   scoreImprovement: number,
   loanType: 'mortgage' | 'auto' | 'credit_card' | 'personal'
 ): {
-  interestSavings: string;
-  monthlyPaymentReduction: string;
-  totalSavings: string;
+  interestImpact: string;
+  monthlyImpact: string;
+  totalBenefits: string;
   explanation: string;
 } {
-  // Approximate interest rate improvements per 20 points
-  const rateImprovementPer20Points: Record<string, number> = {
-    mortgage: 0.125, // 0.125% per 20 points
-    auto: 0.5,       // 0.5% per 20 points
-    credit_card: 2,  // 2% per 20 points
-    personal: 1.5    // 1.5% per 20 points
-  };
-
-  const averageLoanAmounts: Record<string, number> = {
-    mortgage: 300000,
-    auto: 35000,
-    credit_card: 5000,
-    personal: 15000
-  };
-
-  const loanTermsMonths: Record<string, number> = {
-    mortgage: 360, // 30 years
-    auto: 60,      // 5 years
-    credit_card: 36, // 3 years payoff
-    personal: 48    // 4 years
-  };
-
-  const rateImprovement = (scoreImprovement / 20) * rateImprovementPer20Points[loanType];
-  const loanAmount = averageLoanAmounts[loanType];
-  const termMonths = loanTermsMonths[loanType];
-
-  // Simplified interest calculation
-  const interestSavings = (loanAmount * (rateImprovement / 100) * (termMonths / 12));
-  const monthlySavings = interestSavings / termMonths;
+  const benefitLevel = scoreImprovement >= 50 ? 'Substantial' : scoreImprovement >= 25 ? 'Significant' : 'Moderate';
 
   return {
-    interestSavings: `${rateImprovement.toFixed(2)}% lower rate`,
-    monthlyPaymentReduction: `$${monthlySavings.toFixed(0)}/month`,
-    totalSavings: `$${interestSavings.toLocaleString(undefined, { maximumFractionDigits: 0 })} over loan term`,
-    explanation: `A ${scoreImprovement}-point score increase could save approximately ${rateImprovement.toFixed(2)}% on ${loanType} interest rates.`
+    interestImpact: `${benefitLevel} reduction in potential interest rates`,
+    monthlyImpact: `${benefitLevel} reduction in monthly payment obligations`,
+    totalBenefits: `${benefitLevel} long-term interest savings over life of loan`,
+    explanation: `A ${scoreImprovement}-point score increase typically results in ${benefitLevel.toLowerCase()} access to better prime lending terms for ${loanType.replace('_', ' ')}s.`
   };
 }
 

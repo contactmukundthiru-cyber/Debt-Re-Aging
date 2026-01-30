@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { DeltaResult, SeriesInsight, SeriesSnapshot, exportComparisonDossier, computeExpectedRemovalDate } from '../../../lib/delta';
+import { DeltaResult, SeriesInsight, SeriesSnapshot, exportComparisonDossier, computeExpectedRemovalDate, exportComparisonCsv } from '../../../lib/delta';
 import { exportComparisonDossierPdf } from '../../../lib/dossier-pdf';
 
 interface DeltasTabProps {
@@ -21,6 +21,10 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
   const [replayPlaying, setReplayPlaying] = React.useState(false);
   const [replaySpeed, setReplaySpeed] = React.useState(1400);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [impactFilter, setImpactFilter] = React.useState<'all' | 'negative' | 'positive' | 'neutral'>('all');
+  const [severityFilter, setSeverityFilter] = React.useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [deltaSort, setDeltaSort] = React.useState<'impact' | 'field' | 'direction'>('impact');
+  const [searchTerm, setSearchTerm] = React.useState('');
   const insightScore = (insight: SeriesInsight) => {
     const base = insight.severity === 'high' ? 90 : insight.severity === 'medium' ? 70 : 50;
     const readinessBoost = evidenceReadiness >= 75 ? 8 : evidenceReadiness >= 50 ? 4 : 0;
@@ -36,6 +40,33 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
     };
     return [...seriesInsights].sort((a, b) => severityScore(b.severity) - severityScore(a.severity));
   }, [evidenceReadiness, seriesInsights]);
+
+  const filteredInsights = React.useMemo(() => {
+    if (severityFilter === 'all') return prioritizedInsights;
+    return prioritizedInsights.filter(insight => insight.severity === severityFilter);
+  }, [prioritizedInsights, severityFilter]);
+
+  const filteredDeltas = React.useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    const base = impactFilter === 'all' ? deltas : deltas.filter(delta => delta.impact === impactFilter);
+    if (!term) return base;
+    return base.filter(delta => {
+      const haystack = `${delta.field} ${delta.oldValue} ${delta.newValue} ${delta.description}`.toLowerCase();
+      return haystack.includes(term);
+    });
+  }, [deltas, impactFilter, searchTerm]);
+  const sortedDeltas = React.useMemo(() => {
+    const impactRank = (impact: DeltaResult['impact']) => impact === 'negative' ? 3 : impact === 'neutral' ? 2 : 1;
+    const sorted = [...filteredDeltas];
+    if (deltaSort === 'field') {
+      sorted.sort((a, b) => a.field.localeCompare(b.field));
+    } else if (deltaSort === 'direction') {
+      sorted.sort((a, b) => a.oldValue.localeCompare(b.oldValue));
+    } else {
+      sorted.sort((a, b) => impactRank(b.impact) - impactRank(a.impact));
+    }
+    return sorted;
+  }, [deltaSort, filteredDeltas]);
 
   React.useEffect(() => {
     if (!replayPlaying || seriesSnapshots.length === 0) return;
@@ -91,6 +122,20 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
     100,
     Math.round((summaryStats.highCount * 12 + summaryStats.mediumCount * 7 + (evidenceReadiness || 0) * 0.5))
   );
+  const readinessTag = confidenceScore >= 80 ? 'court_ready' : confidenceScore >= 60 ? 'review_ready' : 'needs_evidence';
+  const typeBreakdown = React.useMemo(() => {
+    const counts = seriesInsights.reduce((acc, insight) => {
+      acc[insight.type] = (acc[insight.type] || 0) + 1;
+      return acc;
+    }, {} as Record<SeriesInsight['type'], number>);
+    return [
+      { key: 'reaging', label: 'Re-aging', count: counts.reaging || 0 },
+      { key: 'removal_extension', label: 'Removal', count: counts.removal_extension || 0 },
+      { key: 'value_shift', label: 'Stated Value', count: counts.value_shift || 0 },
+      { key: 'status_flip', label: 'Status', count: counts.status_flip || 0 },
+      { key: 'reporting_shift', label: 'Reporting', count: counts.reporting_shift || 0 }
+    ];
+  }, [seriesInsights]);
   const changeHighlights = React.useMemo(() => {
     const highlights: Record<number, { field: string; from?: string; to?: string }[]> = {};
     seriesSnapshots.forEach((snapshot, idx) => {
@@ -99,7 +144,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
       const changed: { field: string; from?: string; to?: string }[] = [];
       if (prev.dofd !== snapshot.dofd) changed.push({ field: 'DOFD', from: prev.dofd, to: snapshot.dofd });
       if (prev.removal !== snapshot.removal) changed.push({ field: 'Removal', from: prev.removal, to: snapshot.removal });
-      if (prev.balance !== snapshot.balance) changed.push({ field: 'Balance', from: prev.balance, to: snapshot.balance });
+      if (prev.value !== snapshot.value) changed.push({ field: 'Stated Value', from: prev.value, to: snapshot.value });
       if (prev.status !== snapshot.status) changed.push({ field: 'Status', from: prev.status, to: snapshot.status });
       if (prev.lastPayment !== snapshot.lastPayment) changed.push({ field: 'Last Pay', from: prev.lastPayment, to: snapshot.lastPayment });
       if (prev.reported !== snapshot.reported) changed.push({ field: 'Reported', from: prev.reported, to: snapshot.reported });
@@ -286,13 +331,13 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
               const dofdShift = prev?.dofd && snapshot.dofd && prev.dofd !== snapshot.dofd;
               const removalShift = prev?.removal && snapshot.removal && prev.removal !== snapshot.removal;
               const statusShift = prev?.status && snapshot.status && prev.status !== snapshot.status;
-              const balanceShift = prev?.balance && snapshot.balance && prev.balance !== snapshot.balance;
+              const valueShift = prev?.value && snapshot.value && prev.value !== snapshot.value;
               const lastPayShift = prev?.lastPayment && snapshot.lastPayment && prev.lastPayment !== snapshot.lastPayment;
               const reportedShift = prev?.reported && snapshot.reported && prev.reported !== snapshot.reported;
               return (
               <div
                 key={snapshot.timestamp}
-                className={`grid md:grid-cols-[160px_1fr] gap-4 rounded-2xl border p-4 transition-all duration-500 ${
+                className={`grid md:grid-cols-[160px\_1fr] gap-4 rounded-2xl border p-4 transition-all duration-500 ${
                   replayPlaying && replayIndex === idx
                     ? 'border-indigo-500/60 bg-indigo-500/5 scale-[1.01]'
                     : 'border-slate-200/70 dark:border-slate-800/70 bg-white/70 dark:bg-slate-900/40 opacity-80'
@@ -312,8 +357,8 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                     <p className={`font-mono ${removalShift ? 'text-amber-500 font-semibold' : ''}`}>{snapshot.removal || '—'}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-widest text-slate-400">Balance</span>
-                    <p className={`font-mono ${balanceShift ? 'text-indigo-500 font-semibold' : ''}`}>{snapshot.balance || '—'}</p>
+                    <span className="text-[10px] uppercase tracking-widest text-slate-400">Stated Value</span>
+                    <p className={`font-mono ${valueShift ? 'text-indigo-500 font-semibold' : ''}`}>{snapshot.value || '—'}</p>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase tracking-widest text-slate-400">Status</span>
@@ -337,7 +382,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                           key={change.field}
                           type="button"
                           className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] uppercase tracking-widest text-slate-500"
-                          onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: change.field === 'DOFD' ? 'dofd' : change.field === 'Removal' ? 'estimatedRemovalDate' : change.field === 'Balance' ? 'currentBalance' : change.field === 'Status' ? 'accountStatus' : change.field === 'Last Pay' ? 'dateLastPayment' : 'dateReportedOrUpdated' } }))}
+                          onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: change.field === 'DOFD' ? 'dofd' : change.field === 'Removal' ? 'estimatedRemovalDate' : change.field === 'Stated Value' ? 'currentValue' : change.field === 'Status' ? 'accountStatus' : change.field === 'Last Pay' ? 'dateLastPayment' : 'dateReportedOrUpdated' } }))}
                         >
                           {change.field}: {change.from || '—'} → {change.to || '—'}
                         </button>
@@ -374,13 +419,13 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                         Status Shift
                       </span>
                     )}
-                    {balanceShift && (
+                    {valueShift && (
                       <span
                         className="px-2 py-1 rounded-lg bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
-                        title={`Previous Balance: ${prev?.balance || '—'} → ${snapshot.balance || '—'}`}
-                        onClick={() => setActiveInsightId(findInsightByType('balance_shift')?.id || null)}
+                        title={`Previous Value: ${prev?.value || '—'} → ${snapshot.value || '—'}`}
+                        onClick={() => setActiveInsightId(findInsightByType('value_shift')?.id || null)}
                       >
-                        Balance Shift
+                        Value Shift
                       </span>
                     )}
                     {reportedShift && (
@@ -439,14 +484,14 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
             </div>
           )}
           <div className="mt-6 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Balance Drift</p>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3">Value Drift</p>
             <div className="flex items-end gap-2 h-20">
               {seriesSnapshots.map((snapshot, idx) => {
                 const prev = seriesSnapshots[idx - 1];
                 const dofdShift = prev?.dofd && snapshot.dofd && prev.dofd !== snapshot.dofd;
                 const removalShift = prev?.removal && snapshot.removal && prev.removal !== snapshot.removal;
                 const statusShift = prev?.status && snapshot.status && prev.status !== snapshot.status;
-                const raw = snapshot.balance || '';
+                const raw = snapshot.value || '';
                 const value = Number.parseFloat(raw.replace(/[^0-9.-]/g, ''));
                 const height = Number.isFinite(value) ? Math.max(8, Math.min(100, Math.round((value / 10000) * 100))) : 8;
                 return (
@@ -479,7 +524,31 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
               <p className="text-[10px] uppercase tracking-widest text-slate-400">Forensic Summary</p>
               <h3 className="text-lg font-bold dark:text-white">Highest-impact anomalies</h3>
             </div>
-            <span className="text-xs font-mono text-slate-400">Confidence {confidenceScore}%</span>
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <span>Confidence {confidenceScore}%</span>
+              <span className={`px-2 py-1 rounded-full text-[9px] uppercase tracking-widest border ${
+                readinessTag === 'court_ready' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                readinessTag === 'review_ready' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
+                'bg-rose-500/10 text-rose-500 border-rose-500/20'
+              }`}>
+                {readinessTag.replace('_', ' ')}
+              </span>
+            </div>
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-widest text-slate-400">
+            <span>Filter severity</span>
+            {(['all', 'high', 'medium', 'low'] as const).map(level => (
+              <button
+                key={level}
+                type="button"
+                className={`px-2 py-1 rounded-full border ${
+                  severityFilter === level ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' : 'bg-slate-100 text-slate-500 border-slate-200'
+                }`}
+                onClick={() => setSeverityFilter(level)}
+              >
+                {level}
+              </button>
+            ))}
           </div>
           <div className="mb-4">
             <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -504,6 +573,16 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
               <p className="text-2xl font-bold text-slate-600">{summaryStats.lowCount}</p>
             </div>
           </div>
+          <div className="mt-4">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Anomaly Mix</p>
+            <div className="flex flex-wrap gap-2">
+              {typeBreakdown.map(item => (
+                <span key={item.key} className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] uppercase tracking-widest text-slate-500">
+                  {item.label} {item.count}
+                </span>
+              ))}
+            </div>
+          </div>
           {summaryStats.strongest && (
             <div className="mt-4 rounded-xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40 text-xs text-slate-600 dark:text-slate-400">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Top Anomaly</p>
@@ -511,11 +590,44 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
               <p className="mt-2">{summaryStats.strongest.summary}</p>
             </div>
           )}
-          {prioritizedInsights.length > 0 && (
+          <div className="mt-4 rounded-xl border border-slate-200/70 dark:border-slate-800/70 p-4 bg-white/70 dark:bg-slate-900/40 text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Next Best Action</p>
+            <p className="text-sm font-semibold dark:text-white mb-3">
+              {readinessTag === 'court_ready'
+                ? 'Export dossier bundle and move to attorney review.'
+                : readinessTag === 'review_ready'
+                  ? 'Resolve timeline blockers and validate removal dates.'
+                  : 'Complete evidence checklist to strengthen admissibility.'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+                onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'timeline' } }))}
+              >
+                Open Timeline
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+                onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 4, tab: 'discovery' } }))}
+              >
+                Evidence Checklist
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
+                onClick={() => window.dispatchEvent(new CustomEvent('cra:navigate', { detail: { step: 5 } }))}
+              >
+                Export Pack
+              </button>
+            </div>
+          </div>
+          {filteredInsights.length > 0 && (
             <div className="mt-4">
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Priority Order</p>
               <div className="flex flex-wrap gap-2">
-                {prioritizedInsights.slice(0, 5).map(insight => (
+                {filteredInsights.slice(0, 5).map(insight => (
                   <span key={insight.id} className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] uppercase tracking-widest text-slate-500">
                     {insight.title}
                   </span>
@@ -627,13 +739,13 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                       Account Status
                     </button>
                   )}
-                  {activeInsight.type === 'balance_shift' && (
+                  {activeInsight.type === 'value_shift' && (
                     <button
                       type="button"
                       className="btn btn-secondary !rounded-xl !px-3 !py-2 !text-[10px] !uppercase !tracking-widest"
-                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: 'currentBalance' } }))}
+                      onClick={() => window.dispatchEvent(new CustomEvent('cra:focus-field', { detail: { field: 'currentValue' } }))}
                     >
-                      Balance
+                      Stated Value
                     </button>
                   )}
                 </div>
@@ -668,8 +780,71 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
       )}
 
       {/* Delta Cards */}
-      <div className="space-y-4">
-        {deltas.map((delta, i) => {
+      <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400">Delta Filters</p>
+            <h3 className="text-lg font-bold dark:text-white">Impact breakdown</h3>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase tracking-widest">
+            <input
+              type="text"
+              className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-[10px]"
+              placeholder="Search deltas..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button
+              type="button"
+              className="px-2 py-1 rounded-full border bg-slate-100 text-slate-500"
+              onClick={() => setSearchTerm('')}
+            >
+              Clear
+            </button>
+            <span className="text-[10px] uppercase tracking-widest text-slate-400">
+              {sortedDeltas.length} / {deltas.length} results
+            </span>
+            <select
+              className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-[10px]"
+              value={deltaSort}
+              onChange={(e) => setDeltaSort(e.target.value as typeof deltaSort)}
+            >
+              <option value="impact">Sort: Impact</option>
+              <option value="field">Sort: Field</option>
+              <option value="direction">Sort: Before → After</option>
+            </select>
+            {(['all', 'negative', 'positive', 'neutral'] as const).map(level => (
+              <button
+                key={level}
+                type="button"
+                className={`px-2 py-1 rounded-full border ${
+                  impactFilter === level ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' : 'bg-slate-100 text-slate-500 border-slate-200'
+                }`}
+                onClick={() => setImpactFilter(level)}
+              >
+                {level}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="px-2 py-1 rounded-full border bg-slate-900 text-white"
+              onClick={() => {
+                const csv = exportComparisonCsv(sortedDeltas);
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'filtered_deltas.csv';
+                link.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <div className="space-y-4">
+          {sortedDeltas.map((delta, i) => {
           const impactConfig = {
             negative: { color: 'border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20', icon: 'text-rose-500', badge: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
             positive: { color: 'border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20', icon: 'text-emerald-500', badge: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
@@ -725,7 +900,13 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
               </div>
             </div>
           );
-        })}
+          })}
+          {sortedDeltas.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-sm text-slate-500 text-center">
+              No deltas match the current filter.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -19,9 +19,9 @@ export function isValidDateString(dateStr: string): boolean {
 }
 
 /**
- * Validates and sanitizes a currency amount string
+ * Validates and sanitizes a numeric input string
  */
-export function sanitizeCurrency(value: string): string {
+export function sanitizeNumericInput(value: string): string {
   // Remove all non-numeric characters except decimal point
   const sanitized = value.replace(/[^0-9.]/g, '');
 
@@ -31,7 +31,7 @@ export function sanitizeCurrency(value: string): string {
     return parts[0] + '.' + parts.slice(1).join('');
   }
 
-  // Limit to 2 decimal places
+  // Limit to 2 decimal places for precision
   if (parts.length === 2 && parts[1].length > 2) {
     return parts[0] + '.' + parts[1].slice(0, 2);
   }
@@ -40,15 +40,15 @@ export function sanitizeCurrency(value: string): string {
 }
 
 /**
- * Formats a number as USD currency
+ * Formats a number for display without monetary symbols
  */
-export function formatCurrency(value: number | string): string {
+export function formatNumericValue(value: number | string): string {
   const num = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value;
-  if (isNaN(num)) return '$0.00';
+  if (isNaN(num)) return '0.00';
 
   return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(num);
 }
 
@@ -146,12 +146,12 @@ export function validateDateField(
 }
 
 /**
- * Validates a currency field
+ * Validates a numeric value field
  */
-export function validateCurrencyField(
+export function validateNumericField(
   value: string | undefined,
   required: boolean = false,
-  fieldName: string = 'Amount'
+  fieldName: string = 'Value'
 ): ValidationResult {
   if (!value && required) {
     return { valid: false, message: `${fieldName} is required` };
@@ -164,11 +164,11 @@ export function validateCurrencyField(
   const num = parseFloat(value.replace(/[^0-9.-]/g, ''));
 
   if (isNaN(num)) {
-    return { valid: false, message: 'Enter a valid amount' };
+    return { valid: false, message: 'Enter a valid value' };
   }
 
   if (num < 0) {
-    return { valid: false, message: 'Amount cannot be negative' };
+    return { valid: false, message: 'Value cannot be negative' };
   }
 
   return { valid: true, message: '' };

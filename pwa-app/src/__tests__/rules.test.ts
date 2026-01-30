@@ -22,7 +22,7 @@ describe('rule engine', () => {
   test('D1: Paid status with balance', () => {
     const fields = {
       accountStatus: 'Paid',
-      currentBalance: '$100'
+      currentBalance: '100'
     };
     const flags = runRules(fields);
     expect(flags.some(f => f.ruleId === 'D1')).toBe(true);

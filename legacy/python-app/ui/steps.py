@@ -413,9 +413,9 @@ def render_step_4_checks():
     """
     st.markdown("""
     <div style="margin-bottom: 20px;">
-        <h2 style="color: #1e40af; margin-bottom: 8px;">Step 4: Issues Found</h2>
+        <h2 style="color: #1e40af; margin-bottom: 8px;">Step 4: Forensic Audit Results</h2>
         <p style="color: #64748b; font-size: 0.95rem;">
-            We checked your report against 20+ rules. Here's what we found.
+            We audited your report against 50+ forensic rules. Here's what we uncovered.
         </p>
     </div>
     """, unsafe_allow_html=True)

@@ -9,43 +9,11 @@ import logging
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field, asdict
 from app.utils import normalize_date, validate_iso_date
+from app.constants import METRO2_STATUS_MAP, ENTITY_RESOLUTION_MAP
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Metro2 Status Code Decoder
-# Source: Metro2 Industry Standards for Credit Reporting
-METRO2_STATUS_MAP = {
-    '11': 'Current',
-    '13': 'Paid',
-    '62': 'Charge-off',
-    '64': 'Collection',
-    '71': 'Account Involved in Bankruptcy Chapter 7',
-    '78': 'Account Involved in Bankruptcy Chapter 11',
-    '80': 'Account Involved in Bankruptcy Chapter 13',
-    '82': 'Account Involved in Bankruptcy Chapter 12',
-    '83': 'Account Involved in Bankruptcy Chapter 13',
-    '84': 'Account Involved in Bankruptcy Chapter 13',
-    '93': 'Account involved in litigation',
-    '97': 'Unpaid collection',
-    'DA': 'Delete account (Metro2 error code)',
-    'DF': 'Deceased',
-}
-
-# Creditor Alias Map for Entity Resolution
-# Helps identify if multiple names belong to the same parent entity
-CREDITOR_ALIAS_MAP = {
-    'MIDLAND FUNDING': 'MIDLAND CREDIT MANAGEMENT',
-    'MCM': 'MIDLAND CREDIT MANAGEMENT',
-    'MIDLAND CREDIT': 'MIDLAND CREDIT MANAGEMENT',
-    'LVNV': 'LVNV FUNDING',
-    'RESURGENT': 'RESURGENT CAPITAL SERVICES',
-    'PRA': 'PORTFOLIO RECOVERY ASSOCIATES',
-    'PORTFOLIO RECOVERY': 'PORTFOLIO RECOVERY ASSOCIATES',
-    'ASSET ACCEPTANCE': 'ENCORE CAPITAL GROUP',
-    'CAVALRY': 'CAVALRY SPV',
-    'JEFFERSON CAPITAL': 'JEFFERSON CAPITAL SYSTEMS',
-}
 
 @dataclass
 class ExtractedField:
@@ -269,7 +237,7 @@ class CreditReportParser:
         if result.furnisher_or_collector and result.furnisher_or_collector.value:
             furn_val = result.furnisher_or_collector.value.upper()
             result.normalized_furnisher = furn_val
-            for alias, canonical in CREDITOR_ALIAS_MAP.items():
+            for alias, canonical in ENTITY_RESOLUTION_MAP.items():
                 if alias in furn_val:
                     result.normalized_furnisher = canonical
                     break

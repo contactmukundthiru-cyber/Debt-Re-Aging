@@ -62,7 +62,7 @@ CASE ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}
 1. EXECUTIVE CASE SUMMARY
 Potential FCRA/FDCPA litigation matter involving ${flags.filter(f => f.severity === 'high').length} high-severity violations.
 Primary Defendant(s): ${fields.furnisherOrCollector || 'Unknown Furnisher'}
-Estimated Statutory Damages: $${(flags.length * 1000).toLocaleString()} (Max)
+Forensic Impact Assessment: HIGH SEVERITY (Statutory Accountability Eligible)
 
 2. VIOLATION MATRIX
 ${flags.map((f, i) => `[${i + 1}] ${f.ruleName}
@@ -156,7 +156,7 @@ The volume and nature of these errors (${flags.length} total) suggests a systemi
                                 ? "A sworn affidavit converts your dispute from a 'letter' to 'evidence'. Under federal rules of civil procedure, an unrebutted affidavit can sometimes stand as truth. Bureaus hate dealing with these because they cannot be processed by OCR automation."
                                 : activeDocument === 'cfpb'
                                     ? "The Consumer Financial Protection Bureau (CFPB) complaint portal is a direct regulatory channel. Bureaus must respond within 15 days. Using specific Metro 2® terminology in your complaint forces a higher-tier response."
-                                    : "An Attorney Referral Packet summarizes the statutory damages, willful non-compliance evidence, and procedural violations in a format that makes it easy for a consumer protection lawyer to accept your case on contingency."
+                                    : "An Attorney Referral Packet summarizes the forensic impact, willful non-compliance evidence, and procedural violations in a format that makes it easy for a consumer protection lawyer to accept your case on contingency."
                             }
                         </p>
                         <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">

@@ -7,7 +7,7 @@ export interface ForensicSummary {
   totalAccounts: number;
   totalViolations: number;
   criticalAccounts: number;
-  totalEstimatedDamages: number;
+  overallSeverityIndex: number;
   furnisherConcentration: Record<string, number>;
   violationBreakdown: Record<string, number>;
   discrepancies: MaterialDiscrepancy[];
@@ -66,7 +66,7 @@ export function generateExecutiveSummary(accounts: { fields: CreditFields; flags
     totalAccounts: accounts.length,
     totalViolations: accounts.reduce((sum, acc) => sum + acc.flags.length, 0),
     criticalAccounts: accounts.filter(acc => acc.risk.riskLevel === 'critical' || acc.risk.riskLevel === 'high').length,
-    totalEstimatedDamages: accounts.reduce((sum, acc) => sum + (acc.flags.length * 1000), 0), // Base $1k per violation estimate
+    overallSeverityIndex: accounts.reduce((sum, acc) => sum + acc.flags.reduce((count, f) => count + (f.severity === 'high' ? 100 : f.severity === 'medium' ? 50 : 10), 0), 0),
     furnisherConcentration: {},
     violationBreakdown: {},
     discrepancies: [],
@@ -83,7 +83,7 @@ export function generateExecutiveSummary(accounts: { fields: CreditFields; flags
   });
 
   // Material Discrepancy Detection (Self-Reconciliation)
-  const fieldsToCompare: (keyof CreditFields)[] = ['dofd', 'originalAmount', 'currentBalance'];
+  const fieldsToCompare: (keyof CreditFields)[] = ['dofd', 'originalAmount', 'currentValue'];
   fieldsToCompare.forEach(field => {
     const valueMap: Record<string, string[]> = {};
     accounts.forEach(acc => {
@@ -115,7 +115,7 @@ export function generateExecutiveSummary(accounts: { fields: CreditFields; flags
 /**
  * Build a timeline from credit report fields
  */
-export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): TimelineEvent[] {
+export function buildTimeline(fields: CreditFields, flags: RuleFlag[], rawText?: string): TimelineEvent[] {
   const events: TimelineEvent[] = [];
   const violationDates = new Set(flags.map(f => f.fieldValues.dofd || f.fieldValues.dateOpened));
 
@@ -123,6 +123,17 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
     if (!str) return null;
     const d = new Date(str);
     return isNaN(d.getTime()) ? null : d;
+  };
+
+  const extractSnippet = (value?: string) => {
+    if (!rawText || !value) return null;
+    const haystack = rawText.toLowerCase();
+    const needle = value.toLowerCase();
+    const idx = haystack.indexOf(needle);
+    if (idx === -1) return null;
+    const start = Math.max(0, idx - 40);
+    const end = Math.min(rawText.length, idx + needle.length + 40);
+    return rawText.slice(start, end).replace(/\s+/g, ' ').trim();
   };
 
   const dateOpened = parseDate(fields.dateOpened);
@@ -142,6 +153,7 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
         .filter(f => f.fieldValues.field === 'dateOpened')
         .map(f => f.explanation)
         .slice(0, 2)
+        .concat(extractSnippet(fields.dateOpened) ? [extractSnippet(fields.dateOpened)!] : [])
     });
   }
 
@@ -156,6 +168,7 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
         .filter(f => f.fieldValues.field === 'dateLastPayment')
         .map(f => f.explanation)
         .slice(0, 2)
+        .concat(extractSnippet(fields.dateLastPayment) ? [extractSnippet(fields.dateLastPayment)!] : [])
     });
   }
 
@@ -170,6 +183,7 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
         .filter(f => ['B1', 'B2', 'B3', 'E1'].includes(f.ruleId))
         .map(f => f.explanation)
         .slice(0, 3)
+        .concat(extractSnippet(fields.dofd) ? [extractSnippet(fields.dofd)!] : [])
     });
   }
 
@@ -184,6 +198,7 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
         .filter(f => f.ruleId === 'B3')
         .map(f => f.explanation)
         .slice(0, 2)
+        .concat(extractSnippet(fields.chargeOffDate) ? [extractSnippet(fields.chargeOffDate)!] : [])
     });
   }
 
@@ -198,6 +213,7 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[]): Timeline
         .filter(f => f.ruleId === 'B2' || f.ruleId === 'K6')
         .map(f => f.explanation)
         .slice(0, 2)
+        .concat(extractSnippet(fields.estimatedRemovalDate) ? [extractSnippet(fields.estimatedRemovalDate)!] : [])
     });
   }
 

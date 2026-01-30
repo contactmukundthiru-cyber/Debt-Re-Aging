@@ -29,14 +29,14 @@ export function estimateOutcomeProbability(
     };
   }
 
-  const weights: Record<RuleFlag['severity'], number> = {
+  const severityWeights: Record<RuleFlag['severity'], number> = {
     critical: 1.25,
     high: 1.15,
     medium: 1,
     low: 0.9
   };
 
-  const weighted = flags.reduce((sum, flag) => sum + flag.successProbability * weights[flag.severity], 0);
+  const weighted = flags.reduce((sum, flag) => sum + flag.successProbability * severityWeights[flag.severity], 0);
   const base = weighted / flags.length;
   const highCount = flags.filter(f => f.severity === 'high' || f.severity === 'critical').length;
   const severityBoost = Math.min(12, highCount * 3);

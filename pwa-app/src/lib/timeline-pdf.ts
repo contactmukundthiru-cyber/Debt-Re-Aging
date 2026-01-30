@@ -42,7 +42,8 @@ export function exportTimelinePdf(
     const dateLabel = new Date(event.date).toLocaleDateString('en-US');
     const flag = event.flagged ? 'FLAG' : '';
     const evidenceCount = event.evidenceSnippets ? Math.min(event.evidenceSnippets.length, 3) : 0;
-    doc.text(`${dateLabel} | ${event.label} | ${event.type} ${flag} | Evidence ${evidenceCount}`, 14, y);
+    const confidence = Math.min(100, (event.type === 'violation' || event.flagged ? 70 : 20) + evidenceCount * 10);
+    doc.text(`${dateLabel} | ${event.label} | ${event.type} ${flag} | Evidence ${evidenceCount} | Confidence ${confidence}%`, 14, y);
     y += 5;
   });
 
