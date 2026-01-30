@@ -8,8 +8,6 @@ interface SecurityModalProps {
 }
 
 export const SecurityModal: React.FC<SecurityModalProps> = ({ isOpen, onClose }) => {
-    if (!isOpen) return null;
-
     const features = [
         {
             title: 'Local-First Architecture',
@@ -33,6 +31,8 @@ export const SecurityModal: React.FC<SecurityModalProps> = ({ isOpen, onClose })
 
     const [auditState, setAuditState] = React.useState<'idle' | 'running' | 'completed'>('idle');
     const [auditSteps, setAuditSteps] = React.useState<string[]>([]);
+
+    if (!isOpen) return null;
 
     const runAudit = async () => {
         setAuditState('running');

@@ -59,7 +59,7 @@ export function exportComparisonDossierPdf(
   snapshots.forEach(snapshot => {
     if (y > 270) { doc.addPage(); y = 18; }
     doc.text(
-      `${snapshot.label} | DOFD ${safeText(snapshot.dofd)} | Removal ${safeText(snapshot.removal)} | Balance ${safeText(snapshot.balance)} | Status ${safeText(snapshot.status)}`,
+      `${snapshot.label} | DOFD ${safeText(snapshot.dofd)} | Removal ${safeText(snapshot.removal)} | Value ${safeText(snapshot.value)} | Status ${safeText(snapshot.status)}`,
       14,
       y
     );
@@ -68,7 +68,7 @@ export function exportComparisonDossierPdf(
 
   y += 6;
   y = sectionTitle(doc, 'Balance Drift Chart', y);
-  const balances = snapshots.map(snapshot => parseBalance(snapshot.balance));
+  const balances = snapshots.map(snapshot => parseBalance(snapshot.value));
   const maxBalance = Math.max(1, ...balances);
   const chartHeight = 24;
   const chartY = y + chartHeight;
@@ -164,7 +164,7 @@ export function buildComparisonDossierPdfBlob(
   snapshots.forEach(snapshot => {
     if (y > 270) { doc.addPage(); y = 18; }
     doc.text(
-      `${snapshot.label} | DOFD ${safeText(snapshot.dofd)} | Removal ${safeText(snapshot.removal)} | Balance ${safeText(snapshot.balance)} | Status ${safeText(snapshot.status)}`,
+      `${snapshot.label} | DOFD ${safeText(snapshot.dofd)} | Removal ${safeText(snapshot.removal)} | Value ${safeText(snapshot.value)} | Status ${safeText(snapshot.status)}`,
       14,
       y
     );
@@ -173,7 +173,7 @@ export function buildComparisonDossierPdfBlob(
 
   y += 6;
   y = sectionTitle(doc, 'Balance Drift Chart', y);
-  const balances = snapshots.map(snapshot => parseBalance(snapshot.balance));
+  const balances = snapshots.map(snapshot => parseBalance(snapshot.value));
   const maxBalance = Math.max(1, ...balances);
   const chartHeight = 24;
   const chartY = y + chartHeight;

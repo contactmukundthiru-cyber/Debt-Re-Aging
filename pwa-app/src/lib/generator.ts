@@ -30,120 +30,99 @@ export function generatePDFBlob(content: string): Blob {
   const doc = new jsPDF();
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(11);
-  doc.text(`Overall Risk Index: ${risk.overallScore}/100`, 20, y);
-  doc.text(`Dispute Strength: ${risk.disputeStrength.toUpperCase()}`, 100, y);
-  y += 7;
-  doc.text(`Litigation Potential: ${risk.litigationPotential ? 'HIGH' : 'LOW'}`, 20, y);
-  doc.text(`Forensic Confidence: ${Math.max(...flags.map(f => (f as any).forensicConfidence || 0), 0)}%`, 100, y);
-  y += 15;
+  const splitText = doc.splitTextToSize(content, 180);
+  doc.text(splitText, 15, 20);
+  return doc.output('blob');
+}
 
-  // Subject Information
-  doc.setFillColor(240, 240, 240);
-  doc.rect(15, y, 180, 25, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.text('INVESTIGATION SUBJECT', 20, y + 7);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Name: ${consumer.name}`, 20, y + 15);
-  doc.text(`Account Reference: ${fields.furnisherOrCollector || fields.originalCreditor || 'Unknown'}`, 100, y + 15);
-  doc.text(`Address: ${consumer.address}, ${consumer.city} ${consumer.state} ${consumer.zip}`, 20, y + 20);
-  doc.text(`Jurisdiction: ${fields.stateCode || 'Federal'}`, 100, y + 20);
-  y += 35;
 
-  // Risk Assessment
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text('FORENSIC RISK ASSESSMENT', 15, y);
-  y += 10;
+function buildForensicReportContent(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  risk: RiskProfile,
+  caseLaw: CaseLaw[],
+  consumer: ConsumerInfo,
+  discoveryAnswers: Record<string, string>
+): string {
+  const today = new Date().toISOString().split('T')[0];
+  const lines: string[] = [];
 
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Overall Risk Index: ${risk.overallScore}/100`, 20, y);
-  doc.text(`Dispute Strength: ${risk.disputeStrength.toUpperCase()}`, 100, y);
-  y += 7;
-  doc.text(`Litigation Potential: ${risk.litigationPotential ? 'HIGH' : 'LOW'}`, 20, y);
-  y += 15;
-
-  // Violations & Discovery
-  doc.setFont('helvetica', 'bold');
-  doc.text('DETECTED VIOLATIONS & DISCOVERY', 15, y);
-  y += 8;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  flags.forEach((flag, i) => {
-    if (y > 250) { doc.addPage(); y = 20; }
-    doc.setFont('helvetica', 'bold');
-    doc.text(`${i + 1}. ${flag.ruleName} [${flag.ruleId}] - ${flag.severity.toUpperCase()}`, 20, y);
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    const lines = doc.splitTextToSize(flag.explanation, 160);
-    doc.text(lines, 25, y);
-    y += (lines.length * 4) + 2;
-
-    // Citations and metadata
-    doc.setFontSize(8);
-    doc.text(`Success Prob: ${flag.successProbability}% | Willfulness: ${(flag as any).willfulnessScore || 'N/A'}% | Citations: ${flag.legalCitations.join(', ')}`, 25, y);
-    doc.setFontSize(9);
-    y += 7;
-  });
-  y += 5;
-
-  // Evidence Checklist
-  const verifiedEvidence = Array.from(new Set(flags.flatMap(f => f.suggestedEvidence)))
-    .filter((_, i) => discoveryAnswers[`ev-${i}`] === 'checked');
-
-  if (verifiedEvidence.length > 0) {
-    if (y > 250) { doc.addPage(); y = 20; }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('VERIFIED EVIDENCE ATTACHMENTS', 15, y);
-    y += 8;
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    verifiedEvidence.forEach(ev => {
-      if (y > 280) { doc.addPage(); y = 20; }
-      doc.text(`[X] ${ev}`, 20, y);
-      y += 6;
+  lines.push('FORENSIC CREDIT ANALYSIS REPORT');
+  lines.push(`Generated: ${today}`);
+  lines.push('');
+  lines.push('CONSUMER PROFILE');
+  lines.push(`${consumer.name}`);
+  lines.push(`${consumer.address}`);
+  lines.push(`${consumer.city}, ${consumer.state} ${consumer.zip}`);
+  lines.push('');
+  lines.push('ACCOUNT OVERVIEW');
+  lines.push(`Original Creditor: ${fields.originalCreditor || 'Unknown'}`);
+  lines.push(`Current Furnisher: ${fields.furnisherOrCollector || 'Unknown'}`);
+  lines.push(`Account Type: ${fields.accountType || 'Unknown'}`);
+  lines.push(`Current Stated Value: ${fields.currentValue || 'Not Provided'}`);
+  lines.push(`Date Opened: ${fields.dateOpened || 'Not Provided'}`);
+  lines.push(`Date of First Delinquency: ${fields.dofd || 'Not Provided'}`);
+  lines.push(`Estimated Removal Date: ${fields.estimatedRemovalDate || 'Not Provided'}`);
+  lines.push('');
+  lines.push('RISK PROFILE');
+  lines.push(`Overall Score: ${risk.overallScore}/100`);
+  lines.push(`Risk Level: ${risk.riskLevel.toUpperCase()}`);
+  lines.push(`Dispute Strength: ${risk.disputeStrength.toUpperCase()}`);
+  lines.push(`Litigation Potential: ${risk.litigationPotential ? 'YES' : 'NO'}`);
+  lines.push('');
+  lines.push('VIOLATION SUMMARY');
+  if (flags.length === 0) {
+    lines.push('No rule violations detected yet.');
+  } else {
+    flags.forEach((flag, index) => {
+      lines.push(`${index + 1}. ${flag.ruleName} [${flag.ruleId}] (${flag.severity.toUpperCase()})`);
+      lines.push(`   Finding: ${flag.explanation}`);
+      if (flag.legalCitations.length > 0) {
+        lines.push(`   Legal Basis: ${flag.legalCitations.join(', ')}`);
+      }
+      if (flag.suggestedEvidence.length > 0) {
+        lines.push(`   Evidence Requested: ${flag.suggestedEvidence.join('; ')}`);
+      }
     });
-    y += 5;
   }
 
-  // Case Law
   if (caseLaw.length > 0) {
-    if (y > 250) { doc.addPage(); y = 20; }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('RELEVANT LEGAL PRECEDENTS', 15, y);
-    y += 8;
-    doc.setFontSize(9);
+    lines.push('');
+    lines.push('RELEVANT CASE LAW');
     caseLaw.forEach(cl => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFont('helvetica', 'bold');
-      doc.text(cl.case, 20, y);
-      doc.setFont('helvetica', 'normal');
-      doc.text(cl.citation, 100, y);
-      y += 5;
-      const relevance = doc.splitTextToSize(`Relevance: ${cl.relevance}`, 165);
-      doc.text(relevance, 25, y);
-      y += (relevance.length * 4) + 4;
+      lines.push(`- ${cl.case} (${cl.citation})`);
     });
   }
 
-  // Footer on all pages
-  const pageCount = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.text('CONFIDENTIAL FORENSIC ANALYSIS - FOR EDUCATIONAL USE ONLY', 105, 290, { align: 'center' });
-    doc.text(`Page ${i} of ${pageCount}`, 190, 290, { align: 'right' });
+  const verifiedAnswers = Object.entries(discoveryAnswers || {}).filter(([, value]) => value);
+  if (verifiedAnswers.length > 0) {
+    lines.push('');
+    lines.push('VERIFIED DISCOVERY ANSWERS');
+    verifiedAnswers.forEach(([key, value]) => {
+      lines.push(`- ${key}: ${value}`);
+    });
   }
 
+  return lines.join('\n');
+}
+
+function buildForensicReportDoc(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  risk: RiskProfile,
+  caseLaw: CaseLaw[],
+  consumer: ConsumerInfo,
+  discoveryAnswers: Record<string, string>
+): jsPDF {
+  const doc = new jsPDF();
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  const content = buildForensicReportContent(fields, flags, risk, caseLaw, consumer, discoveryAnswers);
+  const splitText = doc.splitTextToSize(content, 180);
+  doc.text(splitText, 15, 20);
   return doc;
 }
 
-/**
- * Generate a comprehensive Forensic Investigation Report
- */
 export function generateForensicReport(
   fields: CreditFields,
   flags: RuleFlag[],

@@ -57,7 +57,7 @@ export interface TimelineEntry {
 export interface ViolationDetail {
   ruleId: string;
   ruleName: string;
-  severity: 'high' | 'medium' | 'low';
+  severity: 'high' | 'medium' | 'low' | 'critical';
   description: string;
   evidence: string[];
   legalCitations: string[];

@@ -375,7 +375,7 @@ export const ADVANCED_RULE_DEFINITIONS: Record<string, {
     legalCitations: ['15 USC 1681c-2', '15 USC 1681g(e)'],
     remediation: 'Block and delete fraudulent account.'
   },
-  'SL1': {
+  'SL4': {
     name: 'Rehabilitated Student Loan Inaccuracy',
     category: 'student',
     severity: 'high',
@@ -1126,7 +1126,7 @@ function createAdvancedFlag(
     legalCitations: rule.legalCitations,
     successProbability: rule.successProbability,
     willfulnessScore: rule.willfulnessIndicator,
-    statutoryDamageRange: { min: rule.statutoryMin, max: rule.statutoryMax },
+    statutoryLiabilityScore: Math.min(100, Math.round(rule.successProbability * 0.7 + rule.willfulnessIndicator * 0.3)),
     impactCategories: getActualDamageCategories(rule.category),
     chainOfCustodyIssue: rule.category === 'fdcpa' || ruleId.startsWith('COT'),
     crossBureauContradiction: ruleId.startsWith('XB'),

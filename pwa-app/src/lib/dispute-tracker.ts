@@ -569,7 +569,7 @@ export function exportDisputesCSV(): string {
     d.type,
     d.bureau || 'N/A',
     d.account.creditor,
-    d.account.balance,
+    d.account.value,
     d.reason.substring(0, 50),
     d.deadlines.responseDeadline,
     d.outcome?.result || 'Pending',

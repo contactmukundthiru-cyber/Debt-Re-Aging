@@ -10,6 +10,29 @@ import {
     calculateDisputePriority,
     BureauComparisonResult
 } from '../../../lib/multi-bureau';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    ShieldCheck, 
+    Activity, 
+    Layers, 
+    AlertTriangle, 
+    CheckCircle2, 
+    ArrowRightLeft,
+    TrendingUp,
+    Zap,
+    Scale,
+    Fingerprint,
+    Search,
+    RefreshCcw,
+    Database,
+    Binary,
+    Cpu,
+    ArrowUpRight,
+    ArrowDownRight,
+    Globe,
+    Lock
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface MultiBureauTabProps {
     bureauData?: BureauData[];
@@ -52,21 +75,24 @@ const MultiBureauTab: React.FC<MultiBureauTabProps> = ({ bureauData: initialData
         [comparison]
     );
 
-    const bureaus: { name: BureauName; color: string; icon: React.ReactNode }[] = [
+    const bureaus: { name: BureauName; color: string; icon: any; gradient: string }[] = [
         {
             name: 'Equifax',
             color: 'rose',
-            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            icon: ShieldCheck,
+            gradient: 'from-rose-500/20 to-pink-500/10'
         },
         {
             name: 'Experian',
             color: 'blue',
-            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            icon: Search,
+            gradient: 'from-blue-500/20 to-indigo-500/10'
         },
         {
             name: 'TransUnion',
             color: 'emerald',
-            icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+            icon: Globe,
+            gradient: 'from-emerald-500/20 to-teal-500/10'
         }
     ];
 
@@ -75,265 +101,325 @@ const MultiBureauTab: React.FC<MultiBureauTabProps> = ({ bureauData: initialData
     };
 
     return (
-        <div className="fade-in space-y-10">
-            {/* Hero Header */}
-            <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
-
-                <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                    <div>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-                            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-purple-400 font-mono">Cross-Bureau Analysis</span>
-                        </div>
-                        <h2 className="text-3xl font-bold tracking-tight mb-2">
-                            Multi-Bureau <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Comparison</span>
-                        </h2>
-                        <p className="text-slate-400 text-sm max-w-lg">
-                            Compare credit data across Equifax, Experian, and TransUnion to detect inconsistencies and maximize dispute leverage.
-                        </p>
-                    </div>
-
-                    <div className="flex gap-3">
-                        {bureauData.length >= 2 && (
-                            <button
-                                onClick={() => setShowComparison(!showComparison)}
-                                className="px-5 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-sm flex items-center gap-2 hover:bg-white/20 transition-all"
-                            >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                {showComparison ? 'Hide' : 'View'} Comparison
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Bureau Assignment Cards */}
-            <div className="grid md:grid-cols-3 gap-6">
-                {bureaus.map((bureau) => {
-                    const status = getBureauStatus(bureau.name);
-                    const isActive = activeBureau === bureau.name;
-
-                    return (
-                        <div
-                            key={bureau.name}
-                            className={`premium-card p-8 transition-all cursor-pointer group ${status
-                                ? `bg-${bureau.color}-50/50 dark:bg-${bureau.color}-950/20 border-${bureau.color}-500/30`
-                                : 'bg-white dark:bg-slate-900'
-                                } ${isActive ? 'ring-2 ring-emerald-500' : ''}`}
-                        >
-                            <div className="flex items-start justify-between mb-6">
-                                <div className={`w-14 h-14 rounded-2xl bg-${bureau.color}-500/10 text-${bureau.color}-500 flex items-center justify-center border border-${bureau.color}-500/20`}>
-                                    <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        {bureau.icon}
-                                    </svg>
+        <div className="pb-32 font-sans selection:bg-purple-500/30 space-y-16">
+            {/* CROSS_BUREAU_HERO::PROTOCOL_ZENITH */}
+            <header className="relative rounded-[4rem] bg-slate-950/40 backdrop-blur-3xl border border-white/10 overflow-hidden shadow-4xl group">
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-[160px] -mr-96 -mt-96 group-hover:bg-purple-400/20 transition-colors duration-1000" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[140px] -ml-40 -mb-40" />
+                
+                <div className="relative z-10 p-12 xl:p-20">
+                    <div className="flex flex-col xl:flex-row items-center gap-20">
+                        <div className="flex-1 space-y-10">
+                            <div className="flex items-center gap-6">
+                                <div className="flex -space-x-3">
+                                    {[Layers, ArrowRightLeft, Database].map((Icon, i) => (
+                                        <div key={i} className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-purple-400 shadow-2xl relative" style={{ zIndex: 3 - i }}>
+                                            <Icon size={24} />
+                                        </div>
+                                    ))}
                                 </div>
-                                {status && (
-                                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                        <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-500">Loaded</span>
-                                    </div>
-                                )}
+                                <div className="h-4 w-px bg-white/10" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-purple-500 font-mono italic animate-pulse">
+                                    System_Status::SYNAPTIC_BUREAU_LINK_ACTIVE
+                                </span>
                             </div>
 
-                            <h3 className="text-xl font-bold dark:text-white mb-2">{bureau.name}</h3>
+                            <div className="space-y-6">
+                                <h1 className="text-7xl xl:text-8xl font-black text-white tracking-tighter leading-none font-mono italic uppercase">
+                                    MULTI_<span className="text-transparent bg-clip-text bg-gradient-to-br from-purple-400 via-pink-400 to-indigo-400">BUREAU</span>
+                                </h1>
+                                <p className="text-2xl text-slate-500 font-medium italic max-w-3xl leading-relaxed border-l-4 border-purple-500/20 pl-10 ml-2">
+                                    Compare institutional data models across Equifax, Experian, and TransUnion. Detect synthetic variances and consolidate forensic leverage.
+                                </p>
+                            </div>
 
-                            {status ? (
-                                <div className="space-y-3">
-                                    <p className="text-xs text-slate-500">
-                                        Uploaded: {new Date(status.uploadDate).toLocaleDateString()}
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                        Fields: {Object.keys(status.fields).filter(k => status.fields[k as keyof typeof status.fields]).length}
-                                    </p>
+                            <div className="flex flex-wrap gap-8 pt-4">
+                                {bureauData.length >= 2 && (
                                     <button
-                                        onClick={() => assignToBureau(bureau.name)}
-                                        className="w-full py-2 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                                        onClick={() => setShowComparison(!showComparison)}
+                                        className="px-12 py-6 bg-purple-600 hover:bg-purple-500 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-sm flex items-center gap-6 transition-all shadow-4xl group/btn"
                                     >
-                                        Update Data
+                                        <Layers size={20} className="group-hover/btn:rotate-12 transition-transform" />
+                                        <span>{showComparison ? 'HIDE_ANALYSIS' : 'INITIALIZE_COMPARISON'}</span>
+                                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                            <ArrowDownRight size={16} className={cn("transition-transform duration-500", showComparison && "rotate-180")} />
+                                        </div>
                                     </button>
+                                )}
+                                <div className="px-10 py-6 bg-slate-900/60 border border-white/5 rounded-[2.5rem] backdrop-blur-2xl flex items-center gap-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+                                        <span className="text-xl font-black text-white font-mono">{bureauData.length}/3</span>
+                                    </div>
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono italic">NODES_SYNCED</span>
                                 </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    <p className="text-sm text-slate-500">
-                                        No data loaded yet. Assign current report to this bureau.
-                                    </p>
-                                    <button
-                                        onClick={() => assignToBureau(bureau.name)}
-                                        disabled={!rawText}
-                                        className={`w-full py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${rawText
-                                            ? `bg-${bureau.color}-500 text-white hover:bg-${bureau.color}-600 shadow-lg shadow-${bureau.color}-500/20`
-                                            : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                                            }`}
-                                    >
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        Assign Current Data
-                                    </button>
-                                </div>
-                            )}
+                            </div>
                         </div>
+
+                        {/* SIGNAL_STRENGTH_VISUALIZER */}
+                        <div className="w-full xl:w-[450px] relative">
+                             <div className="absolute inset-0 bg-purple-500/20 blur-[100px] scale-75 animate-pulse" />
+                             <div className="relative p-12 bg-black/60 backdrop-blur-3xl rounded-[4rem] border border-white/10 shadow-4xl space-y-10">
+                                 <div className="flex items-baseline justify-between">
+                                     <span className="text-sm font-black text-slate-500 uppercase tracking-[0.4em] font-mono italic">Sync_Integrity</span>
+                                     <span className="text-4xl font-black text-white font-mono tracking-tighter">98.4%</span>
+                                 </div>
+                                 <div className="grid grid-cols-3 gap-4 h-32 items-end">
+                                     {[40, 70, 90, 60, 80, 100, 85, 95, 75].map((h, i) => (
+                                         <motion.div 
+                                            key={i}
+                                            initial={{ height: 0 }}
+                                            animate={{ height: `${h}%` }}
+                                            transition={{ delay: i * 0.05, duration: 1, repeat: Infinity, repeatType: 'reverse' }}
+                                            className="w-full bg-gradient-to-t from-purple-600 to-indigo-400 rounded-full opacity-60"
+                                         />
+                                     ))}
+                                 </div>
+                                 <div className="pt-6 border-t border-white/5 flex justify-between items-center">
+                                     <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono">Satellite_Uplink</span>
+                                     <div className="flex items-center gap-3">
+                                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                         <span className="text-xs font-black text-emerald-500 font-mono uppercase italic">Encrypted</span>
+                                     </div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            {/* BUREAU_ASSIGNMENT_VECTORS */}
+            <div className="grid md:grid-cols-3 gap-10">
+                {bureaus.map((bureau, idx) => {
+                    const status = getBureauStatus(bureau.name);
+                    const isActive = activeBureau === bureau.name;
+                    const Icon = bureau.icon;
+
+                    return (
+                        <motion.div
+                            key={bureau.name}
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            onClick={() => assignToBureau(bureau.name)}
+                            className={cn(
+                                "group relative rounded-[3.5rem] p-12 border-2 transition-all duration-700 cursor-pointer overflow-hidden shadow-4xl bg-slate-950/40 backdrop-blur-3xl",
+                                status ? `border-${bureau.color}-500/40` : "border-white/5 hover:border-white/20",
+                                isActive && "ring-4 ring-emerald-500/30"
+                            )}
+                        >
+                            <div className={cn(
+                                "absolute -top-24 -right-24 w-64 h-64 rounded-full blur-[80px] opacity-10 group-hover:opacity-20 transition-opacity duration-700 bg-gradient-to-br",
+                                bureau.name === 'Equifax' ? "from-rose-500" : bureau.name === 'Experian' ? "from-blue-500" : "from-emerald-500"
+                            )} />
+
+                            <div className="relative z-10 space-y-12">
+                                <div className="flex items-start justify-between">
+                                    <div className={cn(
+                                        "w-20 h-20 rounded-[2rem] flex items-center justify-center border-2 shadow-2xl relative transition-transform duration-700 group-hover:scale-110",
+                                        status ? `bg-${bureau.color}-500/10 text-${bureau.color}-500 border-${bureau.color}-500/20` : "bg-white/5 text-slate-500 border-white/5"
+                                    )}>
+                                        <Icon size={32} />
+                                        {status && <div className="absolute inset-0 blur-xl opacity-20 bg-current animate-pulse" />}
+                                    </div>
+                                    {status && (
+                                        <div className="px-6 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,1)]" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 font-mono">DATA_LOCK</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <h3 className="text-4xl font-black text-white tracking-tighter uppercase font-mono italic mb-4">{bureau.name}</h3>
+                                    {status ? (
+                                        <div className="space-y-6">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono mb-1">Upload</p>
+                                                    <p className="text-xs font-black text-white font-mono">{new Date(status.uploadDate).toLocaleDateString()}</p>
+                                                </div>
+                                                <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono mb-1">Vectors</p>
+                                                    <p className="text-xs font-black text-white font-mono">{Object.keys(status.fields).filter(k => status.fields[k as keyof typeof status.fields]).length}_F</p>
+                                                </div>
+                                            </div>
+                                            <button className="w-full py-5 rounded-[2rem] bg-slate-900 border border-white/5 text-[11px] font-black text-slate-400 uppercase tracking-widest hover:bg-slate-800 transition-all font-mono italic">RE_SYNCHRONIZE_CORE</button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-8">
+                                            <p className="text-lg text-slate-500 italic leading-relaxed font-medium">No institutional telemetry captured. Extract current manifest to this node.</p>
+                                            <button
+                                                disabled={!rawText}
+                                                className={cn(
+                                                    "w-full py-6 rounded-[2.5rem] text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-4 transition-all shadow-4xl font-mono",
+                                                    rawText ? `bg-${bureau.color}-600 text-white hover:bg-${bureau.color}-500 shadow-${bureau.color}-500/20` : "bg-slate-900 text-slate-700 cursor-not-allowed border border-white/5"
+                                                )}
+                                            >
+                                                <RefreshCcw size={18} className={cn(rawText && "animate-spin-slow")} />
+                                                MAP_CURRENT_DATA
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
                     );
                 })}
             </div>
 
-            {/* Comparison Results */}
-            {comparison && showComparison && (
-                <div className="space-y-8">
-                    {/* Summary Stats */}
-                    <div className="grid md:grid-cols-4 gap-4">
-                        <div className="premium-card p-6 bg-white dark:bg-slate-900 text-center">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Bureaus Compared</p>
-                            <p className="text-3xl font-bold dark:text-white tabular-nums">{comparison.bureausCompared.length}</p>
+            <AnimatePresence>
+                {comparison && showComparison && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 40 }}
+                        className="space-y-16"
+                    >
+                        <div className="grid md:grid-cols-4 gap-8">
+                            {[
+                                { label: 'SYNCHRONIZED_NODES', value: comparison.bureausCompared.length, color: 'text-purple-400', icon: Database },
+                                { label: 'TOTAL_DISCREPANCIES', value: comparison.totalDiscrepancies, color: 'text-amber-500', icon: AlertTriangle },
+                                { label: 'CRITICAL_VECTORS', value: comparison.criticalDiscrepancies, color: 'text-rose-500', icon: Zap },
+                                { label: 'MISSION_PRIORITY', value: disputePriority?.priority.toUpperCase(), color: disputePriority?.priority === 'immediate' ? 'text-rose-500' : 'text-blue-500', icon: Scale }
+                            ].map((stat, i) => {
+                                const Icon = stat.icon;
+                                return (
+                                    <div key={i} className="p-10 rounded-[3rem] bg-slate-950/60 border border-white/10 shadow-4xl text-center space-y-4 group hover:border-purple-500/30 transition-all backdrop-blur-2xl">
+                                        <div className="flex justify-center">
+                                            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 group-hover:text-purple-400 transition-colors">
+                                                <Icon size={24} />
+                                            </div>
+                                        </div>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 font-mono italic">{stat.label}</p>
+                                        <p className={cn("text-5xl font-black font-mono tracking-tighter italic", stat.color)}>{stat.value}</p>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <div className="premium-card p-6 bg-white dark:bg-slate-900 text-center">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Total Discrepancies</p>
-                            <p className="text-3xl font-bold text-amber-500 tabular-nums">{comparison.totalDiscrepancies}</p>
-                        </div>
-                        <div className="premium-card p-6 bg-white dark:bg-slate-900 text-center">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Critical Issues</p>
-                            <p className="text-3xl font-bold text-rose-500 tabular-nums">{comparison.criticalDiscrepancies}</p>
-                        </div>
-                        <div className="premium-card p-6 bg-white dark:bg-slate-900 text-center">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Dispute Priority</p>
-                            <p className={`text-xl font-bold uppercase ${disputePriority?.priority === 'immediate' ? 'text-rose-500' :
-                                disputePriority?.priority === 'high' ? 'text-amber-500' :
-                                    disputePriority?.priority === 'standard' ? 'text-blue-500' : 'text-slate-400'
-                                }`}>{disputePriority?.priority}</p>
-                        </div>
-                    </div>
 
-                    {/* Discrepancy Details */}
-                    {comparison.fieldDiscrepancies.length > 0 && (
-                        <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
+                        <div className="space-y-12">
+                            <div className="flex items-center justify-between px-8">
+                                <div className="space-y-4">
+                                    <h3 className="text-5xl font-black text-white tracking-tighter uppercase font-mono italic leading-none flex items-center gap-6">
+                                        <Binary className="text-amber-500" size={48} />
+                                        Synthetic_Variances
+                                    </h3>
+                                    <p className="text-[12px] text-slate-500 uppercase tracking-[0.4em] font-black font-mono">Comparative_Inconsistency_Matrix</p>
                                 </div>
-                                <div>
-                                    <h4 className="text-xl font-bold dark:text-white">Detected Discrepancies</h4>
-                                    <p className="text-xs text-slate-500 uppercase tracking-widest">Fields with inconsistent data across bureaus</p>
+                                <div className="px-8 py-3 bg-amber-500/10 border border-amber-500/20 rounded-[1.5rem] backdrop-blur-xl">
+                                    <span className="text-xs font-black text-amber-400 uppercase tracking-widest font-mono italic">
+                                        {comparison.fieldDiscrepancies.length}_DETECTIONS
+                                    </span>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-10">
                                 {comparison.fieldDiscrepancies.map((discrepancy, i) => (
-                                    <div
+                                    <motion.div
                                         key={i}
-                                        className={`p-6 rounded-2xl border transition-all ${discrepancy.severity === 'critical' ? 'bg-rose-50/50 dark:bg-rose-950/20 border-rose-500/30' :
-                                            discrepancy.severity === 'high' ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-500/30' :
-                                                'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
-                                            }`}
+                                        initial={{ opacity: 0, scale: 0.98 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: i * 0.1 }}
+                                        className={cn(
+                                            "rounded-[3.5rem] p-12 border-2 transition-all duration-700 shadow-4xl backdrop-blur-3xl group relative overflow-hidden",
+                                            discrepancy.severity === 'critical' ? "bg-rose-950/20 border-rose-500/30" : discrepancy.severity === 'high' ? "bg-amber-950/20 border-amber-500/30" : "bg-slate-950/40 border-white/10"
+                                        )}
                                     >
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${discrepancy.severity === 'critical' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
-                                                    discrepancy.severity === 'high' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                                        discrepancy.severity === 'medium' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
-                                                            'bg-slate-500/10 text-slate-500 border border-slate-500/20'
-                                                    }`}>
-                                                    {discrepancy.severity}
-                                                </span>
-                                                <h5 className="text-lg font-bold dark:text-white">{discrepancy.fieldLabel}</h5>
-                                            </div>
-                                            <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500`}>
-                                                {discrepancy.discrepancyType}
-                                            </span>
+                                        <div className="absolute top-0 right-0 p-12 opacity-[0.03] scale-[2] pointer-events-none group-hover:scale-[2.5] group-hover:opacity-[0.05] transition-all duration-1000">
+                                            <Binary size={120} />
                                         </div>
 
-                                        {/* Bureau Values */}
-                                        <div className="grid md:grid-cols-3 gap-3 mb-4">
-                                            {bureaus.map(bureau => (
-                                                <div key={bureau.name} className={`p-3 rounded-xl bg-white dark:bg-slate-900 border ${discrepancy.values[bureau.name] ? 'border-slate-200 dark:border-slate-700' : 'border-dashed border-slate-300 dark:border-slate-700'
-                                                    }`}>
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{bureau.name}</p>
-                                                    <p className={`text-sm font-medium ${discrepancy.values[bureau.name] ? 'dark:text-white' : 'text-slate-400 italic'
-                                                        }`}>
-                                                        {discrepancy.values[bureau.name] || 'Not reported'}
-                                                    </p>
+                                        <div className="relative z-10 flex flex-col xl:flex-row gap-12">
+                                            <div className="flex-1 space-y-10">
+                                                <div className="flex items-center gap-8">
+                                                    <div className={cn(
+                                                        "w-16 h-16 rounded-2xl flex items-center justify-center border-2 transition-all duration-700 group-hover:scale-110 shadow-2xl relative",
+                                                        discrepancy.severity === 'critical' ? "bg-rose-500/10 text-rose-500 border-rose-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                                    )}>
+                                                        <AlertTriangle size={28} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-4 mb-3">
+                                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] font-mono italic">VARIANCE_IDENT_0{i+1}</span>
+                                                            <div className={cn(
+                                                                "px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest font-mono border",
+                                                                discrepancy.severity === 'critical' ? "text-rose-500 border-rose-500/20 bg-rose-500/5" : "text-amber-500 border-amber-500/20 bg-amber-500/5"
+                                                            )}>
+                                                                {discrepancy.severity.toUpperCase()}_IMPACT
+                                                            </div>
+                                                        </div>
+                                                        <h4 className="text-4xl font-black text-white tracking-tighter uppercase font-mono italic">{discrepancy.fieldLabel}</h4>
+                                                    </div>
                                                 </div>
-                                            ))}
-                                        </div>
 
-                                        {/* Potential Violation */}
-                                        {discrepancy.potentialViolation && (
-                                            <div className="p-4 rounded-xl bg-rose-500/5 border border-rose-500/10 mb-3">
-                                                <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500 mb-1 flex items-center gap-2">
-                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                    </svg>
-                                                    Potential Violation
-                                                </p>
-                                                <p className="text-sm text-rose-600 dark:text-rose-400 font-medium">{discrepancy.potentialViolation}</p>
+                                                <div className="grid grid-cols-3 gap-6">
+                                                    {bureaus.map(b => (
+                                                        <div key={b.name} className="p-8 bg-black/40 border border-white/5 rounded-[2.5rem] space-y-3 shadow-inner relative overflow-hidden group/tile hover:border-purple-500/30 transition-all">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono italic">{b.name}</span>
+                                                                <div className={cn("w-1.5 h-1.5 rounded-full", discrepancy.values[b.name] ? `bg-${b.color}-500 shadow-[0_0_8px_rgba(var(--${b.color}-rgb),0.8)]` : "bg-slate-700")} />
+                                                            </div>
+                                                            <p className={cn("text-xl font-black font-mono tracking-tighter italic", discrepancy.values[b.name] ? "text-white" : "text-slate-700")}>
+                                                                {discrepancy.values[b.name] || 'NULL_SET'}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="xl:w-[450px] space-y-8">
+                                                 {discrepancy.potentialViolation && (
+                                                     <div className="p-10 bg-rose-600/10 border border-rose-500/20 rounded-[3rem] shadow-inner group/viol relative overflow-hidden">
+                                                        <div className="absolute top-0 right-0 p-6 opacity-[0.05] group-hover/viol:rotate-12 transition-transform">
+                                                            <Fingerprint size={48} />
+                                                        </div>
+                                                        <p className="text-[11px] font-black text-rose-500 uppercase tracking-[0.3em] font-mono italic mb-4">Statutory_Breach</p>
+                                                        <p className="text-xl text-rose-100 font-bold italic leading-relaxed">{discrepancy.potentialViolation}</p>
+                                                     </div>
+                                                 )}
+                                                 <div className="p-10 bg-emerald-600/10 border border-emerald-500/20 rounded-[3rem] shadow-inner relative overflow-hidden">
+                                                     <div className="absolute top-0 right-0 p-6 opacity-[0.05]">
+                                                            <Zap size={48} />
+                                                        </div>
+                                                     <p className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.3em] font-mono italic mb-4">Strategic_Payload</p>
+                                                     <p className="text-xl text-emerald-100 font-bold italic leading-relaxed">{discrepancy.recommendation}</p>
+                                                 </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="p-16 rounded-[4rem] bg-emerald-950/20 border border-emerald-500/20 shadow-4xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-24 opacity-[0.03] scale-[3] pointer-events-none group-hover:scale-[3.5] transition-transform duration-1000">
+                                    <CheckCircle2 size={120} />
+                                </div>
+                                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                                    <div className="space-y-6">
+                                        <h4 className="text-5xl font-black text-white tracking-tighter uppercase font-mono italic leading-none">INTEGRITY_STasis</h4>
+                                        <p className="text-2xl text-emerald-500/80 font-medium italic">Confirmed institutional consistency across {comparison.matchedFields.length} critical data points.</p>
+                                    </div>
+                                    <div className="flex -space-x-6">
+                                        {comparison.matchedFields.slice(0, 5).map((field, i) => (
+                                            <div key={i} className="w-20 h-20 rounded-[2rem] bg-slate-900 border-4 border-slate-950 flex flex-col items-center justify-center shadow-2xl transform hover:-translate-y-4 transition-transform duration-500 cursor-help group/tag">
+                                                <CheckCircle2 className="text-emerald-500 mb-1" size={16} />
+                                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter font-mono">{field.split('_')[0]}</span>
+                                            </div>
+                                        ))}
+                                        {comparison.matchedFields.length > 5 && (
+                                            <div className="w-20 h-20 rounded-[2rem] bg-slate-900 border-4 border-slate-950 flex items-center justify-center shadow-2xl text-emerald-500 font-black font-mono">
+                                                +{comparison.matchedFields.length - 5}
                                             </div>
                                         )}
-
-                                        {/* Recommendation */}
-                                        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
-                                            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-1 flex items-center gap-2">
-                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                                </svg>
-                                                Recommendation
-                                            </p>
-                                            <p className="text-sm text-emerald-600 dark:text-emerald-400">{discrepancy.recommendation}</p>
-                                        </div>
                                     </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Matched Fields */}
-                    {comparison.matchedFields.length > 0 && (
-                        <div className="premium-card p-6 bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-500/30">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
                                 </div>
-                                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                                    {comparison.matchedFields.length} fields match across all bureaus
-                                </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {comparison.matchedFields.map((field, i) => (
-                                    <span key={i} className="text-xs px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                                        {field}
-                                    </span>
-                                ))}
-                            </div>
                         </div>
-                    )}
-                </div>
-            )}
-
-            {/* Instructions when no data */}
-            {bureauData.length < 2 && (
-                <div className="premium-card p-12 text-center bg-slate-50 dark:bg-slate-950/20 border-dashed border-slate-200 dark:border-slate-800">
-                    <svg className="w-16 h-16 mx-auto mb-6 text-slate-200 dark:text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                    <h3 className="text-xl font-bold dark:text-white mb-2">Add Bureau Data to Compare</h3>
-                    <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">
-                        {bureauData.length === 0
-                            ? 'Upload a credit report and assign it to a bureau above. Then upload reports from other bureaus to compare.'
-                            : 'You have 1 bureau loaded. Add at least one more to enable comparison analysis.'}
-                    </p>
-                    <div className="flex items-center justify-center gap-4 text-xs text-slate-400">
-                        <span>Loaded: {bureauData.length}/3</span>
-                        <span>•</span>
-                        <span>Minimum for comparison: 2</span>
-                    </div>
-                </div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

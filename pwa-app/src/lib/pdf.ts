@@ -92,7 +92,7 @@ export async function extractPDFTextViaOCR(
 
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
-      await page.render({ canvasContext: context, viewport }).promise;
+      await page.render({ canvasContext: context, viewport, canvas }).promise;
 
       // Preprocessing: Convert to grayscale for better OCR
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height);

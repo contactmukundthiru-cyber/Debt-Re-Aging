@@ -45,6 +45,10 @@ npm run build
 
 Deploy the generated `pwa-app/out/` directory to any static host.
 
+**Vercel**: In the Vercel project, set **Root Directory** to `pwa-app` so the Next.js app builds and deploys correctly. The marketing site (`index.html` at repo root) is for GitHub Pages; point "Start Portal" links to your Vercel app by adding `<meta name="app-url" content="https://your-app.vercel.app">` in `index.html`.
+
+**GitHub Pages**: Enable Pages from the repo **Settings → Pages**, source = main branch, folder = root. The marketing site will be at `https://<user>.github.io/<repo>/`. If your repo name differs from `Debt-Re-Aging`, update `baseurl` in `_config.yml` to match (e.g. `/debt-re-aging`).
+
 ### Run with Docker (Unified Suite)
 
 If you have Docker installed, you can launch the entire suite (Legacy App + Modern PWA) with a single command:

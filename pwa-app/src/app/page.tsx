@@ -12,6 +12,7 @@ import { BRANDING } from '../config/branding';
 import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
 import { isPDF, extractPDFText, extractPDFTextViaOCR } from '../lib/pdf';
+import { getScanProfile, mergeTextVariants, normalizeExtractedText, scoreTextQuality, ScanMode } from '../lib/ingestion';
 import { compareReports, compareReportSeries, buildReportSeries, buildReportSeriesOptions, DeltaResult, SeriesInsight, SeriesSnapshot, SeriesSnapshotOption } from '../lib/delta';
 import { getRelevantCaseLaw, CaseLaw } from '../lib/caselaw';
 import { generateStateGuidance, getStateLaws } from '../lib/state-laws';
@@ -196,6 +197,7 @@ export default function CreditReportAnalyzer() {
   const { darkMode, step, rawText, editableFields, consumer, flags, riskProfile, isProcessing, progress, isAnalyzing } = state;
 
   const [progressText, setProgressText] = useState('');
+  const [scanMode, setScanMode] = useState<ScanMode>('standard');
   const [fileName, setFileName] = useState<string | null>(null);
   const [sources, setSources] = useState<{ id: string; name: string; size: number; type: string; text: string }[]>([]);
   const [analyzedAccounts, setAnalyzedAccounts] = useState<AnalyzedAccount[]>([]);
@@ -311,7 +313,7 @@ export default function CreditReportAnalyzer() {
       actions: generateActionItems(flags, riskProfile, editableFields),
       metrics: calculateForensicMetrics(editableFields, flags),
     };
-  }, [flags, riskProfile, editableFields]);
+  }, [flags, riskProfile, editableFields, rawText]);
 
   const analyzeText = useCallback((text: string, sourceFileName?: string) => {
     setRawText(text);
@@ -369,7 +371,31 @@ export default function CreditReportAnalyzer() {
     setActiveParsedFields(parsed);
     setEditableFields(fieldsToSimple(parsed));
     setStep(2);
-  }, [showToast]);
+  }, [
+    showToast,
+    setRawText,
+    setFileName,
+    setFlags,
+    setRiskProfile,
+    setDeltas,
+    setRelevantCaseLaw,
+    setScoreImpact,
+    setDeadlines,
+    setCollectorMatch,
+    setMetro2Validation,
+    setImpactAssessment,
+    setSelectedLetterType,
+    setEditableLetter,
+    setExportTab,
+    setActiveTab,
+    setSelectedAccountId,
+    setAnalyzedAccounts,
+    setExecutiveSummary,
+    setShowCelebration,
+    setStep,
+    setActiveParsedFields,
+    setEditableFields
+  ]);
 
   // Keyboard shortcuts - processText is defined later via useCallback
   useEffect(() => {
@@ -409,7 +435,7 @@ export default function CreditReportAnalyzer() {
     return items
       .map((item) => {
         const meta = `[SOURCE:${item.name} | ${item.type || 'unknown'} | ${Math.round(item.size / 1024)}KB]`;
-        return `${meta}\n${item.text}`.trim();
+        return `${meta}\n${normalizeExtractedText(item.text)}`.trim();
       })
       .join('\n\n-----\n\n');
   }, []);
@@ -420,30 +446,56 @@ export default function CreditReportAnalyzer() {
     }
 
     let text = '';
+    const profile = getScanProfile(scanMode);
+    const scanLabel = scanMode === 'max' ? 'Max Scan' : 'Standard Scan';
 
     if (isPDF(file)) {
-      setProcessing(true, undefined, `Extracting PDF text (${file.name})...`);
+      setProcessing(true, undefined, `${scanLabel}: Extracting PDF text (${file.name})...`);
       try {
-        text = await extractPDFText(file, (p) => setProcessing(true, Math.round(p * 100)));
+        const direct = await extractPDFText(file, (p) => setProcessing(true, Math.round(p * 100)));
+        const normalized = normalizeExtractedText(direct);
+        const quality = scoreTextQuality(normalized);
+        text = normalized;
+
+        if (scanMode === 'max' || quality < 55) {
+          setProcessing(true, undefined, `${scanLabel}: OCR pass for PDF (${file.name})...`);
+          const ocrText = await extractPDFTextViaOCR(file, (p) => setProcessing(true, Math.round(p * 100)), {
+            maxPages: profile.pdfMaxPages,
+            scale: profile.pdfScale
+          });
+          text = mergeTextVariants(text, normalizeExtractedText(ocrText));
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : '';
         if (message.toLowerCase().includes('no selectable text')) {
-          setProcessing(true, undefined, `Running OCR on scanned PDF (${file.name})...`);
-          text = await extractPDFTextViaOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
+          setProcessing(true, undefined, `${scanLabel}: OCR on scanned PDF (${file.name})...`);
+          text = await extractPDFTextViaOCR(file, (p) => setProcessing(true, Math.round(p * 100)), {
+            maxPages: profile.pdfMaxPages,
+            scale: profile.pdfScale
+          });
         } else {
           throw error;
         }
       }
     } else if (isImage(file)) {
-      setProcessing(true, undefined, `Running OCR (${file.name})...`);
-      text = await performOCR(file, (p) => setProcessing(true, Math.round(p * 100)));
+      setProcessing(true, undefined, `${scanLabel}: OCR (${file.name})...`);
+      text = await performOCR(file, (p) => setProcessing(true, Math.round(p * 100)), {
+        scale: profile.ocrScale,
+        contrast: profile.ocrContrast,
+        thresholdLow: profile.ocrThresholdLow,
+        thresholdHigh: profile.ocrThresholdHigh
+      });
     } else {
       setProcessing(true, 100, `Reading file (${file.name})...`);
       text = await file.text();
     }
 
-    return text.trim();
-  }, [maxUploadSizeMB, setProcessing]);
+    const normalized = normalizeExtractedText(text);
+    if (!normalized) {
+      throw new Error(`No readable text detected in ${file.name}. Try Max Scan or a higher-quality source.`);
+    }
+    return normalized;
+  }, [maxUploadSizeMB, scanMode, setProcessing]);
 
   const handleFilesUpload = useCallback(async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
@@ -476,9 +528,11 @@ export default function CreditReportAnalyzer() {
       setProcessing(false, 100, 'Sources merged. Ready for analysis.');
     } catch (error) {
       console.error('Processing error:', error);
+      const message = error instanceof Error ? error.message : 'File processing failed.';
+      showToast(message, 'error');
       setProcessing(false, 0, '');
     }
-  }, [extractTextFromFile, mergeSourcesText, setProcessing, setRawText]);
+  }, [extractTextFromFile, mergeSourcesText, setProcessing, setRawText, showToast]);
 
   const handleFileUpload = useCallback(async (file: File) => {
     await handleFilesUpload([file]);
@@ -627,7 +681,24 @@ export default function CreditReportAnalyzer() {
     } finally {
       setAnalyzing(false);
     }
-  }, [editableFields, fileName, showToast]);
+  }, [
+    editableFields,
+    fileName,
+    showToast,
+    setAnalyzing,
+    setFlags,
+    setRiskProfile,
+    setRelevantCaseLaw,
+    setScoreImpact,
+    setDeadlines,
+    setCollectorMatch,
+    setMetro2Validation,
+    setImpactAssessment,
+    setActiveTab,
+    setStep,
+    setHistory,
+    setShowCelebration
+  ]);
 
   const loadFromHistory = useCallback((record: AnalysisRecord) => {
     if (step === 4 && editableFields.dofd) {
@@ -649,7 +720,22 @@ export default function CreditReportAnalyzer() {
     setShowHistory(false);
     setActiveTab('violations');
     setStep(4);
-  }, [step, editableFields, history]);
+  }, [
+    step,
+    editableFields,
+    history,
+    setDeltas,
+    setSeriesInsights,
+    setSeriesSnapshots,
+    setSeriesOptions,
+    setActiveTab,
+    setShowHistory,
+    setEditableFields,
+    setFlags,
+    setRiskProfile,
+    setFileName,
+    setStep
+  ]);
 
   useEffect(() => {
     setSeriesInsights(compareReportSeries(history, editableFields));
@@ -1027,6 +1113,8 @@ export default function CreditReportAnalyzer() {
               isProcessing={isProcessing}
               progressText={progressText}
               progress={progress}
+              scanMode={scanMode}
+              setScanMode={setScanMode}
               rawText={rawText}
               setRawText={setRawText}
               fileName={fileName}

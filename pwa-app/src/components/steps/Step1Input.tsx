@@ -9,6 +9,8 @@ interface Step1InputProps {
   isProcessing: boolean;
   progressText: string;
   progress: number;
+  scanMode: 'standard' | 'max';
+  setScanMode: (mode: 'standard' | 'max') => void;
   rawText: string;
   setRawText: (text: string) => void;
   fileName: string | null;
@@ -38,6 +40,8 @@ export const Step1Input: React.FC<Step1InputProps> = ({
   isProcessing,
   progressText,
   progress,
+  scanMode,
+  setScanMode,
   rawText,
   setRawText,
   fileInputRef,
@@ -164,6 +168,42 @@ export const Step1Input: React.FC<Step1InputProps> = ({
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
           />
+        </div>
+      </div>
+
+      <div className="premium-card p-6 mb-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.35em] text-slate-400 font-mono">Scan Intensity</p>
+            <h3 className="text-lg font-bold dark:text-white">Choose Extraction Force</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Max Scan runs multi-pass OCR and signal merging for noisy or scanned reports.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setScanMode('standard')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
+                scanMode === 'standard'
+                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              Standard
+            </button>
+            <button
+              type="button"
+              onClick={() => setScanMode('max')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
+                scanMode === 'max'
+                  ? 'bg-slate-950 text-emerald-400 border-emerald-500 shadow-lg shadow-emerald-500/20'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              Max Scan
+            </button>
+          </div>
         </div>
       </div>
 

@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Institutional Forensic Auditor - Credit Report Analysis Engine</title>
+    <title>Debt Re-aging | Credit Report Analysis Engine</title>
+    <!-- Optional: set content to your PWA URL (e.g. https://your-app.vercel.app) so "Start Portal" links open there. Leave empty to use same-origin pwa-app/out/ (GitHub Pages). -->
+    <meta name="app-url" content="">
     <meta name="description"
         content="Professional institutional-grade tool for credit report forensic analysis, violation detection, and temporal reconstruction.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,6 +43,7 @@
             --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
         }
 
+        html { scroll-behavior: smooth; }
         * {
             margin: 0;
             padding: 0;
@@ -1209,7 +1212,7 @@
         <div class="container" style="display: flex; justify-content: space-between; align-items: center; position: relative;">
             <a href="#" class="logo" aria-label="Case Factory PRO home">
                 <div style="background: var(--slate-900); color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     </svg>
@@ -1223,13 +1226,13 @@
                 <a href="#how-it-works">Methodology</a>
                 <a href="#platforms">Comparison</a>
                 <a href="#pricing">Licensing</a>
-                <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="nav-cta" style="background: var(--accent); color: #fff;">Start Portal</a>
+                <a href="pwa-app/out/" class="nav-cta app-link" data-fallback="pwa-app/out/" style="background: var(--accent); color: #fff;">Start Portal</a>
             </nav>
             <div class="nav-drawer" id="nav-drawer" role="navigation" aria-label="Mobile menu">
                 <a href="#how-it-works">Methodology</a>
                 <a href="#platforms">Comparison</a>
                 <a href="#pricing">Licensing</a>
-                <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="nav-cta" style="background: var(--accent); color: #fff;">Start Portal</a>
+                <a href="pwa-app/out/" class="nav-cta app-link" data-fallback="pwa-app/out/" style="background: var(--accent); color: #fff;">Start Portal</a>
             </div>
         </div>
     </header>
@@ -1243,7 +1246,7 @@
                 verify timelines, and generate evidence-grade exhibits with 100% data privacy.</p>
             
             <div class="hero-actions">
-                <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn-premium primary" aria-label="Start Investigation — open the web portal">Start Investigation</a>
+                <a href="pwa-app/out/" class="btn-premium primary app-link" data-fallback="pwa-app/out/" aria-label="Start Investigation — open the web portal">Start Investigation</a>
                 <a href="#how-it-works" class="btn-premium outline" aria-label="Explore capabilities and methodology">Explore Capabilities</a>
             </div>
 
@@ -1435,8 +1438,7 @@
                         <li><strong>Legal Escalation Suite</strong>: Sworn affidavits & CFPB narrative generation.</li>
                         <li><strong>Attorney Referral Module</strong>: Export full case dossiers for legal counsel.</li>
                     </ul>
-                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn btn-primary"
-                        style="margin-top: 32px;">Open Web Portal</a>
+                    <a href="pwa-app/out/" class="btn btn-primary app-link" data-fallback="pwa-app/out/" style="margin-top: 32px;">Open Web Portal</a>
                 </div>
 
                 <div class="platform-card">
@@ -1483,8 +1485,7 @@
                 </div>
             </div>
             <div style="display: flex; justify-content: center; margin-top: 32px;">
-                <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn btn-primary">Open
-                    the Web App</a>
+                <a href="pwa-app/out/" class="btn btn-primary app-link" data-fallback="pwa-app/out/">Open the Web App</a>
             </div>
         </div>
     </section>
@@ -1640,8 +1641,7 @@
                     Generate PDF letters, evidence packages, attorney briefs, and a complete ZIP bundle with one click.
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/"
-                        class="btn btn-secondary">See Exports in the Web App</a>
+                    <a href="pwa-app/out/" class="btn btn-secondary app-link" data-fallback="pwa-app/out/">See Exports in the Web App</a>
                     <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md"
                         class="btn btn-secondary">Download Desktop Suite</a>
                 </div>
@@ -1707,8 +1707,7 @@
                         <li>Export dispute letters</li>
                         <li>Evidence bundle ZIP</li>
                     </ul>
-                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn btn-secondary"
-                        style="margin-top: 24px;">Launch Portal</a>
+                    <a href="pwa-app/out/" class="btn btn-secondary app-link" data-fallback="pwa-app/out/" style="margin-top: 24px;">Launch Portal</a>
                 </div>
                 <div class="pricing-card highlight">
                     <h4>Nonprofit & Clinics</h4>
@@ -1828,8 +1827,7 @@
                     Launch the web app for instant analysis or deploy the desktop suite for full-scale case management.
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/"
-                        class="btn btn-primary">Open Web App</a>
+                    <a href="pwa-app/out/" class="btn btn-primary app-link" data-fallback="pwa-app/out/">Open Web App</a>
                     <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/blob/main/docs/QUICK_START.md"
                         class="btn btn-secondary">Deploy Desktop Suite</a>
                 </div>
@@ -1845,8 +1843,7 @@
                 <p style="color: var(--slate-300); max-width: 720px; margin: 0 auto;">Bring case intelligence,
                     documentation, and compliance tracking into a single local-first platform.</p>
                 <div class="hero-actions">
-                    <a href="https://debt-re-aging-git-main-mukund-thiru-non-pro.vercel.app/" class="btn btn-primary">Launch
-                        Portal</a>
+                    <a href="pwa-app/out/" class="btn btn-primary app-link" data-fallback="pwa-app/out/">Launch Portal</a>
                     <a href="mailto:contactmukundthiru1@gmail.com" class="btn btn-secondary">Get Institutional Access</a>
                 </div>
             </div>
@@ -1907,7 +1904,7 @@
                     style="color: var(--slate-600); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.02em;">Platform</a>
                 <a href="mailto:contactmukundthiru1@gmail.com"
                     style="color: var(--slate-600); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.02em;">Contact</a>
-                <a href="#" style="color: var(--slate-600); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.02em;">Documentation</a>
+                <a href="https://github.com/contactmukundthiru-cyber/Debt-Re-Aging/tree/main/docs" style="color: var(--slate-600); text-decoration: none; font-size: 13px; font-weight: 500; letter-spacing: 0.02em;">Documentation</a>
             </div>
             <p style="font-size: 12px; color: var(--slate-400); letter-spacing: 0.02em;">© 2026 Developed for the consumer legal aid community.</p>
         </div>
@@ -1915,6 +1912,17 @@
     </main>
 
     <script>
+        // App URL: set <meta name="app-url" content="https://your-app.vercel.app"> to point all "Start Portal" links to your PWA
+        (function () {
+            var meta = document.querySelector('meta[name="app-url"]');
+            var url = meta && meta.getAttribute('content') && meta.getAttribute('content').trim();
+            if (url) {
+                document.querySelectorAll('.app-link').forEach(function (a) {
+                    a.setAttribute('href', url.replace(/\/$/, '') + '/');
+                });
+            }
+        })();
+
         // Intersection Observer for Scroll Animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -1935,6 +1943,20 @@
                 header.classList.add('scrolled');
             } else {
                 header.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll for in-page anchors
+        document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+            var id = a.getAttribute('href');
+            if (id && id !== '#' && document.querySelector(id)) {
+                a.addEventListener('click', function (e) {
+                    var el = document.querySelector(id);
+                    if (el) {
+                        e.preventDefault();
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
             }
         });
 

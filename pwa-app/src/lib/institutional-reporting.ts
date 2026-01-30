@@ -22,12 +22,12 @@ export function calculateImpactMetrics(): ImpactStats {
     const clients = getClients();
     const history = getHistory();
 
-    const highSeverity = history.filter(h => h.results.riskProfile.riskLevel === 'high' || h.results.riskProfile.riskLevel === 'critical');
+    const highSeverity = history.filter(h => h.riskProfile.riskLevel === 'high' || h.riskProfile.riskLevel === 'critical');
 
     return {
         totalClients: clients.length,
         totalAnalyses: history.length,
-        violationRate: history.length > 0 ? (history.filter(h => h.results.flags.length > 0).length / history.length) * 100 : 0,
+        violationRate: history.length > 0 ? (history.filter(h => h.flags.length > 0).length / history.length) * 100 : 0,
         highSeverityCount: highSeverity.length,
         estimatedTimeSavedHours: history.length * 1.5, // 1.5 hours saved per manual analysis
         potentialScoreIncreaseAvg: 45 // Statistical average
@@ -83,9 +83,9 @@ export function exportInstitutionalJSON(): string {
         history: history.map(h => ({
             id: h.id,
             timestamp: h.timestamp,
-            summary: h.results.riskProfile.summary,
-            violationCount: h.results.flags.length,
-            riskLevel: h.results.riskProfile.riskLevel
+            summary: h.riskProfile.summary,
+            violationCount: h.flags.length,
+            riskLevel: h.riskProfile.riskLevel
         }))
     };
 

@@ -11,7 +11,8 @@ import {
   ChevronRight,
   Clock,
   Briefcase,
-  FileText
+  FileText,
+  RefreshCcw
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { ANALYSIS_TABS, TabId, LetterType } from '../../lib/constants';
@@ -604,47 +605,50 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
         <div className="space-y-16 animate-in fade-in duration-700">
           <CaseSummaryDashboard flags={flags} riskProfile={riskProfile} readiness={readiness} />
 
-          <div className="grid lg:grid-cols-12 gap-10">
+          <div className="grid lg:grid-cols-12 gap-12">
             {/* Mission Critical Items */}
-            <div className="lg:col-span-8 space-y-10">
+            <div className="lg:col-span-8 space-y-12">
               {/* Compliance Violations Manifest */}
-              <div className="premium-card bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-slate-100 dark:ring-white/5">
-                <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20">
-                       <AlertTriangle size={18} />
+              <div className="rounded-[4rem] bg-slate-950/40 backdrop-blur-3xl border border-white/10 overflow-hidden shadow-4xl group">
+                <div className="px-12 py-10 border-b border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-2xl relative">
+                       <AlertTriangle size={28} />
+                       <div className="absolute inset-0 blur-xl opacity-20 bg-indigo-500" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-black dark:text-white tracking-tight uppercase font-mono">Violations <span className="text-indigo-500">MANIFEST</span></h3>
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">FCRA / FDCPA Sequence Audit</p>
+                      <h3 className="text-4xl font-black text-white tracking-tighter uppercase font-mono italic">Violations_<span className="text-indigo-500">MANIFEST</span></h3>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] font-mono mt-1">Institutional_Non-Compliance_Matrix</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full uppercase tracking-widest font-mono">{flags.length} Nodes detected</span>
+                  <div className="px-6 py-2 bg-white/5 border border-white/10 rounded-full">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">{flags.length}_NODES_DETECTED</span>
+                  </div>
                 </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                <div className="divide-y divide-white/5">
                   {flags.slice(0, 5).map((flag, idx) => (
                     <motion.div 
                       key={idx} 
                       whileHover={{ x: 10 }}
-                      className="p-10 hover:bg-slate-50 dark:hover:bg-indigo-500/5 transition-all cursor-default group"
+                      className="p-12 hover:bg-white/[0.02] transition-all cursor-default group"
                     >
-                      <div className="flex items-center justify-between gap-6 mb-4">
-                        <div className="flex items-center gap-4">
+                      <div className="flex items-center justify-between gap-8 mb-6">
+                        <div className="flex items-center gap-6">
                           <span className={cn(
-                            "w-2.5 h-2.5 rounded-full",
-                            flag.severity === 'critical' ? "bg-indigo-500 animate-pulse shadow-[0_0_15px_rgba(99,102,241,0.6)]" : 
-                            flag.severity === 'high' ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]" : "bg-orange-500"
+                            "w-3 h-3 rounded-full",
+                            flag.severity === 'critical' ? "bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.6)] animate-pulse" : 
+                            flag.severity === 'high' ? "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]" : "bg-indigo-500"
                           )} />
-                          <h4 className="text-lg font-black dark:text-white uppercase font-mono tracking-tight group-hover:text-indigo-500 transition-colors">{flag.ruleName}</h4>
+                          <h4 className="text-3xl font-black text-white uppercase font-mono tracking-tighter italic group-hover:text-indigo-400 transition-colors">{flag.ruleName}</h4>
                         </div>
-                        <span className="text-[9px] font-black text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg uppercase tracking-[0.2em] font-mono group-hover:bg-indigo-500 group-hover:text-white transition-colors">{flag.severity}</span>
+                        <span className="text-[10px] font-black text-slate-500 bg-black/40 border border-white/5 px-4 py-1.5 rounded-full uppercase tracking-widest font-mono group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-inner">{flag.severity}</span>
                       </div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 font-medium max-w-3xl pr-4 italic">
+                      <p className="text-lg text-slate-400 leading-relaxed mb-8 font-medium italic max-w-4xl border-l-2 border-white/5 pl-8 ml-1">
                         "{flag.explanation}"
                       </p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-3 ml-9">
                         {flag.legalCitations.slice(0, 4).map((cite, i) => (
-                          <span key={i} className="text-[9px] font-black text-indigo-500 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 px-3 py-1.5 rounded-lg uppercase tracking-widest font-mono">{cite}</span>
+                          <span key={i} className="text-[10px] font-black text-indigo-400 bg-indigo-500/5 border border-indigo-500/20 px-4 py-2 rounded-xl uppercase tracking-widest font-mono italic shadow-inner">{cite}</span>
                         ))}
                       </div>
                     </motion.div>
@@ -652,9 +656,9 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
                   {flags.length > 5 && (
                     <button 
                       onClick={() => setActiveTab('violations')}
-                      className="w-full py-6 text-center text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all font-mono"
+                      className="w-full py-10 text-center text-[11px] font-black uppercase tracking-[0.5em] text-slate-500 hover:text-indigo-400 hover:bg-white/[0.04] transition-all font-mono italic border-t border-white/5"
                     >
-                       + {flags.length - 5} Additional Nodes in Archive
+                       + {flags.length - 5}_ADDITIONAL_VECTORS_RETAINED
                     </button>
                   )}
                 </div>
@@ -662,70 +666,81 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
             </div>
 
             {/* Right Side Strategy */}
-            <div className="lg:col-span-4 space-y-10">
+            <div className="lg:col-span-4 space-y-12">
               {/* Mission Briefing */}
-              <div className="bg-slate-950 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-3xl border border-slate-800 group ring-1 ring-white/10">
-                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-1000">
-                  <ShieldCheck size={180} />
+              <div className="rounded-[4rem] bg-slate-950 border border-white/10 p-12 text-white relative overflow-hidden shadow-4xl group">
+                <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-125 transition-transform duration-1000">
+                  <ShieldCheck size={220} />
                 </div>
                 <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-10">
-                    <div className="w-1.5 h-6 bg-blue-500 rounded-full" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 font-mono">Strategic Briefing</p>
+                  <div className="flex items-center gap-6 mb-12">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 border border-blue-500/20 shadow-2xl relative">
+                        <Activity size={24} className="animate-pulse" />
+                        <div className="absolute inset-0 blur-xl opacity-20 bg-blue-500" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500 font-mono italic">Directive_Summary</p>
+                        <h4 className="text-2xl font-black text-white uppercase font-mono italic tracking-tighter mt-1">STRATEGIC_BRIEF</h4>
+                    </div>
                   </div>
                   
                   <div className="space-y-8 mb-12">
-                    <p className="text-lg text-slate-200 leading-relaxed font-bold italic tracking-tight pr-6 relative">
-                      <span className="text-6xl text-blue-500/20 absolute -top-8 -left-4 font-serif">"</span>
-                      {riskProfile?.summary?.substring(0, 220)}...
+                    <p className="text-xl text-slate-400 leading-relaxed font-bold italic tracking-tight pr-6 relative border-l-2 border-white/5 pl-8 ml-2">
+                       {riskProfile?.summary?.substring(0, 220)}...
                     </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md">
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 font-mono">Tactical Strength</p>
+                    <div className="bg-black/40 p-8 rounded-[2.5rem] border border-white/5 shadow-inner space-y-3">
+                      <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Tactical_Strength</p>
                       <p className={cn(
-                        "text-sm font-black uppercase tracking-[0.2em] font-mono",
-                        riskProfile?.riskLevel === 'critical' ? 'text-blue-400 animate-pulse' : 'text-emerald-500'
-                      )}>{riskProfile?.riskLevel}</p>
+                        "text-lg font-black uppercase tracking-tighter font-mono italic",
+                        riskProfile?.riskLevel === 'critical' ? 'text-rose-500' : 'text-emerald-400'
+                      )}>{riskProfile?.riskLevel}_PRIORITY</p>
                     </div>
-                    <div className="bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md">
-                      <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 font-mono">Litigation Vector</p>
-                      <p className="text-sm font-black uppercase text-orange-400 tracking-[0.2em] font-mono">{riskProfile?.litigationPotential ? 'Elevated' : 'Defensive'}</p>
+                    <div className="bg-black/40 p-8 rounded-[2.5rem] border border-white/5 shadow-inner space-y-3">
+                      <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Litigation_Vector</p>
+                      <p className="text-lg font-black uppercase text-orange-400 tracking-tighter font-mono italic">{riskProfile?.litigationPotential ? 'ELEGATED_NODE' : 'DEFENSIVE'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Execution Manifest */}
-              <div className="bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden ring-1 ring-slate-100 dark:ring-white/5">
-                <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-3 font-mono">
-                    <Zap size={14} className="text-emerald-500" />
-                    Execution Manifest
+              <div className="rounded-[4rem] bg-white border border-slate-200 shadow-4xl overflow-hidden group">
+                <div className="px-12 py-8 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 flex items-center gap-4 font-mono italic">
+                    <Zap size={16} className="text-emerald-500 animate-pulse" />
+                    Execution_Manifest
                   </h3>
+                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 group-hover:rotate-180 transition-transform duration-700">
+                    <RefreshCcw size={12} />
+                  </div>
                 </div>
-                <div className="p-10 space-y-8">
+                <div className="p-12 space-y-10">
                   {analytics?.actions.slice(0, 4).map((action, i) => (
-                    <div key={i} className="flex gap-6 group cursor-pointer" onClick={() => setActiveTab('lettereditor')}>
-                      <div className="mt-1 shrink-0">
+                    <div key={i} className="flex gap-8 group/item cursor-pointer" onClick={() => setActiveTab('lettereditor')}>
+                      <div className="mt-2 shrink-0">
                         <div className={cn(
-                          "w-1 h-12 rounded-full transition-all duration-500",
-                          action.priority === 'immediate' ? "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" : "bg-slate-200 dark:bg-slate-800 group-hover:bg-blue-500 group-hover:h-14"
+                          "w-1.5 h-16 rounded-full transition-all duration-700 relative",
+                          action.priority === 'immediate' ? "bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.6)]" : "bg-slate-200 group-hover/item:bg-blue-500 group-hover/item:h-20"
                         )} />
                       </div>
-                      <div>
-                        <p className="text-sm font-black dark:text-white mb-2 group-hover:text-blue-500 transition-colors uppercase font-mono">{action.action}</p>
-                        <p className="text-xs text-slate-500 leading-relaxed font-normal">{action.reason}</p>
+                      <div className="space-y-2">
+                        <p className="text-lg font-black text-slate-900 group-hover/item:text-blue-600 transition-colors uppercase font-mono italic tracking-tighter">{action.action}</p>
+                        <p className="text-sm text-slate-500 leading-relaxed font-bold italic pr-4">{action.reason}</p>
                       </div>
                     </div>
                   ))}
                   <button 
                     onClick={() => setActiveTab('lettereditor')}
-                    className="w-full group mt-8 py-5 bg-slate-950 dark:bg-indigo-600 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl flex items-center justify-center gap-4"
+                    className="w-full group/btn mt-8 py-8 bg-slate-950 text-white rounded-[2.5rem] text-[11px] font-black uppercase tracking-[0.4em] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-4xl flex items-center justify-center gap-6 relative overflow-hidden"
                   >
-                    Generate Legal Command Package
-                    <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                    <span className="relative z-10 flex items-center gap-6">
+                        GENERATE_LEGAL_COMMAND_CORE
+                        <ChevronRight size={18} className="group-hover/btn:translate-x-2 transition-transform" />
+                    </span>
                   </button>
                 </div>
               </div>
@@ -837,7 +852,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
           />
         )}
 
-        {activeTab === 'timeline' && analytics && <TimelineTab timeline={analytics.timeline} bureau={editableFields.bureau} />}
+        {activeTab === 'timeline' && analytics && <TimelineTab timeline={analytics.timeline} bureau={editableFields.bureau} setActiveTab={setActiveTab} />}
 
         {activeTab === 'evidence' && <EvidenceManagerTab caseId="current-case" />}
 

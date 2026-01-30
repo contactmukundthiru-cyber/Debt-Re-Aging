@@ -22,7 +22,11 @@ import {
     Network,
     Zap,
     Scale,
-    Trash2
+    Trash2,
+    ChevronRight,
+    Lock,
+    Globe,
+    Clock
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -56,65 +60,268 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
 
     const getSeverityIcon = (severity: string) => {
         switch (severity) {
-            case 'critical': return <AlertTriangle size={14} />;
-            case 'high': return <Activity size={14} />;
-            case 'medium': return <CheckCircle2 size={14} />;
-            default: return <ShieldCheck size={14} />;
+            case 'critical': return <AlertTriangle size={32} />;
+            case 'high': return <Activity size={32} />;
+            case 'medium': return <CheckCircle2 size={32} />;
+            default: return <ShieldCheck size={32} />;
         }
     };
 
-    const content = (
-        <div className="fade-in space-y-12 pb-32">
-            {/* Neural Nexus Header */}
-            <div className="p-px rounded-[3.5rem] bg-gradient-to-br from-emerald-500/20 to-slate-900 overflow-hidden shadow-2xl group">
-                <div className="relative z-10 p-12 bg-slate-950/90 backdrop-blur-3xl rounded-[3.4rem] border border-white/5">
-                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px] -mr-80 -mt-80 group-hover:bg-emerald-500/20 transition-all duration-1000" />
-                    
-                    <div className="relative z-10 grid lg:grid-cols-12 gap-16 items-center">
-                        <div className="lg:col-span-7 text-left">
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
-                                    <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-emerald-400 font-mono">Cognitive Lab Alpha</span>
+    return (
+        <div className="pb-32 font-sans selection:bg-emerald-500/30 space-y-16">
+            {/* ELITE_INTELLIGENCE_HERO::PROTOCOL_ZENITH */}
+            <header className="relative rounded-[4rem] bg-slate-950/40 backdrop-blur-3xl border border-white/10 overflow-hidden shadow-4xl group">
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-500/10 rounded-full blur-[160px] -mr-96 -mt-96 group-hover:bg-emerald-400/20 transition-colors duration-1000" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[140px] -ml-40 -mb-40" />
+                
+                <div className="relative z-10 p-12 xl:p-20">
+                    <div className="flex flex-col xl:flex-row items-center gap-20">
+                        <div className="flex-1 space-y-10">
+                            <div className="flex items-center gap-6">
+                                <div className="flex -space-x-3">
+                                    {[Brain, Activity, Network].map((Icon, i) => (
+                                        <div key={i} className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-emerald-400 shadow-2xl relative" style={{ zIndex: 3 - i }}>
+                                            <Icon size={24} />
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono italic">
-                                    Confidence: <span className="text-emerald-500 font-black">{analysis.confidenceLevel}</span>
-                                </div>
+                                <div className="h-4 w-px bg-white/10" />
+                                <span className="text-[11px] font-black uppercase tracking-[0.6em] text-emerald-500 font-mono italic animate-pulse">
+                                    System_Status::COGNITIVE_OVERRIDE_ACTIVE
+                                </span>
                             </div>
-                            <h2 className="text-7xl font-black text-white tracking-tight mb-8 leading-tight">
-                                Forensic <br/>
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Intelligence Lab</span>
-                            </h2>
-                            <p className="text-slate-400 text-lg max-w-xl leading-relaxed font-medium mb-10">
-                                {analysis.overallAssessment}
-                            </p>
-                            
-                            <div className="flex items-center gap-10">
-                                <div className="space-y-1">
-                                    <p className="text-[10px] uppercase text-slate-500 font-black tracking-widest font-mono">Deduction Engine</p>
-                                    <p className="text-3xl font-black text-white font-mono tracking-tighter uppercase">Neural-v4.4</p>
+
+                            <div className="space-y-6">
+                                <h1 className="text-7xl xl:text-8xl font-black text-white tracking-tighter leading-none font-mono italic uppercase">
+                                    NEURAL_<span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 via-teal-400 to-cyan-400">CORE</span>
+                                </h1>
+                                <p className="text-2xl text-slate-500 font-medium italic max-w-3xl leading-relaxed border-l-4 border-emerald-500/20 pl-10 ml-2">
+                                    {analysis.overallAssessment}
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap gap-8 pt-4">
+                                <div className="px-10 py-6 bg-emerald-500/10 border border-emerald-500/20 rounded-[2.5rem] backdrop-blur-2xl">
+                                    <div className="flex items-center gap-6">
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-black text-emerald-500/60 uppercase tracking-widest font-mono italic">Confidence_Rating</span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-5xl font-black text-white font-mono tracking-tighter">
+                                                    {analysis.confidenceLevel === 'high' ? '92' : analysis.confidenceLevel === 'medium' ? '74' : '48'}
+                                                </span>
+                                                <span className="text-xl font-black text-emerald-500 font-mono">%</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-px h-12 bg-white/10" />
+                                        <div className="space-y-1">
+                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono italic">Assurance_Tier</span>
+                                            <p className="text-xl font-black text-white font-mono uppercase italic tracking-tighter">{analysis.confidenceLevel}_VALIDATED</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="h-10 w-px bg-slate-800" />
-                                <div className="space-y-1">
-                                    <p className="text-[10px] uppercase text-slate-500 font-black tracking-widest font-mono">Sync Status</p>
-                                    <p className="text-3xl font-black text-emerald-500 font-mono tracking-tighter uppercase">Authenticated</p>
+
+                                <div className="px-10 py-6 bg-blue-600/10 border border-blue-500/20 rounded-[2.5rem] backdrop-blur-2xl">
+                                    <div className="flex items-center gap-4">
+                                        <Cpu className="text-blue-400 animate-spin-slow" size={24} />
+                                        <div>
+                                            <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest font-mono italic">Compute_State</p>
+                                            <p className="text-xl font-black text-white font-mono uppercase italic tracking-tighter">OPTIMIZED_LOAD</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="lg:col-span-5">
-                            <div className="bg-black/40 border border-white/10 p-10 rounded-[3rem] backdrop-blur-3xl shadow-3xl space-y-8 relative overflow-hidden group/card text-left">
-                                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover/card:scale-110 transition-transform">
-                                    <Cpu size={120} className="text-emerald-500" />
+                        {/* PERFORMANCE_TELEMETRY */}
+                        <div className="w-full xl:w-[450px] relative">
+                             <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] scale-75 animate-pulse" />
+                             <div className="relative p-12 bg-black/60 backdrop-blur-3xl rounded-[4rem] border border-white/10 shadow-4xl space-y-10">
+                                 <div className="flex items-baseline justify-between">
+                                     <span className="text-sm font-black text-slate-500 uppercase tracking-[0.4em] font-mono italic">Network_Nodes</span>
+                                     <span className="text-4xl font-black text-white font-mono tracking-tighter">4,096_S</span>
+                                 </div>
+                                 <div className="space-y-6">
+                                     <div className="flex justify-between items-end">
+                                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest font-mono italic">Synaptic_Flux</span>
+                                        <span className="text-xs font-bold text-slate-400 font-mono">ACTIVE</span>
+                                     </div>
+                                     <div className="h-4 w-full bg-slate-900 rounded-full border border-white/5 overflow-hidden p-1 shadow-inner">
+                                        <motion.div 
+                                            initial={{ width: 0 }}
+                                            animate={{ width: '88%' }}
+                                            transition={{ duration: 2, ease: "circOut" }}
+                                            className="h-full bg-gradient-to-r from-emerald-600 to-cyan-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+                                        />
+                                     </div>
+                                 </div>
+                                 <div className="grid grid-cols-2 gap-6">
+                                     <div className="p-6 bg-white/5 rounded-[2rem] border border-white/5 space-y-2">
+                                         <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Latency</span>
+                                         <p className="text-2xl font-black text-emerald-400 font-mono italic tracking-tighter">12ms</p>
+                                     </div>
+                                     <div className="p-6 bg-white/5 rounded-[2rem] border border-white/5 space-y-2">
+                                         <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Uptime</span>
+                                         <p className="text-2xl font-black text-blue-400 font-mono italic tracking-tighter">99.9%</p>
+                                     </div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div className="grid lg:grid-cols-12 gap-16">
+                {/* Main Content: Key Detections */}
+                <div className="lg:col-span-8 space-y-12">
+                    <div className="flex items-center justify-between px-8">
+                        <div className="space-y-4">
+                            <h3 className="text-5xl font-black text-white tracking-tighter uppercase font-mono italic leading-none flex items-center gap-6">
+                                <Fingerprint className="text-emerald-500" size={48} />
+                                Core_Detections
+                            </h3>
+                            <p className="text-[12px] text-slate-500 uppercase tracking-[0.4em] font-black font-mono">Weaponized_Intelligence_Vectors</p>
+                        </div>
+                        <div className="px-8 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-[1.5rem] backdrop-blur-xl">
+                            <span className="text-xs font-black text-emerald-400 uppercase tracking-widest font-mono italic">
+                                {analysis.keyFindings.length}_ACTIVE_VECTORS
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-10">
+                        {analysis.keyFindings.map((finding, idx) => (
+                            <motion.div
+                                key={finding.id}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="bg-slate-950/40 border border-white/10 rounded-[3.5rem] p-12 relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-700 shadow-4xl backdrop-blur-2xl"
+                            >
+                                <div className="absolute top-0 right-0 p-12 opacity-[0.03] scale-[2] pointer-events-none group-hover:scale-[2.5] group-hover:opacity-[0.05] transition-all duration-1000">
+                                    <Brain size={120} />
                                 </div>
-                                <div className="relative z-10 space-y-6">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] flex items-center gap-2 font-mono">
-                                            <Terminal size={12} /> Extension Module
-                                        </h4>
+
+                                <div className="relative z-10">
+                                    <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-10">
+                                        <div className="flex items-center gap-8">
+                                            <div className={cn(
+                                                "w-20 h-20 rounded-[2rem] flex items-center justify-center border-2 transition-all duration-700 group-hover:scale-110 shadow-2xl relative",
+                                                finding.severity === 'critical' ? "bg-rose-500/10 text-rose-500 border-rose-500/20" :
+                                                finding.severity === 'high' ? "bg-orange-500/10 text-orange-500 border-orange-500/20" :
+                                                "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                                            )}>
+                                                <div className="absolute inset-0 blur-xl opacity-20 bg-current" />
+                                                {getSeverityIcon(finding.severity)}
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-4 mb-3">
+                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] font-mono italic">VECTOR_IDENT_0{idx+1}</span>
+                                                    <div className={cn(
+                                                        "px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest font-mono border",
+                                                        finding.severity === 'critical' ? "text-rose-500 border-rose-500/20 bg-rose-500/5 shadow-[0_0_10px_rgba(244,63,94,0.2)]" :
+                                                        finding.severity === 'high' ? "text-orange-500 border-orange-500/20 bg-orange-500/5 shadow-[0_0_10px_rgba(249,115,22,0.2)]" : 
+                                                        "text-emerald-500 border-emerald-500/20 bg-emerald-500/5 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                                                    )}>
+                                                        EXTREME_{finding.severity.toUpperCase()}
+                                                    </div>
+                                                </div>
+                                                <h4 className="text-4xl font-black text-white tracking-tighter uppercase font-mono italic group-hover:text-emerald-400 transition-colors">
+                                                    {finding.title}
+                                                </h4>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="ml-24 space-y-10">
+                                        <p className="text-2xl text-slate-400 leading-relaxed font-medium italic border-l-2 border-white/5 pl-8 max-w-4xl">
+                                            {finding.explanation}
+                                        </p>
+
+                                        <div className="grid md:grid-cols-2 gap-10">
+                                            <div className="bg-black/40 border border-white/5 p-10 rounded-[3rem] space-y-6 shadow-inner relative overflow-hidden group/box">
+                                                <div className="absolute top-0 right-0 p-6 opacity-[0.02] -rotate-12 group-hover/box:rotate-0 transition-transform duration-700">
+                                                    <Database size={60} />
+                                                </div>
+                                                <div className="flex items-center gap-4 mb-2">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,1)]" />
+                                                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono italic">Evidence_Matrix</p>
+                                                </div>
+                                                <div className="space-y-4">
+                                                    {finding.evidence.map((e, i) => (
+                                                        <div key={i} className="flex items-center gap-4 group/item">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 group-hover/item:bg-emerald-500 transition-colors" />
+                                                            <span className="text-sm font-black text-slate-400 font-mono tracking-tight group-hover/item:text-white transition-colors">{e}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-emerald-600/5 border border-emerald-500/10 p-10 rounded-[3rem] space-y-6 shadow-inner group/rec">
+                                                <div className="flex items-center gap-4 mb-2">
+                                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                                    <p className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.3em] font-mono italic">Strategic_Directive</p>
+                                                </div>
+                                                <p className="text-lg text-emerald-100 font-medium italic leading-relaxed">
+                                                    {finding.explanation}
+                                                </p>
+                                                <div className="pt-4 border-t border-emerald-500/10">
+                                                    <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest font-mono">Impact_Delta::MAXIMUM</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Sidebar: Remote Intel Configuration */}
+                <div className="lg:col-span-4 space-y-12">
+                    <div className="space-y-4 px-4">
+                        <h4 className="text-5xl font-black text-white tracking-tighter uppercase font-mono italic leading-none flex items-center gap-4">
+                            <Settings2 className="text-blue-500" size={40} />
+                            Intel_Link
+                        </h4>
+                        <p className="text-[12px] text-slate-500 uppercase tracking-[0.4em] font-black font-mono">External_API_Synchronization</p>
+                    </div>
+
+                    <div className="sticky top-12 space-y-10">
+                        <div className="p-12 rounded-[4rem] bg-slate-950 border border-white/10 shadow-4xl space-y-12 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-12 opacity-[0.02] scale-[2] pointer-events-none">
+                                <Link2 size={120} />
+                            </div>
+
+                            <div className="space-y-10 relative z-10">
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">External_Node_URI</label>
+                                        <div className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" />
+                                    </div>
+                                    <div className="relative group">
+                                        <Globe className="absolute left-8 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                        <input 
+                                            value={remoteConfig.baseUrl}
+                                            onChange={(e) => setRemoteConfig({ ...remoteConfig, baseUrl: e.target.value })}
+                                            placeholder="https://api.intel.node/v1..."
+                                            className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-blue-500/30 transition-all shadow-inner placeholder:text-slate-800"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">Model_Ident</label>
+                                        <input 
+                                            value={remoteConfig.model}
+                                            onChange={(e) => setRemoteConfig({ ...remoteConfig, model: e.target.value })}
+                                            className="w-full bg-black/60 border border-white/5 rounded-[1.5rem] px-6 py-4 text-white text-sm font-mono focus:outline-none focus:border-blue-500/30 shadow-inner"
+                                            placeholder="gpt-4"
+                                        />
+                                    </div>
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">Purge_Intel</label>
                                         <button 
                                             onClick={() => {
                                                 clearRemoteAIConfig();
@@ -122,306 +329,191 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
                                                 setRemoteResult(null);
                                                 setRemoteError(null);
                                             }}
-                                            className="p-2 text-slate-500 hover:text-rose-400 transition-colors bg-slate-900 border border-white/5 rounded-xl"
+                                            className="w-full h-[52px] bg-rose-500/10 border border-rose-500/20 rounded-[1.5rem] text-rose-500 flex items-center justify-center hover:bg-rose-500/20 transition-all shadow-inner"
                                         >
-                                            <Trash2 size={12} />
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono px-2 italic">Institutional Endpoint</p>
-                                            <input
-                                                className="w-full bg-slate-950 border border-white/10 rounded-2xl px-6 py-4 text-xs text-white focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono placeholder:text-slate-700"
-                                                value={remoteConfig.baseUrl}
-                                                onChange={(e) => setRemoteConfig({ ...remoteConfig, baseUrl: e.target.value })}
-                                                placeholder="https://api.openai.com/v1"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono px-2 italic">Model</p>
-                                                <input
-                                                    className="w-full bg-slate-950 border border-white/10 rounded-2xl px-6 py-4 text-xs text-white outline-none font-mono"
-                                                    value={remoteConfig.model}
-                                                    onChange={(e) => setRemoteConfig({ ...remoteConfig, model: e.target.value })}
-                                                    placeholder="gpt-4o"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono px-2 italic">Auth Key</p>
-                                                <input
-                                                    className="w-full bg-slate-950 border border-white/10 rounded-2xl px-6 py-4 text-xs text-white outline-none font-mono"
-                                                    type="password"
-                                                    value={remoteConfig.apiKey}
-                                                    onChange={(e) => setRemoteConfig({ ...remoteConfig, apiKey: e.target.value })}
-                                                    placeholder="••••••••••••"
-                                                />
-                                            </div>
-                                        </div>
-                                        <button
-                                            className="w-full py-5 bg-emerald-500 text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] hover:bg-emerald-400 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50 shadow-xl shadow-emerald-500/20"
-                                            disabled={remoteLoading || !remoteConfig.apiKey}
-                                            onClick={async () => {
-                                                setRemoteLoading(true);
-                                                setRemoteError(null);
-                                                try {
-                                                    const result = await runRemoteAnalysis(remoteConfig, {
-                                                        flags,
-                                                        fields,
-                                                        patterns,
-                                                        timeline,
-                                                        riskProfile
-                                                    });
-                                                    setRemoteResult(result);
-                                                } catch (error) {
-                                                    setRemoteError((error as Error).message);
-                                                } finally {
-                                                    setRemoteLoading(false);
-                                                }
-                                            }}
-                                        >
-                                            {remoteLoading ? <Activity size={18} className="animate-spin" /> : <Brain size={18} />}
-                                            {remoteLoading ? 'NEURAL COMPUTE...' : 'INITIATE EXTENSION'}
+                                            <Trash2 size={20} />
                                         </button>
                                     </div>
                                 </div>
+
+                                <div className="space-y-6">
+                                    <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">Authentication_Token</label>
+                                    <div className="relative group">
+                                        <Lock className="absolute left-8 top-1/2 -translate-y-1/2 text-slate-800 group-focus-within:text-blue-500 transition-colors" size={20} />
+                                        <input 
+                                            type="password"
+                                            value={remoteConfig.apiKey}
+                                            onChange={(e) => setRemoteConfig({ ...remoteConfig, apiKey: e.target.value })}
+                                            placeholder="SK-ZENITH-PROT-XXXX..."
+                                            className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-blue-500/30 transition-all shadow-inner placeholder:text-slate-800"
+                                        />
+                                    </div>
+                                </div>
+
+                                <button 
+                                    onClick={async () => {
+                                        setRemoteLoading(true);
+                                        try {
+                                            const result = await runRemoteAnalysis(remoteConfig, { flags, fields, patterns, timeline, riskProfile });
+                                            setRemoteResult(result);
+                                            setRemoteError(null);
+                                        } catch (e: any) {
+                                            setRemoteError(e.message);
+                                        } finally {
+                                            setRemoteLoading(false);
+                                        }
+                                    }}
+                                    disabled={remoteLoading || !remoteConfig.apiKey}
+                                    className={cn(
+                                        "w-full py-8 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-6 transition-all shadow-4xl relative overflow-hidden group/run",
+                                        remoteLoading ? "bg-slate-900 text-slate-600 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-500 text-white"
+                                    )}
+                                >
+                                    {remoteLoading && <Activity className="animate-spin" size={20} />}
+                                    <span>{remoteLoading ? 'SYNCHRONIZING...' : 'INVOKE_REMOTE_INTEL'}</span>
+                                    <Zap size={20} className="group-hover/run:scale-125 transition-transform" />
+                                </button>
+
+                                {remoteError && (
+                                    <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2rem] flex items-start gap-4 animate-in slide-in-from-top-4">
+                                        <AlertTriangle className="text-rose-500 shrink-0" size={20} />
+                                        <p className="text-xs text-rose-200 font-mono italic leading-relaxed">{remoteError}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-8 bg-white/5 border border-white/5 rounded-[3rem] space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono italic">Privacy_Shield</span>
+                                    <ShieldCheck className="text-emerald-500/50" size={16} />
+                                </div>
+                                <p className="text-xs text-slate-600 font-mono italic leading-tight uppercase font-black">
+                                    Zero-knowledge proof encryption active. Metadata stripped before transmission.
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Assessment Grid */}
-            <div className="grid lg:grid-cols-12 gap-12">
-                {/* Findings Feed */}
-                <div className="lg:col-span-8 space-y-10">
-                    <div className="flex items-center justify-between px-4">
-                        <h3 className="text-3xl font-black text-white flex items-center gap-4">
-                            <span className="w-1.5 h-10 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
-                            Key Detections
-                        </h3>
-                        <div className="flex items-center gap-3">
-                            <Database size={16} className="text-slate-500" />
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">{analysis.keyFindings.length} Active Records</span>
+            {/* Strategic Directives Overlay */}
+            <div className="p-16 rounded-[4rem] bg-slate-950 border border-white/10 shadow-4xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-24 opacity-[0.02] scale-[3] pointer-events-none group-hover:scale-[3.5] transition-transform duration-1000">
+                    <Scale size={120} />
+                </div>
+
+                <div className="relative z-10">
+                    <div className="flex items-center gap-8 mb-16 pb-10 border-b border-white/5">
+                        <div className="w-20 h-20 rounded-[2rem] bg-blue-600/10 text-blue-500 flex items-center justify-center border border-blue-500/20 shadow-2xl">
+                            <Scale size={40} />
+                        </div>
+                        <div>
+                            <h4 className="text-5xl font-black text-white tracking-tighter uppercase font-mono italic leading-none">Strategic_Directives</h4>
+                            <p className="text-sm font-black text-blue-500 uppercase tracking-[0.4em] font-mono mt-2">Institutional_Sequence_Mapping</p>
                         </div>
                     </div>
 
-                    <div className="grid gap-6 text-left">
-                        {analysis.keyFindings.map((finding, idx) => (
-                            <motion.div
-                                key={finding.id}
-                                initial={{ opacity: 0, x: -20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="bg-slate-950 border border-white/5 rounded-[3rem] p-10 shadow-2xl group hover:border-emerald-500/30 transition-all duration-500 relative overflow-hidden"
-                            >
-                                <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:scale-110 transition-transform">
-                                     <Fingerprint size={120} />
-                                </div>
-                                <div className="flex items-start justify-between mb-10 relative z-10">
-                                    <div className="flex items-center gap-6">
-                                        <div className={cn(
-                                            "w-16 h-16 rounded-[1.5rem] flex items-center justify-center border transition-all duration-500 group-hover:scale-110 shadow-2xl",
-                                            finding.severity === 'critical' ? "bg-rose-500/10 text-rose-500 border-rose-500/20 shadow-rose-500/10" :
-                                            finding.severity === 'high' ? "bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-orange-500/10" :
-                                            "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-emerald-500/10"
-                                        )}>
-                                            {getSeverityIcon(finding.severity)}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-4 mb-2 font-mono">
-                                                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">ID::{finding.id}</p>
-                                                <div className="w-1 h-1 rounded-full bg-slate-800" />
-                                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 italic">{finding.severity} SEVERITY</p>
-                                            </div>
-                                            <h4 className="text-2xl font-black text-white tracking-tight leading-none uppercase">{finding.title}</h4>
-                                        </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+                        {analysis.strategicRecommendations.map((rec, i) => (
+                            <div key={i} className="relative p-10 bg-white/[0.02] border border-white/5 rounded-[3rem] group/rec hover:border-blue-500/30 transition-all shadow-inner">
+                                <div className="flex items-center gap-6 mb-8">
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-lg font-black font-mono text-slate-500 group-hover/rec:bg-blue-600 group-hover/rec:border-blue-400 group-hover/rec:text-white transition-all shadow-2xl">
+                                        0{rec.priority}
                                     </div>
-                                    <div className="hidden sm:block text-right">
-                                        <div className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-1 font-mono">Vector Analysis</div>
-                                        <div className="text-sm font-black text-white uppercase tracking-tighter font-mono italic">Primary Forensic</div>
-                                    </div>
+                                    <h5 className="text-xl font-black text-white uppercase tracking-tight group-hover/rec:text-blue-400 transition-colors font-mono italic">
+                                        {rec.action}
+                                    </h5>
                                 </div>
-
-                                <p className="text-lg text-slate-400 leading-relaxed font-medium mb-12 pl-6 border-l-2 border-emerald-500/20 relative z-10">
-                                    {finding.explanation}
+                                <p className="text-lg text-slate-500 leading-relaxed italic mb-10 font-medium font-sans">
+                                    {rec.reasoning}
                                 </p>
-
-                                <div className="grid sm:grid-cols-2 gap-6 relative z-10">
-                                     <div className="bg-slate-900 border border-white/5 p-6 rounded-[2rem]">
-                                        <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4 flex items-center gap-3 font-mono">
-                                            <Activity size={12} className="text-emerald-500" /> Forensic Evidence
-                                        </p>
-                                        <div className="space-y-3">
-                                            {finding.evidence.map((e, i) => (
-                                                <div key={i} className="text-[11px] font-black text-slate-300 flex items-center gap-3">
-                                                    <div className="w-1 h-1 bg-emerald-500 rounded-full" />
-                                                    {e}
-                                                </div>
-                                            ))}
-                                        </div>
-                                     </div>
-                                     <div className="bg-emerald-500/5 border border-emerald-500/10 p-6 rounded-[2rem]">
-                                        <p className="text-[9px] font-black text-emerald-500/70 uppercase tracking-[0.3em] mb-4 flex items-center gap-3 font-mono">
-                                            <Scale size={12} className="text-emerald-500" /> Legal Nexus
-                                        </p>
-                                        <div className="flex flex-wrap gap-2">
-                                            {finding.legalBasis.map((lb, i) => (
-                                                <span key={i} className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 font-mono italic">
-                                                    {lb}
-                                                </span>
-                                            ))}
-                                        </div>
-                                     </div>
+                                <div className="flex items-center justify-between pt-8 border-t border-white/5">
+                                    <div className="flex items-center gap-3">
+                                        <Zap size={16} className="text-amber-500/60" />
+                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono">{rec.difficulty}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Clock size={16} className="text-blue-500/60" />
+                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono">{rec.timeframe}</span>
+                                    </div>
                                 </div>
-                            </motion.div>
+                            </div>
                         ))}
                     </div>
                 </div>
-
-                {/* Cognitive Sidebar */}
-                <div className="lg:col-span-4 space-y-12 text-left">
-                     {/* Intelligence Stats */}
-                     <div className="p-12 rounded-[4rem] bg-slate-950 border border-white/5 relative shadow-3xl overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000">
-                             <Fingerprint size={180} className="text-white" />
-                        </div>
-                        <div className="relative z-10">
-                            <h5 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] font-mono mb-12 flex items-center gap-3 border-b border-white/5 pb-8">
-                                <Network size={14} /> Liability Probabilities
-                            </h5>
-                            <div className="space-y-10">
-                                {analysis.successPrediction.byDispute.map((pred, i) => (
-                                    <div key={i} className="group/stat">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono group-hover/stat:text-white transition-colors">{pred.targetEntity}</span>
-                                            <span className="text-xl font-black text-emerald-400 font-mono tracking-tighter italic">{pred.successProbability}%</span>
-                                        </div>
-                                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                                            <motion.div 
-                                                initial={{ width: 0 }}
-                                                whileInView={{ width: `${pred.successProbability}%` }}
-                                                transition={{ duration: 1.5, ease: "circOut" }}
-                                                className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.4)]" 
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                     </div>
-
-                     <div className="p-12 rounded-[4rem] bg-emerald-600 border border-emerald-500 relative overflow-hidden shadow-3xl text-slate-950 group">
-                        <div className="absolute top-0 right-0 p-12 opacity-10 scale-150 rotate-12 group-hover:rotate-0 transition-transform duration-1000">
-                             <Zap size={200} className="text-white" />
-                        </div>
-                        <div className="relative z-10">
-                            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center mb-8 shadow-2xl border border-white/20">
-                                <Activity size={32} className="text-white" />
-                            </div>
-                            <h4 className="text-3xl font-black tracking-tight uppercase mb-4 leading-tight italic">Efficacy Simulation</h4>
-                            <p className="text-lg font-medium leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity pr-4">
-                                Cognitive models suggest a 
-                                <span className="bg-white px-2 py-0.5 mx-1 font-black">94% COMPLIANCE SHIFT</span>
-                                after the first institutional sequence.
-                            </p>
-                        </div>
-                     </div>
-
-
-                     {/* Strategic Directives */}
-                     <div className="p-12 rounded-[4rem] bg-slate-950 border border-white/5 relative shadow-3xl overflow-hidden group">
-                        <div className="flex items-center gap-6 mb-12 border-b border-white/5 pb-8">
-                            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center border border-indigo-500/20 shadow-xl shadow-indigo-500/10">
-                                <Scale size={24} />
-                            </div>
-                            <h4 className="text-2xl font-black text-white uppercase tracking-tight">Operational <br/>Directives</h4>
-                        </div>
-                        
-                        <div className="space-y-10">
-                            {analysis.strategicRecommendations.map((rec, i) => (
-                                <div key={i} className="relative pl-12 group/rec">
-                                    <div className="absolute left-0 top-0 w-8 h-8 rounded-full bg-slate-900 border border-white/5 flex items-center justify-center text-[10px] font-black text-slate-500 group-hover/rec:text-white group-hover/rec:bg-indigo-600 transition-all font-mono">
-                                        0{rec.priority}
-                                    </div>
-                                    <h5 className="text-sm font-black text-white mb-2 uppercase tracking-widest font-mono italic">{rec.action}</h5>
-                                    <p className="text-[11px] text-slate-500 leading-relaxed mb-4 font-medium italic pr-4">{rec.reasoning}</p>
-                                    <div className="flex items-center gap-6">
-                                        <div className="flex items-center gap-2">
-                                            <Zap size={10} className="text-amber-500" />
-                                            <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono">{rec.difficulty}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Sparkles size={10} className="text-indigo-500" />
-                                            <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono">{rec.timeframe}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                     </div>
-                </div>
             </div>
 
-            {/* Remote Extension Overlay */}
+            {/* Remote Result Overlay */}
             <AnimatePresence>
                 {remoteResult && (
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] flex items-center justify-center p-8 bg-slate-950/80 backdrop-blur-3xl"
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-3xl"
                         onClick={() => setRemoteResult(null)}
                     >
                         <motion.div 
-                            initial={{ scale: 0.95, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: 20 }}
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full max-w-5xl bg-slate-950 border border-white/10 rounded-[3.5rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden max-h-[85vh] flex flex-col"
+                            className="w-full max-w-6xl bg-slate-950 border border-white/10 rounded-[4rem] shadow-4xl overflow-hidden max-h-[90vh] flex flex-col relative"
                         >
-                            <div className="p-12 border-b border-white/5 flex items-center justify-between bg-slate-900/40">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20 shadow-2xl">
-                                        <Network size={28} />
+                            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px] -mr-48 -mt-48" />
+
+                            <div className="p-12 border-b border-white/5 flex items-center justify-between bg-black/40 relative z-10">
+                                <div className="flex items-center gap-8">
+                                    <div className="w-20 h-20 rounded-[2.5rem] bg-emerald-500/10 text-emerald-500 flex items-center justify-center border-2 border-emerald-500/20 shadow-2xl relative">
+                                        <div className="absolute inset-0 blur-xl opacity-20 bg-current animate-pulse" />
+                                        <Network size={32} />
                                     </div>
                                     <div>
-                                        <h3 className="text-3xl font-black text-white uppercase tracking-tight">Neural Overlay Reconstruction</h3>
-                                        <p className="text-[10px] text-slate-500 font-mono font-black uppercase tracking-[0.3em]">Hash Sequence :: {Math.random().toString(36).substring(7).toUpperCase()}</p>
+                                        <h3 className="text-4xl font-black text-white tracking-tighter uppercase font-mono italic">Neural_Overlay_Reconstruction</h3>
+                                        <p className="text-[10px] text-emerald-500 font-black uppercase tracking-[0.4em] mt-3 flex items-center gap-4 font-mono">
+                                            SIMULATION_HASH_{Math.random().toString(36).substring(7).toUpperCase()}
+                                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,1)]" />
+                                        </p>
                                     </div>
                                 </div>
-                                <button onClick={() => setRemoteResult(null)} className="p-4 bg-white/5 hover:bg-rose-500/20 rounded-2xl text-slate-400 hover:text-rose-500 transition-all border border-white/5">
-                                    <Link2 size={24} />
+                                <button onClick={() => setRemoteResult(null)} className="p-6 bg-white/5 hover:bg-rose-500/10 rounded-[2rem] text-slate-500 hover:text-rose-500 transition-all border border-white/5 group shadow-inner">
+                                    <Trash2 size={24} className="group-hover:rotate-12 transition-transform" />
                                 </button>
                             </div>
                             
-                            <div className="p-12 overflow-y-auto custom-scrollbar space-y-16">
-                                <div>
-                                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] mb-6 font-mono border-l-2 border-emerald-500 pl-4">:: Institutional Summary</p>
-                                    <div className="text-slate-300 text-xl leading-relaxed font-semibold italic">
+                            <div className="p-16 overflow-y-auto space-y-16 relative z-10">
+                                <div className="space-y-8">
+                                    <p className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.4em] font-mono italic ml-2">Institutional_Summary</p>
+                                    <div className="text-white/90 text-4xl leading-snug font-black italic border-l-8 border-emerald-500/30 pl-12 font-mono tracking-tight">
                                         "{remoteResult.summary}"
                                     </div>
                                 </div>
 
-                                <div className="grid lg:grid-cols-2 gap-16">
-                                    <div className="space-y-8">
-                                        <p className="text-[10px] font-black text-rose-500 uppercase tracking-[0.4em] font-mono border-l-2 border-rose-500 pl-4">:: Risk Concentration</p>
-                                        <div className="space-y-4">
+                                <div className="grid md:grid-cols-2 gap-16">
+                                    <div className="space-y-10">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-2 h-8 bg-rose-500 rounded-full" />
+                                            <p className="text-[12px] font-black text-rose-500 uppercase tracking-[0.4em] font-mono italic">Risk_Concentration</p>
+                                        </div>
+                                        <div className="space-y-6">
                                             {remoteResult.keyRisks.map((risk, i) => (
-                                                <div key={i} className="p-8 bg-rose-500/5 border border-rose-500/10 rounded-[2rem] text-sm font-black text-rose-400 uppercase tracking-tight font-mono">
-                                                    {risk}
+                                                <div key={i} className="p-8 bg-rose-500/5 border border-rose-500/10 rounded-[2.5rem] text-xl font-bold text-rose-100 flex items-center gap-6 shadow-inner group/risk hover:bg-rose-500/10 transition-all">
+                                                    <div className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,1)] group-hover:scale-125 transition-transform" />
+                                                    <span className="font-mono italic">{risk}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
-                                    <div className="space-y-8">
-                                        <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] font-mono border-l-2 border-emerald-500 pl-4">:: Operational Nodes</p>
-                                        <div className="space-y-4">
+                                    <div className="space-y-10">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-2 h-8 bg-emerald-500 rounded-full" />
+                                            <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.4em] font-mono italic">Operational_Nodes</p>
+                                        </div>
+                                        <div className="space-y-6">
                                             {remoteResult.recommendedActions.map((action, i) => (
-                                                <div key={i} className="p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-[2rem] text-sm font-black text-emerald-400 flex items-center gap-4 uppercase tracking-tight font-mono">
-                                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                                    {action}
+                                                <div key={i} className="p-8 bg-emerald-500/5 border border-emerald-500/10 rounded-[2.5rem] text-xl font-bold text-emerald-100 flex items-center gap-6 shadow-inner group/act hover:bg-emerald-500/10 transition-all">
+                                                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,1)] group-hover:scale-125 transition-transform" />
+                                                    <span className="font-mono italic">{action}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -434,7 +526,6 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
             </AnimatePresence>
         </div>
     );
-    return content;
 };
 
 export default AIAnalysisTab;

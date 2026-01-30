@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CreditFields, RuleFlag, RiskProfile } from '../../lib/types';
 import { ForensicSummary } from '../../lib/analytics';
 import { Step } from '../../lib/constants';
@@ -46,12 +46,12 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
   const [sortKey, setSortKey] = useState<'risk' | 'violations' | 'value' | 'name'>('risk');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const parseValue = (value?: string) => {
+  const parseValue = useCallback((value?: string) => {
     if (!value) return 0;
     const cleaned = value.replace(/[^0-9.-]/g, '');
     const parsed = Number.parseFloat(cleaned);
     return Number.isFinite(parsed) ? parsed : 0;
-  };
+  }, []);
 
   const priorityQueue = useMemo(() => {
     const scored = analyzedAccounts.map(account => {

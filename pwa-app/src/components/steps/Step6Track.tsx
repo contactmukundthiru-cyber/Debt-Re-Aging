@@ -83,11 +83,11 @@ const Step6Track: React.FC<Step6TrackProps> = ({
   const [showHealthPanel, setShowHealthPanel] = React.useState(false);
   const [trendRange, setTrendRange] = React.useState<'weekly' | 'monthly'>('weekly');
 
-  const getDaysRemaining = (date: string) => {
+  const getDaysRemaining = React.useCallback((date: string) => {
     const due = new Date(date);
     const diff = due.getTime() - Date.now();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  };
+  }, []);
 
   const filteredDisputes = React.useMemo(() => {
     return disputes.filter(dispute => {
@@ -120,7 +120,7 @@ const Step6Track: React.FC<Step6TrackProps> = ({
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [filteredDisputes, commMethod, commSearch, commType]);
 
-  const buildWeeklyTrends = (items: Dispute[]) => {
+  const buildWeeklyTrends = React.useCallback((items: Dispute[]) => {
     const weeks = Array.from({ length: 8 }, (_, idx) => {
       const end = new Date();
       end.setDate(end.getDate() - (7 * (7 - idx)));
@@ -140,7 +140,7 @@ const Step6Track: React.FC<Step6TrackProps> = ({
       }).length;
       return { label: week.label, created, overdue };
     });
-  };
+  }, [getDaysRemaining]);
 
   const analytics = React.useMemo(() => {
     const now = new Date();
@@ -237,7 +237,7 @@ const Step6Track: React.FC<Step6TrackProps> = ({
       slaTrends,
       weeklyTrends: buildWeeklyTrends(filteredDisputes)
     };
-  }, [filteredDisputes]);
+  }, [filteredDisputes, buildWeeklyTrends]);
 
   const maxWeeklyCreated = Math.max(1, ...analytics.weeklyTrends.map(item => item.created));
   const maxWeeklyOverdue = Math.max(1, ...analytics.weeklyTrends.map(item => item.overdue));
@@ -263,7 +263,7 @@ const Step6Track: React.FC<Step6TrackProps> = ({
         date: item.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         daysRemaining: item.daysRemaining
       }));
-  }, [disputes]);
+  }, [disputes, getDaysRemaining]);
 
   React.useEffect(() => {
     if (disputes.length === 0) {
@@ -636,7 +636,7 @@ const Step6Track: React.FC<Step6TrackProps> = ({
     const overdue = disputes.filter(d => getDaysRemaining(d.deadlines.responseDeadline) < 0).length;
     const score = Math.max(0, 100 - (required * 5 + overdue * 8));
     setQualityScore(score);
-  }, [disputes]);
+  }, [disputes, getDaysRemaining]);
 
   const applyOutcome = () => {
     if (!analysis || !selectedDispute || !analysis.items) return;
