@@ -151,6 +151,12 @@ const FIELD_PATTERNS: Record<string, RegExp[]> = {
     /(?:date\s*(?:of\s*)?)?last\s*activity[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
     /last\s*(?:reported|updated)[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
   ],
+  estimatedRemovalDate: [
+    /(?:estimated\s*)?(?:date\s*of\s*)?remov(?:al|ed)(?:\s*on)?[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
+    /scheduled\s*to\s*be\s*removed\s*(?:on)?[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
+    /on\s*file\s*until[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
+    /remov(?:al|ed)\s*date[:\s]*([A-Za-z0-9\/\-,\s]+)/i,
+  ],
   remarks: [
     /(?:remarks|comments|notes)[:\s]+([A-Za-z0-9\s\.,&\'\-\(\)\!/]+?)(?:\n|\||$)/i,
     /consumer\s*statement[:\s]+([A-Za-z0-9\s\.,&\'\-\(\)\!/]+?)(?:\n|\||$)/i,
@@ -273,7 +279,10 @@ export function segmentAccounts(text: string): string[] {
     /^-{3,}$/,
     /^\*{3,}$/,
     /^(account|tradeline|creditor)[:\s]/i,
-    /^[A-Z][A-Z\s&\-\.]{5,}(?:BANK|CREDIT|FINANCIAL|FUNDING|RECOVERY|COLLECTION|LLC|INC)/
+    /^[A-Z][A-Z\s&\-\.]{5,}(?:BANK|CREDIT|FINANCIAL|FUNDING|RECOVERY|COLLECTION|LLC|INC)/,
+    /^[A-Z\s]{4,}\s{3,}\d{4,}/, // Name followed by balance
+    /\b(?:original\s+creditor|furnisher|collector):/i,
+    /\baccount\s+number:\s*[\dX*]+/i
   ];
 
   for (const line of lines) {

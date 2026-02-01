@@ -19,11 +19,14 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../../../lib/utils';
 
+import { CollectorMatch } from '../../../lib/collector-database';
+
 interface InstitutionalTabProps {
     caseId: string;
+    collectorMatch?: CollectorMatch | null;
 }
 
-const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
+const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMatch }) => {
     const [metrics, setMetrics] = React.useState<any>(null);
     const [reportName, setReportName] = React.useState('Forensic Unit 1');
 
@@ -134,6 +137,69 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
                     </div>
                 </div>
             </section>
+
+            {/* COLLECTOR INTELLIGENCE NODE */}
+            {collectorMatch && (
+                <section className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-br from-red-500/20 via-blue-500/20 to-emerald-500/20 rounded-[5rem] blur-3xl opacity-30 group-hover:opacity-60 transition duration-1000" />
+                    <div className="relative rounded-[5rem] bg-slate-950/80 backdrop-blur-3xl border border-white/10 overflow-hidden shadow-2xl p-24">
+                        <div className="flex flex-col xl:flex-row gap-20">
+                            <div className="flex-1 space-y-12">
+                                <div className="flex items-center gap-8">
+                                    <div className="w-20 h-20 bg-red-500/10 rounded-[2rem] flex items-center justify-center border border-red-500/20 shadow-2xl">
+                                        <ShieldCheck className="text-red-500" size={40} />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-4 mb-2">
+                                            <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                                            <p className="text-[11px] font-black text-red-500 uppercase tracking-[0.6em] font-mono leading-tight italic">Collector_Intel_Dossier</p>
+                                        </div>
+                                        <h3 className="text-6xl font-black text-white italic tracking-tighter uppercase font-mono">{collectorMatch.collector.names[0]}</h3>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-10">
+                                    <div className="p-10 bg-white/5 rounded-[3rem] border border-white/5 hover:border-red-500/30 transition-all group/stat">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] font-mono mb-4 italic group-hover/stat:text-red-500/70 transition-colors">CFPB_COMPLAINTS</p>
+                                        <div className="flex items-baseline gap-4">
+                                            <p className="text-6xl font-black text-white font-mono tracking-tighter italic">{collectorMatch.collector.violations.cfpbComplaints.toLocaleString()}</p>
+                                            <span className="text-red-500 text-sm font-black font-mono tracking-widest">+12%</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-10 bg-white/5 rounded-[3rem] border border-white/5 hover:border-blue-500/30 transition-all group/stat">
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] font-mono mb-4 italic group-hover/stat:text-blue-500/70 transition-colors">THREAT_LEVEL</p>
+                                        <p className={cn("text-6xl font-black font-mono tracking-tighter italic", 
+                                            collectorMatch.collector.riskLevel === 'high' ? 'text-rose-500' : 'text-amber-500'
+                                        )}>
+                                            {collectorMatch.collector.riskLevel.toUpperCase()}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 space-y-10">
+                                <div className="space-y-6">
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] font-mono italic">Behavioral_Patterns</p>
+                                    <div className="flex flex-wrap gap-4">
+                                        {collectorMatch.collector.knownIssues.map((issue, idx) => (
+                                            <span key={idx} className="px-8 py-3 bg-slate-900/60 border border-white/10 rounded-full text-[11px] text-slate-300 font-bold tracking-tight shadow-xl hover:border-blue-500/40 transition-all">
+                                                {issue}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="p-12 bg-blue-500/5 border border-blue-500/10 rounded-[3rem] relative overflow-hidden group/note">
+                                    <div className="absolute top-0 right-0 p-6 opacity-20 group-hover/note:opacity-40 transition-opacity">
+                                        <FileText size={48} className="text-blue-500" />
+                                    </div>
+                                    <p className="text-[12px] text-blue-400 font-black mb-4 italic tracking-[0.4em] uppercase font-mono">Forensic_Note</p>
+                                    <p className="text-sm text-slate-400 leading-relaxed font-mono italic">{collectorMatch.collector.notes}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* ACTION CENTER */}
             <div className="grid lg:grid-cols-12 gap-24">

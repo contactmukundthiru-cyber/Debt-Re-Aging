@@ -68,11 +68,12 @@ export function runComprehensiveAnalysis(
 
 /**
  * Runs a batch analysis across multiple accounts to detect cross-account patterns
- * such as duplicate reporting or chain-of-title shifts.
+ * such as duplicate reporting, date shifting, or balance contradictions.
  */
 export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[]): { 
     analyses: Record<string, ComprehensiveAnalysis>,
-    globalFlags: RuleFlag[] 
+    globalFlags: RuleFlag[],
+    consolidatedScore: number
 } {
     const analyses: Record<string, ComprehensiveAnalysis> = {};
     const globalFlags: RuleFlag[] = [];
@@ -83,7 +84,7 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
     });
 
     // 2. Duplicate Detection (DU1)
-    const groups: Record<string, string[]> = {};
+    const balanceGroups: Record<string, string[]> = {};
     accounts.forEach(acc => {
         const balance = (acc.fields.currentValue || '0').replace(/[$,]/g, '').trim();
         const creditor = (acc.fields.originalCreditor || acc.fields.furnisherOrCollector || '')
@@ -91,34 +92,90 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
         
         if (balance !== '0' && creditor.length > 3) {
             const key = `${balance}-${creditor}`;
-            if (!groups[key]) groups[key] = [];
-            groups[key].push(acc.id);
+            if (!balanceGroups[key]) balanceGroups[key] = [];
+            balanceGroups[key].push(acc.id);
         }
     });
 
-    for (const [key, ids] of Object.entries(groups)) {
+    for (const [key, ids] of Object.entries(balanceGroups)) {
         if (ids.length > 1) {
             const flag: RuleFlag = {
                 ruleId: 'DU1',
                 ruleName: 'Duplicate Account Reporting',
                 severity: 'high',
-                explanation: `Detected ${ids.length} accounts reporting the same balance for similar creditors. This artificially inflates your debt-to-income ratio.`,
-                whyItMatters: 'Credit bureaus are required by the FCRA to maintain "maximum possible accuracy." Duplicate entries violate this standard.',
-                suggestedEvidence: ['Highlighted credit report showing matching balances'],
-                fieldValues: { duplicateCount: ids.length },
+                explanation: `Detected ${ids.length} accounts reporting the same balance ($${key.split('-')[0]}) for similar creditors. This artificially suppresses your credit score by duplicating liability.`,
+                whyItMatters: 'Credit bureaus are required by the FCRA to maintain "maximum possible accuracy." Duplicate entries violate this standard and create a false perception of total debt.',
+                suggestedEvidence: ['Highlighted credit report showing matching balances with different account numbers or bureau tags'],
+                fieldValues: { duplicateCount: ids.length.toString() },
                 legalCitations: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
                 successProbability: 95
             };
             globalFlags.push(flag);
-            
-            // Add to individual account flags as well
             ids.forEach(id => {
                 if (analyses[id]) analyses[id].flags.push(flag);
             });
         }
     }
 
-    return { analyses, globalFlags };
+    // 3. Cross-Bureau Integrity Audit (CB1)
+    const acctNumGroups: Record<string, string[]> = {};
+    accounts.forEach(acc => {
+        const num = (acc.fields.accountNumber || '').replace(/[^a-z0-9]/g, '');
+        if (num.length > 5) {
+            if (!acctNumGroups[num]) acctNumGroups[num] = [];
+            acctNumGroups[num].push(acc.id);
+        }
+    });
+
+    for (const [num, ids] of Object.entries(acctNumGroups)) {
+        if (ids.length > 1) {
+            const accs = ids.map(id => accounts.find(a => a.id === id)).filter(Boolean);
+            
+            // Check for shifting dates
+            const dates = accs.map(a => a?.fields.dateOpened).filter(Boolean);
+            const uniqueDates = Array.from(new Set(dates));
+            
+            if (uniqueDates.length > 1) {
+                const flag: RuleFlag = {
+                    ruleId: 'CB1',
+                    ruleName: 'Cross-Bureau Date Conflict',
+                    severity: 'high',
+                    explanation: `Account ending in ...${num.slice(-4)} is reported with different open dates: ${uniqueDates.join(' vs ')}.`,
+                    whyItMatters: 'Data integrity is a core requirement of the FCRA. If bureaus cannot agree on the basic facts of an account (like its open date), the reporting is inherently unreliable.',
+                    suggestedEvidence: ['Comparison table of dates across bureaus'],
+                    legalCitations: ['FCRA_623_a1', 'FCRA_611'],
+                    successProbability: 85
+                };
+                globalFlags.push(flag);
+                ids.forEach(id => {
+                    if (analyses[id]) analyses[id].flags.push(flag);
+                });
+            }
+
+            // Check for balance contradictions
+            const balances = accs.map(a => (a?.fields.currentValue || '0').replace(/[$,]/g, '')).filter(b => b !== '0');
+            const uniqueBalances = Array.from(new Set(balances));
+            if (uniqueBalances.length > 1) {
+                const flag: RuleFlag = {
+                    ruleId: 'CB2',
+                    ruleName: 'Cross-Bureau Balance Mismatch',
+                    severity: 'medium',
+                    explanation: `The reported balance for account ending in ...${num.slice(-4)} varies significantly across bureaus.`,
+                    whyItMatters: 'Discrepancies in balance amounts indicate a failure in the furnisher\'s automated reporting systems.',
+                    legalCitations: ['FCRA_623_a1'],
+                    successProbability: 70
+                };
+                globalFlags.push(flag);
+                ids.forEach(id => {
+                    if (analyses[id]) analyses[id].flags.push(flag);
+                });
+            }
+        }
+    }
+
+    const consolidatedScore = Math.min(100, Object.values(analyses).reduce((sum, curr) => sum + curr.riskProfile.overallScore, 0) / (accounts.length || 1));
+
+    return { analyses, globalFlags, consolidatedScore };
 }
 
 function generateForensicSummary(flags: RuleFlag[], profile: RiskProfile): string {

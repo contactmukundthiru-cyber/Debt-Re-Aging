@@ -62,12 +62,14 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterSeverity, setFilterSeverity] = React.useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [showAnomalies, setShowAnomalies] = React.useState(false);
 
   const filteredFlags = flags.filter(flag => {
     const matchesSearch = flag.ruleName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       flag.explanation.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = filterSeverity === 'all' || flag.severity === filterSeverity;
-    return matchesSearch && matchesSeverity;
+    const matchesCategory = showAnomalies ? true : (flag as any).category === 'violation';
+    return matchesSearch && matchesSeverity && matchesCategory;
   });
 
   const highCount = flags.filter(f => f.severity === 'high').length;
@@ -284,6 +286,19 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                                  </div>
                                  <span className="text-[11px] font-black text-white font-mono">{flag.successProbability}%_PROBABILITY</span>
                               </div>
+                              <div className="flex items-center gap-5">
+                                 <div className="h-1.5 w-48 bg-black rounded-full overflow-hidden border border-white/5">
+                                   <motion.div 
+                                      initial={{ width: 0 }}
+                                      animate={{ width: `${flag.confidence || 100}%` }}
+                                      className={cn(
+                                          "h-full relative",
+                                          (flag.confidence || 100) > 80 ? 'bg-blue-500' : 'bg-slate-700'
+                                      )}
+                                   />
+                                 </div>
+                                 <span className="text-[9px] font-black text-slate-500 font-mono italic">CONFIDENCE: {flag.confidence || 100}%</span>
+                              </div>
                            </div>
                         </div>
                       </div>
@@ -322,6 +337,28 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                         className="overflow-hidden"
                       >
                         <div className="mt-16 pt-16 border-t border-white/5 space-y-16 relative z-10">
+                          {/* ACTIONABLE_PROTOCOL_CALLOUT */}
+                          {(flag as any).nextStep && (
+                            <div className="bg-gradient-to-r from-blue-600/20 via-indigo-600/10 to-transparent border border-blue-500/30 rounded-[3.5rem] p-10 flex items-center gap-10 shadow-2xl">
+                               <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-[0_0_30px_rgba(59,130,246,0.6)] shrink-0">
+                                  <Target size={32} className="animate-pulse" />
+                               </div>
+                               <div>
+                                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 font-mono mb-2">Institutional_Protocol::NEXT_STEP</p>
+                                  <p className="text-3xl font-black text-white italic tracking-tight uppercase font-mono italic">{(flag as any).nextStep}</p>
+                                </div>
+                            </div>
+                          )}
+
+                          {flag.confidence && flag.confidence < 80 && (
+                             <div className="bg-amber-600/10 border border-amber-500/20 rounded-[2.5rem] p-8 flex items-center gap-6">
+                               <AlertTriangle className="text-amber-500 shrink-0" size={24} />
+                               <p className="text-sm text-amber-500/80 font-black uppercase tracking-widest font-mono italic">
+                                 Confidence Alert: This finding requires manual verification of the {Object.keys(flag.fieldValues).join(', ')} data points.
+                               </p>
+                             </div>
+                          )}
+
                           <div className="grid xl:grid-cols-2 gap-16">
                             {/* FORENSIC_LOGIC_STREAM */}
                             <div className="space-y-10">

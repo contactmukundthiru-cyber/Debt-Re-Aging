@@ -34,6 +34,7 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     whyItMatters: 'A debt cannot become delinquent before the account even existed. This is a clear sign of data manipulation.',
     suggestedEvidence: ['Original account agreement', 'First statement showing account open date'],
     legalCitations: ['FCRA_623_a1', 'FCRA_611'],
+    nextStep: 'Demand immediate deletion from the bureau citing "Physical Impossibility".',
     discoveryQuestions: [
       'Do you have the original welcome letter or first statement for this account?',
       'Was this account a result of identity theft (someone opening it in your name)?'
@@ -51,6 +52,7 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     whyItMatters: 'The 7-year reporting period is calculated from the DOFD, not from when a collector purchased the debt.',
     suggestedEvidence: ['Prior credit reports showing original DOFD', 'Original creditor records'],
     legalCitations: ['FCRA_605_a', 'FCRA_605_c'],
+    nextStep: 'Calculate the 7yr+180day limit from the original DOFD and demand removal.',
     discoveryQuestions: [
       'When was the very first time you missed a payment and never caught up?',
       'Do you have an old credit report from 2-3 years ago?'
@@ -82,6 +84,7 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     whyItMatters: 'This is the classic "re-aging" violation - extending reporting beyond the legal limit.',
     suggestedEvidence: ['Prior credit reports', 'Original creditor DOFD verification'],
     legalCitations: ['FCRA_605_a', 'FCRA_605_c'],
+    nextStep: 'This account is past the legal reporting limit. File a CFPB complaint immediately.',
     discoveryQuestions: [
       'Has this account fallen off your credit report and then reappeared later?',
       'Did you make any partial payments recently that might have triggered a date refresh?'
@@ -338,22 +341,28 @@ const STATE_SOL: Record<string, StateSolData> = {
 function parseDate(dateStr: string | undefined): Date | null {
   if (!dateStr) return null;
   
-  // OCR Correction: 'O'->'0', 'I'->'1', etc.
+  // OCR Correction: 'O'->'0', 'I'->'1', 'S'->'5', 'B'->'8'
   let cleaned = dateStr.trim().toLowerCase()
     .replace(/[ol]/g, (m) => (m === 'o' ? '0' : '1'))
-    .replace(/[|i]/g, '1');
+    .replace(/[|i]/g, '1')
+    .replace(/s/g, '5')
+    .replace(/b/g, '8')
+    .replace(/[^a-z0-9\/ \-]/g, '');
 
-  // 1. ISO Format (YYYY-MM-DD or YYYY-MM)
-  const isoMatch = cleaned.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
-  if (isoMatch) {
-    const year = parseInt(isoMatch[1]);
-    const month = parseInt(isoMatch[2]) - 1;
-    const day = isoMatch[3] ? parseInt(isoMatch[3]) : 1;
+  if (cleaned.length < 4) return null;
+
+  // 1. ISO Format (YYYY-MM-DD or YYYY-MM) - Handle spaces after OCR
+  const isoSearch = cleaned.replace(/\s/g, '').match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+  if (isoSearch) {
+    const year = parseInt(isoSearch[1]);
+    const month = parseInt(isoSearch[2]) - 1;
+    const day = isoSearch[3] ? parseInt(isoSearch[3]) : 1;
     return new Date(year, month, day);
   }
 
-  // 2. US Slashing (MM/DD/YYYY or MM-DD-YYYY)
-  const usMatch = cleaned.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  // 2. US Slashing (MM/DD/YYYY or MM-DD-YYYY or M M/ D D/ YYYY)
+  const usCleaned = cleaned.replace(/\s/g, '');
+  const usMatch = usCleaned.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
   if (usMatch) {
     let year = parseInt(usMatch[3]);
     if (year < 100) year += year > 50 ? 1900 : 2000;
@@ -408,7 +417,8 @@ function yearsBetween(date1: Date, date2: Date): number {
 function createFlag(
   ruleId: string,
   explanation: string,
-  fieldValues: Record<string, any>
+  fieldValues: Record<string, any>,
+  confidence: number = 100
 ): RuleFlag {
   const rule = RULE_DEFINITIONS[ruleId] || {
     name: 'Unknown Rule',
@@ -418,10 +428,25 @@ function createFlag(
     legalCitations: []
   };
 
+  const severity = rule.severity || 'medium';
+
   return {
     ruleId,
     ruleName: rule.name,
-    severity: rule.severity,
+    severity: severity as any,
+    category: severity === 'low' ? 'anomaly' : 'violation',
+    confidence,
+    explanation,
+    whyItMatters: rule.whyItMatters,
+    suggestedEvidence: rule.suggestedEvidence,
+    fieldValues,
+    legalCitations: rule.legalCitations,
+    nextStep: (rule as any).nextStep,
+    successProbability: rule.successProbability || 50,
+    discoveryQuestions: rule.discoveryQuestions || [],
+    bureauTactics: rule.bureauTactics || {}
+  };
+}
     explanation,
     whyItMatters: rule.whyItMatters,
     suggestedEvidence: rule.suggestedEvidence,
@@ -449,11 +474,14 @@ export function runRules(fields: CreditFields): RuleFlag[] {
   const history = (fields.paymentHistory || '').toUpperCase();
 
   // B1: DOFD before account opening
-  if (dofd && dateOpened && dofd < dateOpened) {
-    flags.push(createFlag('B1',
-      `The Date of First Delinquency (${fields.dofd}) is BEFORE the account was opened (${fields.dateOpened}). This is physically impossible and indicates data manipulation.`,
-      { dofd: fields.dofd, dateOpened: fields.dateOpened }
-    ));
+  if (dofd && dateOpened) {
+    if (dofd < dateOpened) {
+      flags.push(createFlag('B1',
+        `The Date of First Delinquency (${fields.dofd}) is BEFORE the account was opened (${fields.dateOpened}). This is physically impossible and indicates data manipulation.`,
+        { dofd: fields.dofd, dateOpened: fields.dateOpened },
+        98 // High confidence because both dates are present and contradictory
+      ));
+    }
   }
 
   // B2: Impossible 7-year timeline
@@ -462,9 +490,13 @@ export function runRules(fields: CreditFields): RuleFlag[] {
     if (yearsToRemoval > 7.5) {
       flags.push(createFlag('B2',
         `The estimated removal date (${fields.estimatedRemovalDate}) is ${yearsToRemoval.toFixed(1)} years after the DOFD (${fields.dofd}). The maximum allowed is 7 years plus 180 days.`,
-        { dofd: fields.dofd, estimatedRemovalDate: fields.estimatedRemovalDate, yearsCalculated: yearsToRemoval.toFixed(1) }
+        { dofd: fields.dofd, estimatedRemovalDate: fields.estimatedRemovalDate, yearsCalculated: yearsToRemoval.toFixed(1) },
+        95
       ));
     }
+  } else if (!dofd && removalDate) {
+      // If we have removal date but no DOFD, we can't be sure, but it's an anomaly if the account is old
+      // We don't flag here to avoid user confusion, M1 handles missing DOFD
   }
 
   // B3: DOFD after charge-off
@@ -512,6 +544,38 @@ export function runRules(fields: CreditFields): RuleFlag[] {
         { value: fields.currentValue }
       ));
     }
+
+    const opened = parseDate(fields.dateOpened);
+    if (opened) {
+      const daysSinceOpened = (today.getTime() - opened.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceOpened < 365) {
+        flags.push(createFlag('H1',
+          `Medical debt reported within 365 days of service (${daysSinceOpened.toFixed(0)} days). Federal rules prohibit reporting medical debt less than a year old.`,
+          { dateOpened: fields.dateOpened, days: daysSinceOpened.toFixed(0) }
+        ));
+      }
+    }
+  }
+
+  // R1: Reporting After Bankruptcy Discharged
+  if (status.includes('bankruptcy') || status.includes('discharged')) {
+    const val = parseFloat((fields.currentValue || '0').replace(/[$,]/g, ''));
+    if (val > 0) {
+      flags.push(createFlag('R1',
+        `Account marked as "${fields.accountStatus}" but shows a persistent value of ${val.toFixed(2)}. Discharged debts must show 0.00 value.`,
+        { status: fields.accountStatus, value: fields.currentValue }
+      ));
+    }
+  }
+
+  // C1: Disputed Status Not Shown
+  const remarks = (fields.remarks || '').toLowerCase();
+  const hasDisputeMarker = remarks.includes('dispute') || remarks.includes('subscriber disagrees') || remarks.includes('fcra');
+  // This rule is harder to automate without knowing if the user DID dispute, 
+  // but we can flag it as a "Verification Point"
+  if (!hasDisputeMarker && (status.includes('collect') || status.includes('delinquent'))) {
+    // We only add this if we have some evidence of a prior dispute, 
+    // for now let's keep it as an "Audit Note" or leave it for manual trigger
   }
 
   // M2: Transferred with value
@@ -598,17 +662,28 @@ export function runRules(fields: CreditFields): RuleFlag[] {
     }
   }
 
-  // S1: Statute of Limitations check
+  // S1: Statute of Limitations check with granular account type matching
   if (fields.stateCode && lastPayment) {
     const sol = STATE_SOL[fields.stateCode.toUpperCase()];
     if (sol) {
+      let limit = sol.writtenContracts; // Default
+      let typeLabel = 'written contract';
+
+      if (accountType.includes('revolving') || accountType.includes('card')) {
+        limit = sol.openAccounts;
+        typeLabel = 'open/revolving account';
+      } else if (accountType.includes('installment') || accountType.includes('loan')) {
+        limit = sol.promissoryNotes || sol.writtenContracts;
+        typeLabel = 'promissory note/contract';
+      }
+
       const solExpiry = new Date(lastPayment);
-      solExpiry.setFullYear(solExpiry.getFullYear() + sol.writtenContracts);
+      solExpiry.setFullYear(solExpiry.getFullYear() + limit);
 
       if (today > solExpiry) {
         flags.push(createFlag('S1',
-          `This debt may be beyond the Statute of Limitations for ${fields.stateCode} (${sol.writtenContracts} years). The SOL likely expired on ${solExpiry.toISOString().split('T')[0]}.`,
-          { stateCode: fields.stateCode, dateLastPayment: fields.dateLastPayment, solYears: sol.writtenContracts }
+          `Forensic Audit: This debt exceeds the ${limit}-year ${fields.stateCode} SOL for ${typeLabel}s. The legal collection window likely expired on ${solExpiry.toISOString().split('T')[0]}.`,
+          { stateCode: fields.stateCode, dateLastPayment: fields.dateLastPayment, solYears: limit, accountType: fields.accountType }
         ));
       }
     }
@@ -623,6 +698,33 @@ export function runRules(fields: CreditFields): RuleFlag[] {
       flags.push(createFlag('S2',
         `This judgment appears to be older than 7 years from the filing date and should be removed from your credit report.`,
         { accountType: fields.accountType, dofd: fields.dofd }
+      ));
+    }
+  }
+
+  // K6: Removal Date Logic (Direct Re-aging Detection)
+  const removalDate = parseDate(fields.estimatedRemovalDate);
+  if (removalDate && dofd) {
+    const maxRemoval = new Date(dofd);
+    // 7 years + 180 days per FCRA 605(c)
+    maxRemoval.setMonth(maxRemoval.getMonth() + (7 * 12) + 7); 
+
+    if (removalDate > maxRemoval) {
+      flags.push(createFlag('K6',
+        `Forensic marker detected: The removal date (${fields.estimatedRemovalDate}) is beyond the statutory 7-year+180-day limit based on the reported DOFD (${fields.dofd}).`,
+        { estimatedRemovalDate: fields.estimatedRemovalDate, dofd: fields.dofd }
+      ));
+    }
+  }
+
+  // Z1: Zombie Debt / Account Resuscitation logic
+  const dateOpened = parseDate(fields.dateOpened);
+  if (dateOpened && dofd && (accountType.toLowerCase().includes('collect') || accountType.toLowerCase().includes('factor'))) {
+    const yearsDiff = (dateOpened.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365);
+    if (yearsDiff > 3) {
+      flags.push(createFlag('Z1',
+        `Suspected "Zombie Debt" pattern: This collection account was activated ${yearsDiff.toFixed(1)} years after the original delinquency. This is often proof of debt refreshing.`,
+        { dateOpened: fields.dateOpened, dofd: fields.dofd }
       ));
     }
   }

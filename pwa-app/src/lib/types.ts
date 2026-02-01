@@ -21,6 +21,7 @@ export interface RuleDefinition {
     whyItMatters: string;
     suggestedEvidence: string[];
     legalCitations: string[];
+    nextStep?: string; // Clear instruction for user
     discoveryQuestions?: string[];
     bureauTactics?: BureauTactics;
 }
@@ -29,12 +30,15 @@ export interface RuleFlag {
     ruleId: string;
     ruleName: string;
     severity: 'low' | 'medium' | 'high' | 'critical';
+    category: 'violation' | 'anomaly';
+    confidence: number; // 0-100
     explanation: string;
 
     whyItMatters: string;
     suggestedEvidence: string[];
     fieldValues: Record<string, FieldValue>;
     legalCitations: string[];
+    nextStep?: string;
     successProbability: number; // 0-100%
     discoveryQuestions?: string[]; // Questions to ask the consumer to find more proof
     bureauTactics?: BureauTactics; // Specific advice for each bureau

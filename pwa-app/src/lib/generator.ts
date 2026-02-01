@@ -76,9 +76,31 @@ export function generateForensicReportBlob(
     headStyles: { fillColor: primaryColor }
   });
 
+  // Collector Intel Section
+  const collectorMatch = (discoveryAnswers as any).collectorIntel;
+  if (collectorMatch) {
+    const nextSectionY = doc.lastAutoTable.finalY + 15;
+    doc.text('3. ENTITY INTELLIGENCE: COLLECTOR PROFILE', 15, nextSectionY);
+    
+    doc.autoTable({
+      startY: nextSectionY + 5,
+      head: [['Attribute', 'Intelligence Data']],
+      body: [
+        ['Identified Entity', collectorMatch.collector.names[0]],
+        ['Entity Type', collectorMatch.collector.type.replace('_', ' ').toUpperCase()],
+        ['CFPB Complaint Volume', collectorMatch.collector.violations.cfpbComplaints.toLocaleString()],
+        ['Risk Assessment', collectorMatch.collector.riskLevel.toUpperCase()],
+        ['Known Patterns', collectorMatch.collector.knownIssues.slice(0, 3).join(', ')],
+        ['Institutional Note', collectorMatch.collector.notes],
+      ],
+      theme: 'striped',
+      headStyles: { fillColor: [153, 27, 27] } // dark red
+    });
+  }
+
   // Risk & Findings Section
   const nextY = doc.lastAutoTable.finalY + 15;
-  doc.text('3. FORENSIC FINDINGS & RISK VECTORS', 15, nextY);
+  doc.text(collectorMatch ? '4. FORENSIC FINDINGS & RISK VECTORS' : '3. FORENSIC FINDINGS & RISK VECTORS', 15, nextY);
 
   doc.autoTable({
     startY: nextY + 5,
@@ -104,28 +126,47 @@ export function generateForensicReportBlob(
     f.ruleName,
     f.ruleId,
     f.severity.toUpperCase(),
-    f.explanation
+    f.explanation,
+    f.legalCitations.slice(0, 2).join('\n')
   ]);
 
   doc.autoTable({
     startY: 25,
-    head: [['#', 'Violation Type', 'ID', 'Severity', 'Forensic Explanation']],
+    head: [['#', 'Violation Type', 'ID', 'Svr', 'Forensic Explanation', 'Statutory Basis']],
     body: violationBody,
     styles: { fontSize: 8 },
     headStyles: { fillColor: [190, 18, 60] }, // rose-700
-    columnStyles: { 4: { cellWidth: 80 } }
+    columnStyles: { 
+      4: { cellWidth: 70 },
+      5: { cellWidth: 30 }
+    }
   });
 
-  // Legal Citations
-  if (flags.some(f => f.legalCitations.length > 0)) {
+  // State-Specific Compliance
+  if (fields.stateCode) {
     doc.setFontSize(14);
-    doc.text('5. STATUTORY & CASE LAW AUTHORITY', 15, doc.lastAutoTable.finalY + 15);
+    doc.text('5. STATE COMPLIANCE AUDIT', 15, doc.lastAutoTable.finalY + 15);
     
-    const citations = Array.from(new Set(flags.flatMap(f => f.legalCitations)));
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 20,
-      head: [['Statutory Citations']],
-      body: citations.map(c => [c]),
+      head: [['State', 'SOL Status', 'Interest Threshold', 'Consumer Protection']],
+      body: [
+        [
+          fields.stateCode.toUpperCase(), 
+          flags.some(f => f.ruleId === 'S1') ? 'EXPIRED' : 'ACTIVE',
+          flags.some(f => f.ruleId === 'K7') ? 'EXCEEDED' : 'COMPLIANT',
+          'ENABLED'
+        ]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [30, 58, 138] } // blue-900
+    });
+  }
+
+  // Legal Citations
+  const citationStart = doc.lastAutoTable.finalY + 15;
+  doc.setFontSize(14);
+  doc.text('6. STATUTORY & CASE LAW AUTHORITY', 15, citationStart);
       theme: 'striped'
     });
   }
@@ -285,12 +326,11 @@ ${bureauName}
 [Bureau Address - See Below]
 
 RE: FORMAL DISPUTE UNDER FCRA § 611
-Account: ${creditorName}
-${fields.currentValue ? `Stated Value: ${fields.currentValue}` : ''}
+CERTIFICATE OF AUDIT: ZENITH-V5-${Math.random().toString(36).substring(7).toUpperCase()}
 
 Dear Sir/Madam:
 
-I am writing to formally dispute the accuracy of the above-referenced account pursuant to the Fair Credit Reporting Act, 15 U.S.C. § 1681i.
+I am writing to formally dispute the accuracy of the above-referenced account under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681i. A forensic audit using the Zenith V5 engine has identified systemic reporting failures on this trade line.
 
 Upon careful review of my credit report, I have identified the following inaccuracies and violations:
 ${disputeReasons}

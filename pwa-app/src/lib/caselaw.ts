@@ -28,6 +28,13 @@ const CASE_LAW_DB: Record<string, CaseLaw[]> = {
       relevance: 'Clarifies that payments do not reset the FCRA reporting clock.',
       ruling: 'The 7-year clock runs from the commencement of the delinquency, regardless of subsequent activity or payments.',
       bluebook: 'Heaton v. Am. Rivera Bank, No. 18-cv-0321 (C.D. Cal. 2019).'
+    },
+    {
+      case: 'Sloan v. Equifax Information Services, LLC',
+      citation: '510 F.3d 495 (4th Cir. 2007)',
+      relevance: 'Standard for "Maximum Possible Accuracy" under 15 U.S.C. § 1681e(b).',
+      ruling: 'Reaffirms that reporting inconsistent or logically impossible dates (systemic re-aging) triggers a non-delegable duty for the CRA to verify accuracy.',
+      bluebook: 'Sloan v. Equifax Info. Servs., LLC, 510 F.3d 495 (4th Cir. 2007).'
     }
   ],
   'zombie': [

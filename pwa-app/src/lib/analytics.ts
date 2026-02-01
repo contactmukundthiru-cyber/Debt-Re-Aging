@@ -154,12 +154,17 @@ export function buildTimeline(fields: CreditFields, flags: RuleFlag[], rawText?:
   const removal = parseDate(fields.estimatedRemovalDate);
 
   if (dateOpened) {
+    const isCollection = (fields.accountType || '').toLowerCase().includes('collection') || 
+                       (fields.accountStatus || '').toLowerCase().includes('collection');
+    
     events.push({
       date: dateOpened,
-      label: 'Account Opened',
+      label: isCollection ? 'Collector Assignment' : 'Account Opened',
       type: 'account',
-      description: `Account opened with ${fields.originalCreditor || 'creditor'}`,
-      flagged: flags.some(f => f.ruleId === 'E1' && f.fieldValues.field === 'dateOpened'),
+      description: isCollection 
+        ? `Account assigned to ${fields.furnisherOrCollector || 'collector'} (from ${fields.originalCreditor || 'original creditor'})`
+        : `Account opened with ${fields.originalCreditor || 'creditor'}`,
+      flagged: flags.some(f => (f.ruleId === 'E1' || f.ruleId === 'Z1') && f.fieldValues.field === 'dateOpened'),
       evidenceSnippets: flags
         .filter(f => f.fieldValues.field === 'dateOpened')
         .map(f => f.explanation)
@@ -251,7 +256,7 @@ export function calculateScoreBreakdown(flags: RuleFlag[], fields: CreditFields)
   const breakdown: ScoreBreakdown[] = [];
 
   // Timeline Integrity
-  const timelineViolations = flags.filter(f => ['B1', 'B2', 'B3', 'E1'].includes(f.ruleId));
+  const timelineViolations = flags.filter(f => ['B1', 'B2', 'B3', 'E1', 'K6', 'Z1', 'R2'].includes(f.ruleId));
   const timelineScore = Math.max(0, 25 - (timelineViolations.length * 8));
   breakdown.push({
     category: 'Timeline Integrity',
@@ -263,7 +268,7 @@ export function calculateScoreBreakdown(flags: RuleFlag[], fields: CreditFields)
   });
 
   // Data Accuracy
-  const dataViolations = flags.filter(f => ['D1', 'L1', 'M1', 'M2'].includes(f.ruleId));
+  const dataViolations = flags.filter(f => ['D1', 'L1', 'M1', 'M2', 'M3', 'A1', 'C2'].includes(f.ruleId));
   const dataScore = Math.max(0, 25 - (dataViolations.length * 6));
   breakdown.push({
     category: 'Data Accuracy',
@@ -275,7 +280,7 @@ export function calculateScoreBreakdown(flags: RuleFlag[], fields: CreditFields)
   });
 
   // Financial Compliance
-  const financialViolations = flags.filter(f => ['K1', 'K6', 'K7'].includes(f.ruleId));
+  const financialViolations = flags.filter(f => ['K1', 'K7', 'DU1', 'CB1', 'CB2'].includes(f.ruleId));
   const financialScore = Math.max(0, 25 - (financialViolations.length * 7));
   breakdown.push({
     category: 'Financial Compliance',
@@ -287,7 +292,7 @@ export function calculateScoreBreakdown(flags: RuleFlag[], fields: CreditFields)
   });
 
   // Regulatory Compliance
-  const regulatoryViolations = flags.filter(f => ['H1', 'H2', 'H3', 'S1'].includes(f.ruleId));
+  const regulatoryViolations = flags.filter(f => ['H1', 'H2', 'H3', 'S1', 'S2', 'R1', 'C1'].includes(f.ruleId));
   const regulatoryScore = Math.max(0, 25 - (regulatoryViolations.length * 5));
   breakdown.push({
     category: 'Regulatory Compliance',

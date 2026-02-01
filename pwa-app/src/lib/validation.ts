@@ -48,10 +48,19 @@ export const normalizeDate = (dateStr: string | undefined): string | undefined =
 
 /**
  * Normalizes a currency or numeric string to a clean numeric string (1234.56)
+ * Includes basic OCR error correction for common character swaps.
  */
 export const normalizeNumeric = (value: string | undefined): string | undefined => {
   if (!value) return undefined;
-  const cleaned = value.replace(/[$,\s]/g, '');
+  
+  // Basic OCR correction: O->0, S->5, B->8, I/L->1
+  let cleaned = value.toUpperCase()
+    .replace(/O/g, '0')
+    .replace(/S/g, '5')
+    .replace(/B/g, '8')
+    .replace(/[IL]/g, '1')
+    .replace(/[$,\s]/g, '');
+    
   if (Number.isNaN(Number(cleaned))) return value;
   return cleaned;
 };

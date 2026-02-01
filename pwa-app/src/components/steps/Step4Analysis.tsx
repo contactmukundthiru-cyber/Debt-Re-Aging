@@ -25,6 +25,7 @@ import { exportComparisonDossierPdf, buildComparisonDossierPdfBlob } from '../..
 import { GuideOverlay } from '../GuideOverlay';
 import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { CaseLaw } from '../../lib/caselaw';
+import { CollectorMatch } from '../../lib/collector-database';
 import { TimelineEvent, PatternInsight } from '../../lib/analytics';
 import { DeltaResult } from '../../lib/delta';
 import {
@@ -183,6 +184,7 @@ interface Step4AnalysisProps {
   seriesOptions?: SeriesSnapshotOption[];
   onCompareSnapshots?: (olderId: string, newerId: string) => void;
   relevantCaseLaw: CaseLaw[];
+  collectorMatch?: CollectorMatch | null;
   analytics: Analytics | null;
   tabsRef: React.RefObject<HTMLDivElement>;
   translate: (key: string) => string;
@@ -987,7 +989,7 @@ const Step4Analysis: React.FC<Step4AnalysisProps> = ({
 
         {activeTab === 'institutional' && (
           <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000">
-            <InstitutionalTab caseId="current-case" />
+            <InstitutionalTab caseId="current-case" collectorMatch={collectorMatch} />
           </div>
         )}
       </div>
