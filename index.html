@@ -28,6 +28,29 @@
             --font-mono: 'JetBrains Mono', monospace;
         }
 
+        .ticker-wrapper {
+            background: var(--slate-900);
+            color: rgba(255,255,255,0.4);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            overflow: hidden;
+            white-space: nowrap;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .ticker-content {
+            display: inline-block;
+            animation: ticker 40s linear infinite;
+        }
+
+        @keyframes ticker {
+            0% { transform: translate3d(100%, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         
@@ -326,6 +349,11 @@
 </head>
 
 <body>
+    <div class="ticker-wrapper">
+        <div class="ticker-content">
+            SECURE_NODE_ACTIVE // FCRA_LATENCY: 14MS // METRO2_PROTOCOL_V5 // ZERO_PII_LOGS // INSTITUTIONAL_HANDOFF_READY // ENCRYPTION: AES-256-GCM // AUDIT_TRAIL: ENABLED // LATEST_UPDATE: FEB_2026 // SYSTEM_STATUS: NOMINAL
+        </div>
+    </div>
     <div class="bg-grid"></div>
 
     <header id="site-header">

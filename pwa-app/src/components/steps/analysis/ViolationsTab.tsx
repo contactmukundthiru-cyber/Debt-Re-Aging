@@ -35,6 +35,26 @@ interface ViolationsTabProps {
   translate: (key: string) => string;
 }
 
+const getFullStatuteName = (cite: string) => {
+  const mapping: Record<string, { title: string; desc: string }> = {
+    'FCRA_605_a': { title: '15 U.S.C. § 1681c(a)', desc: 'Obsolescence - Prohibits reporting information older than 7 years from DOFD.' },
+    'FCRA_605_c': { title: '15 U.S.C. § 1681c(c)', desc: 'Commencement of Period - Strictly defines when the 7-year clock begins.' },
+    'FCRA_623_a1': { title: '15 U.S.C. § 1681s-2(a)(1)', desc: 'Accuracy - Prohibits reporting data known or suspected to be inaccurate.' },
+    'FCRA_623_a2': { title: '15 U.S.C. § 1681s-2(a)(2)', desc: 'Duty to Correct - Requires updates when furnishers determine data is inaccurate.' },
+    'FCRA_623_a5': { title: '15 U.S.C. § 1681s-2(a)(5)', desc: 'DOFD Reporting - Mandatory reporting of original delinquency dates.' },
+    'FCRA_611': { title: '15 U.S.C. § 1681i', desc: 'Reinvestigation - Mandates reasonable investigation of consumer disputes.' },
+    'FCRA_607_b': { title: '15 U.S.C. § 1681e(b)', desc: 'Maximum Accuracy - Agencies must follow procedures for absolute integrity.' },
+    'FDCPA_807': { title: '15 U.S.C. § 1692e', desc: 'Deceptive Means - Prohibits false representations in debt collection.' },
+    'FDCPA_807_2': { title: '15 U.S.C. § 1692e(2)', desc: 'False Representation - Misstating the character, amount, or legal status of debt.' },
+    'FDCPA_809': { title: '15 U.S.C. § 1692g', desc: 'Validation - Mandates verification of debt upon consumer request.' },
+    'CFPB_MEDICAL_RULE': { title: '12 CFR § 1022', desc: 'Medical Protections - Special limits on reporting health-related debt.' },
+    'METRO2_GUIDE': { title: 'CDIA Metro 2 Standard', desc: 'Standardized formatting protocol for credit data transmission.' },
+    '11USC524': { title: '11 U.S.C. § 524', desc: 'Bankruptcy Discharge - Prohibits collection of discharged liabilities.' }
+  };
+
+  return mapping[cite] || { title: cite.replace(/_/g, ' '), desc: 'Federal consumer protection statute.' };
+};
+
 const ViolationsTab: React.FC<ViolationsTabProps> = ({
   flags,
   expandedCard,
@@ -49,6 +69,18 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
     const matchesSeverity = filterSeverity === 'all' || flag.severity === filterSeverity;
     return matchesSearch && matchesSeverity;
   });
+
+  const highCount = flags.filter(f => f.severity === 'high').length;
+  const medCount = flags.filter(f => f.severity === 'medium').length;
+  const lowCount = flags.filter(f => f.severity === 'low').length;
+
+  const SeveritySpectrum = () => (
+    <div className="flex w-full h-4 rounded-full overflow-hidden bg-slate-900 border border-white/5 shadow-inner mt-10">
+      <motion.div initial={{ width: 0 }} animate={{ width: `${(highCount / flags.length) * 100}%` }} className="bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.4)]" />
+      <motion.div initial={{ width: 0 }} animate={{ width: `${(medCount / flags.length) * 100}%` }} className="bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]" />
+      <motion.div initial={{ width: 0 }} animate={{ width: `${(lowCount / flags.length) * 100}%` }} className="bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]" />
+    </div>
+  );
 
   if (flags.length === 0) {
     return (
@@ -95,6 +127,13 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                <p className="text-2xl text-slate-400 font-medium leading-relaxed max-w-4xl italic">
                  Mapping detected data variances against the statutory framework. Every entry here represents a <span className="text-white">LITIGATION_VECTOR</span> or regulatory breach identified within the legacy record.
                </p>
+               
+               <SeveritySpectrum />
+               <div className="flex justify-between mt-4">
+                  <span className="text-[10px] font-mono text-rose-500 uppercase tracking-widest font-bold">{highCount} Critical</span>
+                  <span className="text-[10px] font-mono text-amber-500 uppercase tracking-widest font-bold">{medCount} Warning</span>
+                  <span className="text-[10px] font-mono text-blue-500 uppercase tracking-widest font-bold">{lowCount} Minor</span>
+               </div>
             </div>
           </div>
 
@@ -308,12 +347,23 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                               {flag.legalCitations.length > 0 && (
                                 <div className="pt-8 space-y-6">
                                   <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 font-mono italic">Statutory_Framework_Manifest</p>
-                                  <div className="flex flex-wrap gap-4">
-                                    {flag.legalCitations.map((cite, j) => (
-                                      <span key={j} className="text-[12px] font-black px-8 py-4 bg-slate-900 text-cyan-400 rounded-2xl border border-cyan-500/20 shadow-4xl font-mono uppercase tracking-[0.2em] italic">
-                                        {cite}
-                                      </span>
-                                    ))}
+                                  <div className="grid gap-4">
+                                    {flag.legalCitations.map((cite, j) => {
+                                      const statute = getFullStatuteName(cite);
+                                      return (
+                                        <div key={j} className="p-8 rounded-[2.5rem] bg-slate-900 border border-cyan-500/20 shadow-4xl group/statute hover:bg-slate-800 transition-all">
+                                          <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[14px] font-black text-cyan-400 font-mono uppercase tracking-[0.2em] italic">
+                                              {statute.title}
+                                            </span>
+                                            <span className="text-[9px] font-mono text-slate-600 uppercase font-black">{cite}</span>
+                                          </div>
+                                          <p className="text-sm text-slate-500 italic leading-relaxed group-hover/statute:text-slate-300 transition-colors">
+                                            {statute.desc}
+                                          </p>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
                                 </div>
                               )}

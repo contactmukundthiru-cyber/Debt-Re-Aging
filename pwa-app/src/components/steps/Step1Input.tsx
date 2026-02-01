@@ -75,10 +75,13 @@ export const Step1Input: React.FC<Step1InputProps> = ({
         <div className="relative z-10 text-center max-w-2xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-emerald-400 font-mono">Forensic Analysis Engine</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-emerald-400 font-mono">Forensic Analysis Engine // Institutional V5.0</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight relative">
             Analyze Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Credit Report</span>
+            <div className="absolute -top-6 -right-10 px-3 py-1 bg-slate-800 rounded-lg border border-white/5 shadow-2xl rotate-6 text-[8px] font-mono text-slate-400 uppercase tracking-widest hidden md:block">
+              Institutional_Access
+            </div>
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
             Upload any format — PDF, image, or text. Our forensic engine detects FCRA/FDCPA violations and illegal debt re-aging with institutional-grade precision.

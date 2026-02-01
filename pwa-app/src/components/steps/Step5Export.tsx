@@ -116,10 +116,13 @@ const Step5Export: React.FC<Step5ExportProps> = ({
         <div className="relative z-10 text-center max-w-2xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-purple-400 font-mono">Document Generation Center</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-purple-400 font-mono">Document Generation Center // Certified V5.0</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 relative">
             Export <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Legal Documents</span>
+            <div className="absolute -top-10 -right-20 opacity-[0.03] select-none pointer-events-none rotate-12 scale-150">
+              <svg width="200" height="200" viewBox="0 0 200 200" fill="currentColor"><path d="M100 0L129 67H198L142 108L171 175L100 133L29 175L58 108L2 67H71L100 0Z" /></svg>
+            </div>
           </h1>
           <p className="text-slate-400 text-lg">
             Generate dispute letters, CFPB complaints, evidence packages, and attorney referral bundles with proper legal citations.

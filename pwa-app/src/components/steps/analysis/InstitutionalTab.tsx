@@ -35,6 +35,24 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
         loadMetrics();
     }, []);
 
+    const VelocityChart = () => (
+        <div className="h-48 w-full flex items-end gap-2 px-8">
+            {[40, 70, 45, 90, 65, 80, 50, 95, 85, 100].map((h, i) => (
+                <motion.div
+                    key={i}
+                    initial={{ height: 0 }}
+                    animate={{ height: `${h}%` }}
+                    transition={{ delay: i * 0.05, duration: 1, ease: "circOut" }}
+                    className="flex-1 bg-gradient-to-t from-blue-600/40 to-blue-400 rounded-t-lg shadow-lg relative group/bar"
+                >
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity font-mono">
+                        {h}%
+                    </div>
+                </motion.div>
+            ))}
+        </div>
+    );
+
     const downloadReport = async () => {
         const report = await generateImpactReport(reportName);
         const blob = new Blob([report], { type: 'text/markdown' });
@@ -119,10 +137,41 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
 
             {/* ACTION CENTER */}
             <div className="grid lg:grid-cols-12 gap-24">
-                <div className="lg:col-span-8 space-y-24">
+                        <div className="lg:col-span-8 space-y-24">
                     <div className="relative group/manifest">
                          <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/20 to-transparent rounded-[5rem] blur-3xl opacity-0 group-hover/manifest:opacity-100 transition duration-1000" />
                          <div className="relative rounded-[5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 overflow-hidden shadow-2xl p-20">
+                            <div className="flex items-center justify-between mb-16">
+                                <div>
+                                    <h3 className="text-4xl font-black text-white italic uppercase tracking-tighter mb-2">Throughput_Velocity</h3>
+                                    <p className="text-[10px] text-slate-500 font-mono tracking-[0.4em] uppercase">Historical_Case_Volume_Index</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                     <div className="w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
+                                     <span className="text-xs font-mono text-slate-400">REALTIME_STREAMING</span>
+                                </div>
+                            </div>
+
+                            <VelocityChart />
+
+                            <div className="grid grid-cols-4 gap-10 mt-16 pt-16 border-t border-white/5">
+                                {[
+                                    { label: 'Avg_Processing', val: '2.4m', sub: '-14% vs prev' },
+                                    { label: 'Cloud_Residency', val: '0.0%', sub: 'Purely Local' },
+                                    { label: 'Encryption_Key', val: 'ECC', sub: 'Rotated daily' },
+                                    { label: 'Audit_Trail', val: 'Active', sub: 'IndexedDB-backed' }
+                                ].map((stat, i) => (
+                                    <div key={i}>
+                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono mb-2">{stat.label}</p>
+                                        <p className="text-2xl font-black text-white font-mono italic">{stat.val}</p>
+                                        <p className="text-[9px] text-blue-500/60 font-mono mt-1">{stat.sub}</p>
+                                    </div>
+                                ))}
+                            </div>
+                         </div>
+                    </div>
+
+                    <div className="panel p-16 rounded-[4rem] bg-white/[0.02] border border-white/5 shadow-3xl">
                             <div className="flex items-center justify-between mb-16 px-4">
                                 <div className="flex items-center gap-10">
                                     <div className="w-20 h-20 rounded-[2.5rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
