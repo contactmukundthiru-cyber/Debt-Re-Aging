@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { Step } from '../../lib/constants';
 import { ImpactAssessment } from '../../lib/evidence-builder';
@@ -138,7 +139,12 @@ const Step5Export: React.FC<Step5ExportProps> = ({
             <div className="flex-1">
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{caseHealth.summary}</p>
               <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: `${caseHealth.readiness}%` }} />
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${caseHealth.readiness}%` }}
+                  transition={{ duration: 1, ease: "circOut" }}
+                  className="h-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" 
+                />
               </div>
               <p className="text-[10px] uppercase tracking-widest text-slate-400 mt-2">Evidence readiness {caseHealth.readiness}%</p>
             </div>

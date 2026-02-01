@@ -203,6 +203,8 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
                 <button
                   onClick={() => setShowSmartFixes(false)}
                   className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  title="Close Smart Fixes"
+                  aria-label="Close Smart Fixes"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
@@ -452,26 +454,34 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
             </div>
             <div className="p-8 grid sm:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Legal Name</label>
+                <label htmlFor="consumer-name" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Legal Name</label>
                 <input
+                  id="consumer-name"
                   type="text"
+                  placeholder="Full Legal Name"
+                  title="Consumer Legal Name"
                   className="w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm"
                   value={consumer.name || ''}
                   onChange={(e) => setConsumer(prev => ({ ...prev, name: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Address</label>
+                <label htmlFor="consumer-address" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Address</label>
                 <input
+                  id="consumer-address"
                   type="text"
+                  placeholder="Street, City, Zip"
+                  title="Consumer Current Address"
                   className="w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm"
                   value={consumer.address || ''}
                   onChange={(e) => setConsumer(prev => ({ ...prev, address: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">State Jurisdiction</label>
+                <label htmlFor="state-jurisdiction" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">State Jurisdiction</label>
                 <select
+                  id="state-jurisdiction"
+                  title="State Jurisdiction"
                   className="w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm appearance-none"
                   value={consumer.state || ''}
                   onChange={(e) => {
@@ -521,11 +531,14 @@ const Step3Verify: React.FC<Step3VerifyProps> = ({
             <div className="premium-card p-6 bg-slate-900 border-none text-white h-[calc(100vh-160px)] flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Forensic Source Evidence</p>
-                <button onClick={() => setShowWorkbench(false)} className="text-slate-500 hover:text-white">
+                <button onClick={() => setShowWorkbench(false)} className="text-slate-500 hover:text-white" title="Close Source Evidence Workbench" aria-label="Close Source Evidence Workbench">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
               <textarea
+                id="source-evidence-text"
+                title="Forensic Source Evidence"
+                placeholder="Source Text for Verification"
                 className="flex-grow w-full bg-slate-950/50 border border-slate-800 rounded-xl p-6 font-mono text-xs leading-relaxed text-slate-300 resize-none focus:ring-1 focus:ring-emerald-500/30 transition-all"
                 value={rawText}
                 readOnly

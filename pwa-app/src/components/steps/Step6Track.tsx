@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CreditFields, RuleFlag } from '../../lib/types';
 import { ConsumerInfo } from '../../lib/types';
 import { Step } from '../../lib/constants';
@@ -814,8 +815,10 @@ const Step6Track: React.FC<Step6TrackProps> = ({
           <div className="space-y-4">
             <div className="grid md:grid-cols-[1fr_220px] gap-4">
               <div>
-                <label className="field-label">Select Dispute</label>
+                <label htmlFor="select-dispute" className="field-label">Select Dispute</label>
                 <select
+                  id="select-dispute"
+                  title="Select Dispute to Analyze"
                   className="input rounded-xl"
                   value={selectedDisputeId}
                   onChange={(e) => setSelectedDisputeId(e.target.value)}
@@ -828,8 +831,10 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                 </select>
               </div>
               <div className="flex flex-col justify-end">
-                <label className="field-label">Import Response</label>
+                <label htmlFor="import-response" className="field-label">Import Response</label>
                 <input
+                  id="import-response"
+                  title="Import Bureau Response"
                   type="file"
                   accept=".txt,.pdf,.png,.jpg,.jpeg,.webp"
                   className="input rounded-xl"
@@ -881,12 +886,16 @@ const Step6Track: React.FC<Step6TrackProps> = ({
               </div>
             </div>
 
-            <textarea
-              className="textarea rounded-2xl min-h-[160px]"
-              placeholder="Paste bureau response letter text here..."
-              value={responseText}
-              onChange={(e) => setResponseText(e.target.value)}
-            />
+            <div className="space-y-2">
+              <label htmlFor="response-text" className="field-label">Response Text</label>
+              <textarea
+                id="response-text"
+                className="textarea rounded-2xl min-h-[160px]"
+                placeholder="Paste bureau response letter text here..."
+                value={responseText}
+                onChange={(e) => setResponseText(e.target.value)}
+              />
+            </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -1054,8 +1063,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
         {selectedDocuments.length > 0 && (
           <div className="mb-4 flex flex-wrap items-end gap-3">
             <div>
-              <label className="field-label">Batch Tags</label>
+              <label htmlFor="batch-tags" className="field-label">Batch Tags</label>
               <input
+                id="batch-tags"
                 className="input rounded-xl"
                 value={docTagInput}
                 onChange={(e) => setDocTagInput(e.target.value)}
@@ -1116,6 +1126,8 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                 <div className="flex flex-wrap gap-2">
                   <input
                     type="checkbox"
+                    title="Select Document for Batch Action"
+                    aria-label={`Select ${doc.name}`}
                     checked={selectedDocIds.includes(doc.id)}
                     onChange={() => toggleDocSelect(doc.id)}
                   />
@@ -1155,6 +1167,8 @@ const Step6Track: React.FC<Step6TrackProps> = ({
               <button
                 type="button"
                 onClick={() => setPreviewDocId(null)}
+                title="Close Document Preview"
+                aria-label="Close Document Preview"
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1257,14 +1271,18 @@ const Step6Track: React.FC<Step6TrackProps> = ({
               return (
                 <div key={trend.label} className="flex flex-col items-center gap-2">
                   <div className="flex items-end gap-1 h-24">
-                    <div
-                      className="w-3 rounded-full bg-blue-500/60"
-                      style={{ height: `${createdHeight}%` }}
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${createdHeight}%` }}
+                      transition={{ duration: 0.8, ease: "circOut" }}
+                      className="w-3 rounded-full bg-blue-500/60 shadow-[0_0_10px_rgba(59,130,246,0.2)]"
                       title={`${trend.created} created`}
                     />
-                    <div
-                      className="w-3 rounded-full bg-rose-500/70"
-                      style={{ height: `${overdueHeight}%` }}
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${overdueHeight}%` }}
+                      transition={{ duration: 0.8, delay: 0.1, ease: "circOut" }}
+                      className="w-3 rounded-full bg-rose-500/70 shadow-[0_0_10px_rgba(244,63,94,0.2)]"
                       title={`${trend.overdue} overdue`}
                     />
                   </div>
@@ -1300,8 +1318,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
             Clear Selection
           </button>
           <div>
-            <label className="field-label">Bulk Status</label>
+            <label htmlFor="bulk-status" className="field-label">Bulk Status</label>
             <select
+              id="bulk-status"
               className="input rounded-xl"
               value={bulkStatus}
               onChange={(e) => setBulkStatus(e.target.value as DisputeStatus)}
@@ -1317,8 +1336,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
             </select>
           </div>
           <div>
-            <label className="field-label">Reason Template</label>
+            <label htmlFor="reason-template" className="field-label">Reason Template</label>
             <select
+              id="reason-template"
               className="input rounded-xl"
               value={reasonTemplate}
               onChange={(e) => setReasonTemplate(e.target.value as typeof reasonTemplate)}
@@ -1390,8 +1410,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
         </div>
         <div className="mt-4 grid md:grid-cols-2 gap-4">
           <div>
-            <label className="field-label">Bureau</label>
+            <label htmlFor="filter-bureau" className="field-label">Bureau</label>
             <select
+              id="filter-bureau"
               className="input rounded-xl"
               value={filterBureau}
               onChange={(e) => setFilterBureau(e.target.value as typeof filterBureau)}
@@ -1404,8 +1425,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
             </select>
           </div>
           <div>
-            <label className="field-label">Status</label>
+            <label htmlFor="filter-status" className="field-label">Status</label>
             <select
+              id="filter-status"
               className="input rounded-xl"
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
@@ -1434,8 +1456,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
         </div>
         <div className="mt-4 grid md:grid-cols-3 gap-4">
           <div>
-            <label className="field-label">Type</label>
+            <label htmlFor="comm-type" className="field-label">Type</label>
             <select
+              id="comm-type"
               className="input rounded-xl"
               value={commType}
               onChange={(e) => setCommType(e.target.value as typeof commType)}
@@ -1446,8 +1469,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
             </select>
           </div>
           <div>
-            <label className="field-label">Method</label>
+            <label htmlFor="comm-method" className="field-label">Method</label>
             <select
+              id="comm-method"
               className="input rounded-xl"
               value={commMethod}
               onChange={(e) => setCommMethod(e.target.value as typeof commMethod)}
@@ -1460,8 +1484,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
             </select>
           </div>
           <div>
-            <label className="field-label">Search</label>
+            <label htmlFor="comm-search" className="field-label">Search</label>
             <input
+              id="comm-search"
               className="input rounded-xl"
               value={commSearch}
               onChange={(e) => setCommSearch(e.target.value)}
@@ -1513,9 +1538,11 @@ const Step6Track: React.FC<Step6TrackProps> = ({
               {analytics.monthCounts.map(item => (
                 <div key={item.key} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden">
-                    <div
-                      className="bg-emerald-500/80"
-                      style={{ height: `${Math.max(12, (item.total / analytics.maxCount) * 100)}%` }}
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${Math.max(12, (item.total / analytics.maxCount) * 100)}%` }}
+                      transition={{ duration: 1, ease: "circOut" }}
+                      className="bg-emerald-500/80 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
                     />
                   </div>
                   <span className="text-[10px] uppercase tracking-widest text-slate-400">{item.label}</span>
@@ -1614,7 +1641,12 @@ const Step6Track: React.FC<Step6TrackProps> = ({
               <p className="text-2xl font-bold dark:text-white mt-2">{row.success}%</p>
               <p className="text-xs text-slate-500">Success rate</p>
               <div className="mt-4 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: `${row.success}%` }} />
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${row.success}%` }}
+                  transition={{ duration: 1, ease: "circOut" }}
+                  className="h-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]" 
+                />
               </div>
               <div className="mt-3 flex justify-between text-xs text-slate-500">
                 <span>{row.total} total</span>
@@ -1643,10 +1675,15 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                 {item.windows.map(window => (
                   <div key={`${item.bureau}-${window.days}`} className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <p className="text-[9px] uppercase tracking-widest text-slate-400">{window.days} days</p>
-                    <p className="text-lg font-bold dark:text-white">{window.avgDays}d</p>
+                    <p className="text-lg font-bold dark:text-white">{window.avgDays} days</p>
                     <p className="text-[10px] text-slate-400">{window.count} cases</p>
                     <div className="mt-2 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-indigo-500" style={{ width: `${Math.min(100, window.avgDays)}%` }} />
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, window.avgDays)}%` }}
+                        transition={{ duration: 1, ease: "circOut" }}
+                        className="h-full bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.3)]" 
+                      />
                     </div>
                   </div>
                 ))}
@@ -1736,7 +1773,12 @@ const Step6Track: React.FC<Step6TrackProps> = ({
               {(trendRange === 'weekly' ? analytics.weeklyTrends : analytics.monthCounts.map(item => ({ label: item.label, created: item.total, overdue: 0 }))).map((item) => (
                 <div key={`created-${item.label}`} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden">
-                    <div className="bg-emerald-500/80" style={{ height: `${Math.max(10, item.created * 10)}%` }} />
+                    <motion.div 
+                      initial={{ height: 0 }}
+                      animate={{ height: `${Math.max(10, item.created * 10)}%` }}
+                      transition={{ duration: 1, ease: "circOut" }}
+                      className="bg-emerald-500/80 shadow-[0_0_10px_rgba(16,185,129,0.2)]" 
+                    />
                   </div>
                   <span className="text-[9px] uppercase tracking-widest text-slate-400">{item.label}</span>
                 </div>
@@ -1749,7 +1791,12 @@ const Step6Track: React.FC<Step6TrackProps> = ({
               {(trendRange === 'weekly' ? analytics.weeklyTrends : analytics.monthCounts.map(item => ({ label: item.label, created: 0, overdue: 0 }))).map((item) => (
                 <div key={`overdue-${item.label}`} className="flex-1 flex flex-col items-center gap-2">
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden">
-                    <div className="bg-rose-500/80" style={{ height: `${Math.max(6, item.overdue * 12)}%` }} />
+                    <motion.div 
+                      initial={{ height: 0 }}
+                      animate={{ height: `${Math.max(6, item.overdue * 12)}%` }}
+                      transition={{ duration: 1, ease: "circOut" }}
+                      className="bg-rose-500/80 shadow-[0_0_10px_rgba(244,63,94,0.2)]" 
+                    />
                   </div>
                   <span className="text-[9px] uppercase tracking-widest text-slate-400">{item.label}</span>
                 </div>
@@ -1781,12 +1828,15 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-start gap-3">
                     <input
+                      id={`select-${dispute.id}`}
+                      title={`Select ${dispute.account.creditor}`}
+                      aria-label={`Select ${dispute.account.creditor}`}
                       type="checkbox"
                       className="mt-1"
                       checked={selectedIds.includes(dispute.id)}
                       onChange={() => toggleSelect(dispute.id)}
                     />
-                    <div>
+                    <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${['draft', 'submitted', 'investigating'].includes(dispute.status) ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
                         dispute.status === 'resolved_favorable' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
@@ -1819,7 +1869,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
+                    <label htmlFor={`status-${dispute.id}`} className="sr-only">Dispute Status</label>
                     <select
+                      id={`status-${dispute.id}`}
                       className="select text-xs py-1 h-auto dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       value={dispute.status}
                       onChange={(e) => {
@@ -1891,7 +1943,9 @@ const Step6Track: React.FC<Step6TrackProps> = ({
                           </button>
                         ))}
                       </div>
+                      <label htmlFor={`notes-${dispute.id}`} className="sr-only">Dispute Notes</label>
                       <textarea
+                        id={`notes-${dispute.id}`}
                         className="textarea rounded-xl min-h-[80px]"
                         placeholder="Add a note or reason for status change..."
                         value={noteDrafts[dispute.id] ?? dispute.notes ?? '' }

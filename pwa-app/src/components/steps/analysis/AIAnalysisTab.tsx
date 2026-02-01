@@ -80,7 +80,7 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
                             <div className="flex items-center gap-6">
                                 <div className="flex -space-x-3">
                                     {[Brain, Activity, Network].map((Icon, i) => (
-                                        <div key={i} className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-emerald-400 shadow-2xl relative" style={{ zIndex: 3 - i }}>
+                                        <div key={i} className={cn("w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-emerald-400 shadow-2xl relative", i === 0 ? "z-[3]" : i === 1 ? "z-[2]" : "z-[1]")}>
                                             <Icon size={24} />
                                         </div>
                                     ))}
@@ -304,8 +304,8 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
                                         <input 
                                             value={remoteConfig.baseUrl}
                                             onChange={(e) => setRemoteConfig({ ...remoteConfig, baseUrl: e.target.value })}
-                                            placeholder="https://api.intel.node/v1..."
-                                            className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-blue-500/30 transition-all shadow-inner placeholder:text-slate-800"
+                                            placeholder="https://api.openai.com/v1/chat/completions"
+                                            className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-slate-500/40 transition-all shadow-inner placeholder:text-slate-800"
                                         />
                                     </div>
                                 </div>
@@ -316,13 +316,16 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
                                         <input 
                                             value={remoteConfig.model}
                                             onChange={(e) => setRemoteConfig({ ...remoteConfig, model: e.target.value })}
-                                            className="w-full bg-black/60 border border-white/5 rounded-[1.5rem] px-6 py-4 text-white text-sm font-mono focus:outline-none focus:border-blue-500/30 shadow-inner"
-                                            placeholder="gpt-4"
+                                            className="w-full bg-black/60 border border-white/5 rounded-[1.5rem] px-6 py-4 text-white text-sm font-mono focus:outline-none focus:border-slate-500/40 shadow-inner"
+                                            placeholder="gpt-4o-mini"
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">Purge_Intel</label>
+                                        <label htmlFor="purge-remote-intel" className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">Purge_Intel</label>
                                         <button 
+                                            id="purge-remote-intel"
+                                            title="Purge Remote AI Intelligence Configuration"
+                                            aria-label="Purge Remote AI Configuration"
                                             onClick={() => {
                                                 clearRemoteAIConfig();
                                                 setRemoteConfig(loadRemoteAIConfig());
@@ -344,8 +347,8 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
                                             type="password"
                                             value={remoteConfig.apiKey}
                                             onChange={(e) => setRemoteConfig({ ...remoteConfig, apiKey: e.target.value })}
-                                            placeholder="SK-ZENITH-PROT-XXXX..."
-                                            className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-blue-500/30 transition-all shadow-inner placeholder:text-slate-800"
+                                            placeholder="sk-... (your API key)"
+                                            className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-slate-500/40 transition-all shadow-inner placeholder:text-slate-800"
                                         />
                                     </div>
                                 </div>
@@ -476,7 +479,12 @@ const AIAnalysisTab: React.FC<AIAnalysisTabProps> = ({
                                         </p>
                                     </div>
                                 </div>
-                                <button onClick={() => setRemoteResult(null)} className="p-6 bg-white/5 hover:bg-rose-500/10 rounded-[2rem] text-slate-500 hover:text-rose-500 transition-all border border-white/5 group shadow-inner">
+                                <button 
+                                    onClick={() => setRemoteResult(null)} 
+                                    title="Close Neural Overlay Reconstruction"
+                                    aria-label="Close Analysis"
+                                    className="p-6 bg-white/5 hover:bg-rose-500/10 rounded-[2rem] text-slate-500 hover:text-rose-500 transition-all border border-white/5 group shadow-inner"
+                                >
                                     <Trash2 size={24} className="group-hover:rotate-12 transition-transform" />
                                 </button>
                             </div>

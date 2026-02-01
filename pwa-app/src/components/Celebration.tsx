@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CelebrationProps {
     isVisible: boolean;
@@ -9,10 +10,23 @@ interface CelebrationProps {
 
 export const Celebration: React.FC<CelebrationProps> = ({ isVisible, violationCount }) => {
     const [show, setShow] = useState(false);
+    const [particles, setParticles] = useState<{ id: number; left: string; color: string; delay: number; duration: number; rotate: number }[]>([]);
 
     useEffect(() => {
         if (isVisible && violationCount > 0) {
             setShow(true);
+            
+            // Generate stable randomized values on mount
+            const newParticles = [...Array(50)].map((_, i) => ({
+                id: i,
+                left: `${Math.random() * 100}%`,
+                color: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'][Math.floor(Math.random() * 4)],
+                delay: Math.random() * 3,
+                duration: 3 + Math.random() * 2,
+                rotate: Math.random() * 360
+            }));
+            setParticles(newParticles);
+
             const timer = setTimeout(() => setShow(false), 5000);
             return () => clearTimeout(timer);
         }
@@ -22,23 +36,33 @@ export const Celebration: React.FC<CelebrationProps> = ({ isVisible, violationCo
 
     return (
         <div className="fixed inset-0 pointer-events-none z-[300] flex items-center justify-center overflow-hidden">
-            {/* Confetti particles (CSS based) */}
-            {[...Array(50)].map((_, i) => (
-                <div
-                    key={i}
-                    className="absolute w-2 h-2 rounded-sm animate-fall"
-                    style={{
-                        left: `${Math.random() * 100}%`,
-                        top: `-20px`,
-                        backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'][Math.floor(Math.random() * 4)],
-                        animationDelay: `${Math.random() * 3}s`,
-                        animationDuration: `${3 + Math.random() * 2}s`,
-                        transform: `rotate(${Math.random() * 360}deg)`
+            {/* Confetti particles */}
+            {particles.map((p) => (
+                <motion.div
+                    key={p.id}
+                    initial={{ top: -20, left: p.left, rotate: 0, opacity: 1 }}
+                    animate={{ 
+                        top: '120vh', 
+                        rotate: p.rotate + 720,
+                        opacity: 0,
+                        backgroundColor: p.color
                     }}
+                    transition={{ 
+                        duration: p.duration, 
+                        delay: p.delay,
+                        ease: "linear"
+                    }}
+                    className="absolute w-2 h-2 rounded-sm"
                 />
             ))}
 
-            <div className="bg-white dark:bg-slate-900 px-8 py-6 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 animate-scale-bounce flex flex-col items-center gap-4 relative">
+            <motion.div 
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: "spring", damping: 15 }}
+                className="bg-white dark:bg-slate-900 px-8 py-6 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-4 relative"
+            >
                 <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl animate-pulse" />
                 <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl animate-pulse" />
 

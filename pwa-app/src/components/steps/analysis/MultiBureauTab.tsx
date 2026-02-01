@@ -113,7 +113,7 @@ const MultiBureauTab: React.FC<MultiBureauTabProps> = ({ bureauData: initialData
                             <div className="flex items-center gap-6">
                                 <div className="flex -space-x-3">
                                     {[Layers, ArrowRightLeft, Database].map((Icon, i) => (
-                                        <div key={i} className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-purple-400 shadow-2xl relative" style={{ zIndex: 3 - i }}>
+                                        <div key={i} className={cn("w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-purple-400 shadow-2xl relative", i === 0 ? "z-[3]" : i === 1 ? "z-[2]" : "z-[1]")}>
                                             <Icon size={24} />
                                         </div>
                                     ))}

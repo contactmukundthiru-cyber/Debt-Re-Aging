@@ -8,12 +8,42 @@ import {
     calculateCategoryJump,
     ScoreSimulationResult
 } from '../../../lib/score-simulator';
+import { motion } from 'framer-motion';
+import { 
+    Cpu, 
+    TrendingUp, 
+    ArrowRight, 
+    DollarSign, 
+    Shield, 
+    Target, 
+    Calendar,
+    ChevronRight,
+    Zap,
+    Activity,
+    Lock
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 interface ScoreSimulatorTabProps {
     flags: RuleFlag[];
     fields: Partial<CreditFields>;
     riskProfile: RiskProfile;
 }
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { y: 20, opacity: 0 },
+  show: { y: 0, opacity: 1 }
+};
 
 const ScoreSimulatorTab: React.FC<ScoreSimulatorTabProps> = ({
     flags,
@@ -41,77 +71,91 @@ const ScoreSimulatorTab: React.FC<ScoreSimulatorTabProps> = ({
 
     if (flags.length === 0) {
         return (
-            <div className="premium-card p-16 text-center bg-slate-50 dark:bg-slate-950/20 border-dashed border-slate-200 dark:border-slate-800">
-                <svg className="w-20 h-20 mx-auto mb-6 text-emerald-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <h3 className="text-xl font-bold dark:text-white mb-2">No Simulation Data</h3>
-                <p className="text-sm text-slate-500 max-w-md mx-auto">
-                    Score simulation requires detected violations. Upload a credit report with issues to see projected improvements.
+            <div className="min-h-[600px] flex flex-col items-center justify-center p-20 bg-slate-950/20 rounded-[4rem] border-2 border-dashed border-white/5">
+                <div className="w-24 h-24 rounded-[2.5rem] bg-slate-500/10 border border-slate-500/20 flex items-center justify-center mb-8">
+                    <Lock size={40} className="text-slate-500/50" />
+                </div>
+                <h3 className="text-3xl font-black text-white mb-4 uppercase tracking-tighter italic">Simulation Locked</h3>
+                <p className="text-sm text-slate-500 max-w-md text-center font-mono uppercase tracking-widest leading-relaxed">
+                    Score simulation requires active violation nodes. Initialize forensic scan to unlock fiscal projection data.
                 </p>
+                <div className="mt-12 px-8 py-3 rounded-full bg-slate-900 border border-white/5 text-[10px] font-mono text-slate-600 uppercase tracking-[0.4em]">Waiting for Data...</div>
             </div>
         );
     }
 
     return (
-        <div className="fade-in space-y-10 pb-12">
-            {/* Hero Section */}
-            <div className="premium-card p-10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] -mr-48 -mt-48" />
-                <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] -ml-40 -mb-40" />
-
-                <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
-                        <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-emerald-400 font-mono">AI Score Predictor</span>
-                    </div>
-
-                    <div className="grid lg:grid-cols-3 gap-12 items-center">
-                        {/* Current Score */}
-                        <div className="text-center lg:text-left">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Current Estimated</p>
-                            <div className="flex items-baseline gap-2 justify-center lg:justify-start">
-                                <span className="text-6xl font-bold tabular-nums">{simulation.currentEstimatedScore}</span>
-                                <span className="text-slate-500 text-sm">/850</span>
-                            </div>
-                            <p className="text-sm text-slate-400 mt-2">{simulation.currentScoreRange}</p>
-                        </div>
-
-                        {/* Arrow Animation */}
-                        <div className="hidden lg:flex items-center justify-center">
-                            <div className="relative">
-                                <svg className="w-24 h-24 text-emerald-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                                    <span className="text-2xl font-bold text-emerald-400">+{simulation.totalPotentialIncrease}</span>
-                                    <p className="text-[8px] text-slate-500 uppercase tracking-wider">Potential</p>
+        <div className="fade-in space-y-20 pb-32">
+            {/* Neural Projection Hero */}
+            <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-slate-500/20 via-slate-500/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
+                <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl p-16">
+                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-500/5 rounded-full blur-[120px] -mr-96 -mt-96" />
+                    
+                    <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-20">
+                        <div className="text-center lg:text-left flex-1">
+                            <div className="flex items-center gap-4 mb-10 justify-center lg:justify-start">
+                                <div className="px-5 py-2 rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center gap-3">
+                                    <Cpu size={14} className="text-slate-500 animate-pulse" />
+                                    <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-400 font-mono">Neural Fiscal Engine v5.0</span>
                                 </div>
                             </div>
+                            
+                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 mb-4 font-mono">Current_Dossier_Estimate</p>
+                            <div className="flex items-baseline gap-4 justify-center lg:justify-start">
+                                <span className="text-9xl font-black tracking-tighter text-white tabular-nums drop-shadow-2xl">{simulation.currentEstimatedScore}</span>
+                                <span className="text-slate-600 font-mono text-xl font-bold">/ 850</span>
+                            </div>
+                            <div className="mt-6 inline-flex items-center gap-3 px-6 py-2 rounded-full bg-slate-950/50 border border-white/5">
+                                <Activity size={12} className="text-slate-500" />
+                                <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">{simulation.currentScoreRange}</span>
+                            </div>
                         </div>
 
-                        {/* Projected Score */}
-                        <div className="text-center lg:text-right">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-2">Projected After Disputes</p>
-                            <div className="flex items-baseline gap-2 justify-center lg:justify-end">
-                                <span className="text-6xl font-bold tabular-nums text-emerald-400">{simulation.projectedScoreAfterDisputes.realistic}</span>
-                                <span className="text-emerald-500/50 text-sm">/850</span>
+                        {/* Centered Transformation UI */}
+                        <div className="flex flex-col items-center gap-6">
+                            <div className="relative">
+                                <div className="w-24 h-24 rounded-full border-2 border-slate-500/20 border-t-slate-500 animate-[spin_4s_linear_infinite]" />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-3xl font-black text-slate-400 tabular-nums">+{simulation.totalPotentialIncrease}</span>
+                                    <span className="text-[8px] font-mono text-slate-500 font-black uppercase tracking-widest">Shift</span>
+                                </div>
                             </div>
-                            <p className="text-sm text-emerald-400/80 mt-2">{simulation.projectedScoreRange}</p>
+                            <div className="h-12 w-px bg-gradient-to-b from-slate-500/50 to-transparent" />
+                        </div>
+
+                        <div className="text-center lg:text-right flex-1">
+                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 mb-4 font-mono">Quantum_Post_Dispute</p>
+                            <div className="flex items-baseline gap-4 justify-center lg:justify-end">
+                                <span className="text-9xl font-black tracking-tighter text-slate-400 tabular-nums drop-shadow-[0_0_30px_rgba(100,116,139,0.3)]">{simulation.projectedScoreAfterDisputes.realistic}</span>
+                                <span className="text-slate-500/30 font-mono text-xl font-bold">/ 850</span>
+                            </div>
+                            <div className="mt-6 inline-flex items-center gap-3 px-6 py-2 rounded-full bg-slate-500/10 border border-slate-500/20">
+                                <Target size={12} className="text-slate-500" />
+                                <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">{simulation.projectedScoreRange}</span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Category Jump Badge */}
+                    {/* Category Jump Banner */}
                     {categoryJump.categoriesJumped > 0 && (
-                        <div className="mt-8 flex justify-center">
-                            <div className="px-6 py-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 inline-flex items-center gap-4">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Category Jump</span>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-bold text-slate-300">{categoryJump.currentCategory}</span>
-                                    <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                    <span className="text-sm font-bold text-emerald-400">{categoryJump.projectedCategory}</span>
+                        <div className="mt-20 relative px-10 py-6 rounded-[2.5rem] bg-slate-900/40 border border-white/5 overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-slate-500/5 via-transparent to-slate-500/5 opacity-50" />
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="flex items-center gap-6">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-500/10 flex items-center justify-center border border-slate-500/20">
+                                        <TrendingUp size={20} className="text-slate-500" />
+                                    </div>
+                                    <div className="h-10 w-px bg-slate-800" />
+                                    <div className="flex items-center gap-8">
+                                        <span className="text-sm font-black text-slate-400 uppercase tracking-widest font-mono line-through opacity-50">{categoryJump.currentCategory}</span>
+                                        <ArrowRight size={20} className="text-slate-500" />
+                                        <span className="text-xl font-black text-white uppercase tracking-tighter italic">{categoryJump.projectedCategory}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-[0.3em]">Institutional Grade Upgrade</div>
+                                    <div className="text-[8px] font-mono text-slate-600 font-bold uppercase tracking-[0.2em] mt-1">Confirmed by Neural Core</div>
                                 </div>
                             </div>
                         </div>
@@ -119,224 +163,263 @@ const ScoreSimulatorTab: React.FC<ScoreSimulatorTabProps> = ({
                 </div>
             </div>
 
-            {/* Score Range Indicator */}
-            <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6 text-center">Projection Confidence Range</p>
-
-                <div className="flex items-center justify-between gap-4 mb-4">
-                    <div className="text-center flex-1 p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Conservative</p>
-                        <p className="text-2xl font-bold text-slate-500 tabular-nums">{simulation.projectedScoreAfterDisputes.conservative}</p>
+            {/* Sub-Header Confidence Matrix */}
+            <div className="grid lg:grid-cols-3 gap-10">
+                {[
+                    { label: 'Conservative', score: simulation.projectedScoreAfterDisputes.conservative, color: 'slate' },
+                    { label: 'Realistic_Baseline', score: simulation.projectedScoreAfterDisputes.realistic, color: 'slate' },
+                    { label: 'Optimistic_Peak', score: simulation.projectedScoreAfterDisputes.optimistic, color: 'slate' }
+                ].map((range, i) => (
+                    <div key={i} className={cn(
+                        "p-10 rounded-[3rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-all duration-500",
+                        range.color === 'slate' && "border-slate-500/20 shadow-[0_0_40px_rgba(100,116,139,0.1)]"
+                    )}>
+                        <div className="flex items-center justify-between mb-8">
+                            <p className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-[0.4em]">{range.label}</p>
+                            <div className={cn(
+                                "w-2 h-2 rounded-full",
+                                "bg-slate-500"
+                            )} />
+                        </div>
+                        <h4 className={cn(
+                            "text-6xl font-black tabular-nums tracking-tighter",
+                            "text-slate-400"
+                        )}>{range.score}</h4>
                     </div>
-                    <div className="text-center flex-1 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-emerald-500 mb-1">Realistic</p>
-                        <p className="text-2xl font-bold text-emerald-500 tabular-nums">{simulation.projectedScoreAfterDisputes.realistic}</p>
-                    </div>
-                    <div className="text-center flex-1 p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-1">Optimistic</p>
-                        <p className="text-2xl font-bold text-blue-500 tabular-nums">{simulation.projectedScoreAfterDisputes.optimistic}</p>
-                    </div>
-                </div>
+                ))}
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
-                {/* Financial Benefits */}
-                <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+            <div className="grid lg:grid-cols-12 gap-16">
+                {/* Visual Impact Artifacts (7 cols) */}
+                <div className="lg:col-span-12 space-y-16">
+                    <div className="flex items-center gap-8">
+                        <div className="w-20 h-20 rounded-[2.5rem] bg-slate-500/10 text-slate-400 flex items-center justify-center border border-slate-500/20 shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-slate-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                            <Target size={32} className="relative z-10" />
                         </div>
                         <div>
-                            <h4 className="text-xl font-bold dark:text-white">Potential Savings</h4>
-                            <p className="text-xs text-slate-500 uppercase tracking-widest">Lifetime Financial Impact</p>
+                            <h4 className="text-4xl font-black text-white uppercase tracking-tighter italic">Removal Artifacts</h4>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold mt-2">Per-Node Impact Projection</p>
                         </div>
                     </div>
 
-                    <div className="space-y-4">
-                        {simulation.financialBenefits.map((benefit, i) => (
-                            <div key={i} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 group hover:border-emerald-500/30 transition-all">
-                                <div className="flex items-start justify-between mb-3">
-                                    <h5 className="text-sm font-bold dark:text-white">{benefit.product}</h5>
-                                    <span className="text-lg font-bold text-emerald-500 tabular-nums">
-                                        ${benefit.lifetimeSavings.toLocaleString()}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-4 text-xs">
-                                    <div>
-                                        <span className="text-slate-400">Current: </span>
-                                        <span className="font-bold text-rose-500">{benefit.currentRate}</span>
-                                    </div>
-                                    <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                    <div>
-                                        <span className="text-slate-400">Projected: </span>
-                                        <span className="font-bold text-emerald-500">{benefit.projectedRate}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Total Savings */}
-                    <div className="mt-6 p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Total Lifetime Savings</span>
-                            <span className="text-3xl font-bold text-emerald-500 tabular-nums">${totalSavings.toLocaleString()}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Item-by-Item Impact */}
-                <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 className="text-xl font-bold dark:text-white">Removal Impact</h4>
-                            <p className="text-xs text-slate-500 uppercase tracking-widest">Per-Item Score Projection</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {simulation.removalSimulations.map((sim, i) => (
-                            <div key={i} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                                <div className="flex items-start justify-between mb-3">
-                                    <h5 className="text-sm font-bold dark:text-white line-clamp-1 flex-1">{sim.itemDescription}</h5>
-                                    <span className={`text-lg font-bold tabular-nums ${sim.confidence === 'high' ? 'text-emerald-500' :
-                                            sim.confidence === 'medium' ? 'text-blue-500' : 'text-slate-400'
-                                        }`}>
-                                        +{sim.projectedScoreIncrease.mid}
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-1000 ${sim.confidence === 'high' ? 'bg-emerald-500' :
-                                                    sim.confidence === 'medium' ? 'bg-blue-500' : 'bg-slate-400'
-                                                }`}
-                                            style={{ width: `${(sim.projectedScoreIncrease.mid / 50) * 100}%` }}
-                                        />
+                            <motion.div 
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="group relative"
+                            >
+                                <div className="absolute -inset-px bg-gradient-to-br from-slate-500/10 to-transparent rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity blur-sm" />
+                                <div className="relative p-10 bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] transition-all duration-500 flex flex-col min-h-[300px]">
+                                    <div className="flex items-start justify-between mb-8">
+                                        <div className="px-4 py-1.5 rounded-full bg-slate-500/5 border border-slate-500/10 text-[8px] font-mono font-black text-slate-400 uppercase tracking-widest">
+                                            Phase: {sim.timeToReflect}
+                                        </div>
+                                        <div className={cn(
+                                            "w-2 h-2 rounded-full",
+                                            "bg-slate-500"
+                                        )} />
                                     </div>
-                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${sim.confidence === 'high' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                            sim.confidence === 'medium' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
-                                                'bg-slate-500/10 text-slate-500 border border-slate-500/20'
-                                        }`}>
-                                        {sim.confidence}
-                                    </span>
-                                </div>
 
-                                <div className="flex items-center justify-between text-[10px] text-slate-400">
-                                    <span>Range: +{sim.projectedScoreIncrease.low} to +{sim.projectedScoreIncrease.high}</span>
-                                    <span>{sim.timeToReflect}</span>
+                                    <h5 className="text-lg font-black text-white uppercase tracking-tighter italic mb-4 leading-tight group-hover:text-slate-400 transition-colors">
+                                        {sim.itemDescription}
+                                    </h5>
+                                    
+                                    <div className="mt-auto space-y-6">
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-5xl font-black text-white tabular-nums tracking-tighter">+{sim.projectedScoreIncrease.mid}</span>
+                                            <span className="text-[10px] font-mono font-black text-slate-600 uppercase tracking-widest">Points</span>
+                                        </div>
+
+                                        <div className="w-full h-1 bg-slate-900 rounded-full overflow-hidden">
+                                            <motion.div 
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${(sim.projectedScoreIncrease.mid / 50) * 100}%` }}
+                                                transition={{ duration: 1.5, ease: "circOut" }}
+                                                className={cn(
+                                                    "h-full rounded-full transition-all duration-1000",
+                                                    "bg-slate-500"
+                                                )}
+                                            />
+                                        </div>
+
+                                        <div className="flex items-center justify-between text-[8px] font-mono text-slate-500 font-black uppercase tracking-[0.2em]">
+                                            <span>Confidence: {sim.confidence}</span>
+                                            <span className="text-white">Est. Impact</span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* FICO Factor Weights */}
-            <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center">
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                        </svg>
+            {/* Financial Lifecycle Analysis */}
+            <div className="grid lg:grid-cols-12 gap-16">
+                <div className="lg:col-span-7 space-y-12">
+                    <div className="flex items-center gap-8">
+                        <div className="w-20 h-20 rounded-[2.5rem] bg-slate-500/10 text-slate-500 flex items-center justify-center border border-slate-500/20 shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-slate-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                            <DollarSign size={32} className="relative z-10" />
+                        </div>
+                        <div>
+                            <h4 className="text-4xl font-black text-white uppercase tracking-tighter italic">Fiscal Lifecycle</h4>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold mt-2">Projected Debt Servicing Delta</p>
+                        </div>
                     </div>
-                    <div>
-                        <h4 className="text-xl font-bold dark:text-white">FICO Score Factors</h4>
-                        <p className="text-xs text-slate-500 uppercase tracking-widest">How Your Score Is Calculated</p>
-                    </div>
-                </div>
 
-                <div className="grid md:grid-cols-5 gap-4">
-                    {ficoWeights.map((factor, i) => {
-                        const colors = ['emerald', 'blue', 'purple', 'amber', 'rose'];
-                        const color = colors[i];
-                        return (
-                            <div
-                                key={i}
-                                className={`p-5 rounded-2xl bg-${color}-500/5 border border-${color}-500/20 text-center group hover:scale-105 transition-all`}
-                            >
-                                <div className={`text-3xl font-bold text-${color}-500 mb-2`}>{Math.round(factor.weight * 100)}%</div>
-                                <h5 className="text-sm font-bold dark:text-white mb-1">{factor.category}</h5>
-                                <p className="text-[10px] text-slate-400 leading-relaxed">{factor.description}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* 12-Month Timeline */}
-            <div className="premium-card p-8 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h4 className="text-xl font-bold dark:text-white">12-Month Score Projection</h4>
-                        <p className="text-xs text-slate-500 uppercase tracking-widest">Expected Recovery Timeline</p>
-                    </div>
-                </div>
-
-                <div className="relative">
-                    {/* Timeline Bar */}
-                    <div className="flex items-end justify-between gap-1 h-48 mb-4">
-                        {simulation.timeline.map((point, i) => {
-                            const maxScore = 850;
-                            const minScore = simulation.currentEstimatedScore - 20;
-                            const range = maxScore - minScore;
-                            const height = ((point.projectedScore - minScore) / range) * 100;
-
-                            return (
-                                <div
-                                    key={i}
-                                    className="flex-1 flex flex-col items-center gap-2"
-                                >
-                                    <div className="text-[10px] font-bold text-slate-400 tabular-nums">
-                                        {point.projectedScore}
+                    <div className="space-y-6">
+                        {simulation.financialBenefits.map((benefit, i) => (
+                            <div key={i} className="group relative">
+                                <div className="absolute -inset-px bg-gradient-to-r from-slate-500/10 to-transparent rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="relative p-10 bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] transition-all duration-500 flex items-center justify-between">
+                                    <div className="flex items-center gap-10">
+                                        <div className="w-16 h-16 rounded-2xl bg-slate-900/50 flex flex-col items-center justify-center border border-white/5 group-hover:border-slate-500/30 transition-colors">
+                                            <span className="text-[10px] font-mono font-black text-slate-500">PRD</span>
+                                            <span className="text-lg font-mono font-black text-slate-500">{String(i + 1).padStart(2, '0')}</span>
+                                        </div>
+                                        <div>
+                                            <h5 className="text-xl font-black text-white uppercase tracking-tight mb-2 italic">{benefit.product}</h5>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-[10px] font-mono font-black text-slate-500/80 uppercase tracking-[0.2em]">{benefit.currentRate}</span>
+                                                <ChevronRight size={12} className="text-slate-700" />
+                                                <span className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-[0.2em]">{benefit.projectedRate}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div
-                                        className={`w-full rounded-t-lg transition-all duration-500 ${i === 0 ? 'bg-slate-300 dark:bg-slate-700' :
-                                                i === simulation.timeline.length - 1 ? 'bg-emerald-500' :
-                                                    'bg-blue-500/50'
-                                            }`}
-                                        style={{ height: `${Math.max(10, height)}%` }}
+                                    <div className="text-right">
+                                        <div className="text-3xl font-black text-white tabular-nums tracking-tighter group-hover:text-slate-400 transition-colors">${benefit.lifetimeSavings.toLocaleString()}</div>
+                                        <div className="text-[8px] font-mono font-black text-slate-500 uppercase tracking-widest mt-1">Life_Cycle_SAVINGS</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="p-12 rounded-[3.5rem] bg-slate-500/5 border border-slate-500/20 shadow-inner relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Zap size={80} className="text-slate-500" />
+                        </div>
+                        <div className="relative z-10">
+                            <p className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-[0.5em] mb-4">Total_Aggregated_Delta</p>
+                            <div className="flex items-baseline gap-4">
+                                <span className="text-7xl font-black text-white tabular-nums tracking-tighter">${totalSavings.toLocaleString()}</span>
+                                <span className="text-slate-500 font-black text-xl font-mono uppercase tracking-widest italic">USD</span>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-6 font-medium italic max-w-md uppercase leading-relaxed tracking-wide">
+                                Cumulative interest expense elimination projected across all institutional lending products over active liability terms.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Score Factor Weights (5 cols) */}
+                <div className="lg:col-span-5 space-y-12">
+                     <div className="flex items-center gap-8">
+                        <div className="w-20 h-20 rounded-[2.5rem] bg-slate-500/10 text-slate-400 flex items-center justify-center border border-slate-500/20 shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-slate-500/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                            <Shield size={32} className="relative z-10" />
+                        </div>
+                        <div>
+                            <h4 className="text-3xl font-black text-white uppercase tracking-tighter italic">Neural Weights</h4>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold mt-2">FICO Calculation Protocol</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {ficoWeights.map((factor, i) => (
+                            <div key={i} className="p-8 rounded-[2.5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 group hover:border-slate-500/20 transition-all duration-500">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h5 className="text-lg font-black text-white uppercase tracking-tighter italic">{factor.category}</h5>
+                                    <span className="text-2xl font-black text-slate-400 font-mono tracking-tighter">{Math.round(factor.weight * 100)}%</span>
+                                </div>
+                                <p className="text-xs text-slate-500 leading-relaxed font-medium uppercase tracking-wide border-l border-slate-900 pl-6 italic">
+                                    {factor.description}
+                                </p>
+                                <div className="mt-8 w-full h-1 bg-slate-900 rounded-full overflow-hidden">
+                                     <motion.div 
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${factor.weight * 100}%` }}
+                                        transition={{ duration: 1.5, ease: "circOut" }}
+                                        className="h-full bg-slate-500/50 rounded-full transition-all duration-1000 group-hover:bg-slate-400 group-hover:shadow-[0_0_10px_rgba(100,116,139,0.5)]"
                                     />
                                 </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Month Labels */}
-                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wider">
-                        {simulation.timeline.filter((_, i) => i % 3 === 0).map((point, i) => (
-                            <span key={i}>Mo {point.month}</span>
+                            </div>
                         ))}
                     </div>
                 </div>
+            </div>
 
-                {/* Milestones */}
-                <div className="mt-8 grid md:grid-cols-3 gap-4">
-                    {simulation.timeline.filter(t => t.milestone).slice(0, 3).map((point, i) => (
-                        <div key={i} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Month {point.month}</span>
+            {/* Recovery Sequence Timeline */}
+            <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-t from-slate-500/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
+                <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden p-16 shadow-2xl">
+                     <div className="flex items-center justify-between mb-20">
+                        <div className="flex items-center gap-10">
+                            <div className="w-20 h-20 rounded-[2.5rem] bg-white/5 text-white flex items-center justify-center border border-white/10 shadow-2xl relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                                <Calendar size={32} className="relative z-10" />
                             </div>
-                            <p className="text-sm font-medium dark:text-white">{point.milestone}</p>
+                            <div>
+                                <h4 className="text-4xl font-black text-white uppercase tracking-tighter italic">Recovery Sequence</h4>
+                                <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold mt-2">12-Month Synthetic Projection</p>
+                            </div>
                         </div>
-                    ))}
+                        <div className="px-8 py-3 rounded-full border border-white/10 text-[10px] font-mono text-slate-400 font-black uppercase tracking-[0.5em]">
+                            Model_Lock: FINAL
+                        </div>
+                    </div>
+
+                    <div className="relative px-10">
+                        {/* Timeline Visualization */}
+                        <div className="flex items-end justify-between h-64 gap-3 relative mb-12">
+                            {/* Grid Lines */}
+                            <div className="absolute inset-0 flex flex-col justify-between opacity-5">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="w-full h-px bg-white" />
+                                ))}
+                            </div>
+
+                            {simulation.timeline.map((point, i) => {
+                                const maxScore = 850;
+                                const minScore = simulation.currentEstimatedScore - 20;
+                                const range = maxScore - minScore;
+                                const height = ((point.projectedScore - minScore) / range) * 100;
+                                
+                                return (
+                                    <div key={i} className="relative flex-1 group/month">
+                                        <div className="absolute inset-0 -top-10 opacity-0 group-hover/month:opacity-100 transition-opacity flex flex-col items-center">
+                                            <div className="px-3 py-1.5 bg-white rounded-xl text-[10px] font-black text-slate-950 font-mono shadow-xl mb-2">
+                                                {point.projectedScore}
+                                            </div>
+                                            <div className="w-px h-10 bg-gradient-to-t from-white/20 to-white" />
+                                        </div>
+
+                                        <motion.div 
+                                            initial={{ height: 0 }}
+                                            animate={{ height: `${height}%` }}
+                                            transition={{ delay: i * 0.05, duration: 1, ease: "circOut" }}
+                                            className={cn(
+                                                "w-full rounded-2xl relative transition-all duration-500 group-hover/month:opacity-100",
+                                                i === 0 ? "bg-slate-800/40" : 
+                                                i < 3 ? "bg-slate-500/30 group-hover/month:bg-slate-500/50" : 
+                                                "bg-slate-500/20 group-hover/month:bg-slate-500/40"
+                                            )}
+                                        />
+                                        <div className="mt-6 text-center">
+                                            <p className="text-[10px] font-mono font-black text-slate-600 uppercase tracking-widest group-hover/month:text-white transition-colors">
+                                                {point.month}
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -19,7 +19,9 @@ import {
     Copy,
     Share2,
     Eye,
-    MessageSquareQuote
+    MessageSquareQuote,
+    Zap,
+    Activity
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -41,41 +43,46 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  const letterTypes: { id: LetterType; label: string; icon: React.ReactNode; color: string; description: string }[] = [
+  const letterTypes: { id: LetterType; label: string; icon: React.ReactNode; color: string; description: string; tag: string }[] = [
     { 
         id: 'bureau', 
         label: 'Institutional Challenge', 
         icon: <Shield size={18} />, 
         color: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-        description: 'Formal demand for institutional data integrity from central repositories.'
+        description: 'Formal demand for institutional data integrity from central repositories.',
+        tag: 'FCRA_Institutional'
     },
     { 
         id: 'validation', 
         label: 'Liability Verification', 
         icon: <CheckCircle2 size={18} />, 
         color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20',
-        description: 'Verification request for liability chains and original instrument data.'
+        description: 'Verification request for liability chains and original instrument data.',
+        tag: 'FDCPA_Lending'
     },
     { 
         id: 'furnisher', 
         label: 'Direct Audit Demand', 
         icon: <Mail size={18} />, 
         color: 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20',
-        description: 'Institutional audit request targeting original reporting source data.'
+        description: 'Institutional audit request targeting original reporting source data.',
+        tag: 'Metro2_Audit'
     },
     { 
         id: 'cease_desist', 
         label: 'Protocol Termination', 
         icon: <Ban size={18} />, 
         color: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
-        description: 'Mandatory termination of data processing and communication protocols.'
+        description: 'Mandatory termination of data processing and communication protocols.',
+        tag: 'Comm_Control'
     },
     { 
         id: 'intent_to_sue', 
         label: 'Litigation Manifest', 
         icon: <Gavel size={18} />, 
         color: 'text-rose-400 bg-rose-400/10 border-rose-400/20',
-        description: 'Formal manifest of non-compliance and intent for legal adjudication.'
+        description: 'Formal manifest of non-compliance and intent for legal adjudication.',
+        tag: 'Legal_Escalation'
     }
   ];
 
@@ -84,7 +91,7 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
   const stats = useMemo(() => ({
     words: editableLetter.split(/\s+/).filter(x => x.length).length,
     citations: (editableLetter.match(/Section|FCRA|FDCPA|15 U.S.C.|U.C.C./g) || []).length,
-    severity: editableLetter.length > 2000 ? 'Level III' : editableLetter.length > 1000 ? 'Level II' : 'Level I'
+    severity: editableLetter.length > 2000 ? 'ULTRA' : editableLetter.length > 1000 ? 'HIGH' : 'LOW'
   }), [editableLetter]);
 
   const handleCopy = () => {
@@ -94,211 +101,228 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
   };
 
   return (
-    <div className="fade-in space-y-12 pb-32">
-      {/* Institutional Output Header */}
-      <div className="relative p-1 rounded-[3rem] bg-gradient-to-b from-slate-800 to-slate-950 overflow-hidden shadow-2xl">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 mix-blend-overlay"></div>
-        <div className="relative z-10 p-12 bg-slate-950/90 rounded-[2.8rem] backdrop-blur-xl">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/5 rounded-full blur-[150px] -mr-80 -mt-80" />
-          
-          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
-            <div className="max-w-2xl text-center lg:text-left">
-              <div className="flex items-center justify-center lg:justify-start gap-4 mb-8">
-                  <div className="px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                    <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-blue-400 font-mono">Output Module : Alpha-7</span>
-                  </div>
-                  <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-slate-500 font-mono">Status: CALIBRATED</span>
-              </div>
-              <h2 className="text-6xl font-black text-white tracking-tight mb-8 leading-[1.1]">
-                Institutional <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Command Package</span>
-              </h2>
-              <p className="text-slate-400 text-xl leading-relaxed font-light max-w-xl">
-                Precision-engineered legal communications generated from forensic findings. All outputs are cryptographically verified for institutional standards.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-6 w-full lg:w-auto min-w-[320px]">
-              <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 backdrop-blur-md">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Target Entity</span>
-                  <span className="text-[10px] font-mono text-blue-400 uppercase tracking-widest px-2 py-0.5 rounded bg-blue-400/10 border border-blue-400/20">Active Selection</span>
-                </div>
-                <div className="text-xl font-mono text-white mb-6 uppercase tracking-tight">
-                  {selectedType?.label}
-                </div>
-                <button
-                    onClick={() => generatePDF(editableLetter, `manifest_${selectedLetterType}.pdf`)}
-                    className="w-full px-8 py-5 rounded-2xl bg-blue-600 text-white font-black text-[12px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-4 hover:bg-blue-500 shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:scale-[1.02] active:scale-95 group"
-                >
-                    <Download size={18} className="group-hover:translate-y-1 transition-transform" />
-                    Finalize Manifest PDF
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                  <button 
-                      onClick={handleCopy}
-                      className="py-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-widest hover:text-white hover:border-blue-500/50 transition-all flex items-center justify-center gap-3 transition-colors"
-                  >
-                      {copySuccess ? <CheckCircle2 size={16} className="text-emerald-500" /> : <Copy size={16} />}
-                      {copySuccess ? 'Copied' : 'Copy Text'}
-                  </button>
-                  <button className="py-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 text-[10px] uppercase font-bold tracking-widest hover:text-white hover:border-blue-500/50 transition-all flex items-center justify-center gap-3 transition-colors">
-                      <Share2 size={16} />
-                      Transmit
-                  </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Command Module Selector Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {letterTypes.map((type, idx) => (
-          <motion.button
-            key={type.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            onClick={() => setSelectedLetterType(type.id)}
-            className={cn(
-                "p-8 rounded-[2rem] border transition-all duration-500 text-left group relative overflow-hidden",
-                selectedLetterType === type.id
-                    ? "bg-slate-900 border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/20"
-                    : "bg-slate-950/40 border-slate-800/50 hover:border-slate-700 hover:bg-slate-900/40"
-            )}
-          >
-            <div className={cn(
-                "w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 shadow-inner",
-                selectedLetterType === type.id ? type.color : "bg-slate-900/50 text-slate-600 border border-slate-800/50"
-            )}>
-                {React.cloneElement(type.icon as React.ReactElement, { size: 24 })}
-            </div>
-            <h4 className={cn(
-                "font-mono text-xs uppercase tracking-[0.1em] mb-3",
-                selectedLetterType === type.id ? "text-white" : "text-slate-500"
-            )}>
-                {type.label}
-            </h4>
-            <div className="w-8 h-0.5 bg-slate-800 mb-4 group-hover:w-16 transition-all duration-500" />
-            <p className="text-[10px] text-slate-500 font-medium leading-relaxed line-clamp-2 uppercase tracking-tight">
-                {type.description}
-            </p>
-            
-            {selectedLetterType === type.id && (
-                <motion.div layoutId="active-indicator" className="absolute top-6 right-6 text-blue-500">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-blue-500 blur-lg opacity-40 animate-pulse" />
-                        <Eye size={16} className="relative z-10" />
-                    </div>
-                </motion.div>
-            )}
-          </motion.button>
-        ))}
-      </div>
-
-      <div className={cn(
-          "relative transition-all duration-700",
-          isFullscreen ? "fixed inset-4 z-[100] bg-slate-950 p-4 shadow-[0_0_100px_rgba(0,0,0,0.8)]" : ""
-      )}>
-        {/* Institutional Editor Terminal */}
-        <div className="relative bg-slate-950 border border-slate-800 rounded-[3rem] overflow-hidden flex flex-col min-h-[800px] shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
-            
-            <div className="bg-slate-900/50 p-8 border-b border-slate-800 flex flex-wrap justify-between items-center gap-8 relative z-10 backdrop-blur-md">
-                <div className="flex items-center gap-8">
-                    <div className="flex items-center gap-4">
-                        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl border border-white/5", selectedType?.color)}>
-                            {selectedType?.icon}
+    <div className="fade-in space-y-20 pb-40">
+        {/* ELITE_AUDIT_HERO::CORRESPONDENCE_LAB */}
+        <section className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-br from-indigo-600/20 via-blue-600/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
+            <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl p-16">
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[140px] -mr-96 -mt-96" />
+                
+                <div className="relative z-10 grid lg:grid-cols-12 gap-20 items-center">
+                    <div className="lg:col-span-8">
+                         <div className="flex items-center gap-6 mb-8">
+                            <div className="px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full flex items-center gap-3">
+                                <Zap size={14} className="text-indigo-400 animate-pulse" />
+                                <span className="text-[10px] uppercase font-black tracking-[0.4em] text-indigo-400 font-mono">Output Protocol v5.0</span>
+                            </div>
+                            <div className="h-px w-10 bg-slate-800" />
+                            <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Status::STANDBY</span>
                         </div>
-                        <div>
-                            <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500 font-mono font-bold">Document Manifest ID</p>
-                            <p className="text-lg font-black text-white font-mono uppercase truncate max-w-[200px]">{selectedType?.label}</p>
+
+                        <h2 className="text-7xl lg:text-[7.5rem] font-black text-white tracking-tighter mb-10 leading-[0.85] italic uppercase font-mono">
+                            Correspondence <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-violet-500 tracking-[-0.05em]">LAB</span>
+                        </h2>
+
+                        <p className="text-2xl text-slate-400 leading-[1.4] font-bold italic tracking-tight max-w-2xl border-l-2 border-indigo-500/30 pl-12 mb-12">
+                            Weaponizing <span className="text-white font-black">Institutional Demands</span>. Our correspondence matrix generates legally binding manifests designed to trigger strict compliance windows.
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-12 sm:gap-20 pt-10 border-t border-white/5">
+                             <div className="space-y-2">
+                                 <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.5em] font-mono italic">Tokens_Processed</p>
+                                 <p className="text-5xl font-black text-white font-mono tracking-tighter italic">{stats.words}</p>
+                             </div>
+                             <div className="space-y-2">
+                                 <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.5em] font-mono italic">Legal_Citations</p>
+                                 <p className="text-5xl font-black text-indigo-500 font-mono tracking-tighter italic">{stats.citations}</p>
+                             </div>
+                             <button
+                                onClick={() => generatePDF(editableLetter, `manifest_${selectedLetterType}.pdf`)}
+                                className="px-10 py-5 bg-white text-slate-950 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-indigo-600 hover:text-white transition-all shadow-3xl flex items-center gap-4"
+                            >
+                                <Download size={18} />
+                                Finalize_Manifest_PDF
+                            </button>
                         </div>
                     </div>
-                    
-                    <div className="h-12 w-px bg-slate-800" />
-                    
-                    <div className="flex items-center gap-8 font-mono">
-                         <div className="text-center">
-                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Units</p>
-                            <p className="text-sm font-black text-slate-300 tabular-nums">{editableLetter.length}</p>
-                         </div>
-                         <div className="text-center">
-                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Tokens</p>
-                            <p className="text-sm font-black text-slate-300 tabular-nums">{stats.words}</p>
-                         </div>
-                         <div className="text-center">
-                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Citations</p>
-                            <p className="text-sm font-black text-blue-400 tabular-nums">{stats.citations}</p>
-                         </div>
-                         <div className="text-center hidden sm:block">
-                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Severity</p>
-                            <p className="text-sm font-black text-rose-400">{stats.severity}</p>
+
+                    <div className="lg:col-span-4 self-stretch">
+                         <div className="h-full bg-slate-900 border border-white/10 p-12 rounded-[4rem] backdrop-blur-3xl shadow-2xl relative overflow-hidden group/actions flex flex-col justify-center gap-8">
+                            <div className="absolute top-0 right-0 p-12 opacity-[0.03] scale-[2.5] text-white rotate-12 pointer-events-none group-hover/actions:rotate-0 transition-transform duration-1000">
+                                <FileText size={100} />
+                            </div>
+                            
+                            <button 
+                                onClick={handleCopy}
+                                className="w-full py-8 rounded-[2.5rem] bg-slate-950 border border-white/5 text-slate-500 flex flex-col items-center justify-center gap-4 hover:border-indigo-500/50 hover:text-white transition-all group/btn relative overflow-hidden"
+                            >
+                                <div className="absolute inset-0 bg-indigo-500/5 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
+                                {copySuccess ? <CheckCircle2 size={32} className="text-emerald-500 relative z-10" /> : <Copy size={32} className="relative z-10" />}
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] font-mono italic relative z-10">{copySuccess ? 'SYNC_SUCCESS' : 'Buffer_Copy'}</span>
+                            </button>
+
+                            <button 
+                                className="w-full py-8 rounded-[2.5rem] bg-slate-950 border border-white/5 text-slate-500 flex flex-col items-center justify-center gap-4 hover:border-violet-500/50 hover:text-white transition-all group/btn relative overflow-hidden"
+                            >
+                                <div className="absolute inset-0 bg-violet-500/5 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
+                                <Share2 size={32} className="relative z-10" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] font-mono italic relative z-10">Transmit_Protocol</span>
+                            </button>
                          </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div className="flex items-center gap-4">
-                    <button 
-                        onClick={() => setIsFullscreen(!isFullscreen)}
-                        className="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 hover:text-white hover:border-blue-500 transition-all shadow-lg group"
+        {/* Tactical Document Matrix Selector */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <AnimatePresence>
+                {letterTypes.map((type, idx) => (
+                    <motion.button
+                        key={type.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        onClick={() => setSelectedLetterType(type.id)}
+                        className={cn(
+                            "relative p-8 rounded-[3rem] border transition-all duration-700 text-left group overflow-hidden h-full flex flex-col justify-between",
+                            selectedLetterType === type.id
+                                ? "bg-slate-900 border-indigo-500/50 shadow-indigo-950/20"
+                                : "bg-slate-950/40 border-white/5 hover:border-white/20"
+                        )}
                     >
-                        {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} className="group-hover:scale-110 transition-transform" />}
-                    </button>
-                    <div className="flex items-center gap-3 px-6 py-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-[pulse_2s_infinite]" />
-                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] font-mono">Dossier Locked</span>
+                        {selectedLetterType === type.id && (
+                            <motion.div 
+                                layoutId="active-bg" 
+                                className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent" 
+                            />
+                        )}
+                        
+                        <div className="relative z-10">
+                            <div className={cn(
+                                "w-16 min-h-[4rem] rounded-2xl flex items-center justify-center mb-10 transition-all duration-700 shadow-2xl border",
+                                selectedLetterType === type.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-slate-900 text-slate-600 border-white/5"
+                            )}>
+                                {React.cloneElement(type.icon as React.ReactElement, { size: 28 })}
+                            </div>
+                            <span className="text-[9px] font-mono text-slate-600 font-black uppercase tracking-[0.3em] block mb-2">{type.tag}</span>
+                            <h4 className={cn(
+                                "text-2xl font-black italic tracking-tighter uppercase font-mono leading-none mb-6",
+                                selectedLetterType === type.id ? "text-white" : "text-slate-500 group-hover:text-slate-400"
+                            )}>
+                                {type.label.split(' ').map((word, i) => (
+                                    <span key={i} className="block">{word}</span>
+                                ))}
+                            </h4>
+                        </div>
+
+                        <div className="relative z-10 mt-auto pt-8 border-t border-white/5">
+                            <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-tight italic opacity-60">
+                                {type.description}
+                            </p>
+                        </div>
+                    </motion.button>
+                ))}
+            </AnimatePresence>
+        </div>
+
+        {/* ELITE_DOSSIER_EDITOR_INTERFACE */}
+        <div className={cn(
+            "relative transition-all duration-1000",
+            isFullscreen ? "fixed inset-8 z-[100] bg-slate-950 rounded-[5rem] overflow-hidden border border-white/10 shadow-[0_0_200px_rgba(0,0,0,0.95)]" : ""
+        )}>
+            <div className="relative bg-slate-950 border border-white/10 rounded-[4rem] overflow-hidden flex flex-col min-h-[900px] shadow-4xl group/editor">
+                <div className="absolute top-0 left-0 w-full h-[600px] bg-indigo-500/5 rounded-full blur-[200px] -ml-64 -mt-64 pointer-events-none" />
+                
+                <div className="bg-slate-900/40 p-10 border-b border-white/5 flex flex-wrap justify-between items-center gap-10 relative z-10 backdrop-blur-3xl">
+                    <div className="flex items-center gap-10">
+                         <div className="flex items-center gap-6">
+                            <div className={cn(
+                                "w-20 h-20 rounded-3xl flex items-center justify-center shadow-4xl border border-white/10 transform rotate-3 group-hover/editor:rotate-0 transition-transform duration-700",
+                                selectedType?.color.split(' ')[0], "bg-slate-950"
+                            )}>
+                                {React.cloneElement(selectedType?.icon as React.ReactElement, { size: 36, className: selectedType?.color.split(' ')[0] })}
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-3 mb-1">
+                                    <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                    <p className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-mono font-black italic">Target_Manifest_Node</p>
+                                </div>
+                                <p className="text-3xl font-black text-white font-mono uppercase italic tracking-tighter leading-none">{selectedType?.label}</p>
+                            </div>
+                         </div>
+                         
+                         <div className="hidden lg:block h-16 w-px bg-white/5" />
+                         
+                         <div className="hidden lg:flex items-center gap-12 font-mono">
+                             <div className="space-y-1">
+                                <p className="text-[10px] uppercase font-black text-slate-700 tracking-widest italic">Character_Array</p>
+                                <p className="text-2xl font-black text-slate-300 tabular-nums">{editableLetter.length.toLocaleString()}</p>
+                             </div>
+                             <div className="space-y-1">
+                                <p className="text-[10px] uppercase font-black text-slate-700 tracking-widest italic">Lexical_Tokens</p>
+                                <p className="text-2xl font-black text-slate-300 tabular-nums">{stats.words}</p>
+                             </div>
+                             <div className="space-y-1">
+                                <p className="text-[10px] uppercase font-black text-slate-700 tracking-widest italic">Risk_Vectors</p>
+                                <p className="text-2xl font-black text-rose-500 tabular-nums">{stats.severity}</p>
+                             </div>
+                         </div>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                        <button 
+                            onClick={() => setIsFullscreen(!isFullscreen)}
+                            className="w-16 h-16 bg-slate-950 border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:border-indigo-500 transition-all shadow-4xl flex items-center justify-center group/fs"
+                        >
+                            {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} className="group-hover/fs:scale-110 transition-transform" />}
+                        </button>
+                        <div className="px-8 py-5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-4">
+                            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] font-mono italic">Manifest_Integrity::LOCKED</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="flex-1 relative flex overflow-hidden">
-                 {/* Precision Diagnostics Sidebar */}
-                 <div className="w-20 border-r border-slate-800 bg-slate-900/30 flex flex-col items-center py-12 gap-12 relative z-10">
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer group">
-                        <Type size={22} className="group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer group">
-                        <AlignLeft size={22} className="group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-blue-400 transition-colors cursor-pointer group">
-                        <MessageSquareQuote size={22} className="group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="mt-auto mb-4 flex flex-col items-center gap-1 font-mono">
-                        <div className="w-1 h-1 rounded-full bg-slate-700" />
-                        <div className="w-1 h-3 rounded-full bg-blue-500/20" />
-                        <span className="text-[8px] text-slate-600 rotate-90 mt-8 whitespace-nowrap tracking-[0.5em] uppercase">V4.4.2</span>
-                    </div>
-                 </div>
+                <div className="flex-1 relative flex overflow-hidden">
+                     {/* ELITE_DYNAMIC_SIDEBAR */}
+                     <div className="w-24 border-r border-white/5 bg-black/20 flex flex-col items-center py-12 gap-12 relative z-10">
+                        {[Type, AlignLeft, MessageSquareQuote, Shield].map((Icon, i) => (
+                            <div key={i} className="w-14 h-14 rounded-2xl bg-slate-950 border border-white/5 text-slate-700 hover:text-indigo-400 hover:border-indigo-500/30 transition-all cursor-pointer flex items-center justify-center group/tool">
+                                <Icon size={24} className="group-hover/tool:scale-110 transition-transform" />
+                            </div>
+                        ))}
+                        <div className="mt-auto mb-8 flex flex-col items-center gap-8 font-mono">
+                            <span className="text-[12px] text-slate-800 rotate-90 whitespace-nowrap tracking-[0.8em] font-black uppercase">V5.0_CORE</span>
+                            <div className="w-1 h-32 bg-gradient-to-b from-indigo-500/50 to-transparent rounded-full shadow-[0_0_15px_rgba(99,102,241,0.3)]" />
+                        </div>
+                     </div>
 
-                 <textarea
-                    className="flex-1 p-20 font-serif text-[22px] leading-[1.8] bg-transparent border-none focus:ring-0 resize-none outline-none text-slate-200 custom-scrollbar selection:bg-blue-500/30"
-                    value={editableLetter}
-                    onChange={(e) => setEditableLetter(e.target.value)}
-                    spellCheck={false}
-                    placeholder="ENTER FORENSIC NARRATIVE DATA..."
-                 />
+                     <div className="flex-1 relative group/textarea overflow-hidden">
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[180px] -mr-64 -mt-64 pointer-events-none group-hover/textarea:opacity-100 transition-opacity duration-1000" />
+                        <textarea
+                            className="w-full h-full p-24 font-serif text-3xl leading-[1.8] bg-transparent border-none focus:ring-0 resize-none outline-none text-slate-200 custom-scrollbar selection:bg-slate-500/30 font-medium italic"
+                            value={editableLetter}
+                            onChange={(e) => setEditableLetter(e.target.value)}
+                            spellCheck={false}
+                            placeholder="Type or paste your letter text here..."
+                        />
+                     </div>
+                </div>
 
-                 {/* Focus Background Element */}
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-blue-500/2 rounded-full blur-[120px] pointer-events-none" />
-            </div>
-
-            <div className="bg-slate-900/80 p-6 border-t border-slate-800 flex justify-between items-center text-[10px] font-mono font-bold text-slate-500 uppercase tracking-[0.3em] px-12 relative z-10">
-                <span className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-sm bg-blue-500/40" />
-                    Institutional Command Suite // Terminal 01
-                </span>
-                <span className="flex items-center gap-4 py-2 px-4 rounded-full bg-amber-500/5 border border-amber-500/20 text-amber-500/80">
-                    <AlertCircle size={14} />
-                    ADVISORY: AUDIT DATA INTEGRITY VERIFIED
-                </span>
+                <div className="bg-slate-950 p-6 border-t border-white/5 flex justify-between items-center text-[10px] font-mono font-black text-slate-700 uppercase tracking-[0.6em] px-16 relative z-10 italic">
+                    <span className="flex items-center gap-4">
+                        <Activity size={12} className="text-slate-500 animate-pulse" />
+                        Institutional_Command_Suite_v5.0.1
+                    </span>
+                    <span className="flex items-center gap-4 py-2 px-6 rounded-full bg-amber-500/5 border border-amber-500/20 text-amber-500/60 font-bold">
+                        <AlertCircle size={14} />
+                        Audit_Verification::PENDING_PDF_RASTER
+                    </span>
+                </div>
             </div>
         </div>
-      </div>
     </div>
   );
 };

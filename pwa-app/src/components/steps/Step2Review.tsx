@@ -258,12 +258,16 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
               <div className="flex flex-wrap items-center gap-3">
                 <input
                   type="text"
+                  title="Filter by creditor"
+                  aria-label="Filter tradelines by creditor name"
                   className="w-48 h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 dark:text-white text-xs"
                   placeholder="Filter by creditor..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <select
+                  title="Sort tradelines"
+                  aria-label="Sort tradelines by category"
                   className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 dark:text-white text-xs appearance-none cursor-pointer pr-8"
                   value={sortKey}
                   onChange={(e) => setSortKey(e.target.value as typeof sortKey)}

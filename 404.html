@@ -4,19 +4,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page not found | Debt Re-aging</title>
+  <meta name="description" content="This page wasn’t found. Return to the Debt Re-aging marketing site or open the app.">
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; color: #334155; text-align: center; }
-    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    p { margin-bottom: 1.5rem; }
-    a { color: #0f172a; font-weight: 600; }
+    :root {
+      --slate-900: #0f172a;
+      --slate-600: #475569;
+      --slate-400: #94a3b8;
+      --accent: #475569;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: #f8fafc;
+      color: #334155;
+      text-align: center;
+    }
+    .wrap { max-width: 420px; }
+    .code {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(4rem, 15vw, 8rem);
+      font-weight: 600;
+      line-height: 1;
+      color: var(--slate-900);
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--slate-900);
+      margin-bottom: 0.75rem;
+    }
+    p {
+      font-size: 0.9375rem;
+      color: var(--slate-600);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1rem;
+      justify-content: center;
+    }
+    .links a {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .links a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+    .links a.primary {
+      background: var(--slate-900);
+      color: #fff;
+    }
+    .links a.primary:hover { background: #0a0f1a; }
+    .links a.secondary {
+      background: #fff;
+      color: var(--slate-900);
+      border: 1px solid #e2e8f0;
+    }
+    .links a.secondary:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
   </style>
 </head>
 <body>
-  <h1>Page not found</h1>
-  <p>This page doesn’t exist. Go back to the home page or open the app.</p>
-  <p>
-    <a href="./">Home</a> &middot;
-    <a href="pwa-app/out/">Open App</a>
-  </p>
+  <main class="wrap" role="main">
+    <p class="code" aria-hidden="true">404</p>
+    <h1>Page not found</h1>
+    <p>This page doesn’t exist. Go back to the home page or open the app.</p>
+    <nav class="links" aria-label="Options">
+      <a href="./" class="primary">Home</a>
+      <a href="pwa-app/out/" class="secondary">Open App</a>
+    </nav>
+  </main>
 </body>
 </html>

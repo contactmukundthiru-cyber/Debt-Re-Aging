@@ -113,7 +113,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
                 onClick={() => fileInputRef.current?.click()}
               >
                 {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05] dot-pattern-current" />
 
                 <div className="relative z-10 text-center">
                   <div className="w-24 h-24 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/10 transition-all shadow-xl">
@@ -123,6 +123,8 @@ export const Step1Input: React.FC<Step1InputProps> = ({
                   </div>
 
                   <button
+                    type="button"
+                    title="Initiate Scan"
                     className="mb-4 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/20 active:scale-95 transition-all flex items-center gap-2 mx-auto"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -142,6 +144,9 @@ export const Step1Input: React.FC<Step1InputProps> = ({
             <input
               ref={fileInputRef}
               type="file"
+              id="report-upload"
+              title="Upload Credit Report"
+              aria-label="Upload credit report files"
               accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.webp,.bmp,.tiff"
               multiple
               className="sr-only"
@@ -163,7 +168,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
             </div>
           </div>
           <textarea
-            className="flex-grow min-h-[240px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 p-6 font-mono text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all resize-none dark:text-white placeholder:text-slate-400"
+            className="flex-grow min-h-[240px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 p-6 font-mono text-sm focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500/50 transition-all resize-none dark:text-white placeholder:text-slate-400"
             placeholder="Paste raw credit report data here...&#10;&#10;Tip: Copy text directly from your credit bureau PDF or online account."
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
@@ -210,6 +215,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
         <button
           type="button"
+          title="Analyze Report Text"
           className="btn btn-primary px-12 py-5 h-auto text-base font-bold shadow-xl shadow-emerald-900/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02]"
           onClick={processText}
           disabled={!rawText.trim()}
@@ -220,6 +226,7 @@ export const Step1Input: React.FC<Step1InputProps> = ({
         </button>
         <button
           type="button"
+          title="Load Sample Data"
           className="btn btn-secondary px-12 py-5 h-auto text-base font-bold dark:bg-slate-900 dark:text-white dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 transition-all"
           onClick={loadSample}
         >
@@ -252,6 +259,8 @@ export const Step1Input: React.FC<Step1InputProps> = ({
                 </div>
                 <button
                   type="button"
+                  title={`Remove ${source.name}`}
+                  aria-label={`Remove ${source.name}`}
                   onClick={() => removeSource(source.id)}
                   className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 >

@@ -103,12 +103,23 @@ export function generateExecutiveSummary(accounts: { fields: CreditFields; flags
           accounts: [key],
           values: uniqueValues,
           impact: 'high',
-          description: `Conflicting ${field} reported for account ${key}. Experian reports ${uniqueValues[0]}, while others report ${uniqueValues.slice(1).join(', ')}. This violates the "Maximum Possible Accuracy" requirement of FCRA §607(b).`
+          description: `Conflicting ${field} reported for account ${key}: values ${uniqueValues.join(', ')}. Violates the "Maximum Possible Accuracy" requirement of FCRA §607(b).`
         });
       }
     });
   });
 
+  // Evidence readiness: higher when violations have evidence, fields are complete, and discrepancies are documented
+  const totalFlags = summary.totalViolations;
+  const withEvidence = accounts.reduce((sum, acc) => sum + acc.flags.filter(f => (f.fieldValues?.dofd || f.fieldValues?.currentValue || f.fieldValues?.dateOpened)).length, 0);
+  const fieldCompleteness = accounts.reduce((s, acc) => {
+    const f = acc.fields;
+    const filled = [f.dofd, f.dateOpened, f.originalCreditor, f.furnisherOrCollector, f.currentValue, f.accountStatus].filter(Boolean).length;
+    return s + (filled / 6) * 100;
+  }, 0) / Math.max(1, accounts.length);
+  summary.evidenceReadiness = totalFlags === 0
+    ? Math.round(Math.min(100, fieldCompleteness * 0.5))
+    : Math.round(Math.min(100, (withEvidence / Math.max(1, totalFlags)) * 45 + (fieldCompleteness / 100) * 35 + (summary.discrepancies.length > 0 ? 20 : 0)));
   return summary;
 }
 
@@ -367,6 +378,24 @@ export function detectPatterns(flags: RuleFlag[], fields: CreditFields): Pattern
       significance: 'medium',
       description: 'DOFD is required for all negative accounts but is not reported.',
       recommendation: 'Dispute for incomplete information. Furnisher must provide or delete the account.'
+    });
+  }
+
+  // When no patterns match, provide a baseline recommendation
+  if (insights.length === 0 && flags.length > 0) {
+    insights.push({
+      pattern: 'Violations Require Documentation',
+      significance: 'medium',
+      description: `${flags.length} violation(s) detected. Document dates, balances, and correspondence for each.`,
+      recommendation: 'Request a copy of your full file from each bureau. Send targeted dispute letters citing specific FCRA sections.'
+    });
+  }
+  if (insights.length === 0 && flags.length === 0 && (fields.dofd || fields.dateOpened)) {
+    insights.push({
+      pattern: 'No Violations Detected',
+      significance: 'low',
+      description: 'No rule violations were flagged for this account based on the data provided.',
+      recommendation: 'Keep copies of all reports and correspondence. Re-run analysis if you receive updated data or additional accounts.'
     });
   }
 

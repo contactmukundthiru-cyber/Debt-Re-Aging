@@ -88,6 +88,8 @@ Documentation improvements are always welcome:
 - Improve the pilot guide
 - Translate documentation
 
+For **marketing site** (GitHub Pages) and **PWA** deployment options (canonical, OG image, analytics), see **`docs/DEPLOYMENT_MARKETING.md`**.
+
 ### Contributing Rules
 
 To add new detection rules:

@@ -108,122 +108,179 @@ The volume and nature of these errors (${flags.length} total) suggests a systemi
     };
 
     return (
-        <div className="fade-in space-y-12 pb-24">
-            {/* Header / Hero */}
-            <div className="relative p-1 rounded-[3rem] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-white/5 overflow-hidden shadow-3xl">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
-                <div className="relative z-10 p-12">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-                        <div className="text-center md:text-left">
-                            <div className="flex items-center gap-3 mb-6 justify-center md:justify-start">
-                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-blue-400 font-mono">Escalation Node: Alpha-9</span>
-                            </div>
-                            <h2 className="text-5xl lg:text-6xl font-black text-white tracking-tighter mb-6 leading-tight">
-                                Legal <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Escalation Lab</span>
-                            </h2>
-                            <p className="text-slate-400 text-lg max-w-xl font-medium">
-                                Converting forensic audit results into valid statutory instruments. These documents are calibrated to bypass clerical filters and engage legal counsel.
-                            </p>
+        <div className="fade-in space-y-20 pb-40">
+            {/* ELITE_AUDIT_HERO::KINETIC_ESCALATION_LAB */}
+            <section className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-br from-slate-600/20 via-slate-500/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
+                <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl p-16">
+                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-500/5 rounded-full blur-[140px] -mr-96 -mt-96" />
+                    
+                    <div className="relative z-10 grid lg:grid-cols-12 gap-20 items-center">
+                        <div className="lg:col-span-12 mb-12 border-b border-white/5 pb-12">
+                             <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                                <div className="text-center md:text-left">
+                                    <div className="flex items-center gap-6 mb-8 justify-center md:justify-start">
+                                        <div className="px-5 py-2 bg-slate-500/10 border border-slate-500/20 rounded-full flex items-center gap-3">
+                                            <Zap size={14} className="text-slate-400 animate-pulse" />
+                                            <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-400 font-mono">Escalation Matrix v5.0</span>
+                                        </div>
+                                        <div className="h-px w-10 bg-slate-800" />
+                                        <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Node_Selection::ACTIVE</span>
+                                    </div>
+                                    <h2 className="text-7xl lg:text-[7.5rem] font-black text-white tracking-tighter mb-6 leading-[0.85] italic uppercase font-mono">
+                                        Kinetic <br/>
+                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-white to-slate-400 tracking-[-0.05em]">ESCALATION</span>
+                                    </h2>
+                                </div>
+
+                                <div className="flex bg-slate-900/30 p-3 rounded-[3rem] border border-white/10 backdrop-blur-3xl shadow-inner relative group/nav">
+                                    {[
+                                        { id: 'affidavit', label: 'Forensic_Affidavit', icon: <PenTool size={18} /> },
+                                        { id: 'cfpb', label: 'CFPB_Narrative', icon: <Mail size={18} /> },
+                                        { id: 'attorney', label: 'Legal_Dossier', icon: <Briefcase size={18} /> }
+                                    ].map(btn => (
+                                        <button
+                                            key={btn.id}
+                                            onClick={() => setActiveDocument(btn.id as any)}
+                                            className={cn(
+                                                "px-10 py-5 rounded-[2.2rem] flex items-center gap-4 transition-all relative overflow-hidden group/btn min-w-[180px]",
+                                                activeDocument === btn.id ? "text-slate-950" : "text-slate-500 hover:text-white"
+                                            )}
+                                        >
+                                            {activeDocument === btn.id && (
+                                                <motion.div 
+                                                    layoutId="activeEscalationTab" 
+                                                    className="absolute inset-0 bg-white shadow-2xl"
+                                                    transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
+                                                />
+                                            )}
+                                            <span className="relative z-10 transition-transform group-hover/btn:scale-110">{btn.icon}</span>
+                                            <span className="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] font-mono italic">{btn.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                             </div>
                         </div>
 
-                        <div className="flex bg-slate-900/50 p-2 rounded-[2rem] border border-white/10 backdrop-blur-xl">
-                            {[
-                                { id: 'affidavit', label: 'Affidavit', icon: <PenTool size={18} /> },
-                                { id: 'cfpb', label: 'CFPB', icon: <Mail size={18} /> },
-                                { id: 'attorney', label: 'Dossier', icon: <Briefcase size={18} /> }
-                            ].map(btn => (
-                                <button
-                                    key={btn.id}
-                                    onClick={() => setActiveDocument(btn.id as any)}
-                                    className={cn(
-                                        "px-8 py-4 rounded-[1.5rem] flex items-center gap-3 transition-all relative overflow-hidden group",
-                                        activeDocument === btn.id ? "text-slate-950" : "text-slate-500 hover:text-slate-200"
-                                    )}
-                                >
-                                    {activeDocument === btn.id && (
-                                        <motion.div layoutId="activeEscalationTab" className="absolute inset-0 bg-white" />
-                                    )}
-                                    <span className="relative z-10">{btn.icon}</span>
-                                    <span className="relative z-10 text-[10px] font-black uppercase tracking-widest">{btn.label}</span>
-                                </button>
-                            ))}
+                        <div className="lg:col-span-8">
+                            <p className="text-2xl text-slate-400 leading-[1.4] font-bold italic tracking-tight max-w-4xl border-l-2 border-slate-500/30 pl-12 mb-16">
+                                Converting forensic audit streams into <span className="text-white">Valid Statutory Instruments</span>. These documents are calibrated to bypass institutional clerical filters and engage <span className="text-slate-300">Tier-1 Legal Response Protocols</span>.
+                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div className="grid lg:grid-cols-12 gap-12">
-                {/* Document Preview */}
+            <div className="grid lg:grid-cols-12 gap-20">
+                {/* Document Preview - High Density Forensic Terminal */}
                 <div className="lg:col-span-8">
-                    <div className="relative p-1 rounded-[2.5rem] bg-gradient-to-b from-slate-800 to-slate-950">
-                        <div className="bg-slate-950 rounded-[2.4rem] overflow-hidden flex flex-col h-[700px] border border-white/5 relative">
-                            {/* Paper Effect */}
-                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')] opacity-10 pointer-events-none" />
+                    <div className="relative p-1 rounded-[4rem] bg-gradient-to-br from-slate-800 to-slate-950 shadow-2xl group/preview overflow-hidden">
+                        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-slate-500/5 rounded-full blur-[100px] -mr-40 -mt-40 opacity-0 group-hover/preview:opacity-100 transition-opacity duration-1000" />
+                        <div className="bg-slate-950/40 backdrop-blur-3xl rounded-[3.8rem] overflow-hidden flex flex-col h-[850px] border border-white/5 relative shadow-inner">
+                            {/* Paper Texture Overlay */}
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] opacity-10 pointer-events-none mix-blend-overlay" />
                             
-                            <div className="p-8 border-b border-white/10 flex justify-between items-center relative z-10 bg-slate-900/50 backdrop-blur-md">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-3 h-3 rounded-full bg-rose-500" />
-                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest font-mono">
-                                        {activeDocument === 'affidavit' ? 'Forensic Affidavit // Sworn Statement' :
-                                            activeDocument === 'cfpb' ? 'Regulatory Complaint // Narrative_01' : 'Case Summary // Attorney_Referral'}
-                                    </span>
+                            <div className="p-12 border-b border-white/5 flex justify-between items-center relative z-10 bg-black/20 backdrop-blur-md">
+                                <div className="flex items-center gap-6">
+                                    <div className="w-16 h-16 rounded-[2rem] bg-slate-900 flex items-center justify-center border border-white/10 group-hover/preview:border-slate-500/30 transition-colors">
+                                        <FileText size={28} className="text-slate-400" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] font-mono italic">
+                                            {activeDocument === 'affidavit' ? 'COMMAND_PACK::SWORN_STATEMENT' :
+                                                activeDocument === 'cfpb' ? 'COMMAND_PACK::REGULATORY_DRIVE' : 'COMMAND_PACK::ATTORNEY_DOSSIER'}
+                                        </span>
+                                        <h4 className="text-2xl font-black text-white uppercase tracking-tighter italic font-mono mt-1">
+                                             Instrument_Alpha_01
+                                        </h4>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => copyToClipboard(getDocumentText())}
-                                    className="px-6 py-2.5 bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-400 transition-all flex items-center gap-2 shadow-xl"
+                                    className="px-10 py-5 bg-white text-slate-950 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-slate-600 hover:text-white transition-all flex items-center gap-4 shadow-3xl group/copy"
                                 >
-                                    <Copy size={14} />
-                                    Copy Manifest
+                                    <Copy size={16} className="group-hover/copy:rotate-12 transition-transform" />
+                                    Copy_To_Buffer
                                 </button>
                             </div>
                             
-                            <div className="flex-grow p-12 overflow-y-auto font-mono text-sm leading-relaxed whitespace-pre-wrap text-slate-300 relative z-10 custom-scrollbar selection:bg-blue-500/30">
-                                <div className="max-w-3xl mx-auto">
+                            <div className="flex-grow p-16 overflow-y-auto font-mono text-[13px] leading-[1.8] whitespace-pre-wrap text-slate-300 relative z-10 custom-scrollbar selection:bg-slate-500/30">
+                                <div className="max-w-4xl mx-auto py-10">
                                     {getDocumentText()}
+                                    <motion.div 
+                                        animate={{ opacity: [0, 1, 0] }}
+                                        transition={{ duration: 1, repeat: Infinity }}
+                                        className="inline-block w-3 h-5 bg-slate-500 ml-1 translate-y-1"
+                                    />
                                 </div>
                             </div>
 
-                            <div className="p-6 border-t border-white/10 bg-slate-900/50 flex justify-center text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em] font-mono">
-                                Institutional Grade Output // {new Date().getFullYear()} Precision
+                            <div className="p-10 border-t border-white/5 bg-black/40 flex justify-center text-[10px] font-black text-slate-700 uppercase tracking-[0.6em] font-mono italic relative z-10">
+                                Institutional_Grade_Output // MISSION_CRITICAL // {new Date().getFullYear()}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Tactical Sidebar */}
-                <div className="lg:col-span-4 space-y-8">
-                    <div className="p-10 rounded-[2.5rem] bg-slate-900 border border-slate-800 shadow-2xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:rotate-12 transition-transform duration-700">
-                             <Scale size={120} />
+                {/* Tactical Sidebar - Deployment Metrics */}
+                <div className="lg:col-span-4 space-y-12">
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="p-16 rounded-[4.5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 shadow-2xl relative overflow-hidden group/intel min-h-[500px] flex flex-col justify-between"
+                    >
+                        <div className="absolute top-0 right-0 p-16 opacity-[0.02] scale-[2.5] rotate-12 group-hover/intel:rotate-0 transition-transform duration-1000 grayscale pointer-events-none select-none">
+                             <ShieldAlert size={200} className="text-white" />
                         </div>
-                        <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] font-mono mb-8 flex items-center gap-3">
-                             <Zap size={14} /> Strategic Intent
-                        </h4>
-                        <div className="space-y-8">
-                             <div>
-                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Target Entity</p>
-                                 <p className="text-sm font-bold text-white uppercase tracking-tight">{fields.furnisherOrCollector || 'Institutional Furnisher'}</p>
-                             </div>
-                             <div>
-                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Liability Nodes</p>
-                                 <p className="text-sm font-bold text-white uppercase tracking-tight">{flags.length} Structural Failures</p>
-                             </div>
-                             <div className="pt-8 border-t border-white/5">
-                                 <p className="text-[11px] text-slate-400 leading-relaxed font-medium italic">
-                                     "Affidavits create a legal weight that standard disputes lack. By converting your audit into a sworn statement, you increase the 'Settlement Pressure Index' by over 400%."
-                                 </p>
-                             </div>
-                        </div>
-                    </div>
+                        
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-8 mb-16">
+                                <div className="w-16 h-16 rounded-[2rem] bg-slate-600/10 flex items-center justify-center text-slate-400 border border-slate-500/20 shadow-2xl relative">
+                                    <Zap size={28} className="animate-pulse" />
+                                    <div className="absolute inset-0 blur-2xl opacity-20 bg-slate-500" />
+                                </div>
+                                <h4 className="text-3xl font-black text-white uppercase tracking-tighter italic font-mono">Deployment_<span className="text-slate-300">STRATEGY</span></h4>
+                            </div>
 
-                    <div className="p-10 rounded-[2.5rem] bg-indigo-600/10 border border-indigo-500/20 relative overflow-hidden">
-                        <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] font-mono mb-8">Next Command</h4>
-                        <p className="text-sm text-slate-300 mb-8 leading-relaxed font-medium">
-                            Once copied, this document should be notarized and sent via <span className="text-white">Certified Mail w/ Return Receipt</span>.
-                        </p>
-                        <button className="w-full py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-indigo-400 hover:text-white transition-all shadow-2xl">
-                            Print Command Pack
+                            <div className="space-y-12">
+                                <div className="group/stat">
+                                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.5em] font-mono mb-4 group-hover/stat:text-slate-400 transition-colors italic">Primary_Target</p>
+                                    <p className="text-2xl font-black text-white uppercase tracking-tighter italic font-mono">{fields.furnisherOrCollector || 'INSTITUTION_UNKNOWN'}</p>
+                                </div>
+                                <div className="group/stat">
+                                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.5em] font-mono mb-4 group-hover/stat:text-slate-400 transition-colors italic">Liability_Magnitude</p>
+                                    <div className="flex items-center gap-4">
+                                        <p className="text-4xl font-black text-white uppercase tracking-tighter italic font-mono leading-none">{flags.length}</p>
+                                        <div className="px-3 py-1 bg-slate-500/10 border border-slate-500/20 rounded-lg">
+                                            <span className="text-[9px] font-black text-slate-400 font-mono italic">FAILURES</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="pt-12 border-t border-white/5">
+                                    <p className="text-xl text-slate-400 leading-relaxed font-bold italic border-l-2 border-slate-500/30 pl-10 relative group-hover/intel:text-slate-200 transition-colors">
+                                        "Affidavits create a <span className="text-slate-300 italic">Static Legal Reality</span>. By converting audit streams into sworn statements, you bypass the friction of automated bureau processing."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    <div className="p-16 rounded-[4.5rem] bg-slate-700 border border-slate-500 relative overflow-hidden group/command shadow-2xl shadow-slate-900/30 flex flex-col justify-between min-h-[350px]">
+                        <div className="absolute top-0 right-0 p-16 opacity-20 scale-[2.5] -rotate-12 group-hover/command:rotate-0 transition-transform duration-1000 grayscale select-none pointer-events-none">
+                            <Terminal size={100} className="text-white" />
+                        </div>
+                        <div className="relative z-10">
+                            <h4 className="text-[11px] font-black text-white/50 uppercase tracking-[0.5em] font-mono mb-8 italic">Next_Command_Cycle</h4>
+                            <p className="text-2xl text-white font-black leading-tight italic tracking-tighter mb-10 group-hover/command:translate-x-2 transition-transform">
+                                Execute certified mail protocols with <span className="underline decoration-white/30 decoration-4 underline-offset-8">Return Receipt Received</span>.
+                            </p>
+                        </div>
+                        <button className="w-full py-6 bg-slate-950 text-white rounded-[2.5rem] text-[11px] font-black uppercase tracking-[0.5em] font-mono italic hover:scale-[1.02] active:scale-[0.98] transition-all shadow-3xl flex items-center justify-center gap-6 relative overflow-hidden group/btn">
+                            <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-500 opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                            <span className="relative z-10 flex items-center gap-6">
+                               Assemble_Dossier_Pack
+                               <Briefcase size={20} className="group-hover/btn:translate-x-2 transition-transform duration-500" />
+                            </span>
                         </button>
                     </div>
                 </div>

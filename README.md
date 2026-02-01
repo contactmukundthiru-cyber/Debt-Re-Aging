@@ -49,6 +49,8 @@ Deploy the generated `pwa-app/out/` directory to any static host.
 
 **GitHub Pages**: Enable Pages from the repo **Settings → Pages**, source = main branch, folder = root. The marketing site will be at `https://<user>.github.io/<repo>/`. If your repo name differs from `Debt-Re-Aging`, update `baseurl` in `_config.yml` to match (e.g. `/debt-re-aging`).
 
+**Optional (marketing site)**: For SEO and sharing, set canonical URL, add an OG image (1200×630) at `img/og.png`, and optionally add analytics. See **`docs/DEPLOYMENT_MARKETING.md`** for canonical, og:image, analytics, and JSON-LD.
+
 ### Run with Docker (Unified Suite)
 
 If you have Docker installed, you can launch the entire suite (Legacy App + Modern PWA) with a single command:
@@ -136,6 +138,7 @@ Also ensure the Docker daemon is running (WSL/Linux): `sudo service docker start
 ## For Organizations
 
 - **Deployment & handoff**: `docs/INSTITUTIONAL_HANDOFF.md`
+- **Marketing site (GitHub Pages)**: `docs/DEPLOYMENT_MARKETING.md` — canonical, OG image, analytics, app links
 - **IT guide**: `docs/IT_DEPLOYMENT_GUIDE.md`
 - **Security whitepaper**: `docs/SECURITY_WHITEPAPER.md`
 - **Training**: `docs/TRAINING_MATERIALS.md`

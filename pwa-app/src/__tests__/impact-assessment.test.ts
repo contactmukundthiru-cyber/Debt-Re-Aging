@@ -10,7 +10,8 @@ describe('Forensic Impact Assessment Engine', () => {
     whyItMatters: 'Legal time limit.',
     suggestedEvidence: [],
     fieldValues: {},
-    legalCitations: ['FCRA § 623']
+    legalCitations: ['FCRA § 623'],
+    successProbability: 85
   };
 
   const mediumSeverityFlag: RuleFlag = {
@@ -21,7 +22,8 @@ describe('Forensic Impact Assessment Engine', () => {
     whyItMatters: 'Accuracy.',
     suggestedEvidence: [],
     fieldValues: {},
-    legalCitations: ['FCRA § 623']
+    legalCitations: ['FCRA § 623'],
+    successProbability: 60
   };
 
   test('detects high-severity violations and marks as critical', () => {

@@ -56,7 +56,7 @@ export const GuideOverlay: React.FC<GuideOverlayProps> = ({ onClose }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm fade-in">
             <div className="max-w-md w-full bg-slate-900 border border-emerald-500/50 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
                 {/* Decorative Grid */}
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #10b981 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                <div className="absolute inset-0 opacity-10 dot-pattern-emerald" />
 
                 <div className="relative z-10">
                     <div className="flex justify-between items-center mb-4">

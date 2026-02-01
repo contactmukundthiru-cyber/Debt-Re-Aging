@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface ForensicScannerProps {
     progress: number;
@@ -87,7 +88,12 @@ export const ForensicScanner: React.FC<ForensicScannerProps> = ({ progress, stag
 
             {/* Progress Bar */}
             <div className="h-1 w-full bg-emerald-900/30">
-                <div className="h-full bg-emerald-500 shadow-[0_0_20px_#10b981] transition-all duration-300" style={{ width: `${progress}%` }} />
+                <motion.div 
+                    className="h-full bg-emerald-500 shadow-[0_0_20px_#10b981]" 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.3 }}
+                />
             </div>
         </div>
     );

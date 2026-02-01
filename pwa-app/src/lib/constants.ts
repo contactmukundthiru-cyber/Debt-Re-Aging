@@ -22,8 +22,9 @@ export const ACCOUNT_TYPES = ['Collection', 'Charge-off', 'Credit Card', 'Instal
 export const STATUSES = ['Open', 'Closed', 'Paid', 'Settled', 'Transferred', 'Sold', 'Charged Off', 'In Collections'];
 
 export const ANALYSIS_TABS = [
-  { id: 'overview', label: 'STRATEGIC OVERVIEW' },
-  { id: 'violations', label: 'VIOLATION MATRIX' },
+  { id: 'overview', label: 'EXECUTIVE DASHBOARD' },
+  { id: 'violations', label: 'VIOLATION MANIFEST' },
+  { id: 'institutional', label: 'INSTITUTIONAL HUB' },
   { id: 'briefing', label: 'FORENSIC BRIEFING' },
   { id: 'review', label: 'AUDIT REVIEW' },
   { id: 'aianalysis', label: 'INTELLIGENCE LAB' },

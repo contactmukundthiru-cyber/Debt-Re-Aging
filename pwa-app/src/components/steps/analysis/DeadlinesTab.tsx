@@ -111,10 +111,20 @@ const DeadlinesTab: React.FC<DeadlinesTabProps> = ({ fields, consumer, flags }) 
 
   if (!tracker) {
     return (
-      <div className="premium-card p-12 text-center bg-slate-50 dark:bg-slate-950/30 border-dashed border-slate-200 dark:border-slate-800">
-        <h3 className="text-xl font-bold dark:text-white mb-2">No deadlines yet</h3>
-        <p className="text-sm text-slate-500">Add the required dates (DOFD, last payment, state) to generate the deadline matrix.</p>
-      </div>
+        <div className="fade-in">
+            <div className="relative p-1 rounded-[4rem] bg-gradient-to-br from-slate-600/20 to-slate-900 shadow-2xl overflow-hidden group">
+                <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-3xl" />
+                <div className="relative z-10 p-32 flex flex-col items-center justify-center text-center gap-10">
+                    <div className="w-32 h-32 rounded-[3.5rem] bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-slate-400 shadow-2xl animate-pulse">
+                        <Clock size={56} />
+                    </div>
+                    <div>
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter italic font-mono mb-4">Temporal_Sync::FAILED</h3>
+                        <p className="text-lg text-slate-500 max-w-lg mx-auto font-bold italic border-l-2 border-slate-500/30 pl-8">No active deadlines detected. Date of First Delinquency (DOFD) and state residence are <span className="text-slate-300">REQUIRED</span> for temporal mapping.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
   }
 
@@ -129,16 +139,6 @@ const DeadlinesTab: React.FC<DeadlinesTabProps> = ({ fields, consumer, flags }) 
     });
   };
 
-  const downloadTextReport = () => {
-    const report = formatDeadlineReport(tracker);
-    const blob = new Blob([report], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'deadline_tracker.txt';
-    link.click();
-    URL.revokeObjectURL(link.href);
-  };
-
   const downloadCalendar = () => {
     const ics = buildIcs(tracker, reminders.length > 0 ? reminders : [7]);
     const blob = new Blob([ics], { type: 'text/calendar' });
@@ -149,20 +149,16 @@ const DeadlinesTab: React.FC<DeadlinesTabProps> = ({ fields, consumer, flags }) 
     URL.revokeObjectURL(link.href);
   };
 
-  const setCadence = (preset: number[]) => {
-    setReminders(preset);
-  };
-
-  const buildEmail = (template: 'reminder' | 'no_response') => {
-    const creditor = tracker.creditorName;
-    const next = tracker.nextAction;
-    if (template === 'reminder') {
-      return buildReminderEmail(creditor, next.description, next.deadline.toLocaleDateString());
-    }
-    return buildNoResponseEmail(creditor);
-  };
-
   const copyTemplate = async (template: 'reminder' | 'no_response') => {
+    const buildEmail = (template: 'reminder' | 'no_response') => {
+        const creditor = tracker.creditorName;
+        const next = tracker.nextAction;
+        if (template === 'reminder') {
+          return buildReminderEmail(creditor, next.description, next.deadline.toLocaleDateString());
+        }
+        return buildNoResponseEmail(creditor);
+    };
+
     try {
       await navigator.clipboard.writeText(buildEmail(template));
       setCopyStatus('success');
@@ -174,274 +170,251 @@ const DeadlinesTab: React.FC<DeadlinesTabProps> = ({ fields, consumer, flags }) 
     }
   };
 
-  const downloadText = (content: string, filename: string) => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(link.href);
-  };
-
-  const buildMOV = () => buildMOVRequest(fields, consumer);
-  const buildNotice = () => buildNoResponseNotice(fields, consumer, disputeFiledDate || undefined);
-  const buildCFPB = () => buildCFPBOutline(fields, consumer, flags);
-
   return (
-    <div className="fade-in space-y-12 pb-32">
-        {/* Elite Command Header */}
-        <div className="relative p-1 rounded-[3rem] bg-gradient-to-br from-slate-800 to-slate-950 overflow-hidden shadow-3xl">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] -mr-64 -mt-64" />
-            <div className="relative z-10 p-12 bg-slate-950/90 rounded-[2.8rem] backdrop-blur-xl border border-white/5">
-                <div className="grid lg:grid-cols-2 gap-16 items-center">
-                    <div>
-                        <div className="flex items-center gap-4 mb-8">
-                            <div className="px-4 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center gap-2">
-                                <Timer size={12} className="text-amber-400" />
-                                <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-amber-400 font-mono">Temporal Matrix Node</span>
+    <div className="fade-in space-y-20 pb-40">
+        {/* ELITE_AUDIT_HERO::TEMPORAL_RESPONSE_MATRIX */}
+        <section className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-br from-slate-600/20 via-slate-500/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
+            <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl p-16">
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-500/5 rounded-full blur-[140px] -mr-96 -mt-96" />
+                
+                <div className="relative z-10 grid lg:grid-cols-12 gap-20 items-center">
+                    <div className="lg:col-span-8">
+                         <div className="flex items-center gap-6 mb-8">
+                            <div className="px-5 py-2 bg-slate-500/10 border border-slate-500/20 rounded-full flex items-center gap-3">
+                                <Timer size={14} className="text-slate-300 animate-pulse" />
+                                <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-300 font-mono">Temporal Core v5.0</span>
                             </div>
-                            <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Compliance Core</span>
+                            <div className="h-px w-10 bg-slate-800" />
+                            <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Sync_Status::ACTIVE</span>
                         </div>
-                        <h2 className="text-6xl font-black text-white tracking-tight mb-8 leading-tight">
-                            Compliance <br/>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">Temporal Matrix</span>
+
+                        <h2 className="text-7xl lg:text-[7.5rem] font-black text-white tracking-tighter mb-10 leading-[0.85] italic uppercase font-mono">
+                            Temporal <br/>
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-white to-slate-400 tracking-[-0.05em]">RESPONSE</span>
                         </h2>
-                        <div className="flex items-center gap-12">
-                             <div className="space-y-1">
-                                 <p className="text-[10px] uppercase text-slate-500 font-black tracking-widest font-mono">Countdowns</p>
-                                 <p className="text-4xl font-black text-white font-mono tracking-tighter">{tracker.countdowns.length}</p>
+
+                        <p className="text-2xl text-slate-400 leading-[1.4] font-bold italic tracking-tight max-w-2xl border-l-2 border-slate-500/30 pl-12 mb-12">
+                            Executing <span className="text-white font-black">Strict Compliance Windows</span>. Statutory clocks are currently ticking. Failure to respond within these windows constitutes willful neglect under FCRA precedent.
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-12 sm:gap-20 pt-10 border-t border-white/5">
+                             <div className="space-y-2">
+                                 <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.5em] font-mono italic">Countdowns_Active</p>
+                                 <p className="text-5xl font-black text-white font-mono tracking-tighter italic">{tracker.countdowns.length}</p>
                              </div>
-                             <div className="h-12 w-px bg-slate-800" />
-                             <div className="space-y-1">
-                                 <p className="text-[10px] uppercase text-slate-500 font-black tracking-widest font-mono">Active Reminders</p>
-                                 <p className="text-4xl font-black text-amber-400 font-mono tracking-tighter">{reminders.length}</p>
+                             <div className="space-y-2">
+                                 <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.5em] font-mono italic">Reminders_Configured</p>
+                                 <p className="text-5xl font-black text-slate-400 font-mono tracking-tighter italic">{reminders.length}</p>
                              </div>
+                             <button
+                                onClick={downloadCalendar}
+                                className="px-10 py-5 bg-white text-slate-950 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-slate-600 hover:text-white transition-all shadow-3xl flex items-center gap-4"
+                            >
+                                <Calendar size={18} />
+                                Sync_Temporal_Cal
+                            </button>
                         </div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-2xl space-y-8 shadow-2xl">
-                         <div className="flex items-center gap-4 mb-2">
-                            <Calendar size={18} className="text-amber-400" />
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 font-mono">Filing Initialization</h4>
-                         </div>
-                         <div className="grid sm:grid-cols-[1fr_auto] gap-4">
-                            <input
-                                type="date"
-                                className="w-full bg-slate-900 border border-white/10 rounded-2xl px-6 py-5 text-white outline-none focus:ring-2 focus:ring-amber-500/30 transition-all font-mono"
-                                value={disputeFiledDate}
-                                onChange={(e) => setDisputeFiledDate(e.target.value)}
-                            />
-                            <button
-                                onClick={() => setDisputeFiledDate('')}
-                                className="px-8 bg-slate-800 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 hover:text-white transition-all shadow-xl active:scale-95 transform"
-                            >
-                                Reset
-                            </button>
-                         </div>
-                         <div className="flex gap-4">
-                            <button
-                                onClick={downloadCalendar}
-                                className="flex-grow py-5 bg-white text-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-400 hover:text-white transition-all shadow-xl flex items-center justify-center gap-3 active:scale-95 transform font-mono"
-                            >
-                                <Calendar size={16} /> Sync iCal Events
-                            </button>
+                    <div className="lg:col-span-4 self-stretch">
+                         <div className="h-full bg-slate-900 border border-white/10 p-12 rounded-[4rem] backdrop-blur-3xl shadow-2xl relative overflow-hidden group/input flex flex-col justify-center">
+                            <div className="absolute top-0 right-0 p-12 opacity-[0.03] scale-[2.5] text-white rotate-12 pointer-events-none group-hover/input:rotate-0 transition-transform duration-1000">
+                                <Calendar size={100} />
+                            </div>
+                            <div className="relative z-10 space-y-12">
+                                <div>
+                                    <label htmlFor="filing-init-date" className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 font-mono mb-6 italic">Filing_Initialization</label>
+                                    <input
+                                        id="filing-init-date"
+                                        title="Initial Dispute Filing Date"
+                                        type="date"
+                                        className="w-full bg-slate-950 border border-white/5 rounded-[2rem] px-8 py-6 text-white text-xl outline-none focus:ring-2 focus:ring-slate-500/30 transition-all font-mono font-black italic shadow-inner"
+                                        value={disputeFiledDate}
+                                        onChange={(e) => setDisputeFiledDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-6">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500 font-mono italic">Recall_Cadence</p>
+                                    <div className="flex flex-wrap gap-3">
+                                        {reminderOptions.map(days => (
+                                            <button
+                                                key={days}
+                                                onClick={() => toggleReminder(days)}
+                                                className={cn(
+                                                    "px-6 py-3 rounded-xl border text-[10px] font-black font-mono transition-all",
+                                                    reminders.includes(days) 
+                                                        ? "bg-slate-500 border-slate-400 text-white shadow-lg" 
+                                                        : "bg-slate-950 border-white/5 text-slate-500 hover:border-slate-500"
+                                                )}
+                                            >
+                                                {days}D
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                          </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div className="grid lg:grid-cols-12 gap-12">
-            {/* Countdown Matrix */}
+        <div className="grid lg:grid-cols-12 gap-20">
+            {/* Countdown Matrix Stack */}
             <div className="lg:col-span-8 space-y-8">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-2xl font-black text-white flex items-center gap-4">
-                        <span className="w-1.5 h-8 bg-amber-500 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
-                        Compliance Tracking Stack
+                <div className="flex items-center justify-between mb-8 px-8">
+                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.5em] font-mono italic flex items-center gap-4">
+                        <Activity size={16} className="text-slate-400" /> Compliance_Stack::ACTIVE
                     </h3>
                 </div>
 
-                <div className="grid gap-6">
-                    {tracker.countdowns.map((cd, idx) => (
-                        <motion.div
-                            key={`${cd.type}-${idx}`}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.1 }}
-                            className={cn(
-                                "relative group p-10 rounded-[3rem] border border-white/5 backdrop-blur-xl transition-all duration-500 overflow-hidden",
-                                cd.urgency === 'expired' ? "bg-rose-500/5 border-rose-500/30" :
-                                cd.urgency === 'critical' ? "bg-orange-500/5 border-orange-500/30" :
-                                "bg-slate-900/40"
-                            )}
-                        >
-                            <div className="absolute top-0 right-0 p-10">
-                                <span className={cn(
-                                    "px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] font-mono border",
-                                    cd.urgency === 'expired' ? "bg-rose-500 text-white border-rose-400" :
-                                    cd.urgency === 'critical' ? "bg-orange-500 text-white border-orange-400" :
-                                    "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                )}>
-                                    {cd.urgency}
-                                </span>
-                            </div>
-
-                            <div className="flex flex-col md:flex-row md:items-center gap-10">
-                                <div className="text-center md:text-left min-w-[220px]">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono mb-2">Temporal Offset</p>
-                                    <p className={cn(
-                                        "text-5xl font-black font-mono tracking-tighter shrink-0",
-                                        cd.urgency === 'expired' ? "text-rose-500" : "text-white"
-                                    )}>
-                                        {formatCountdown(cd)}
-                                    </p>
-                                </div>
-
-                                <div className="h-px md:h-24 w-full md:w-px bg-white/10" />
-
-                                <div className="flex-grow space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <AlertTriangle size={16} className={cn(
-                                            cd.urgency === 'expired' ? "text-rose-400" : "text-amber-400"
-                                        )} />
-                                        <h4 className="text-xl font-black text-white uppercase tracking-tight">
-                                            {cd.label}
-                                        </h4>
+                <div className="space-y-6">
+                    <AnimatePresence mode="popLayout">
+                        {tracker.countdowns.map((cd, idx) => {
+                            const isExpired = cd.urgency === 'expired';
+                            const isCritical = cd.urgency === 'critical';
+                            return (
+                                <motion.div
+                                    key={`${cd.type}-${idx}`}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className={cn(
+                                        "group/cd p-10 rounded-[3.5rem] bg-slate-950/40 backdrop-blur-3xl border transition-all shadow-2xl relative overflow-hidden",
+                                        isExpired ? "border-slate-500/30 bg-slate-950/10 shadow-slate-950/20" :
+                                        isCritical ? "border-slate-500/30 shadow-slate-950/20" :
+                                        "border-white/5 hover:border-slate-500/30"
+                                    )}
+                                >
+                                    {/* Urgency Badge */}
+                                    <div className="absolute top-0 right-0 p-10 flex items-center gap-4">
+                                         <div className={cn(
+                                             "px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.3em] font-mono border italic",
+                                             isExpired ? "bg-slate-600 text-white border-slate-400" :
+                                             isCritical ? "bg-slate-500 text-white border-slate-400 shadow-lg shadow-slate-500/20" :
+                                             "bg-slate-900 text-slate-400 border-slate-500/20"
+                                         )}>
+                                             {cd.urgency}
+                                         </div>
                                     </div>
-                                    <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                                        {cd.explanation}
-                                    </p>
-                                    <div className="pt-8 mt-4 border-t border-white/5 flex items-center gap-5">
-                                        <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-xl">
-                                            <MousePointer2 size={20} />
+
+                                    <div className="relative z-10 grid md:grid-cols-12 gap-12 items-center">
+                                        <div className="md:col-span-4 flex flex-col items-center md:items-start">
+                                             <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em] font-mono mb-2 italic">Temporal_Delta</span>
+                                             <p className={cn(
+                                                 "text-6xl font-black font-mono tracking-tighter italic leading-none",
+                                                 isExpired ? "text-slate-400" : "text-white"
+                                             )}>
+                                                 {formatCountdown(cd)}
+                                             </p>
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1">Execution Directive</p>
-                                            <p className="text-sm font-bold text-white font-mono">{cd.action}</p>
+
+                                        <div className="hidden md:block md:col-span-1 h-20 w-px bg-white/5 mx-auto" />
+
+                                        <div className="md:col-span-7">
+                                            <div className="flex items-center gap-4 mb-4">
+                                                <h5 className="text-2xl font-black text-white italic uppercase tracking-tighter font-mono">{cd.label}</h5>
+                                                {isExpired && <AlertTriangle size={16} className="text-slate-400 animate-pulse" />}
+                                            </div>
+                                            <p className="text-sm font-bold text-slate-400 italic mb-6 leading-relaxed pr-20">{cd.explanation}</p>
+                                            
+                                            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between group/action transition-colors hover:bg-white/10">
+                                                <div className="flex items-center gap-4">
+                                                    <MousePointer2 size={16} className="text-slate-400" />
+                                                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest font-mono italic">Tactical_Action: <span className="text-white">{cd.action}</span></span>
+                                                </div>
+                                                <ChevronRight size={14} className="text-slate-600 group-hover/action:translate-x-2 transition-transform" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
+                                </motion.div>
+                            );
+                        })}
+                    </AnimatePresence>
                 </div>
             </div>
 
             {/* Sidebar Controls */}
-            <div className="lg:col-span-4 space-y-8">
-                {/* Reminders */}
-                <div className="bg-slate-900/50 border border-white/5 rounded-[3rem] p-10 shadow-2xl">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono mb-10 flex items-center gap-3">
-                        <Bell size={14} className="text-amber-400" />
-                        Trigger Presets
-                    </h3>
-                    <div className="space-y-4">
-                        {reminderOptions.map(days => (
-                            <button
-                                key={days}
-                                onClick={() => toggleReminder(days)}
-                                className={cn(
-                                    "w-full flex items-center justify-between p-6 rounded-2xl border transition-all active:scale-95 group",
-                                    reminders.includes(days) 
-                                        ? "bg-amber-500/10 border-amber-400/50 text-amber-400" 
-                                        : "bg-slate-950 border-white/5 text-slate-600 hover:border-white/20 hover:text-slate-300"
-                                )}
-                            >
-                                <span className="font-black text-[10px] uppercase tracking-[0.3em] font-mono">{days} Day Interval</span>
-                                {reminders.includes(days) ? (
-                                    <CheckCircle2 size={20} className="text-amber-400" />
-                                ) : (
-                                    <div className="w-5 h-5 rounded-full border-2 border-slate-800 group-hover:border-slate-700" />
-                                )}
-                            </button>
-                        ))}
+            <div className="lg:col-span-4 space-y-12">
+                 <div className="p-16 rounded-[4.5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 shadow-2xl relative overflow-hidden group/intel h-full flex flex-col justify-between">
+                    <div className="absolute top-0 right-0 p-16 opacity-[0.02] scale-[2.5] rotate-12 group-hover/intel:rotate-0 transition-transform duration-1000 grayscale pointer-events-none select-none">
+                         <ShieldAlert size={200} className="text-white" />
                     </div>
-                </div>
-
-                {/* Comms */}
-                <div className="bg-gradient-to-br from-amber-600/10 to-transparent border border-white/10 rounded-[3rem] p-10 space-y-8 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-6 opacity-20">
-                        <Mail size={80} className="text-amber-400 rotate-12" />
-                    </div>
-                    <div className="relative z-10">
-                        <h4 className="text-lg font-black text-white mb-6 uppercase tracking-tight">Outreach Manifests</h4>
-                        <div className="space-y-4">
-                            <button
-                                onClick={() => copyTemplate('reminder')}
-                                className="w-full flex items-center gap-5 p-5 bg-slate-900/80 border border-white/5 rounded-2xl hover:border-amber-400/50 transition-all text-left group"
-                            >
-                                <div className="w-12 h-12 rounded-xl bg-amber-500/5 flex items-center justify-center text-amber-500 border border-amber-500/10 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                                    <Zap size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-white group-hover:text-amber-400 transition-colors">Forensic Status Check</p>
-                                    <p className="text-[9px] text-slate-500 font-bold font-mono">Export Internal Reminder</p>
-                                </div>
-                            </button>
-                            <button
-                                onClick={() => copyTemplate('no_response')}
-                                className="w-full flex items-center gap-5 p-5 bg-slate-900/80 border border-white/5 rounded-2xl hover:border-rose-500/50 transition-all text-left group"
-                            >
-                                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 group-hover:bg-rose-500 group-hover:text-white transition-all">
-                                    <ShieldAlert size={20} />
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-white group-hover:text-rose-400 transition-colors">Statutory Lapse Notice</p>
-                                    <p className="text-[9px] text-slate-500 font-bold font-mono">Export Escalation Draft</p>
-                                </div>
-                            </button>
-                        </div>
-                        {copyStatus === 'success' && (
-                            <motion.p 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-center text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] mt-6"
-                            >
-                                SYNC_SUCCESS
-                            </motion.p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Milestone Ledger */}
-                <div className="p-10 bg-slate-900/40 border border-white/5 rounded-[3rem] shadow-2xl">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 font-mono mb-10">Statutory Milestone Ledger</h3>
-                    <div className="space-y-8">
-                        {tracker.milestones.map((m, idx) => (
-                            <div key={idx} className="flex gap-6 group">
-                                <div className="flex flex-col items-center">
-                                    <div className={cn(
-                                        "w-3 h-3 rounded-full border-2 transition-all",
-                                        m.passed 
-                                            ? "bg-slate-700 border-slate-800" 
-                                            : "bg-amber-500 border-amber-900 shadow-[0_0_15px_rgba(245,158,11,0.5)] scale-125"
-                                    )} />
-                                    {idx < tracker.milestones.length - 1 && (
-                                        <div className={cn(
-                                            "w-px flex-grow my-2",
-                                            m.passed ? "bg-slate-800" : "bg-gradient-to-b from-amber-500/50 to-slate-800"
-                                        )} />
-                                    )}
-                                </div>
-                                <div className="pb-4">
-                                    <p className={cn(
-                                        "text-sm font-black uppercase tracking-tight",
-                                        m.passed ? "text-slate-600 line-through" : "text-white"
-                                    )}>
-                                        {m.event}
-                                    </p>
-                                    <div className="flex items-center gap-3 mt-1 text-[10px] font-mono font-bold">
-                                        <Calendar size={10} className="text-slate-600" />
-                                        <span className="text-slate-500">{m.date.toLocaleDateString()}</span>
-                                    </div>
-                                    <p className="text-xs text-slate-600 mt-3 font-medium leading-relaxed group-hover:text-slate-400 transition-colors">
-                                        {m.significance}
-                                    </p>
-                                </div>
+                    
+                    <div className="relative z-10 w-full">
+                        <div className="flex items-center gap-8 mb-16 px-4">
+                            <div className="w-16 h-16 rounded-[2rem] bg-slate-600/10 flex items-center justify-center text-slate-400 border border-slate-500/20 shadow-2xl relative">
+                                <Activity size={28} className="animate-pulse" />
                             </div>
-                        ))}
+                            <h4 className="text-3xl font-black text-white uppercase tracking-tighter italic font-mono">Milestone_Log</h4>
+                        </div>
+
+                        <div className="relative border-l-2 border-slate-800 ml-12 pl-12 space-y-20 pb-20">
+                            {tracker.milestones.map((milestone, i) => {
+                                const isPassed = milestone.passed;
+                                return (
+                                    <div key={i} className={cn("relative group/ms transition-opacity", !isPassed && "opacity-40 grayscale")}>
+                                        <div className={cn(
+                                            "absolute -left-[57px] top-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-all bg-slate-950 border-2",
+                                            isPassed ? "border-slate-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]" : "border-slate-800"
+                                        )}>
+                                            {isPassed && <div className="w-2 h-2 rounded-full bg-slate-500" />}
+                                        </div>
+                                        <div className="pt-1">
+                                            <span className="text-[9px] font-mono text-slate-500 italic mb-2 block font-black uppercase tracking-widest">{milestone.date.toLocaleDateString()}</span>
+                                            <p className={cn(
+                                                "text-xl font-black uppercase tracking-tighter font-mono italic leading-none mb-4",
+                                                isPassed ? "text-white" : "text-slate-600"
+                                            )}>{milestone.event}</p>
+                                            <p className="text-sm font-bold text-slate-500 italic leading-snug pr-8">{milestone.significance}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
+
+                    <div className="mt-16 bg-gradient-to-br from-slate-600/10 to-transparent border border-white/10 rounded-[3.5rem] p-12 space-y-10 shadow-3xl relative overflow-hidden w-full">
+                        <div className="absolute top-0 right-0 p-10 opacity-10 group-hover/intel:rotate-[-20deg] transition-transform duration-700">
+                             <Mail size={100} className="text-slate-300" />
+                        </div>
+                        <div className="relative z-10 w-full">
+                            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] font-mono mb-10 italic">Outreach_Protocols</h4>
+                            <div className="space-y-6">
+                                <button
+                                    onClick={() => copyTemplate('reminder')}
+                                    className="w-full flex items-center justify-between p-8 rounded-[2rem] bg-slate-950/80 border border-white/5 hover:border-slate-500 transition-all group/btn"
+                                >
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-mono italic mb-2 group-hover/btn:text-slate-300 transition-colors">Manifest_Export</p>
+                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Internal_Reminder_Draft</p>
+                                    </div>
+                                    <Zap size={20} className="text-slate-800 group-hover/btn:text-slate-400 transition-colors" />
+                                </button>
+                                <button
+                                    onClick={() => copyTemplate('no_response')}
+                                    className="w-full flex items-center justify-between p-8 rounded-[2rem] bg-slate-950/80 border border-white/5 hover:border-slate-500 transition-all group/btn"
+                                >
+                                    <div>
+                                        <p className="text-[10px] font-black text-white uppercase tracking-[0.3em] font-mono italic mb-2 group-hover/btn:text-slate-400 transition-colors">Escalation_Notice</p>
+                                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Non_Response_Protocol</p>
+                                    </div>
+                                    <ShieldAlert size={20} className="text-slate-800 group-hover/btn:text-slate-400 transition-colors" />
+                                </button>
+                            </div>
+                            {copyStatus === 'success' && (
+                                <motion.div 
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="mt-8 py-4 bg-slate-500/10 border border-slate-500/20 rounded-xl text-center"
+                                >
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono italic">Sync_Authorized</span>
+                                </motion.div>
+                            )}
+                        </div>
+                    </div>
+                 </div>
             </div>
         </div>
     </div>

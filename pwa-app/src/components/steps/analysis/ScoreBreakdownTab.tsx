@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { RiskProfile } from '../../../lib/rules';
+import { cn } from '../../../lib/utils';
 
 interface ScoreBreakdownTabProps {
   riskProfile: RiskProfile;
@@ -105,9 +107,16 @@ const ScoreBreakdownTab: React.FC<ScoreBreakdownTabProps> = ({ riskProfile }) =>
 
               <div className="space-y-3 relative z-10">
                 <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-1000 rounded-full ${isHigh ? 'bg-gradient-to-r from-rose-500 to-orange-500' : isMed ? 'bg-gradient-to-r from-amber-500 to-yellow-500' : 'bg-gradient-to-r from-emerald-500 to-cyan-500'}`}
-                    style={{ width: `${cat.impact}%` }}
+                  <motion.div
+                    className={cn(
+                      "h-full rounded-full",
+                      isHigh ? 'bg-gradient-to-r from-rose-500 to-orange-500' : 
+                      isMed ? 'bg-gradient-to-r from-amber-500 to-yellow-500' : 
+                      'bg-gradient-to-r from-emerald-500 to-cyan-500'
+                    )}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${cat.impact}%` }}
+                    transition={{ duration: 1.5, ease: "circOut" }}
                   />
                 </div>
                 <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">

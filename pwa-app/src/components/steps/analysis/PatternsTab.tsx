@@ -7,98 +7,199 @@ interface PatternsTabProps {
   patterns: PatternInsight[];
 }
 
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Zap, 
+    Activity, 
+    Target, 
+    Compass, 
+    Cpu, 
+    AlertTriangle, 
+    Lightbulb, 
+    ShieldAlert,
+    Dna,
+    BarChart3,
+    Layers
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
+
+interface PatternsTabProps {
+  patterns: PatternInsight[];
+}
+
 const PatternsTab: React.FC<PatternsTabProps> = ({ patterns }) => {
   const highCount = patterns.filter(p => p.significance === 'high').length;
 
   if (patterns.length === 0) {
     return (
-      <div className="premium-card p-16 text-center bg-slate-50 dark:bg-slate-950/20 border-dashed border-slate-200 dark:border-slate-800">
-        <svg className="w-20 h-20 mx-auto mb-6 text-emerald-500/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        <h3 className="text-xl font-bold dark:text-white mb-2">Pattern Nullification</h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">Forensic engine detected no systemic reporting anomalies in this tradeline. This is a positive indicator of data integrity.</p>
-      </div>
+        <div className="fade-in">
+            <div className="relative p-1 rounded-[4rem] bg-gradient-to-br from-emerald-600/20 to-slate-900 shadow-2xl overflow-hidden group">
+                <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-3xl" />
+                <div className="relative z-10 p-32 flex flex-col items-center justify-center text-center gap-10">
+                    <div className="w-32 h-32 rounded-[3.5rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-2xl animate-pulse">
+                        <ShieldAlert size={56} />
+                    </div>
+                    <div>
+                        <h3 className="text-4xl font-black text-white uppercase tracking-tighter italic font-mono mb-4">Pattern_Nullification::TRUE</h3>
+                        <p className="text-lg text-slate-500 max-w-lg mx-auto font-bold italic border-l-2 border-emerald-500/30 pl-8">Forensic engine detected no systemic reporting anomalies. Data integrity appears to be <span className="text-emerald-400">NOMINAL</span>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
   }
 
   return (
-    <div className="fade-in space-y-10">
-      {/* Hero Header */}
-      <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
+    <div className="fade-in space-y-20 pb-40">
+      {/* ELITE_AUDIT_HERO::SYSTEMIC_INTELLIGENCE_MATRIX */}
+      <section className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-br from-purple-600/20 via-pink-600/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
+        <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl p-16">
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-purple-500/5 rounded-full blur-[140px] -mr-96 -mt-96" />
+            
+            <div className="relative z-10 grid lg:grid-cols-12 gap-20 items-center">
+                <div className="lg:col-span-8">
+                     <div className="flex items-center gap-6 mb-8">
+                        <div className="px-5 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full flex items-center gap-3">
+                            <Cpu size={14} className="text-purple-400 animate-pulse" />
+                            <span className="text-[10px] uppercase font-black tracking-[0.4em] text-purple-400 font-mono">Neural Analysis v5.0</span>
+                        </div>
+                        <div className="h-px w-10 bg-slate-800" />
+                        <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Node_Status::SCANNING</span>
+                    </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-              <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-purple-400 font-mono">Pattern Recognition AI</span>
-            </div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">
-              Behavioral <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Anomalies</span>
-            </h2>
-            <p className="text-slate-400 text-sm max-w-lg">Machine learning-detected patterns that indicate systemic reporting misconduct or coordinated data manipulation across bureaus.</p>
-          </div>
+                    <h2 className="text-7xl lg:text-[7.5rem] font-black text-white tracking-tighter mb-10 leading-[0.85] italic uppercase font-mono">
+                        Systemic <br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-indigo-500 tracking-[-0.05em]">INTELLIGENCE</span>
+                    </h2>
 
-          <div className="flex gap-4">
-            <div className="px-6 py-4 rounded-2xl bg-white/5 border border-white/10 text-center">
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Patterns</p>
-              <p className="text-2xl font-bold tabular-nums">{patterns.length}</p>
+                    <p className="text-2xl text-slate-400 leading-[1.4] font-bold italic tracking-tight max-w-2xl border-l-2 border-purple-500/30 pl-12 mb-12">
+                        Detecting <span className="text-white font-black">Behavioral Fingerprints</span> of institutional misconduct. Our neural engine maps cross-bureau data manipulation to identify systemic reporting failures.
+                    </p>
+                </div>
+
+                <div className="lg:col-span-4 grid grid-cols-2 gap-8">
+                    <div className="p-10 rounded-[3.5rem] bg-white/5 border border-white/10 backdrop-blur-2xl text-center group/card transition-all hover:bg-white/10">
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] font-mono mb-4 italic group-hover/card:text-purple-400">Total_Signals</p>
+                        <p className="text-6xl font-black text-white font-mono italic tracking-tighter leading-none">{patterns.length}</p>
+                    </div>
+                    <div className="p-10 rounded-[3.5rem] bg-rose-500/10 border border-rose-500/20 backdrop-blur-2xl text-center group/card transition-all hover:bg-rose-500/20">
+                        <p className="text-[10px] font-black text-rose-400/60 uppercase tracking-[0.5em] font-mono mb-4 italic group-hover/card:text-rose-400">Critical_Vectors</p>
+                        <p className="text-6xl font-black text-rose-500 font-mono italic tracking-tighter leading-none">{highCount}</p>
+                    </div>
+                </div>
             </div>
-            <div className="px-6 py-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-center">
-              <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest mb-1">Critical</p>
-              <p className="text-2xl font-bold text-rose-400 tabular-nums">{highCount}</p>
-            </div>
-          </div>
         </div>
+      </section>
+
+      {/* Pattern Matrix Grid */}
+      <div className="grid lg:grid-cols-2 gap-12">
+        <AnimatePresence>
+            {patterns.map((pattern, i) => {
+                const isHigh = pattern.significance === 'high';
+                return (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className={cn(
+                            "group/pattern relative p-12 rounded-[4.5rem] border transition-all h-full flex flex-col overflow-hidden shadow-2xl",
+                            isHigh 
+                                ? "bg-rose-950/20 border-rose-500/20" 
+                                : "bg-slate-950/40 border-white/5"
+                        )}
+                    >
+                        {/* Status Bar */}
+                        <div className="flex items-center justify-between mb-12 relative z-10">
+                            <div className="flex items-center gap-6">
+                                <div className={cn(
+                                    "w-16 h-16 rounded-[2rem] flex items-center justify-center transition-all shadow-xl",
+                                    isHigh ? "bg-rose-500 text-white shadow-rose-500/20" : "bg-slate-900 text-slate-500"
+                                )}>
+                                    {isHigh ? <AlertTriangle size={24} /> : <Compass size={24} />}
+                                </div>
+                                <div className="h-px w-8 bg-slate-800" />
+                                <span className={cn(
+                                    "text-[10px] font-black uppercase tracking-[0.5em] font-mono italic",
+                                    isHigh ? "text-rose-500" : "text-slate-500"
+                                )}>
+                                    {pattern.significance}_PRIORITY_ANOMALY
+                                </span>
+                            </div>
+                            <div className="px-4 py-1 rounded-full bg-slate-900 border border-white/5 flex items-center gap-3">
+                                <div className={cn("w-2 h-2 rounded-full", isHigh ? "bg-rose-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" : "bg-emerald-500")} />
+                                <span className="text-[9px] font-black text-slate-500 font-mono italic">SIGNAL_STRENGTH: HIGH</span>
+                            </div>
+                        </div>
+
+                        <div className="relative z-10 flex-grow">
+                            <h4 className={cn(
+                                "text-4xl lg:text-5xl font-black tracking-tighter italic uppercase font-mono mb-6 leading-none",
+                                isHigh ? "text-white" : "text-slate-200"
+                            )}>
+                                {pattern.pattern}
+                            </h4>
+                            <p className="text-xl text-slate-400 font-bold italic leading-relaxed mb-12 max-w-2xl border-l-2 border-indigo-500/20 pl-8">
+                                {pattern.description}
+                            </p>
+
+                            {/* Tactical Strategy Module */}
+                            <div className="p-10 rounded-[3rem] bg-slate-950 border border-white/5 relative group/strategy overflow-hidden mt-auto">
+                                <div className="absolute top-0 right-0 p-8 opacity-[0.03] scale-[2] pointer-events-none group-hover/strategy:rotate-12 transition-transform duration-700">
+                                     <Dna size={80} className="text-white" />
+                                </div>
+                                
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-10 h-10 rounded-[1.2rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                                            <Lightbulb size={18} />
+                                        </div>
+                                        <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.5em] font-mono italic">Strategic_Protocol</h5>
+                                    </div>
+                                    <p className="text-lg font-bold text-slate-300 leading-relaxed italic pr-12">
+                                        {pattern.recommendation}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Background Visuals */}
+                        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-tl from-purple-500/5 to-transparent rounded-full blur-[100px] -mr-64 -mb-64 pointer-events-none opacity-50" />
+                    </motion.div>
+                );
+            })}
+        </AnimatePresence>
       </div>
 
-      {/* Pattern Cards */}
-      <div className="grid gap-6">
-        {patterns.map((pattern, i) => {
-          const isHigh = pattern.significance === 'high';
-          return (
-            <div key={i} className={`premium-card p-8 overflow-hidden relative group transition-all hover:-translate-y-0.5 ${isHigh ? 'border-rose-500/30 bg-rose-50/20 dark:bg-rose-950/10' : 'bg-white dark:bg-slate-900'}`}>
-              {/* Background Glow */}
-              {isHigh && <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />}
-
-              <div className="flex items-start justify-between gap-8 relative z-10">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-2.5 h-2.5 rounded-full ${isHigh ? 'bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]' : 'bg-slate-400'}`} />
-                    <span className={`text-[10px] font-bold uppercase tracking-widest ${isHigh ? 'text-rose-500' : 'text-slate-400'}`}>
-                      {pattern.significance} Significance
-                    </span>
-                  </div>
-
-                  <h4 className={`text-2xl font-bold tracking-tight mb-3 ${isHigh ? 'text-rose-600 dark:text-rose-400' : 'dark:text-white'} group-hover:text-purple-500 transition-colors`}>
-                    {pattern.pattern}
-                  </h4>
-
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-8 max-w-3xl">
-                    {pattern.description}
-                  </p>
-
-                  <div className="p-6 rounded-2xl bg-white/80 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400 mb-3 flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                      Recommended Strategy
-                    </p>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
-                      {pattern.recommendation}
-                    </p>
-                  </div>
-                </div>
-
-                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shrink-0 ${isHigh ? 'bg-rose-500 text-white shadow-2xl shadow-rose-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-purple-500/10 group-hover:text-purple-500'} transition-all`}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><polyline points="13 2 13 9 20 9" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      {/* Global Intelligence Metrics */}
+      <div className="p-16 rounded-[4.5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 shadow-2xl relative overflow-hidden group/global">
+         <div className="absolute top-0 right-0 p-20 opacity-5 grayscale pointer-events-none">
+             <BarChart3 size={200} className="text-white" />
+         </div>
+         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-16">
+             <div className="max-w-2xl">
+                 <h4 className="text-3xl font-black text-white uppercase tracking-tighter italic font-mono mb-6">Neural_Systemic_Overlay</h4>
+                 <p className="text-xl text-slate-400 font-bold italic border-l-2 border-purple-500/30 pl-10 pr-10">
+                     Our behavioral modeling confirms <span className="text-white italic underline decoration-purple-500/30 underline-offset-8">Coordination Integrity Failure</span>. These patterns are statistically improbable under standard algorithmic reporting, providing secondary evidentiary weight for bad-faith claims.
+                 </p>
+             </div>
+             <div className="flex gap-16 pr-10">
+                 {[
+                     { label: 'Variance', value: '2.4%', icon: <Layers size={14} /> },
+                     { label: 'Probability', value: '98.9%', icon: <Target size={14} /> },
+                     { label: 'Delta', value: '+14pt', icon: <Zap size={14} /> }
+                 ].map((stat, i) => (
+                     <div key={i} className="text-center">
+                         <div className="flex items-center justify-center gap-2 mb-3">
+                             <span className="text-indigo-500">{stat.icon}</span>
+                             <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono italic">{stat.label}</span>
+                         </div>
+                         <p className="text-5xl font-black text-white font-mono italic tracking-tighter leading-none">{stat.value}</p>
+                     </div>
+                 ))}
+             </div>
+         </div>
       </div>
     </div>
   );

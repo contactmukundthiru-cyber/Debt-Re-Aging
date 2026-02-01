@@ -147,7 +147,7 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
           <input
             type="text"
             placeholder="Search forensic patterns, rules, or citations..."
-            className="w-full pl-24 pr-12 py-10 rounded-[3rem] border border-white/5 bg-slate-950/20 backdrop-blur-3xl text-xl focus:ring-[15px] focus:ring-emerald-500/5 focus:border-emerald-500/20 transition-all outline-none text-white shadow-4xl placeholder:text-slate-700 font-mono italic"
+            className="w-full pl-24 pr-12 py-10 rounded-[3rem] border border-white/5 bg-slate-950/20 backdrop-blur-3xl text-xl focus:ring-[15px] focus:ring-slate-500/10 focus:border-slate-500/30 transition-all outline-none text-white shadow-4xl placeholder:text-slate-700 font-mono italic"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

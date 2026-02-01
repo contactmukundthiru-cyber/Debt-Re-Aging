@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Step } from '../../lib/constants';
 
 interface ProgressNavProps {
@@ -57,9 +58,11 @@ export const ProgressNav: React.FC<ProgressNavProps> = ({ steps, currentStep, se
                 {i < steps.length - 1 && (
                   <div className="flex-1 relative mx-4">
                     <div className="absolute inset-0 h-[2px] bg-slate-100 dark:bg-slate-800 rounded-full top-1/2 -translate-y-1/2" />
-                    <div
-                      className="absolute inset-0 h-[2px] bg-gradient-to-r from-emerald-500 to-slate-900 dark:to-white rounded-full top-1/2 -translate-y-1/2 transition-all duration-1000 ease-in-out"
-                      style={{ width: isCompleted ? '100%' : '0%' }}
+                    <motion.div
+                      initial={false}
+                      animate={{ width: isCompleted ? '100%' : '0%' }}
+                      transition={{ duration: 0.8, ease: "easeInOut" }}
+                      className="absolute inset-0 h-[2px] bg-gradient-to-r from-emerald-500 to-slate-900 dark:to-white rounded-full top-1/2 -translate-y-1/2"
                     />
                   </div>
                 )}

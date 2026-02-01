@@ -144,7 +144,7 @@ ${brief.notes}`;
               <div className="flex items-center gap-6">
                 <div className="flex -space-x-3">
                   {[FileText, Target, Shield].map((Icon, i) => (
-                    <div key={i} className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-blue-400 shadow-2xl relative" style={{ zIndex: 3 - i }}>
+                    <div key={i} className={cn("w-14 h-14 rounded-2xl bg-slate-900 border-2 border-slate-950 flex items-center justify-center text-blue-400 shadow-2xl relative", i === 0 ? "z-[3]" : i === 1 ? "z-[2]" : "z-[1]")}>
                       <Icon size={24} />
                     </div>
                   ))}
@@ -248,8 +248,8 @@ ${brief.notes}`;
                       <input 
                         value={brief.title}
                         onChange={(e) => setBrief({ ...brief, title: e.target.value })}
-                        placeholder="ENTER_AUTO_ID..."
-                        className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-blue-500/30 transition-all shadow-inner placeholder:text-slate-800"
+                        placeholder="Case or reference ID"
+                        className="w-full bg-black/60 border border-white/5 rounded-[2rem] pl-20 pr-10 py-6 text-white text-lg font-mono italic focus:outline-none focus:border-slate-500/40 transition-all shadow-inner placeholder:text-slate-800"
                       />
                    </div>
                 </div>
@@ -259,19 +259,21 @@ ${brief.notes}`;
                    <textarea 
                     value={brief.objective}
                     onChange={(e) => setBrief({ ...brief, objective: e.target.value })}
-                    placeholder="DEFINE_MISSION_OBJECTIVES..."
+                    placeholder="Objectives or key points for this brief"
                     rows={3}
-                    className="w-full bg-black/60 border border-white/5 rounded-[2.5rem] p-10 text-white text-lg font-mono italic focus:outline-none focus:border-blue-500/30 transition-all shadow-inner placeholder:text-slate-800 resize-none"
+                    className="w-full bg-black/60 border border-white/5 rounded-[2.5rem] p-10 text-white text-lg font-mono italic focus:outline-none focus:border-slate-500/40 transition-all shadow-inner placeholder:text-slate-800 resize-none"
                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">Jurisdiction</label>
+                      <label htmlFor="jurisdiction-select" className="text-[10px] font-black text-slate-600 uppercase tracking-widest font-mono italic ml-6">Jurisdiction</label>
                       <select 
+                        id="jurisdiction-select"
+                        title="Select Jurisdiction"
                         value={brief.jurisdiction}
                         onChange={(e) => setBrief({ ...brief, jurisdiction: e.target.value })}
-                        className="w-full bg-black/60 border border-white/5 rounded-[2rem] px-8 py-5 text-white font-mono text-sm focus:outline-none focus:border-blue-500/30 appearance-none shadow-inner"
+                        className="w-full bg-black/60 border border-white/5 rounded-[2rem] px-8 py-5 text-white font-mono text-sm focus:outline-none focus:border-slate-500/40 appearance-none shadow-inner"
                       >
                          {STATES.map(s => <option key={s} value={s}>{s}_STATUTORY</option>)}
                       </select>
@@ -325,8 +327,8 @@ ${brief.notes}`;
                 value={taskText}
                 onChange={(e) => setTaskText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addTask()}
-                placeholder="EXECUTE_NEW_DIRECTIVE..."
-                className="w-full bg-slate-950/40 border border-white/5 rounded-[2.5rem] pl-20 pr-48 py-8 text-2xl font-mono italic text-white focus:outline-none focus:border-blue-500/30 transition-all shadow-4xl placeholder:text-slate-800"
+                placeholder="Add a new section or directive"
+                className="w-full bg-slate-950/40 border border-white/5 rounded-[2.5rem] pl-20 pr-48 py-8 text-2xl font-mono italic text-white focus:outline-none focus:border-slate-500/40 transition-all shadow-4xl placeholder:text-slate-800"
               />
               <button 
                 onClick={addTask}
@@ -365,6 +367,8 @@ ${brief.notes}`;
                         </div>
                         <button 
                           onClick={() => removeTask(task.id)}
+                          title="Remove Directive"
+                          aria-label="Remove Directive"
                           className="w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center text-slate-700 hover:text-rose-500 hover:border-rose-500/30 transition-all opacity-0 group-hover/task:opacity-100"
                         >
                           <Trash2 size={18} />
@@ -385,6 +389,8 @@ ${brief.notes}`;
                          </div>
                          <button 
                            onClick={() => toggleTask(task.id)}
+                           title={task.done ? "Mark as Incomplete" : "Mark as Completed"}
+                           aria-label={task.done ? "Mark as Incomplete" : "Mark as Completed"}
                            className={cn(
                              "w-14 h-14 rounded-2xl border flex items-center justify-center transition-all shadow-2xl",
                              task.done 
