@@ -6,6 +6,7 @@ import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { Step } from '../../lib/constants';
 import { ImpactAssessment } from '../../lib/evidence-builder';
 import { ConsumerInfo } from '../../lib/generator';
+import { CaseLaw } from '../../lib/caselaw';
 import { computeCaseHealth, formatExecutiveBrief } from '../../lib/case-health';
 import { AttorneyPackage } from '../../lib/attorney-export';
 
@@ -26,6 +27,7 @@ interface Step5ExportProps {
   editableFields: CreditFields;
   flags: RuleFlag[];
   riskProfile: RiskProfile;
+  relevantCaseLaw: CaseLaw[];
   discoveryAnswers: Record<string, string>;
   impactAssessment: ImpactAssessment | null;
   translate: (key: string) => string;
@@ -43,6 +45,7 @@ interface Step5ExportProps {
   downloadAnalysisJson: () => void;
   downloadCaseBundle: () => void;
   downloadCaseBundleZip: () => void;
+  downloadForensicReport: () => void;
   isBundling: boolean;
   downloadTextFile: (content: string, filename: string) => void;
   downloadPdfFile: (content: string, filename: string) => void;
@@ -63,6 +66,7 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   editableFields,
   flags,
   riskProfile,
+  relevantCaseLaw,
   discoveryAnswers,
   impactAssessment,
   translate,
@@ -80,6 +84,7 @@ const Step5Export: React.FC<Step5ExportProps> = ({
   downloadAnalysisJson,
   downloadCaseBundle,
   downloadCaseBundleZip,
+  downloadForensicReport,
   isBundling,
   downloadTextFile,
   downloadPdfFile
@@ -174,6 +179,16 @@ const Step5Export: React.FC<Step5ExportProps> = ({
           <h3 className="text-lg font-bold text-indigo-900 mb-4">Export the executive brief</h3>
           <p className="text-sm text-indigo-900/70 mb-6">Generate a concise, shareable summary before sending legal packets.</p>
           <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              className="btn bg-indigo-600 text-white hover:bg-indigo-700 !rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
+              onClick={() => downloadForensicReport()}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Institutional Forensic Audit (PDF)
+            </button>
             <button
               type="button"
               className="btn btn-primary !rounded-xl"

@@ -142,33 +142,58 @@ export const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({ isOpen, on
 };
 
 /**
- * Hook to manage keyboard shortcuts modal state
+ * Hook to manage keyboard shortcuts modal state and execution
  */
-export function useKeyboardShortcuts() {
+export function useKeyboardShortcuts(onNavigate?: (step: number) => void, onAction?: (action: string) => void) {
     const [isOpen, setIsOpen] = useState(false);
 
     const open = useCallback(() => setIsOpen(true), []);
     const close = useCallback(() => setIsOpen(false), []);
     const toggle = useCallback(() => setIsOpen(prev => !prev), []);
 
-    // Listen for '?' key to open shortcuts
+    // Listen for keys
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Don't trigger if user is typing in an input
             const target = e.target as HTMLElement;
-            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+            const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+            
+            // '?' to toggle shortcuts panel
+            if (e.key === '?' && !isTyping && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                toggle();
                 return;
             }
 
-            if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+            // 'Escape' to close
+            if (e.key === 'Escape' && isOpen) {
+                close();
+                return;
+            }
+
+            // Step navigation (1-6)
+            if (!isTyping && onNavigate && /^[1-6]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+                onNavigate(parseInt(e.key));
+                return;
+            }
+
+            // Ctrl/Cmd + Enter to trigger analysis
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && onAction) {
                 e.preventDefault();
-                toggle();
+                onAction('analyze');
+                return;
+            }
+
+            // Ctrl/Cmd + S to trigger export
+            if ((e.ctrlKey || e.metaKey) && e.key === 's' && onAction) {
+                e.preventDefault();
+                onAction('export');
+                return;
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [toggle]);
+    }, [toggle, close, isOpen, onNavigate, onAction]);
 
     return { isOpen, open, close, toggle };
 }

@@ -10,25 +10,80 @@ export const isValidDate = (dateStr: string): boolean => {
 };
 
 /**
+ * Normalizes a date string into YYYY-MM-DD format
+ * Handles common formats like MM/DD/YYYY, MM/YYYY, and text dates
+ */
+export const normalizeDate = (dateStr: string | undefined): string | undefined => {
+  if (!dateStr) return undefined;
+  const clean = dateStr.trim();
+  
+  // Already in YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
+  
+  // Handle MM/DD/YYYY or MM-DD-YYYY
+  const mdyMatch = clean.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (mdyMatch) {
+    let [_, m, d, y] = mdyMatch;
+    if (y.length === 2) y = (parseInt(y) > 50 ? '19' : '20') + y;
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+  }
+
+  // Handle MM/YYYY
+  const myMatch = clean.match(/^(\d{1,2})[\/\-](\d{2,4})$/);
+  if (myMatch) {
+    let [_, m, y] = myMatch;
+    if (y.length === 2) y = (parseInt(y) > 50 ? '19' : '20') + y;
+    return `${y}-${m.padStart(2, '0')}-01`;
+  }
+
+  try {
+    const d = new Date(clean);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().split('T')[0];
+    }
+  } catch (e) {}
+
+  return dateStr;
+};
+
+/**
+ * Normalizes a currency or numeric string to a clean numeric string (1234.56)
+ */
+export const normalizeNumeric = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
+  const cleaned = value.replace(/[$,\s]/g, '');
+  if (Number.isNaN(Number(cleaned))) return value;
+  return cleaned;
+};
+
+/**
  * Gets validation status and message for a date field
  */
-export const getDateValidation = (value: string | undefined, required: boolean): { valid: boolean; message: string } => {
+export const getDateValidation = (value: string | undefined, required: boolean): { valid: boolean; message: string; normalized?: string } => {
   if (!value && required) return { valid: false, message: 'Required field' };
   if (!value) return { valid: true, message: '' };
-  if (!isValidDate(value)) return { valid: false, message: 'Use YYYY-MM-DD format' };
-  return { valid: true, message: '' };
+  
+  const normalized = normalizeDate(value);
+  if (normalized && isValidDate(normalized)) {
+    return { valid: true, message: '', normalized };
+  }
+  
+  return { valid: false, message: 'Format: YYYY-MM-DD or MM/DD/YYYY' };
 };
 
 export const isValidNumeric = (value: string): boolean => {
   if (!value) return true;
-  const cleaned = value.replace(/[,\s]/g, '');
+  const cleaned = value.replace(/[$,\s]/g, '');
   return !Number.isNaN(Number(cleaned));
 };
 
-export const getNumericValidation = (value: string | undefined): { valid: boolean; message: string } => {
+export const getNumericValidation = (value: string | undefined): { valid: boolean; message: string; normalized?: string } => {
   if (!value) return { valid: true, message: '' };
-  if (!isValidNumeric(value)) return { valid: false, message: 'Use numbers like 1234.56' };
-  return { valid: true, message: '' };
+  const normalized = normalizeNumeric(value);
+  if (normalized && isValidNumeric(normalized)) {
+    return { valid: true, message: '', normalized };
+  }
+  return { valid: false, message: 'Use numbers like 1,234.56' };
 };
 
 const parseDate = (value?: string): Date | null => {
@@ -66,4 +121,31 @@ export const getDateOrderIssues = (fields: Record<string, string | undefined>): 
   }
 
   return issues;
+};
+
+/**
+ * Normalizes all applicable fields in a CreditFields object
+ */
+export const normalizeCreditFields = (fields: Record<string, string | undefined>): Record<string, string | undefined> => {
+  const result: Record<string, string | undefined> = { ...fields };
+  
+  for (const key in result) {
+    const value = result[key];
+    if (!value) continue;
+    
+    if (key.toLowerCase().includes('date') || key === 'dofd') {
+      result[key] = normalizeDate(value) || value;
+    } else if (
+      key.toLowerCase().includes('value') || 
+      key.toLowerCase().includes('amount') || 
+      key.toLowerCase().includes('balance') || 
+      key === 'creditLimit' ||
+      key === 'initialValue' ||
+      key === 'originalAmount'
+    ) {
+      result[key] = normalizeNumeric(value) || value;
+    }
+  }
+  
+  return result;
 };

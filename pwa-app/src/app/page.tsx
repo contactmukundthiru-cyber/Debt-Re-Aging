@@ -31,6 +31,7 @@ import {
 import {
   saveAnalysis,
   getHistory,
+  getAllHistory,
   getAnalysis,
   deleteAnalysis,
   exportHistory,
@@ -125,7 +126,7 @@ import Step5Export from '../components/steps/Step5Export';
 import Step6Track from '../components/steps/Step6Track';
 import { Celebration } from '../components/Celebration';
 import { FIELD_CONFIG, STATES, ACCOUNT_TYPES, STATUSES, STEPS, ANALYSIS_TABS, Step, LetterType, TabId } from '../lib/constants';
-import { getDateValidation, getDateOrderIssues } from '../lib/validation';
+import { getDateValidation, getDateOrderIssues, normalizeCreditFields } from '../lib/validation';
 
 // Institutional & Quality Components
 import {
@@ -239,7 +240,32 @@ export default function CreditReportAnalyzer() {
     isOpen: isShortcutsOpen,
     toggle: toggleShortcuts,
     close: closeShortcuts
-  } = useKeyboardShortcuts();
+  } = useKeyboardShortcuts(
+    (targetStep) => {
+      if (targetStep >= 1 && targetStep <= 6) {
+        setStep(targetStep as Step);
+        showToast(`Navigated to Step ${targetStep}`, 'info');
+      }
+    },
+    (action) => {
+      if (action === 'save') {
+        saveSession({
+          step,
+          rawText,
+          editableFields,
+          consumerInfo: consumer,
+          discoveryAnswers,
+        });
+        showToast('Session saved locally', 'success');
+      } else if (action === 'submit') {
+        if (step < 6) {
+          setStep((step + 1) as Step);
+        } else {
+          showToast('Analysis complete', 'info');
+        }
+      }
+    }
+  );
 
 
   // Toast notification state
@@ -253,14 +279,19 @@ export default function CreditReportAnalyzer() {
 
   // Load history, disputes, and language on mount
   useEffect(() => {
-    setHistory(getHistory());
-    setDisputes(loadDisputes());
-    setDisputeStats(getDisputeStats());
-    setLang(getLanguage());
-    const storedGuide = typeof window !== 'undefined' ? localStorage.getItem('cra_show_guide') : null;
-    if (storedGuide !== null) {
-      setShowGuide(storedGuide === 'true');
-    }
+    const initData = async () => {
+      const hist = await getAllHistory();
+      setHistory(hist);
+      setDisputes(loadDisputes());
+      setDisputeStats(getDisputeStats());
+      setLang(getLanguage());
+      const storedGuide = typeof window !== 'undefined' ? localStorage.getItem('cra_show_guide') : null;
+      if (storedGuide !== null) {
+        setShowGuide(storedGuide === 'true');
+      }
+    };
+    
+    initData();
 
     // Try to recover session
     const saved = loadSession();
@@ -606,10 +637,13 @@ export default function CreditReportAnalyzer() {
       }
 
       // Core analysis - Zenith V5 Forensic Engine
-      const { flags: detectedFlags, riskProfile: profile } = runComprehensiveAnalysis(editableFields, {
-        stateCode: editableFields.stateCode
+      const normalizedFields = normalizeCreditFields(editableFields) as CreditFields;
+      const { flags: detectedFlags, riskProfile: profile } = runComprehensiveAnalysis(normalizedFields, {
+        stateCode: normalizedFields.stateCode
       });
 
+      // Update state with normalized fields to show corrections in UI
+      setEditableFields(normalizedFields);
       setFlags(detectedFlags);
       setRiskProfile(profile);
 
@@ -664,8 +698,9 @@ export default function CreditReportAnalyzer() {
 
       // Save to history
       try {
-        saveAnalysis(editableFields, detectedFlags, profile, fileName || undefined);
-        setHistory(getHistory());
+        await saveAnalysis(editableFields, detectedFlags, profile, fileName || undefined);
+        const latestHistory = await getAllHistory();
+        setHistory(latestHistory);
       } catch (e) {
         console.warn('Failed to save to history:', e);
       }
@@ -842,6 +877,20 @@ export default function CreditReportAnalyzer() {
     const blob = generatePDFBlob(content);
     saveAs(blob, filename);
   }, []);
+
+  const downloadForensicReport = useCallback(() => {
+    if (!riskProfile) return;
+    const blob = generateForensicReportBlob(
+      editableFields,
+      flags,
+      riskProfile,
+      relevantCaseLaw,
+      consumer,
+      discoveryAnswers
+    );
+    saveAs(blob, 'forensic_investigation_report.pdf');
+    showToast('Institutional report generated successfully.', 'success');
+  }, [editableFields, flags, riskProfile, relevantCaseLaw, consumer, discoveryAnswers, showToast]);
 
   const downloadAnalysisJson = useCallback(() => {
     const payload = {
@@ -1246,6 +1295,7 @@ export default function CreditReportAnalyzer() {
               editableFields={editableFields as CreditFields}
               flags={flags}
               riskProfile={riskProfile!}
+              relevantCaseLaw={relevantCaseLaw}
               discoveryAnswers={discoveryAnswers}
               impactAssessment={impactAssessment}
               translate={translate}
@@ -1263,6 +1313,7 @@ export default function CreditReportAnalyzer() {
               downloadAnalysisJson={downloadAnalysisJson}
               downloadCaseBundle={downloadCaseBundle}
               downloadCaseBundleZip={downloadCaseBundleZip}
+              downloadForensicReport={downloadForensicReport}
               isBundling={isBundling}
               downloadTextFile={downloadTextFile}
               downloadPdfFile={downloadPdfFile}

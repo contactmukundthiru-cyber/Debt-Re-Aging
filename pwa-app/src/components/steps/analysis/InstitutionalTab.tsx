@@ -24,11 +24,19 @@ interface InstitutionalTabProps {
 }
 
 const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
-    const metrics = useMemo(() => calculateImpactMetrics(), []);
+    const [metrics, setMetrics] = React.useState<any>(null);
     const [reportName, setReportName] = React.useState('Forensic Unit 1');
 
-    const downloadReport = () => {
-        const report = generateImpactReport(reportName);
+    React.useEffect(() => {
+        const loadMetrics = async () => {
+            const data = await calculateImpactMetrics();
+            setMetrics(data);
+        };
+        loadMetrics();
+    }, []);
+
+    const downloadReport = async () => {
+        const report = await generateImpactReport(reportName);
         const blob = new Blob([report], { type: 'text/markdown' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -37,8 +45,8 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
         a.click();
     };
 
-    const downloadJSON = () => {
-        const json = exportInstitutionalJSON();
+    const downloadJSON = async () => {
+        const json = await exportInstitutionalJSON();
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -70,6 +78,13 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
 
     return (
         <div className="fade-in space-y-32 pb-40">
+            {!metrics ? (
+                <div className="flex flex-col items-center justify-center p-40 text-center">
+                    <div className="w-20 h-20 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-8" />
+                    <p className="text-slate-500 font-mono text-xs uppercase tracking-widest">Initialising_Forensic_Vault...</p>
+                </div>
+            ) : (
+                <>
             {/* HERO SECTION */}
             <section className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-indigo-600/10 to-transparent rounded-[6rem] blur-3xl opacity-50 group-hover:opacity-100 transition duration-1000" />
@@ -169,12 +184,12 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
                         <div className="flex items-center justify-between mb-10">
                             <h4 className="text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono italic">Compliance_SLA</h4>
-                            <span className="text-xl font-black text-emerald-400 font-mono italic">{institutionalMetrics.complianceHealth}%</span>
+                            <span className="text-xl font-black text-emerald-400 font-mono italic">{metrics.complianceHealth}%</span>
                         </div>
                         <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden mb-12 border border-white/5">
                             <motion.div 
                                 initial={{ width: 0 }}
-                                animate={{ width: `${institutionalMetrics.complianceHealth}%` }}
+                                animate={{ width: `${metrics.complianceHealth}%` }}
                                 transition={{ duration: 2, ease: "circOut" }}
                                 className="h-full bg-gradient-to-right from-blue-500 via-emerald-500 to-blue-500 bg-[length:200%_100%] animate-gradient"
                             />
@@ -233,8 +248,8 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId }) => {
                         </div>
                      </div>
                 </div>
-            </div>
-        </div>
+            </div>            </>
+            )}        </div>
     );
 };
 

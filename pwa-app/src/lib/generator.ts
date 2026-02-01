@@ -3,37 +3,145 @@
  */
 
 import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 import { CreditFields, RuleFlag, RiskProfile, ConsumerInfo } from './types';
 import { CaseLaw } from './caselaw';
 export type { ConsumerInfo };
 
 /**
- * Generate a professional PDF dispute letter
+ * Generate a professional Forensic Investigation PDF Report
  */
-export function generatePDFLetter(content: string, filename: string) {
-  const doc = new jsPDF();
+export function generateForensicReportBlob(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  risk: RiskProfile,
+  caseLaw: CaseLaw[],
+  consumer: ConsumerInfo,
+  discoveryAnswers: Record<string, string>
+): Blob {
+  const doc = new jsPDF() as any;
+  const primaryColor = [15, 23, 42]; // slate-900
+  const accentColor = [16, 185, 129]; // emerald-500
 
-  // Basic PDF styling
+  // Header 
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, 210, 40, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('FORENSIC INVESTIGATION REPORT', 15, 25);
+  
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
+  doc.text(`CONFIDENTIAL CASE FILE: ${Math.random().toString(36).substring(7).toUpperCase()}`, 15, 33);
+  doc.text(`GENERATED: ${new Date().toLocaleString()}`, 140, 33);
 
-  const splitText = doc.splitTextToSize(content, 180);
-  doc.text(splitText, 15, 20);
+  // Consumer Info Section
+  doc.setTextColor(...primaryColor);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('1. SUBJECT PROFILE', 15, 55);
+  
+  doc.autoTable({
+    startY: 60,
+    head: [['Attribute', 'Data']],
+    body: [
+      ['Name', consumer.name || 'N/A'],
+      ['Address', consumer.address || 'N/A'],
+      ['Location', `${consumer.city || ''}, ${consumer.state || ''} ${consumer.zip || ''}`],
+      ['SSN/ID Ref', consumer.ssn ? `***-**-${consumer.ssn.slice(-4)}` : 'REDACTED'],
+    ],
+    theme: 'striped',
+    headStyles: { fillColor: primaryColor }
+  });
 
-  doc.save(filename);
-}
+  // Account Evidence
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('2. TRADELINE EVIDENCE', 15, doc.lastAutoTable.finalY + 15);
 
-/**
- * Generate a PDF blob from plain text content.
- */
-export function generatePDFBlob(content: string): Blob {
-  const doc = new jsPDF();
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  const splitText = doc.splitTextToSize(content, 180);
-  doc.text(splitText, 15, 20);
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 20,
+    head: [['Field', 'Reported Value', 'Internal Analysis']],
+    body: [
+      ['Original Creditor', fields.originalCreditor || 'N/A', 'Verified Source'],
+      ['Current Furnisher', fields.furnisherOrCollector || 'N/A', 'Active Reporter'],
+      ['Account Status', fields.accountStatus || 'N/A', 'Reported State'],
+      ['Date Opened', fields.dateOpened || 'N/A', 'Historical Start'],
+      ['DOFD', fields.dofd || 'N/A', 'LEGAL ANCHOR DATE'],
+      ['Balance', fields.currentValue || 'N/A', 'Reported Liability'],
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: primaryColor }
+  });
+
+  // Risk & Findings Section
+  const nextY = doc.lastAutoTable.finalY + 15;
+  doc.text('3. FORENSIC FINDINGS & RISK VECTORS', 15, nextY);
+
+  doc.autoTable({
+    startY: nextY + 5,
+    head: [['Metric', 'Value', 'Assessment']],
+    body: [
+      ['Forensic Score', `${risk.overallScore}/100`, risk.riskLevel.toUpperCase()],
+      ['Dispute Strength', risk.disputeStrength.toUpperCase(), 'Statistical Probability'],
+      ['Litigation Potential', risk.litigationPotential ? 'HIGH' : 'LOW', 'Statutory Basis'],
+    ],
+    theme: 'plain',
+    headStyles: { fillColor: accentColor, textColor: [255, 255, 255] }
+  });
+
+  // Violations Table
+  doc.addPage();
+  doc.setTextColor(...primaryColor);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('4. DETECTED VIOLATIONS MANIFEST', 15, 20);
+
+  const violationBody = flags.map((f, i) => [
+    i + 1,
+    f.ruleName,
+    f.ruleId,
+    f.severity.toUpperCase(),
+    f.explanation
+  ]);
+
+  doc.autoTable({
+    startY: 25,
+    head: [['#', 'Violation Type', 'ID', 'Severity', 'Forensic Explanation']],
+    body: violationBody,
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [190, 18, 60] }, // rose-700
+    columnStyles: { 4: { cellWidth: 80 } }
+  });
+
+  // Legal Citations
+  if (flags.some(f => f.legalCitations.length > 0)) {
+    doc.setFontSize(14);
+    doc.text('5. STATUTORY & CASE LAW AUTHORITY', 15, doc.lastAutoTable.finalY + 15);
+    
+    const citations = Array.from(new Set(flags.flatMap(f => f.legalCitations)));
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Statutory Citations']],
+      body: citations.map(c => [c]),
+      theme: 'striped'
+    });
+  }
+
+  // Footer on all pages
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(`Case Factory Forensic Hub - Institutional Version 5.0 - Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+  }
+
   return doc.output('blob');
 }
+
 
 
 function buildForensicReportContent(

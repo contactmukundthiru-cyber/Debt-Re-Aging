@@ -5,6 +5,7 @@
  */
 
 import { CreditFields } from './types';
+import { normalizeDate, normalizeNumeric } from './validation';
 
 export interface ExtractedField {
   value: string;
@@ -416,12 +417,29 @@ export function parseMultipleAccounts(text: string): ParsedAccount[] {
 }
 
 /**
- * Convert parsed fields to simple key-value for rule engine
+ * Convert parsed fields to simple key-value for rule engine with normalization
  */
 export function fieldsToSimple(parsed: ParsedFields): CreditFields {
   const simple: CreditFields = {};
   for (const [key, field] of Object.entries(parsed)) {
-    if (field.value) (simple as Record<string, string>)[key] = field.value;
+    if (!field.value) continue;
+    
+    let normalized = field.value;
+    // Hardening: Normalize dates and numeric values before they hit the rules logic
+    if (key.toLowerCase().includes('date') || key === 'dofd') {
+      normalized = normalizeDate(field.value) || field.value;
+    } else if (
+      key.toLowerCase().includes('value') || 
+      key.toLowerCase().includes('amount') || 
+      key.toLowerCase().includes('balance') || 
+      key === 'creditLimit' ||
+      key === 'initialValue' ||
+      key === 'originalAmount'
+    ) {
+      normalized = normalizeNumeric(field.value) || field.value;
+    }
+    
+    (simple as Record<string, string>)[key] = normalized;
   }
   return simple;
 }

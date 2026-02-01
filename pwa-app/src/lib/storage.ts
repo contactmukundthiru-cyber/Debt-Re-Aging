@@ -1,4 +1,5 @@
 import { CreditFields, RuleFlag, RiskProfile, AnalysisRecord } from './types';
+import { saveAnalysisToDB, getHistoryFromDB, deleteAnalysisFromDB, clearHistoryFromDB } from './dexie-storage';
 
 export type { AnalysisRecord } from './types';
 
@@ -6,17 +7,22 @@ const STORAGE_KEY = 'credit_analyzer_history';
 const MAX_HISTORY = 20;
 
 /**
- * Save an analysis to localStorage
+ * Generate a unique ID
  */
-export function saveAnalysis(
+export function generateId(): string {
+  return 'audit_' + Math.random().toString(36).substring(2, 11);
+}
+
+/**
+ * Save an analysis to both localStorage (for quick access) and IndexedDB (for long term)
+ */
+export async function saveAnalysis(
   fields: CreditFields,
   flags: RuleFlag[],
   riskProfile: RiskProfile,
   fileName?: string,
   tags?: string[]
-): string {
-  const history = getHistory();
-
+): Promise<string> {
   const record: AnalysisRecord = {
     id: generateId(),
     timestamp: Date.now(),
@@ -27,25 +33,25 @@ export function saveAnalysis(
     tags,
   };
 
-  // Add to beginning of history
+  // 1. IndexedDB (Primary)
+  await saveAnalysisToDB(record);
+
+  // 2. LocalStorage (Legacy / Fallback / Fast Cache)
+  const history = getHistory();
   history.unshift(record);
-
-  // Trim to max size
-  if (history.length > MAX_HISTORY) {
-    history.splice(MAX_HISTORY);
-  }
-
+  if (history.length > MAX_HISTORY) history.splice(MAX_HISTORY);
+  
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
   } catch (e) {
-    console.warn('Failed to save to localStorage:', e);
+    console.warn('LocalStorage quota exceeded, using IndexedDB only');
   }
 
   return record.id;
 }
 
 /**
- * Get all saved analyses
+ * Get all saved analyses (Legacy sync version)
  */
 export function getHistory(): AnalysisRecord[] {
   if (typeof window === 'undefined') return [];
@@ -60,42 +66,51 @@ export function getHistory(): AnalysisRecord[] {
 }
 
 /**
+ * Get all saved analyses (Async version - uses IndexedDB)
+ */
+export async function getAllHistory(): Promise<AnalysisRecord[]> {
+  const dbHistory = await getHistoryFromDB();
+  if (dbHistory.length > 0) return dbHistory;
+  
+  // Fallback to localStorage if DB is empty
+  return getHistory();
+}
+
+/**
  * Get a specific analysis by ID
  */
-export function getAnalysis(id: string): AnalysisRecord | null {
-  const history = getHistory();
+export async function getAnalysis(id: string): Promise<AnalysisRecord | null> {
+  const history = await getAllHistory();
   return history.find(r => r.id === id) || null;
 }
 
 /**
  * Delete an analysis
  */
-export function deleteAnalysis(id: string): boolean {
+export async function deleteAnalysis(id: string): Promise<boolean> {
+  // 1. IndexedDB
+  await deleteAnalysisFromDB(id);
+
+  // 2. LocalStorage
   const history = getHistory();
   const index = history.findIndex(r => r.id === id);
 
-  if (index === -1) return false;
-
-  history.splice(index, 1);
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-    return true;
-  } catch (e) {
-    console.warn('Failed to save to localStorage:', e);
-    return false;
+  if (index !== -1) {
+    history.splice(index, 1);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    } catch (e) {}
   }
+
+  return true;
 }
 
 /**
  * Clear all history
  */
-export function clearHistory(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (e) {
-    console.warn('Failed to clear localStorage:', e);
-  }
+export async function clearHistory(): Promise<void> {
+  await clearHistoryFromDB();
+  localStorage.removeItem(STORAGE_KEY);
 }
 
 /**
@@ -142,31 +157,27 @@ export function importHistory(json: string): number {
 }
 
 /**
- * Generate a unique ID
- */
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-}
-
-/**
  * Format a timestamp for display
  */
 export function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);
   const now = new Date();
   const diff = now.getTime() - timestamp;
-
+  
   // Within last hour
   if (diff < 3600000) {
     const mins = Math.floor(diff / 60000);
     return mins <= 1 ? 'Just now' : `${mins} minutes ago`;
   }
-
+  
   // Within last 24 hours
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
     return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
   }
+  
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
   // Within last week
   if (diff < 604800000) {
