@@ -853,7 +853,7 @@ export default function CreditReportAnalyzer() {
       link.click();
       URL.revokeObjectURL(url);
     }
-  }, [editableFields, flags, consumer, riskProfile, discoveryAnswers]);
+  }, [editableFields, flags, consumer, riskProfile]);
 
   const downloadTextFile = useCallback((content: string, filename: string) => {
     const blob = new Blob([content], { type: 'text/plain' });
@@ -925,7 +925,6 @@ export default function CreditReportAnalyzer() {
     ];
   }, [
     consumer,
-    discoveryAnswers,
     editableFields,
     flags,
     riskProfile

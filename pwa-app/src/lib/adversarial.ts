@@ -16,15 +16,48 @@ export interface DecisionNode {
     counterTactic?: string;
 }
 
+export interface RejectionCounter {
+    rejectionType: string;
+    bureauReason: string;
+    statutoryRebuttal: string;
+    escalationAction: string;
+}
+
 export interface SimulationResult {
     pathOfLeastResistance: DecisionNode[];
-    internalRiskMitigationScore: number; // Score representing their effort to mitigate risk
-    institutionalCompliancePressure: number; // Score representing pressure to delete
+    internalRiskMitigationScore: number; 
+    institutionalCompliancePressure: number;
     tactic: 'technical_fault' | 'administrative_burden' | 'legal_risk';
-    /** Estimated cost (in dollars) for the bureau/collector to comply with verification. */
     estimatedComplianceCost: number;
-    /** Threshold (in dollars) below which settlement/deletion is often preferred over fight. */
     settlementThreshold: number;
+    predictedRejections: RejectionCounter[];
+}
+
+/**
+ * Predicts and provides counters for common bureau rejections
+ */
+function predictRejections(flags: RuleFlag[]): RejectionCounter[] {
+    const counters: RejectionCounter[] = [];
+    
+    // 1. Frivolous/Irrelevant Flag
+    counters.push({
+        rejectionType: 'Frivolous Dispute',
+        bureauReason: 'Dispute lacks sufficient information to conduct an investigation.',
+        statutoryRebuttal: 'Pursuant to 15 U.S.C. § 1681i(a)(3), a dispute is only frivolous if the consumer fails to provide specific inaccuracies. This dispute includes forensic identifiers and specific FCRA § 623 violations.',
+        escalationAction: 'File immediate CFPB complaint for failure to investigate under § 611.'
+    });
+
+    // 2. Verified as Accurate
+    if (flags.some(f => f.severity === 'high')) {
+        counters.push({
+            rejectionType: 'Verified Accurate',
+            bureauReason: 'The furnisher has verified the information as being reported correctly.',
+            statutoryRebuttal: 'A mere "verification" by the furnisher does not satisfy the CRA duty to conduct a reasonable reinvestigation. If the logical impossibility of the dates remains, the investigation was per-se unreasonable.',
+            escalationAction: 'Demand the Method of Verification (MOV) under § 611(a)(7).'
+        });
+    }
+
+    return counters;
 }
 
 /**
@@ -35,7 +68,7 @@ export function simulateAdversarialLogic(
     risk: RiskProfile
 ): SimulationResult {
     const nodes: DecisionNode[] = [];
-    let compliancePressure = 15; // Base pressure of processing a dispute (clerk time, mail, etc.)
+    let compliancePressure = 15; 
 
     // Logic 1: The "Auto-Verification" Filter (e-OSCAR)
     const technicalViolations = flags.filter(f => f.ruleId.startsWith('B') || f.ruleId.startsWith('E'));
@@ -75,7 +108,7 @@ export function simulateAdversarialLogic(
         reasoning: `When institutional compliance pressure (${compliancePressure} points) exceeds the threshold of profitable verification, data removal becomes the logical outcome.`,
     });
 
-    const estimatedComplianceCost = compliancePressure * 12; // ~$12/point (clerical, mail, review)
+    const estimatedComplianceCost = compliancePressure * 12; 
     const settlementThreshold = Math.max(200, 800 - risk.overallScore * 4);
 
     return {
@@ -84,6 +117,7 @@ export function simulateAdversarialLogic(
         institutionalCompliancePressure: compliancePressure,
         tactic: technicalViolations.length > 2 ? 'technical_fault' : 'legal_risk',
         estimatedComplianceCost,
-        settlementThreshold
+        settlementThreshold,
+        predictedRejections: predictRejections(flags)
     };
 }

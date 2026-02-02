@@ -40,7 +40,7 @@ interface DeltasTabProps {
 }
 
 const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seriesSnapshots = [], evidenceReadiness = 0 }) => {
-  const { isPrivacyMode } = useApp();
+  const { state: { isPrivacyMode } } = useApp();
   const negativeCount = useMemo(() => deltas.filter(d => d.impact === 'negative').length, [deltas]);
   const positiveCount = useMemo(() => deltas.filter(d => d.impact === 'positive').length, [deltas]);
   const [activeInsightId, setActiveInsightId] = React.useState<string | null>(null);
@@ -305,7 +305,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                         <div className="space-y-1">
                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono italic">Vector_Analysis::{insight.type}</span>
                            <h5 className="text-4xl font-black text-white italic tracking-tighter group-hover:text-slate-400 transition-colors uppercase font-mono leading-none">
-                              {isPrivacyMode ? maskSensitiveInText(insight.title) : insight.title}
+                              {maskSensitiveInText(insight.title, isPrivacyMode)}
                            </h5>
                         </div>
                       </div>
@@ -320,7 +320,7 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
 
                     <div className="relative z-10 flex-1 flex flex-col justify-between pt-10 border-t border-white/5">
                         <p className="text-2xl text-slate-400 font-medium italic leading-relaxed mb-12 max-w-2xl pr-10">
-                           {isPrivacyMode ? maskSensitiveInText(insight.summary) : insight.summary}
+                           {maskSensitiveInText(insight.summary, isPrivacyMode)}
                         </p>
                         
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -397,21 +397,21 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
                              <div className="flex items-baseline justify-between">
                                 <span className="text-sm font-black text-slate-700 uppercase italic font-mono">Timestamp</span>
                                 <span className="text-xl font-black text-white font-mono italic">
-                                   {isPrivacyMode && displaySnapshots[replayIndex]?.timestamp ? maskSensitiveInText(displaySnapshots[replayIndex].timestamp) : displaySnapshots[replayIndex]?.timestamp}
+                                   {maskSensitiveInText(String(displaySnapshots[replayIndex]?.timestamp || ''), isPrivacyMode)}
                                 </span>
                              </div>
                              <div className="h-px w-full bg-white/5" />
                              <div className="flex items-baseline justify-between">
                                 <span className="text-sm font-black text-slate-700 uppercase italic font-mono">Reported</span>
                                 <span className="text-xl font-black text-white font-mono italic">
-                                   {isPrivacyMode && displaySnapshots[replayIndex]?.reported ? maskSensitiveInText(displaySnapshots[replayIndex].reported) : displaySnapshots[replayIndex]?.reported || '---'}
+                                   {maskSensitiveInText(displaySnapshots[replayIndex]?.reported || '---', isPrivacyMode)}
                                 </span>
                              </div>
                              <div className="h-px w-full bg-white/5" />
                              <div className="flex items-baseline justify-between">
                                 <span className="text-sm font-black text-slate-700 uppercase italic font-mono">Status_Key</span>
                                 <span className="text-xl font-black text-slate-400 font-mono italic">
-                                   {isPrivacyMode && displaySnapshots[replayIndex]?.status ? maskSensitiveInText(displaySnapshots[replayIndex].status) : displaySnapshots[replayIndex]?.status || 'NO_DATA'}
+                                   {maskSensitiveInText(displaySnapshots[replayIndex]?.status || 'NO_DATA', isPrivacyMode)}
                                 </span>
                              </div>
                           </div>

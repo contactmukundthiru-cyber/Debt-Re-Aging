@@ -59,6 +59,78 @@ export interface PatternInsight {
 }
 
 /**
+ * Detailed forensic story of a violation for legal pleadings/disputes.
+ */
+export interface ForensicNarrative {
+  overview: string;
+  chronology: {
+    event: string;
+    date: string;
+    evidence: string;
+    implication: string;
+  }[];
+  statutoryConclusion: string;
+  damagesTheory: string;
+}
+
+/**
+ * Generate a forensic narrative for a specific account and its flags.
+ */
+export function generateForensicNarrative(fields: CreditFields, flags: RuleFlag[]): ForensicNarrative {
+  const accountName = fields.originalCreditor || fields.furnisherOrCollector || 'this account';
+  const dofd = fields.dofd || 'Unknown';
+  const removal = fields.estimatedRemovalDate || 'Unknown';
+  
+  const highFlags = flags.filter(f => f.severity === 'high');
+  const reagingFlags = flags.filter(f => ['B1', 'B2', 'B3', 'K6', 'Z1', 'R2'].includes(f.ruleId));
+
+  const chronology: ForensicNarrative['chronology'] = [];
+
+  // 1. Establish the Baseline
+  if (fields.dofd) {
+    chronology.push({
+      date: fields.dofd,
+      event: 'Commencement of Reporting Period (DOFD)',
+      evidence: 'FCRA 605(c)',
+      implication: `Pursuant to 15 U.S.C. § 1681c(c), this date anchors the 7-year clock.`
+    });
+  }
+
+  // 2. Identify the Violation Point
+  reagingFlags.forEach(flag => {
+    chronology.push({
+      date: 'DETECTED',
+      event: `Pattern: ${flag.ruleName}`,
+      evidence: flag.legalCitations.join(', '),
+      implication: flag.whyItMatters
+    });
+  });
+
+  // 3. The Result
+  if (fields.estimatedRemovalDate) {
+    chronology.push({
+      date: fields.estimatedRemovalDate,
+      event: 'Projected Illegal Reporting Limit',
+      evidence: 'Forensic Audit Result',
+      implication: `This date extends ${reagingFlags.length > 0 ? 'illegally' : 'potentially'} beyond the statutory limit.`
+    });
+  }
+
+  const overview = `Forensic analysis of ${accountName} reveals a systemic violation of the Fair Credit Reporting Act. By manipulating core reporting dates, the furnisher has extended the legal visibility of this debt, causing ongoing consumer harm.`;
+
+  const statutoryConclusion = `The reporting of this tradeline constitutes a ${highFlags.length > 0 ? 'willful' : 'negligent'} noncompliance with 15 U.S.C. § 1681i and § 1681s-2.`;
+
+  const damagesTheory = `The illegal re-aging of this debt causes concrete injury in the form of depressed credit scoring, increased insurance premiums, and lost credit opportunities.`;
+
+  return {
+    overview,
+    chronology,
+    statutoryConclusion,
+    damagesTheory
+  };
+}
+
+/**
  * Generate an executive summary across all analyzed accounts
  */
 export function generateExecutiveSummary(accounts: { fields: CreditFields; flags: RuleFlag[]; risk: RiskProfile }[]): ForensicSummary {

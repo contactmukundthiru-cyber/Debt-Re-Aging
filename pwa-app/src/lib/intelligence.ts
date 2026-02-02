@@ -1,6 +1,7 @@
 import { CreditFields } from './types';
 import { parseDate } from './rules';
 import { maskSensitiveInText } from './utils';
+import { RuleFlag } from './types';
 
 export interface SmartRecommendation {
     id: string;
@@ -98,4 +99,43 @@ export function getSmartRecommendations(fields: Partial<CreditFields>, isPrivacy
     }
 
     return recommendations;
+}
+
+export interface DiscoveryTrap {
+    question: string;
+    rationale: string;
+    expectedEvasion: string;
+}
+
+/**
+ * Generates "Discovery Traps" - strategic questions for specialized disputes or depositions.
+ */
+export function generateDiscoveryTraps(flags: RuleFlag[]): DiscoveryTrap[] {
+    const traps: DiscoveryTrap[] = [];
+
+    if (flags.some(f => f.ruleId === 'K6' || f.ruleId === 'B1')) {
+        traps.push({
+            question: "Did the furnisher utilize a 'date-normalization' algorithm upon acquisition of this debt segment?",
+            rationale: "Establish whether the DOFD was calculated by humans or an automated system that may have ignored original creditor data.",
+            expectedEvasion: "Claiming 'proprietary algorithms' - which still doesn't excuse inaccurate reporting."
+        });
+    }
+
+    if (flags.some(f => f.ruleId === 'Z1')) {
+        traps.push({
+            question: "Provide all documentation regarding the internal 'Account Activation Date' vs the reported 'Date Opened' to the bureaus.",
+            rationale: "Zombie debt often uses an internal activation date to look newer than the legal delinquency date.",
+            expectedEvasion: "Confusing internal account numbers with the actual age of the delinquency."
+        });
+    }
+
+    if (flags.some(f => f.ruleId === 'S1' || f.ruleId === 'S3')) {
+        traps.push({
+            question: "When was the last affirmative acknowledgement of this debt made by the consumer in writing?",
+            rationale: "FDCPA violations hinge on whether the collector knew or should have known the SOL had expired.",
+            expectedEvasion: "Relying on implied acknowledgement for tolling, which is often not legally sufficient."
+        });
+    }
+
+    return traps;
 }

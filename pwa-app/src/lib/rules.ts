@@ -189,6 +189,15 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     legalCitations: ['FCRA_605_a3', 'FCRA_611'],
     nextStep: 'Judgments over 7 years must be deleted regardless of satisfied status.'
   },
+  S3: {
+    name: 'Time-Barred Debt: Illegal Enforcement',
+    severity: 'critical',
+    successProbability: 82,
+    whyItMatters: 'Attempting to collect or threatening legal action on debt where the Statute of Limitations has expired is a violation of the FDCPA.',
+    suggestedEvidence: ['Proof of SOL expiry', 'Collection letters/notices after expiry date'],
+    legalCitations: ['FDCPA_807_2', 'FDCPA_807_5'],
+    nextStep: 'Send an immediate Cease and Desist citing the expiration of the SOL and the FDCPAs prohibition on threatening legal action on time-barred debt.'
+  },
   C1: {
     name: 'Disputed Status Not Shown',
     severity: 'medium',
@@ -682,6 +691,14 @@ export function runRules(fields: CreditFields): RuleFlag[] {
           `Forensic Audit: This debt exceeds the ${limit}-year ${fields.stateCode} SOL for ${typeLabel}s. The legal collection window likely expired on ${solExpiry.toISOString().split('T')[0]}.`,
           { stateCode: fields.stateCode, dateLastPayment: fields.dateLastPayment, solYears: limit, accountType: fields.accountType }
         ));
+
+        // Trigger S3 if it's a collection or charge-off being actively reported as "Open" or "Activity"
+        if (['collection', 'charge_off'].includes(accountType) && (status.includes('open') || status.includes('active'))) {
+           flags.push(createFlag('S3',
+            `This time-barred debt is being actively reported with an "Open" or "Active" status, which may imply legal enforceability that does not exist under ${fields.stateCode} law.`,
+            { stateCode: fields.stateCode, solExpiry: solExpiry.toISOString().split('T')[0] }
+           ));
+        }
       }
     }
   }

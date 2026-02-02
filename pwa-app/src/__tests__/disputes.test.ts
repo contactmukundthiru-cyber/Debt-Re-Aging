@@ -13,6 +13,8 @@ describe('dispute letter generator', () => {
       ruleId: 'B1',
       ruleName: 'Re-aging',
       severity: 'high',
+      category: 'violation',
+      confidence: 90,
       explanation: 'Account was re-aged.',
       whyItMatters: 'Legal limit exceeded.',
       suggestedEvidence: ['Old reports'],

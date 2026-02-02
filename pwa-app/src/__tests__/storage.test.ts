@@ -13,6 +13,7 @@ describe('storage utils', () => {
     overallScore: 0,
     riskLevel: 'low',
     disputeStrength: 'weak',
+    summary: 'Test summary',
     litigationPotential: false,
     detectedPatterns: [],
     keyViolations: [],

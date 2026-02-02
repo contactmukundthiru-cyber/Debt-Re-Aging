@@ -5,6 +5,8 @@
 
 import { getClients, ClientProfile } from './institutional';
 import { getAllHistory, AnalysisRecord } from './storage';
+import { CreditFields, RuleFlag, RiskProfile } from './types';
+import { generateForensicHash } from './utils';
 
 export interface ImpactStats {
     totalClients: number;
@@ -54,6 +56,69 @@ export async function calculateImpactMetrics(): Promise<ImpactStats> {
         forensicAccuracyScore: 99.8,
         throughputHistory
     };
+}
+
+/**
+ * Generate a Forensic Case Brief for litigation or formal dispute escalation.
+ */
+export function generateForensicCaseBrief(
+    fields: CreditFields,
+    flags: RuleFlag[],
+    risk: RiskProfile
+): string {
+    const fingerprint = generateForensicHash({
+        account: fields.accountNumber,
+        opened: fields.dateOpened,
+        dofd: fields.dofd
+    });
+
+    const highSeverityFlags = flags.filter(f => f.severity === 'high' || f.severity === 'critical');
+    
+    let brief = `# FORENSIC CASE BRIEF\n`;
+    brief += `**CASE_FINGERPRINT:** ${fingerprint}\n`;
+    brief += `**GENERATED:** ${new Date().toISOString()}\n`;
+    brief += `**CLASSIFICATION:** LEGAL_PRE_LITIGATION\n\n`;
+
+    brief += `## 1. SUBJECT TRADELINE IDENTIFICATION\n`;
+    brief += `- **Furnisher:** ${fields.furnisherOrCollector || 'N/A'}\n`;
+    brief += `- **Original Creditor:** ${fields.originalCreditor || 'N/A'}\n`;
+    brief += `- **Reported Account Type:** ${fields.accountType || 'N/A'}\n`;
+    brief += `- **Reported Balance:** ${fields.currentValue || 'N/A'}\n\n`;
+
+    brief += `## 2. DETECTED FORENSIC MARKERS\n`;
+    if (highSeverityFlags.length > 0) {
+        highSeverityFlags.forEach(f => {
+            brief += `### [${f.ruleId}] ${f.ruleName}\n`;
+            brief += `- **Violation Depth:** ${f.severity.toUpperCase()}\n`;
+            brief += `- **Technical Explanation:** ${f.explanation}\n`;
+            brief += `- **Legal Basis:** ${f.legalCitations.join(', ')}\n\n`;
+        });
+    } else {
+        brief += `No critical forensic markers identified in current scan.\n\n`;
+    }
+
+    brief += `## 3. WILLFULNESS & INTENT ASSESSMENT\n`;
+    const reagingCount = flags.filter(f => ['B1', 'B2', 'B3', 'K6', 'Z1', 'R2'].includes(f.ruleId)).length;
+    if (reagingCount >= 2) {
+        brief += `**ASSESSMENT: HIGH PROBABILITY OF WILLFUL NONCOMPLIANCE.**\n`;
+        brief += `The presence of multiple, reinforcing date-manipulation markers (Re-aging Node Count: ${reagingCount}) suggest a systemic failure of reasonable procedures under 15 U.S.C. § 1681e(b). This pattern is inconsistent with clerical error and indicates an intentional extension of the statutory reporting limit.\n\n`;
+    } else {
+        brief += `**ASSESSMENT: POTENTIAL NEGLIGENT NONCOMPLIANCE.**\n`;
+        brief += `Current metrics suggest technical inaccuracies that warrant a formal reinvestigation, though systemic intent cannot yet be forensically established.\n\n`;
+    }
+
+    brief += `## 4. RECOMMENDED DISCOVERY / INQUIRY\n`;
+    brief += `- **Internal Log Audit:** Demand the specific date/time stamps for all updates to Metro 2 Field 25 (DOFD).\n`;
+    brief += `- **Chain of Title:** Request the full Bill of Sale and Data Integrity Affidavit from the transfer of ${fields.originalCreditor} to ${fields.furnisherOrCollector}.\n`;
+    brief += `- **Procedure Verification:** Inquiry into whether an 'automated verification' (e-OSCAR Code 01) was used to resolve this forensic inconsistency.\n\n`;
+
+    brief += `## 5. STATUTORY CONCLUSION\n`;
+    brief += `Based on the risk score of **${risk.overallScore}**, the subject tradeline deviates from the requirements of the Fair Credit Reporting Act. Success probability for a formal 611(a) challenge is estimated at **${Math.min(95, risk.overallScore + 20)}%**.\n\n`;
+
+    brief += `--- \n`;
+    brief += `*Produced by Zenith V5 Forensic Engine - Institutional Grade Analysis*`;
+
+    return brief;
 }
 
 /**
