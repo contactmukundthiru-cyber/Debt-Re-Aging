@@ -18,7 +18,8 @@ import {
   Lock,
   Search
 } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, maskPII } from '../../lib/utils';
+import { EyeOff } from 'lucide-react';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -95,6 +96,16 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            {state.isPrivacyMode && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-full text-rose-500"
+              >
+                <EyeOff size={14} className="animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">Privacy Active</span>
+              </motion.div>
+            )}
             <div className="hidden md:flex items-center bg-slate-100 dark:bg-slate-900 rounded-2xl px-3 py-1.5 border border-slate-200 dark:border-slate-800">
               <Search className="w-4 h-4 text-slate-400 mr-2" />
               <input 

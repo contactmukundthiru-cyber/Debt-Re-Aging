@@ -14,12 +14,15 @@ import {
     Award,
     Activity,
     Network,
-    Briefcase
+    Briefcase,
+    EyeOff,
+    Download
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../../../lib/utils';
 
 import { CollectorMatch } from '../../../lib/collector-database';
+import { useApp } from '../../../context/AppContext';
 
 interface InstitutionalTabProps {
     caseId: string;
@@ -27,6 +30,8 @@ interface InstitutionalTabProps {
 }
 
 const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMatch }) => {
+    const { state, setPrivacyMode } = useApp();
+    const { isPrivacyMode } = state;
     const [metrics, setMetrics] = React.useState<any>(null);
     const [reportName, setReportName] = React.useState('Forensic Unit 1');
 
@@ -38,13 +43,23 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
         loadMetrics();
     }, []);
 
+    const performBackup = async () => {
+        const json = await exportInstitutionalJSON();
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `INSTITUTIONAL_BACKUP_${new Date().toISOString()}.json`;
+        a.click();
+    };
+
     const VelocityChart = () => (
-        <div className="h-48 w-full flex items-end gap-2 px-8">
-            {[40, 70, 45, 90, 65, 80, 50, 95, 85, 100].map((h, i) => (
+        <div className="h-48 w-full flex items-end gap-2 px-8" role="img" aria-label="Analysis throughput velocity over time">
+            {(metrics?.throughputHistory || [40, 70, 45, 90, 65, 80, 50, 95, 85, 100]).map((h: number, i: number) => (
                 <motion.div
                     key={i}
                     initial={{ height: 0 }}
-                    animate={{ height: `${h}%` }}
+                    animate={{ height: `${h || 10}%` }}
                     transition={{ delay: i * 0.05, duration: 1, ease: "circOut" }}
                     className="flex-1 bg-gradient-to-t from-blue-600/40 to-blue-400 rounded-t-lg shadow-lg relative group/bar"
                 >
@@ -77,11 +92,16 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
     };
 
     const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
-        <div className="relative group p-12 bg-white/[0.02] border border-white/5 rounded-[4rem] overflow-hidden shadow-4xl hover:border-blue-500/30 transition-all duration-700">
+        <div 
+            tabIndex={0}
+            className="relative group p-12 bg-white/[0.02] border border-white/5 rounded-[4rem] overflow-hidden shadow-4xl hover:border-blue-500/30 transition-all duration-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            role="status"
+            aria-label={`${title}: ${value}`}
+        >
             <div className={cn("absolute -inset-1 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition duration-700", color)} />
             <div className="relative z-10 flex items-center justify-between mb-10">
                 <div className={cn("w-16 h-16 rounded-[2rem] flex items-center justify-center border shadow-2xl transition-transform duration-700 group-hover:rotate-6", color.replace('from-', 'bg-').replace('to-', ' ').split(' ')[0] + '/10', color.replace('from-', 'border-').replace('to-', ' ').split(' ')[0] + '/20')}>
-                    <Icon size={28} className={color.replace('from-', 'text-').split(' ')[0]} />
+                    <Icon size={28} aria-hidden="true" className={color.replace('from-', 'text-').split(' ')[0]} />
                 </div>
                 {trend && (
                     <div className="px-5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-3">
@@ -105,7 +125,7 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
                     <p className="text-slate-500 font-mono text-xs uppercase tracking-widest">Initialising_Forensic_Vault...</p>
                 </div>
             ) : (
-                <>
+                <React.Fragment>
             {/* HERO SECTION */}
             <section className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-indigo-600/10 to-transparent rounded-[6rem] blur-3xl opacity-50 group-hover:opacity-100 transition duration-1000" />
@@ -203,7 +223,7 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
 
             {/* ACTION CENTER */}
             <div className="grid lg:grid-cols-12 gap-24">
-                        <div className="lg:col-span-8 space-y-24">
+                <div className="lg:col-span-8 space-y-24">
                     <div className="relative group/manifest">
                          <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/20 to-transparent rounded-[5rem] blur-3xl opacity-0 group-hover/manifest:opacity-100 transition duration-1000" />
                          <div className="relative rounded-[5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 overflow-hidden shadow-2xl p-20">
@@ -238,59 +258,56 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
                     </div>
 
                     <div className="panel p-16 rounded-[4rem] bg-white/[0.02] border border-white/5 shadow-3xl">
-                            <div className="flex items-center justify-between mb-16 px-4">
+                        <div className="flex items-center justify-between mb-16 px-4">
+                            <div className="flex items-center gap-10">
+                                <div className="w-20 h-20 rounded-[2.5rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                                    <History size={32} />
+                                </div>
+                                <h3 className="text-4xl font-black text-white tracking-tighter uppercase font-mono italic">Reporting_Vectors</h3>
+                            </div>
+                        </div>
+
+                        <div className="space-y-10">
+                            <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[4rem] flex flex-col sm:flex-row items-center justify-between gap-12 group/action hover:bg-white/[0.04] transition-all">
                                 <div className="flex items-center gap-10">
-                                    <div className="w-20 h-20 rounded-[2.5rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                                        <History size={32} />
+                                    <div className="w-20 h-20 rounded-[2rem] bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-2xl">
+                                        <FileText size={32} />
                                     </div>
-                                    <h3 className="text-4xl font-black text-white tracking-tighter uppercase font-mono italic">Reporting_Vectors</h3>
+                                    <div>
+                                        <h4 className="text-2xl font-black text-white uppercase tracking-tight font-mono italic">Impact_Manifest.md</h4>
+                                        <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest font-mono mt-2 italic">Professional_Markdown_Summary</p>
+                                    </div>
                                 </div>
+                                <button 
+                                    onClick={downloadReport}
+                                    title="Download Markdown Impact Report"
+                                    className="px-12 py-5 bg-white text-slate-950 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-blue-500 hover:text-white transition-all shadow-4xl flex items-center gap-6"
+                                >
+                                    DOWNLOAD
+                                    <TrendingUp size={16} />
+                                </button>
                             </div>
 
-                            <div className="space-y-10">
-                                <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[4rem] flex flex-col sm:flex-row items-center justify-between gap-12 group/action hover:bg-white/[0.04] transition-all">
-                                    <div className="flex items-center gap-10">
-                                        <div className="w-20 h-20 rounded-[2rem] bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-2xl">
-                                            <FileText size={32} />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-2xl font-black text-white uppercase tracking-tight font-mono italic">Impact_Manifest.md</h4>
-                                            <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest font-mono mt-2 italic">Professional_Markdown_Summary</p>
-                                        </div>
+                            <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[4rem] flex flex-col sm:flex-row items-center justify-between gap-12 group/action hover:bg-white/[0.04] transition-all">
+                                <div className="flex items-center gap-10">
+                                    <div className="w-20 h-20 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-2xl">
+                                        <FileJson size={32} />
                                     </div>
-                                    <button 
-                                        onClick={downloadReport}
-                                        title="Download Markdown Impact Report"
-                                        aria-label="Download Impact Report"
-                                        className="px-12 py-5 bg-white text-slate-950 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-blue-500 hover:text-white transition-all shadow-4xl flex items-center gap-6"
-                                    >
-                                        DOWNLOAD
-                                        <TrendingUp size={16} />
-                                    </button>
-                                </div>
-
-                                <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[4rem] flex flex-col sm:flex-row items-center justify-between gap-12 group/action hover:bg-white/[0.04] transition-all">
-                                    <div className="flex items-center gap-10">
-                                        <div className="w-20 h-20 rounded-[2rem] bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-2xl">
-                                            <FileJson size={32} />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-2xl font-black text-white uppercase tracking-tight font-mono italic">CRM_Syndication.json</h4>
-                                            <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest font-mono mt-2 italic">Normalized_Data_Structure</p>
-                                        </div>
+                                    <div>
+                                        <h4 className="text-2xl font-black text-white uppercase tracking-tight font-mono italic">CRM_Syndication.json</h4>
+                                        <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest font-mono mt-2 italic">Normalized_Data_Structure</p>
                                     </div>
-                                    <button 
-                                        onClick={downloadJSON}
-                                        title="Download JSON Data for CRM"
-                                        aria-label="Export JSON Data"
-                                        className="px-12 py-5 bg-slate-900 text-white border border-white/10 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-slate-800 transition-all shadow-4xl flex items-center gap-6"
-                                    >
-                                        EXPORT_RAW
-                                        <Network size={16} />
-                                    </button>
                                 </div>
+                                <button 
+                                    onClick={downloadJSON}
+                                    title="Download JSON Data for CRM"
+                                    className="px-12 py-5 bg-slate-900 text-white border border-white/10 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-slate-800 transition-all shadow-4xl flex items-center gap-6"
+                                >
+                                    EXPORT_RAW
+                                    <Network size={16} />
+                                </button>
                             </div>
-                         </div>
+                        </div>
                     </div>
                 </div>
 
@@ -330,10 +347,45 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
                      </div>
 
                      <div className="p-16 rounded-[4rem] bg-gradient-to-br from-blue-600/20 to-indigo-600/20 border border-white/10 backdrop-blur-3xl shadow-4xl relative overflow-hidden group">
+                        <div className="relative z-10 space-y-8">
+                            <h4 className="text-2xl font-black text-white uppercase tracking-tight font-mono italic">Enterprise_Security</h4>
+                            
+                            <div className="space-y-4 mb-8">
+                                {[
+                                    { t: "Verification Integrity", s: "SHA-256 Active" },
+                                    { t: "Privacy Shield", s: isPrivacyMode ? "Redacted" : "Exposed", warn: !isPrivacyMode },
+                                    { t: "Storage Residency", s: "Edge (Local)" }
+                                ].map((item, i) => (
+                                    <div key={i} className="flex justify-between items-center border-b border-white/5 pb-2">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono italic">{item.t}</span>
+                                        <span className={cn("text-[10px] font-bold font-mono uppercase italic", item.warn ? "text-rose-400" : "text-emerald-400")}>{item.s}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button 
+                                onClick={() => setPrivacyMode(!isPrivacyMode)}
+                                className={cn(
+                                    "w-full px-6 py-4 rounded-2xl flex items-center justify-between border transition-all font-mono text-xs font-black uppercase tracking-widest",
+                                    isPrivacyMode 
+                                        ? "bg-rose-500/20 border-rose-500/40 text-rose-400" 
+                                        : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
+                                )}
+                            >
+                                {isPrivacyMode ? 'SHIELD_ACTIVE' : 'ACTIVATE_SHIELD'}
+                                <EyeOff size={18} />
+                            </button>
+                        </div>
+                     </div>
+
+                     <div className="p-16 rounded-[4rem] bg-indigo-600 text-white shadow-4xl relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform" onClick={performBackup}>
                         <div className="relative z-10">
-                            <h4 className="text-2xl font-black text-white uppercase tracking-tight font-mono italic mb-4">Scaling_Ready</h4>
-                            <p className="text-[11px] font-bold text-slate-400 leading-relaxed uppercase tracking-widest font-mono italic">
-                                Institutional instance is optimized for multi-user concurrent units.
+                            <div className="flex items-center justify-between mb-4">
+                                <h4 className="text-2xl font-black uppercase tracking-tight font-mono italic">Full_Backup</h4>
+                                <Download size={24} />
+                            </div>
+                            <p className="text-[11px] font-bold text-indigo-100 leading-relaxed uppercase tracking-widest font-mono italic">
+                                Download all local case history for off-site archival.
                             </p>
                         </div>
                      </div>
@@ -363,8 +415,10 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
                         </div>
                      </div>
                 </div>
-            </div>            </>
-            )}        </div>
+            </div>
+                </React.Fragment>
+            )}
+        </div>
     );
 };
 

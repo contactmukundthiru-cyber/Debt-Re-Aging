@@ -146,7 +146,7 @@ export function compareMultipleBureaus(bureauData: BureauData[]): BureauComparis
             } else if (uniqueValues.size === 1 && definedValues.length === bureausCompared.length) {
 
                 // All bureaus match
-                matchedFields.push(FIELD_LABELS[fieldKey] || fieldKey);
+                matchedFields.push(FIELD_LABELS[fieldKey as string] || fieldKey as string);
             }
         }
     });
@@ -212,7 +212,7 @@ function createDiscrepancy(
 
     return {
         fieldKey,
-        fieldLabel: FIELD_LABELS[fieldKey] || fieldKey,
+        fieldLabel: FIELD_LABELS[fieldKey as string] || fieldKey as string,
         values,
         discrepancyType: type,
         severity,

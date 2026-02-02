@@ -31,7 +31,11 @@ export const metadata: Metadata = {
   description: BRANDING.metaDescription,
   keywords: ['credit report', 'FCRA', 'FDCPA', 'debt re-aging', 'dispute letter', 'credit repair', 'forensic analysis'],
   authors: [{ name: BRANDING.organizationName }],
-  manifest: 'manifest.json',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/icons/icon.svg',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -61,9 +65,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href={`${basePath}/favicon.svg`} sizes="any" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href={`${basePath}/icons/icon.svg`} />
-        <link rel="manifest" href={`${basePath}/manifest.json`} />
         <script
           dangerouslySetInnerHTML={{
             __html: `

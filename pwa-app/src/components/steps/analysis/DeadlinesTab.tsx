@@ -9,7 +9,7 @@ import {
   DeadlineTracker
 } from '../../../lib/countdown';
 import { CreditFields, RuleFlag } from '../../../lib/rules';
-import { ConsumerInfo } from '../../../lib/generator';
+import { ConsumerInfo } from '../../../lib/types';
 import {
   buildReminderEmail,
   buildNoResponseEmail,

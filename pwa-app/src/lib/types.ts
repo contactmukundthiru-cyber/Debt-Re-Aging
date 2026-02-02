@@ -64,6 +64,10 @@ export interface CreditFields {
     remarks?: string;
     bureau?: string;
     stateCode?: string;
+    accountNumber?: string;
+    phone?: string;
+    // Allow dynamic field access with string keys only
+    [key: string]: string | undefined;
 }
 
 export interface ScoreImpact {

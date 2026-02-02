@@ -103,6 +103,8 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
                 ruleId: 'DU1',
                 ruleName: 'Duplicate Account Reporting',
                 severity: 'high',
+                category: 'violation',
+                confidence: 95,
                 explanation: `Detected ${ids.length} accounts reporting the same balance ($${key.split('-')[0]}) for similar creditors. This artificially suppresses your credit score by duplicating liability.`,
                 whyItMatters: 'Credit bureaus are required by the FCRA to maintain "maximum possible accuracy." Duplicate entries violate this standard and create a false perception of total debt.',
                 suggestedEvidence: ['Highlighted credit report showing matching balances with different account numbers or bureau tags'],
@@ -120,7 +122,7 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
     // 3. Cross-Bureau Integrity Audit (CB1)
     const acctNumGroups: Record<string, string[]> = {};
     accounts.forEach(acc => {
-        const num = (acc.fields.accountNumber || '').replace(/[^a-z0-9]/g, '');
+        const num = (acc.id || '').replace(/[^a-z0-9]/g, '');
         if (num.length > 5) {
             if (!acctNumGroups[num]) acctNumGroups[num] = [];
             acctNumGroups[num].push(acc.id);
@@ -140,9 +142,12 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
                     ruleId: 'CB1',
                     ruleName: 'Cross-Bureau Date Conflict',
                     severity: 'high',
+                    category: 'violation',
+                    confidence: 85,
                     explanation: `Account ending in ...${num.slice(-4)} is reported with different open dates: ${uniqueDates.join(' vs ')}.`,
                     whyItMatters: 'Data integrity is a core requirement of the FCRA. If bureaus cannot agree on the basic facts of an account (like its open date), the reporting is inherently unreliable.',
                     suggestedEvidence: ['Comparison table of dates across bureaus'],
+                    fieldValues: {},
                     legalCitations: ['FCRA_623_a1', 'FCRA_611'],
                     successProbability: 85
                 };
@@ -160,8 +165,12 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
                     ruleId: 'CB2',
                     ruleName: 'Cross-Bureau Balance Mismatch',
                     severity: 'medium',
+                    category: 'anomaly',
+                    confidence: 70,
                     explanation: `The reported balance for account ending in ...${num.slice(-4)} varies significantly across bureaus.`,
                     whyItMatters: 'Discrepancies in balance amounts indicate a failure in the furnisher\'s automated reporting systems.',
+                    suggestedEvidence: [],
+                    fieldValues: {},
                     legalCitations: ['FCRA_623_a1'],
                     successProbability: 70
                 };

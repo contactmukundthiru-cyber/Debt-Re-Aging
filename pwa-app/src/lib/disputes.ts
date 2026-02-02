@@ -4,6 +4,7 @@
  */
 
 import { CreditFields, RuleFlag } from './rules';
+import { generateForensicHash } from './utils';
 
 export interface DisputeLetterConfig {
   type: 'bureau' | 'furnisher' | 'validation' | 'cease-desist' | 'intent-to-sue';
@@ -46,10 +47,10 @@ const BUREAU_ADDRESSES = {
   },
   transunion: {
     name: 'TransUnion LLC',
-    address: 'Consumer Dispute Center',
-    city: 'P.O. Box 2000',
-    state: 'Chester',
-    zip: 'PA 19016'
+    address: 'P.O. Box 2000',
+    city: 'Chester',
+    state: 'PA',
+    zip: '19016'
   }
 };
 
@@ -91,7 +92,14 @@ export function generateDisputeLetter(
   }
 
   // Subject line
+  const forensicId = generateForensicHash({
+    account: fields.accountNumber,
+    opened: fields.dateOpened,
+    consumer: consumer.name
+  });
+
   letter += `RE: FORMAL DISPUTE - ${config.type === 'validation' ? 'DEBT VALIDATION REQUEST' : 'REQUEST FOR INVESTIGATION'}\n`;
+  letter += `TRADELINE FORENSIC ID: ${forensicId}\n`;
   letter += `Account: ${fields.originalCreditor || fields.furnisherOrCollector || '[ACCOUNT NAME]'}\n`;
   if (fields.currentValue) letter += `Reported Stated Value: ${fields.currentValue}\n`;
   letter += `\n`;

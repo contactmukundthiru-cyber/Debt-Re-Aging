@@ -45,15 +45,50 @@ const CaseSummaryDashboard: React.FC<CaseSummaryDashboardProps> = ({ flags, risk
         ? Math.round(flags.reduce((acc, f) => acc + (f.successProbability || 0), 0) / flags.length)
         : 0;
 
+    const prioritizedAction = flags.find(f => f.severity === 'high')?.ruleName || 'Reviewing forensic data';
+    const nextStepAction = (flags.find(f => f.severity === 'high') as any)?.nextStep || 'Standard audit protocol';
+
     return (
-        <motion.div 
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
-        >
-            {/* Total Violations */}
-            <motion.div variants={item} className="group relative">
+        <div className="space-y-16 mb-24">
+            {/* ACTION_PRIORITY_HEADER */}
+            <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative p-12 bg-slate-950 border border-white/5 rounded-[3rem] overflow-hidden group shadow-4xl mb-16"
+            >
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-600/5 rounded-full blur-[120px] -mr-64 -mt-64" />
+                <div className="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-12">
+                    <div className="flex items-center gap-10">
+                        <div className="w-20 h-20 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-[0_0_40px_rgba(16,185,129,0.5)]">
+                            <Target size={36} className="animate-pulse" />
+                        </div>
+                        <div className="space-y-2">
+                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-500 font-mono">Institutional_Protocol::NEXT_PHASE</p>
+                            <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase font-mono">
+                                {highImpact > 0 ? 'CRITICAL_LEGAL_ACTION_REQUIRED' : 'STANDARD_AUDIT_VERIFICATION'}
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 bg-slate-900/60 p-8 rounded-[2rem] border border-white/5 flex flex-col sm:flex-row items-center gap-10">
+                        <div className="flex-1 space-y-2">
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono">RECOMMENDED_NEXT_STEP</p>
+                            <p className="text-2xl font-black text-white italic tracking-tight">{nextStepAction}</p>
+                        </div>
+                        <div className="h-16 w-px bg-white/5 hidden sm:block" />
+                        <div className="text-right shrink-0">
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono mb-2">PRIMARY_VIOLATION</p>
+                            <p className="text-xl font-bold text-rose-500 italic tracking-tight uppercase font-mono">{prioritizedAction}</p>
+                        </div>
+                    </div>
+                </div>
+            </motion.div>
+
+            <motion.div 
+                variants={container}
+            >
+                {/* Total Violations */}
+                <motion.div variants={item} className="group relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-br from-rose-500/30 via-transparent to-transparent rounded-[2.5rem] opacity-50 blur-sm group-hover:opacity-100 transition-all duration-700" />
                 <div className="relative bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.4rem] p-8 h-full overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-rose-500/15 transition-all duration-700" />
@@ -235,6 +270,7 @@ const CaseSummaryDashboard: React.FC<CaseSummaryDashboardProps> = ({ flags, risk
                 </div>
             </motion.div>
         </motion.div>
+    </div>
     );
 };
 

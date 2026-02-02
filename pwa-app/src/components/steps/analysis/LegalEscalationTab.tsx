@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { RuleFlag, CreditFields, RiskProfile } from '../../../lib/rules';
 import { generateForensicAffidavit } from '../../../lib/affidavit';
-import { ConsumerInfo } from '../../../lib/generator';
+import { ConsumerInfo } from '../../../lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     FileText, 

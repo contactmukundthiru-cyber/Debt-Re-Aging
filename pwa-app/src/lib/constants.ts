@@ -1,6 +1,7 @@
 export const FIELD_CONFIG = [
   { key: 'originalCreditor', label: 'Original Creditor', section: 'account', help: 'The company that originally extended credit' },
   { key: 'furnisherOrCollector', label: 'Current Furnisher', section: 'account', help: 'Who is currently reporting this account' },
+  { key: 'accountNumber', label: 'Account Number', section: 'account', help: 'The unique identifier for this account' },
   { key: 'accountType', label: 'Account Type', section: 'account', help: 'e.g., Collection, Charge-off, Credit Card' },
   { key: 'accountStatus', label: 'Status', section: 'account', help: 'Current account status (Open, Closed, Paid)' },
   { key: 'paymentHistory', label: 'Payment History', section: 'account', help: 'Payment status codes (OK, 30, 60, 90, CO)' },
@@ -20,6 +21,30 @@ export const STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA
 export const ACCOUNT_TYPES = ['Collection', 'Charge-off', 'Credit Card', 'Installment Loan', 'Medical', 'Mortgage', 'Auto Loan', 'Student Loan', 'Personal Loan', 'Utility'];
 
 export const STATUSES = ['Open', 'Closed', 'Paid', 'Settled', 'Transferred', 'Sold', 'Charged Off', 'In Collections'];
+
+export const BUREAU_ADDRESSES = {
+  experian: {
+    name: 'Experian',
+    address: 'P.O. Box 4500',
+    city: 'Allen',
+    state: 'TX',
+    zip: '75013'
+  },
+  equifax: {
+    name: 'Equifax Information Services LLC',
+    address: 'P.O. Box 740256',
+    city: 'Atlanta',
+    state: 'GA',
+    zip: '30374'
+  },
+  transunion: {
+    name: 'TransUnion LLC',
+    address: 'P.O. Box 2000',
+    city: 'Chester',
+    state: 'PA',
+    zip: '19016'
+  }
+};
 
 export const ANALYSIS_TABS = [
   { id: 'overview', label: 'EXECUTIVE DASHBOARD' },

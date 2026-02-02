@@ -15,12 +15,15 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { format } from 'date-fns';
+import { useApp } from '../../../context/AppContext';
+import { maskSensitiveInText } from '../../../lib/utils';
 
 interface ForensicTimelineProps {
   events: TimelineEvent[];
 }
 
 const ForensicTimeline: React.FC<ForensicTimelineProps> = ({ events }) => {
+  const { isPrivacyMode } = useApp();
   if (!events || events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-20 text-center bg-slate-950 rounded-[4rem] border-2 border-dashed border-slate-800 shadow-3xl relative overflow-hidden">
@@ -123,12 +126,12 @@ const ForensicTimeline: React.FC<ForensicTimelineProps> = ({ events }) => {
                   <div className="flex items-center gap-6 mb-8">
                     <div className="w-1.5 h-12 bg-blue-500 rounded-full" />
                     <h4 className="text-5xl font-black text-white tracking-tighter leading-none uppercase font-mono italic">
-                      {event.label}
+                      {isPrivacyMode ? maskSensitiveInText(event.label) : event.label}
                     </h4>
                   </div>
                   
                   <p className="text-2xl text-slate-400 leading-relaxed font-bold mb-14 max-w-5xl italic border-l border-white/10 pl-10 tracking-tight">
-                    {event.description}
+                    {isPrivacyMode ? maskSensitiveInText(event.description) : event.description}
                   </p>
 
                   {event.evidenceSnippets && event.evidenceSnippets.length > 0 && (
@@ -145,7 +148,7 @@ const ForensicTimeline: React.FC<ForensicTimelineProps> = ({ events }) => {
                             </div>
                             <span className="font-mono leading-relaxed select-all italic opacity-80 group-hover/snippet:opacity-100 transition-opacity text-base py-2">
                                 <span className="text-blue-500/50 mr-4 font-black">LOG_NODE_{sIndex + 1}::</span>
-                                {snippet}
+                                {isPrivacyMode ? maskSensitiveInText(snippet) : snippet}
                             </span>
                           </div>
                         ))}

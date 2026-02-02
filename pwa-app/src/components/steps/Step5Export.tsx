@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RuleFlag, RiskProfile, CreditFields } from '../../lib/types';
 import { Step } from '../../lib/constants';
 import { ImpactAssessment } from '../../lib/evidence-builder';
-import { ConsumerInfo } from '../../lib/generator';
+import { ConsumerInfo } from '../../lib/types';
 import { CaseLaw } from '../../lib/caselaw';
 import { computeCaseHealth, formatExecutiveBrief } from '../../lib/case-health';
 import { AttorneyPackage } from '../../lib/attorney-export';

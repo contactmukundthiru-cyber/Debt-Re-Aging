@@ -5,17 +5,16 @@ import { useApp } from '../context/AppContext';
 
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { parseCreditReport, fieldsToSimple, parseMultipleAccounts, ParsedFields } from '../lib/parser';
-import { runRules, calculateRiskProfile, parseDate } from '../lib/rules';
 import { runComprehensiveAnalysis, runBatchAnalysis } from '../lib/forensic-engine';
 import { CreditFields, RuleFlag, RiskProfile, ConsumerInfo, AnalysisRecord } from '../lib/types';
 import { BRANDING } from '../config/branding';
 import { generateBureauLetter, generateValidationLetter, generateCaseSummary, generateCFPBNarrative, generatePDFLetter, generatePDFBlob, generateForensicReport, generateForensicReportBlob } from '../lib/generator';
 import { performOCR, isImage } from '../lib/ocr';
 import { isPDF, extractPDFText, extractPDFTextViaOCR } from '../lib/pdf';
+import { validateFiles, validateTextInput } from '../lib/validation-input';
 import { getScanProfile, mergeTextVariants, normalizeExtractedText, scoreTextQuality, ScanMode } from '../lib/ingestion';
 import { compareReports, compareReportSeries, buildReportSeries, buildReportSeriesOptions, DeltaResult, SeriesInsight, SeriesSnapshot, SeriesSnapshotOption } from '../lib/delta';
 import { getRelevantCaseLaw, CaseLaw } from '../lib/caselaw';
-import { generateStateGuidance, getStateLaws } from '../lib/state-laws';
 import {
   buildTimeline,
   calculateScoreBreakdown,
@@ -42,19 +41,11 @@ import {
 
 // Revolutionary feature imports
 import {
-  generateDisputeLetter,
-  generateValidationLetter as generateAdvancedValidationLetter,
   generateCeaseDesistLetter,
-  generateIntentToSueLetter,
-  getLetterRecommendations,
-  DisputeLetterConfig
+  generateIntentToSueLetter
 } from '../lib/disputes';
 import {
-  buildCFPBComplaint,
-  generateCFPBNarrative as generateAdvancedCFPBNarrative,
-  formatForCFPBSubmission,
-  estimateComplaintStrength,
-  CFPBComplaint
+  estimateComplaintStrength
 } from '../lib/cfpb-complaint';
 import {
   buildEvidencePackage,
@@ -74,25 +65,12 @@ import {
   ScoreImpactEstimate
 } from '../lib/score-impact';
 
+
 import {
-  BureauReport,
-  compareAccounts,
-  generateBureauSummary,
-  formatComparisonReport,
-  exportComparisonCSV,
-  ComparisonResult
-} from '../lib/bureau-compare';
-import {
-  calculateRemovalDate,
-  calculateSOLExpiration,
-  calculateCountdowns,
   buildDeadlineTracker,
-  generateCalendarEvents,
-  CountdownResult,
   DeadlineTracker
 } from '../lib/countdown';
 import {
-  t,
   translate,
   setLanguage,
   getLanguage,
@@ -125,7 +103,9 @@ import Step4Analysis from '../components/steps/Step4Analysis';
 import Step5Export from '../components/steps/Step5Export';
 import Step6Track from '../components/steps/Step6Track';
 import { Celebration } from '../components/Celebration';
-import { FIELD_CONFIG, STATES, ACCOUNT_TYPES, STATUSES, STEPS, ANALYSIS_TABS, Step, LetterType, TabId } from '../lib/constants';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { FIELD_CONFIG, STATES, ACCOUNT_TYPES, STATUSES, STEPS, ANALYSIS_TABS } from '../lib/constants';
+import type { Step, LetterType, TabId } from '../lib/constants';
 import { getDateValidation, getDateOrderIssues, normalizeCreditFields } from '../lib/validation';
 
 // Institutional & Quality Components
@@ -154,9 +134,7 @@ import {
   DisputeStatus
 } from '../lib/dispute-tracker';
 
-// Types imported from constants: Step, LetterType, TabId
-
-import { ConsumerInfo as AppConsumerInfo, AnalyzedAccount } from '../lib/types';
+import { AnalyzedAccount } from '../lib/types';
 
 // Multi-account analysis interface moved to lib/types
 
@@ -539,11 +517,21 @@ export default function CreditReportAnalyzer() {
     const fileArray = Array.from(files);
     if (fileArray.length === 0) return;
 
-    setProcessing(true, 0, `Processing ${fileArray.length} source${fileArray.length > 1 ? 's' : ''}...`);
+    // Validate files before processing
+    const validation = validateFiles(fileArray);
+    if (!validation.valid) {
+      validation.errors.forEach(error => showToast(error, 'error'));
+      if (validation.validFiles.length === 0) {
+        setProcessing(false, 0, '');
+        return;
+      }
+    }
+
+    setProcessing(true, 0, `Processing ${validation.validFiles.length} source${validation.validFiles.length > 1 ? 's' : ''}...`);
 
     try {
       const extracted: { id: string; name: string; size: number; type: string; text: string }[] = [];
-      for (const file of fileArray) {
+      for (const file of validation.validFiles) {
         const text = await extractTextFromFile(file);
         extracted.push({
           id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -831,31 +819,28 @@ export default function CreditReportAnalyzer() {
     showToast('History cleared.', 'info');
   }, [showToast]);
 
-  const downloadDocument = useCallback((type: 'bureau' | 'validation' | 'cfpb' | 'summary', format: 'pdf' | 'txt' = 'pdf') => {
-    const generators: Record<string, () => { content: string; filename: string; mimeType: string }> = {
-      bureau: () => ({
-        content: generateBureauLetter(editableFields, flags, consumer),
-        filename: `dispute_letter_bureau.${format === 'pdf' ? 'pdf' : 'txt'}`,
-        mimeType: format === 'pdf' ? 'application/pdf' : 'text/plain'
-      }),
-      validation: () => ({
-        content: generateValidationLetter(editableFields, flags, consumer),
-        filename: `debt_validation_request.${format === 'pdf' ? 'pdf' : 'txt'}`,
-        mimeType: format === 'pdf' ? 'application/pdf' : 'text/plain'
-      }),
-      cfpb: () => ({
-        content: generateCFPBNarrative(editableFields, flags, discoveryAnswers),
-        filename: `cfpb_complaint_narrative.${format === 'pdf' ? 'pdf' : 'txt'}`,
-        mimeType: format === 'pdf' ? 'application/pdf' : 'text/plain'
-      }),
-      summary: () => ({
-        content: generateCaseSummary(editableFields, flags, riskProfile!),
-        filename: `case_analysis_summary.${format === 'pdf' ? 'pdf' : 'txt'}`,
-        mimeType: format === 'pdf' ? 'application/pdf' : 'text/markdown'
-      }),
-    };
-
-    const { content, filename } = generators[type]();
+  const downloadDocument = useCallback(async (type: 'bureau' | 'validation' | 'cfpb' | 'summary', format: 'pdf' | 'txt' = 'pdf') => {
+    let content = '';
+    let filename = '';
+    
+    switch (type) {
+      case 'bureau':
+        content = generateBureauLetter(editableFields, flags, consumer);
+        filename = `dispute_letter_bureau.${format === 'pdf' ? 'pdf' : 'txt'}`;
+        break;
+      case 'validation':
+        content = generateValidationLetter(editableFields, flags, consumer);
+        filename = `debt_validation_request.${format === 'pdf' ? 'pdf' : 'txt'}`;
+        break;
+      case 'cfpb':
+        content = generateCFPBNarrative(editableFields, flags, consumer);
+        filename = `cfpb_complaint_narrative.${format === 'pdf' ? 'pdf' : 'txt'}`;
+        break;
+      case 'summary':
+        content = await generateCaseSummary(editableFields, flags, riskProfile!, consumer);
+        filename = `case_analysis_summary.${format === 'pdf' ? 'pdf' : 'txt'}`;
+        break;
+    }
 
     if (format === 'pdf') {
       generatePDFLetter(content, filename);
@@ -930,8 +915,8 @@ export default function CreditReportAnalyzer() {
     return [
       { title: 'Bureau Dispute Letter', content: generateBureauLetter(editableFields, flags, consumer) },
       { title: 'Debt Validation Request', content: generateValidationLetter(editableFields, flags, consumer) },
-      { title: 'CFPB Complaint Narrative', content: generateCFPBNarrative(editableFields, flags, discoveryAnswers) },
-      { title: 'Case Summary', content: generateCaseSummary(editableFields, flags, riskProfile!) },
+      { title: 'CFPB Complaint Narrative', content: generateCFPBNarrative(editableFields, flags, consumer) },
+      { title: 'Case Summary', content: generateCaseSummary(editableFields, flags, riskProfile!, consumer) },
       { title: 'Cease and Desist Letter', content: generateCeaseDesistLetter(editableFields, consumerDetails, flags.map(f => f.explanation)) },
       { title: 'Intent to Sue Letter', content: generateIntentToSueLetter(editableFields, flags, consumerDetails) },
       { title: 'Evidence Package', content: formatEvidencePackage(buildEvidencePackage(editableFields, flags, riskProfile!, consumerDetails.name, consumerDetails.state)) },
@@ -971,7 +956,7 @@ export default function CreditReportAnalyzer() {
       if (pdfFolder) {
         sections.forEach((section) => {
           const safeName = section.title.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-          pdfFolder.file(`${safeName}.pdf`, generatePDFBlob(section.content));
+          pdfFolder.file(`${safeName}.pdf`, generatePDFBlob(section.content) as unknown as string);
         });
         if (riskProfile) {
           pdfFolder.file(
@@ -1182,104 +1167,164 @@ export default function CreditReportAnalyzer() {
 
           {/* Step 1: Input */}
           {step === 1 && (
-            <Step1Input
-              isProcessing={isProcessing}
-              progressText={progressText}
-              progress={progress}
-              scanMode={scanMode}
-              setScanMode={setScanMode}
-              rawText={rawText}
-              setRawText={setRawText}
-              fileName={fileName}
-              fileInputRef={fileInputRef}
-              handleFileUpload={handleFileUpload}
-              handleFilesUpload={handleFilesUpload}
-              handleDrop={handleDrop}
-              handleDragOver={handleDragOver}
-              handleDragLeave={handleDragLeave}
-              processText={processText}
-              loadSample={loadSample}
-              sources={sources.map(({ id, name, size, type }) => ({ id, name, size, type }))}
-              removeSource={removeSource}
-              clearSources={clearSources}
-              history={history}
-              showHistory={showHistory}
-              setShowHistory={setShowHistory}
-              loadFromHistory={loadFromHistory}
-              removeFromHistory={removeFromHistory}
-              historyFileInputRef={historyFileInputRef}
-              exportHistory={handleExportHistory}
-              importHistory={handleImportHistory}
-              clearHistory={handleClearHistory}
-            />
+            <ErrorBoundary
+              fallback={
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-bold text-red-600 mb-2">Something went wrong</h3>
+                  <p className="text-slate-600 mb-4">An error occurred in this step. Please try again.</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              }
+            >
+              <Step1Input
+                isProcessing={isProcessing}
+                progressText={progressText}
+                progress={progress}
+                scanMode={scanMode}
+                setScanMode={setScanMode}
+                rawText={rawText}
+                setRawText={setRawText}
+                fileName={fileName}
+                fileInputRef={fileInputRef}
+                handleFileUpload={handleFileUpload}
+                handleFilesUpload={handleFilesUpload}
+                handleDrop={handleDrop}
+                handleDragOver={handleDragOver}
+                handleDragLeave={handleDragLeave}
+                processText={processText}
+                loadSample={loadSample}
+                sources={sources.map(({ id, name, size, type }) => ({ id, name, size, type }))}
+                removeSource={removeSource}
+                clearSources={clearSources}
+                history={history}
+                showHistory={showHistory}
+                setShowHistory={setShowHistory}
+                loadFromHistory={loadFromHistory}
+                removeFromHistory={removeFromHistory}
+                historyFileInputRef={historyFileInputRef}
+                exportHistory={handleExportHistory}
+                importHistory={handleImportHistory}
+                clearHistory={handleClearHistory}
+              />
+            </ErrorBoundary>
           )}
 
           {/* Step 2: Review Extracted */}
           {step === 2 && (
-            <Step2Review
-              analyzedAccounts={analyzedAccounts}
-              executiveSummary={executiveSummary}
-              flags={flags}
-              discoveryAnswers={discoveryAnswers}
-              fileName={fileName}
-              rawText={rawText}
-              setRawText={setRawText}
-              setEditableFields={setEditableFields}
-              setActiveParsedFields={setActiveParsedFields}
-              setStep={setStep}
-              fieldsToSimple={fieldsToSimple}
-              parseCreditReport={parseCreditReport}
-            />
+            <ErrorBoundary
+              fallback={
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-bold text-red-600 mb-2">Something went wrong</h3>
+                  <p className="text-slate-600 mb-4">An error occurred in this step. Please try again.</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              }
+            >
+              <Step2Review
+                analyzedAccounts={analyzedAccounts}
+                executiveSummary={executiveSummary}
+                flags={flags}
+                discoveryAnswers={discoveryAnswers}
+                fileName={fileName}
+                rawText={rawText}
+                setRawText={setRawText}
+                setEditableFields={setEditableFields}
+                setActiveParsedFields={setActiveParsedFields}
+                setStep={setStep}
+                fieldsToSimple={fieldsToSimple}
+                parseCreditReport={parseCreditReport}
+              />
+            </ErrorBoundary>
           )}
 
           {/* Step 3: Verify Fields */}
           {step === 3 && (
-            <Step3Verify
-              editableFields={editableFields}
-              setEditableFields={setEditableFields}
-              activeParsedFields={activeParsedFields}
-              rawText={rawText}
-              consumer={consumer}
-              setConsumer={setConsumer}
-              runAnalysis={runAnalysis}
-              isAnalyzing={isAnalyzing}
-              setStep={setStep}
-              showHelp={showHelp}
-              setShowHelp={setShowHelp}
-            />
+            <ErrorBoundary
+              fallback={
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-bold text-red-600 mb-2">Something went wrong</h3>
+                  <p className="text-slate-600 mb-4">An error occurred in this step. Please try again.</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              }
+            >
+              <Step3Verify
+                editableFields={editableFields}
+                setEditableFields={setEditableFields}
+                activeParsedFields={activeParsedFields}
+                rawText={rawText}
+                consumer={consumer}
+                setConsumer={setConsumer}
+                runAnalysis={runAnalysis}
+                isAnalyzing={isAnalyzing}
+                setStep={setStep}
+                showHelp={showHelp}
+                setShowHelp={setShowHelp}
+              />
+            </ErrorBoundary>
           )}
 
           {/* Step 4: Analysis Results */}
           {step === 4 && riskProfile && (
-            <Step4Analysis
-              flags={flags}
-              riskProfile={riskProfile}
-              editableFields={editableFields}
-              rawText={rawText}
-              consumer={consumer}
-              discoveryAnswers={discoveryAnswers}
-              setDiscoveryAnswers={setDiscoveryAnswers}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              expandedCard={expandedCard}
-              setExpandedCard={setExpandedCard}
-              deltas={deltas}
-              seriesInsights={seriesInsights}
-              seriesSnapshots={seriesSnapshots}
-              seriesOptions={seriesOptions}
-              onCompareSnapshots={handleCompareSnapshots}
-              relevantCaseLaw={relevantCaseLaw}
-              collectorMatch={collectorMatch}
-              analytics={analytics}
-              tabsRef={tabsRef}
-              translate={translate}
-              generateForensicReport={generateForensicReport}
-              selectedLetterType={selectedLetterType}
-              setSelectedLetterType={setSelectedLetterType}
-              editableLetter={editableLetter}
-              setEditableLetter={setEditableLetter}
-              generatePDFLetter={generatePDFLetter}
-            />
+            <ErrorBoundary
+              fallback={
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-bold text-red-600 mb-2">Something went wrong</h3>
+                  <p className="text-slate-600 mb-4">An error occurred in this step. Please try again.</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              }
+            >
+              <Step4Analysis
+                flags={flags}
+                riskProfile={riskProfile}
+                editableFields={editableFields}
+                rawText={rawText}
+                consumer={consumer}
+                discoveryAnswers={discoveryAnswers}
+                setDiscoveryAnswers={setDiscoveryAnswers}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                expandedCard={expandedCard}
+                setExpandedCard={setExpandedCard}
+                deltas={deltas}
+                seriesInsights={seriesInsights}
+                seriesSnapshots={seriesSnapshots}
+                seriesOptions={seriesOptions}
+                onCompareSnapshots={handleCompareSnapshots}
+                relevantCaseLaw={relevantCaseLaw}
+                collectorMatch={collectorMatch}
+                analytics={analytics}
+                tabsRef={tabsRef}
+                translate={translate}
+                generateForensicReport={generateForensicReport}
+                selectedLetterType={selectedLetterType}
+                setSelectedLetterType={setSelectedLetterType}
+                editableLetter={editableLetter}
+                setEditableLetter={setEditableLetter}
+                generatePDFLetter={generatePDFLetter}
+              />
+            </ErrorBoundary>
           )}
 
           <div className="mt-8 flex justify-between items-center no-print">
@@ -1311,59 +1356,89 @@ export default function CreditReportAnalyzer() {
           {/* OLD CODE REMOVED */}
           {/* Step 5: Documents */}
           {step === 5 && (
-            <Step5Export
-              step={step}
-              setStep={setStep}
-              exportTab={exportTab}
-              setExportTab={setExportTab}
-              consumer={consumer}
-              editableFields={editableFields as CreditFields}
-              flags={flags}
-              riskProfile={riskProfile!}
-              relevantCaseLaw={relevantCaseLaw}
-              discoveryAnswers={discoveryAnswers}
-              impactAssessment={impactAssessment}
-              translate={translate}
-              downloadDocument={downloadDocument}
-              generateCeaseDesistLetter={generateCeaseDesistLetter}
-              generateIntentToSueLetter={generateIntentToSueLetter}
-              estimateComplaintStrength={estimateComplaintStrength}
-              buildEvidencePackage={buildEvidencePackage}
-              formatEvidencePackage={formatEvidencePackage}
-              buildAttorneyPackage={buildAttorneyPackage}
-              formatAttorneyPackage={formatAttorneyPackage}
-              formatRedactedAttorneyPackage={formatRedactedAttorneyPackage}
-              buildOutcomeNarrative={buildOutcomeNarrative}
-              formatCurrency={formatCurrency}
-              downloadAnalysisJson={downloadAnalysisJson}
-              downloadCaseBundle={downloadCaseBundle}
-              downloadCaseBundleZip={downloadCaseBundleZip}
-              downloadForensicReport={downloadForensicReport}
-              isBundling={isBundling}
-              downloadTextFile={downloadTextFile}
-              downloadPdfFile={downloadPdfFile}
-            />
+            <ErrorBoundary
+              fallback={
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-bold text-red-600 mb-2">Something went wrong</h3>
+                  <p className="text-slate-600 mb-4">An error occurred in this step. Please try again.</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              }
+            >
+              <Step5Export
+                step={step}
+                setStep={setStep}
+                exportTab={exportTab}
+                setExportTab={setExportTab}
+                consumer={consumer}
+                editableFields={editableFields as CreditFields}
+                flags={flags}
+                riskProfile={riskProfile!}
+                relevantCaseLaw={relevantCaseLaw}
+                discoveryAnswers={discoveryAnswers}
+                impactAssessment={impactAssessment}
+                translate={translate}
+                downloadDocument={downloadDocument}
+                generateCeaseDesistLetter={generateCeaseDesistLetter}
+                generateIntentToSueLetter={generateIntentToSueLetter}
+                estimateComplaintStrength={estimateComplaintStrength}
+                buildEvidencePackage={buildEvidencePackage}
+                formatEvidencePackage={formatEvidencePackage}
+                buildAttorneyPackage={buildAttorneyPackage}
+                formatAttorneyPackage={formatAttorneyPackage}
+                formatRedactedAttorneyPackage={formatRedactedAttorneyPackage}
+                buildOutcomeNarrative={buildOutcomeNarrative}
+                formatCurrency={formatCurrency}
+                downloadAnalysisJson={downloadAnalysisJson}
+                downloadCaseBundle={downloadCaseBundle}
+                downloadCaseBundleZip={downloadCaseBundleZip}
+                downloadForensicReport={downloadForensicReport}
+                isBundling={isBundling}
+                downloadTextFile={downloadTextFile}
+                downloadPdfFile={downloadPdfFile}
+              />
+            </ErrorBoundary>
           )}
 
           {/* Step 6: Dispute Tracker */}
           {step === 6 && (
-            <Step6Track
-              disputes={disputes}
-              setDisputes={setDisputes}
-              disputeStats={disputeStats}
-              setDisputeStats={setDisputeStats}
-              editableFields={editableFields as CreditFields}
-              consumer={consumer}
-              flags={flags}
-              createDispute={createDispute}
-              loadDisputes={loadDisputes}
-              getDisputeStats={getDisputeStats}
-              updateDisputeStatus={updateDisputeStatus}
-              setStep={setStep}
-              reset={handleReset}
-              missingFields={missingFieldCount}
-              overdueDeadlines={overdueDeadlinesCount}
-            />
+            <ErrorBoundary
+              fallback={
+                <div className="p-8 text-center">
+                  <h3 className="text-lg font-bold text-red-600 mb-2">Something went wrong</h3>
+                  <p className="text-slate-600 mb-4">An error occurred in this step. Please try again.</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg"
+                  >
+                    Reload Page
+                  </button>
+                </div>
+              }
+            >
+              <Step6Track
+                disputes={disputes}
+                setDisputes={setDisputes}
+                disputeStats={disputeStats}
+                setDisputeStats={setDisputeStats}
+                editableFields={editableFields as CreditFields}
+                consumer={consumer}
+                flags={flags}
+                createDispute={createDispute}
+                loadDisputes={loadDisputes}
+                getDisputeStats={getDisputeStats}
+                updateDisputeStatus={updateDisputeStatus}
+                setStep={setStep}
+                reset={handleReset}
+                missingFields={missingFieldCount}
+                overdueDeadlines={overdueDeadlinesCount}
+              />
+            </ErrorBoundary>
           )}
         </div>
       </main>

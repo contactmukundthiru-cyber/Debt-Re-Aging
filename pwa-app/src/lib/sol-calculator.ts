@@ -50,7 +50,7 @@ export const STATE_SOL_DATA: StateSOL[] = [
   { state: 'New Hampshire', stateCode: 'NH', writtenContract: 3, oralContract: 3, promissoryNote: 3, openAccount: 3 },
   { state: 'New Jersey', stateCode: 'NJ', writtenContract: 6, oralContract: 6, promissoryNote: 6, openAccount: 6 },
   { state: 'New Mexico', stateCode: 'NM', writtenContract: 6, oralContract: 4, promissoryNote: 6, openAccount: 4 },
-  { state: 'New York', stateCode: 'NY', writtenContract: 6, oralContract: 6, promissoryNote: 6, openAccount: 6 },
+  { state: 'New York', stateCode: 'NY', writtenContract: 3, oralContract: 3, promissoryNote: 3, openAccount: 3, notes: 'Consumer Credit Fairness Act (eff. 4/2022) reduced SOL to 3 years for most consumer debts.' },
   { state: 'North Carolina', stateCode: 'NC', writtenContract: 3, oralContract: 3, promissoryNote: 3, openAccount: 3 },
   { state: 'North Dakota', stateCode: 'ND', writtenContract: 6, oralContract: 6, promissoryNote: 6, openAccount: 6 },
   { state: 'Ohio', stateCode: 'OH', writtenContract: 6, oralContract: 6, promissoryNote: 6, openAccount: 6 },
@@ -120,7 +120,8 @@ export function getStateSOL(stateCode: string): StateSOL | null {
 export function calculateSOL(
   stateCode: string,
   debtType: DebtType,
-  dofd: Date | string
+  dofd: Date | string,
+  dateLastPayment?: Date | string
 ): SOLResult | null {
   const stateData = getStateSOL(stateCode);
   if (!stateData) return null;
@@ -128,10 +129,17 @@ export function calculateSOL(
   const dofdDate = typeof dofd === 'string' ? new Date(dofd) : dofd;
   if (isNaN(dofdDate.getTime())) return null;
 
+  // Most states restart the SOL clock on a voluntary payment
+  // This is called "Tolling"
+  const lastPaymentDate = dateLastPayment ? (typeof dateLastPayment === 'string' ? new Date(dateLastPayment) : dateLastPayment) : null;
+  const solStartDate = (lastPaymentDate && !isNaN(lastPaymentDate.getTime()) && lastPaymentDate > dofdDate) 
+    ? lastPaymentDate 
+    : dofdDate;
+
   const category = getContractCategory(debtType);
   const solYears = stateData[category];
 
-  const solExpiration = new Date(dofdDate);
+  const solExpiration = new Date(solStartDate);
   solExpiration.setFullYear(solExpiration.getFullYear() + solYears);
 
   const now = new Date();
@@ -148,8 +156,9 @@ export function calculateSOL(
     status = 'active';
   }
 
-  const legalImplications = getLegalImplications(status, stateData, debtType);
-  const recommendedActions = getRecommendedActions(status, stateData, debtType);
+  const restartedFlag = lastPaymentDate && lastPaymentDate > dofdDate;
+  const legalImplications = getLegalImplications(status, stateData, debtType, restartedFlag || undefined);
+  const recommendedActions = getRecommendedActions(status, stateData, debtType, restartedFlag || undefined);
 
   return {
     stateCode: stateData.stateCode,
@@ -173,9 +182,14 @@ export function calculateSOL(
 function getLegalImplications(
   status: 'expired' | 'expiring_soon' | 'active',
   stateData: StateSOL,
-  debtType: DebtType
+  debtType: DebtType,
+  restarted?: boolean
 ): string[] {
   const implications: string[] = [];
+
+  if (restarted) {
+    implications.push('CLOCK RESTARTED: A payment was detected after the DOFD. In most states, this resets the statute of limitations clock.');
+  }
 
   if (status === 'expired') {
     implications.push(`The statute of limitations has expired in ${stateData.state}`);
@@ -206,9 +220,15 @@ function getLegalImplications(
 function getRecommendedActions(
   status: 'expired' | 'expiring_soon' | 'active',
   stateData: StateSOL,
-  _debtType: DebtType
+  _debtType: DebtType,
+  restarted?: boolean
 ): string[] {
   const actions: string[] = [];
+
+  if (restarted) {
+    actions.push('WARNING: Avoid making any further payments as it continues to extend the statute of limitations.');
+    actions.push('Check states law to see if a payment only partially restarts or fully restarts the SOL clock.');
+  }
 
   if (status === 'expired') {
     actions.push('Send written notice that debt is time-barred');

@@ -78,7 +78,7 @@ export const Celebration: React.FC<CelebrationProps> = ({ isVisible, violationCo
                     </h3>
                 </div>
                 <p className="text-xs text-slate-500 max-w-[200px] text-center">Ready for document generation and legal triage.</p>
-            </div>
+            </motion.div>
 
             <style jsx>{`
         @keyframes fall {

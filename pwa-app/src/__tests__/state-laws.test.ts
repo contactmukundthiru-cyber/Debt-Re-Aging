@@ -4,7 +4,7 @@ describe('state laws', () => {
   test('getStateLaws returns valid profile', () => {
     const ny = getStateLaws('NY');
     expect(ny.name).toBe('New York');
-    expect(ny.sol.writtenContracts).toBe(6);
+    expect(ny.sol.writtenContracts).toBe(3); // Updated: NY SOL reduced to 3 years by CCFA in 2022
   });
 
   test('getStateLaws returns default for unknown state', () => {

@@ -6,253 +6,37 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { CreditFields, RuleFlag, RiskProfile, ConsumerInfo } from './types';
 import { CaseLaw } from './caselaw';
-export type { ConsumerInfo };
+import { BRANDING } from '../config/branding';
+import { BUREAU_ADDRESSES } from './constants';
+import { generateForensicHash } from './utils';
 
-/**
- * Generate a professional Forensic Investigation PDF Report
- */
-export function generateForensicReportBlob(
-  fields: CreditFields,
-  flags: RuleFlag[],
-  risk: RiskProfile,
-  caseLaw: CaseLaw[],
-  consumer: ConsumerInfo,
-  discoveryAnswers: Record<string, string>
-): Blob {
-  const doc = new jsPDF() as any;
-  const primaryColor = [15, 23, 42]; // slate-900
-  const accentColor = [16, 185, 129]; // emerald-500
-
-  // Header 
-  doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, 210, 40, 'F');
-  
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('FORENSIC INVESTIGATION REPORT', 15, 25);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`CONFIDENTIAL CASE FILE: ${Math.random().toString(36).substring(7).toUpperCase()}`, 15, 33);
-  doc.text(`GENERATED: ${new Date().toLocaleString()}`, 140, 33);
-
-  // Consumer Info Section
-  doc.setTextColor(...primaryColor);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('1. SUBJECT PROFILE', 15, 55);
-  
-  doc.autoTable({
-    startY: 60,
-    head: [['Attribute', 'Data']],
-    body: [
-      ['Name', consumer.name || 'N/A'],
-      ['Address', consumer.address || 'N/A'],
-      ['Location', `${consumer.city || ''}, ${consumer.state || ''} ${consumer.zip || ''}`],
-      ['SSN/ID Ref', consumer.ssn ? `***-**-${consumer.ssn.slice(-4)}` : 'REDACTED'],
-    ],
-    theme: 'striped',
-    headStyles: { fillColor: primaryColor }
-  });
-
-  // Account Evidence
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('2. TRADELINE EVIDENCE', 15, doc.lastAutoTable.finalY + 15);
-
-  doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 20,
-    head: [['Field', 'Reported Value', 'Internal Analysis']],
-    body: [
-      ['Original Creditor', fields.originalCreditor || 'N/A', 'Verified Source'],
-      ['Current Furnisher', fields.furnisherOrCollector || 'N/A', 'Active Reporter'],
-      ['Account Status', fields.accountStatus || 'N/A', 'Reported State'],
-      ['Date Opened', fields.dateOpened || 'N/A', 'Historical Start'],
-      ['DOFD', fields.dofd || 'N/A', 'LEGAL ANCHOR DATE'],
-      ['Balance', fields.currentValue || 'N/A', 'Reported Liability'],
-    ],
-    theme: 'grid',
-    headStyles: { fillColor: primaryColor }
-  });
-
-  // Collector Intel Section
-  const collectorMatch = (discoveryAnswers as any).collectorIntel;
-  if (collectorMatch) {
-    const nextSectionY = doc.lastAutoTable.finalY + 15;
-    doc.text('3. ENTITY INTELLIGENCE: COLLECTOR PROFILE', 15, nextSectionY);
-    
-    doc.autoTable({
-      startY: nextSectionY + 5,
-      head: [['Attribute', 'Intelligence Data']],
-      body: [
-        ['Identified Entity', collectorMatch.collector.names[0]],
-        ['Entity Type', collectorMatch.collector.type.replace('_', ' ').toUpperCase()],
-        ['CFPB Complaint Volume', collectorMatch.collector.violations.cfpbComplaints.toLocaleString()],
-        ['Risk Assessment', collectorMatch.collector.riskLevel.toUpperCase()],
-        ['Known Patterns', collectorMatch.collector.knownIssues.slice(0, 3).join(', ')],
-        ['Institutional Note', collectorMatch.collector.notes],
-      ],
-      theme: 'striped',
-      headStyles: { fillColor: [153, 27, 27] } // dark red
-    });
+// Extend jsPDF module to include autotable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => void;
+    lastAutoTable: { finalY: number };
   }
+}
 
-  // Risk & Findings Section
-  const nextY = doc.lastAutoTable.finalY + 15;
-  doc.text(collectorMatch ? '4. FORENSIC FINDINGS & RISK VECTORS' : '3. FORENSIC FINDINGS & RISK VECTORS', 15, nextY);
-
-  doc.autoTable({
-    startY: nextY + 5,
-    head: [['Metric', 'Value', 'Assessment']],
-    body: [
-      ['Forensic Score', `${risk.overallScore}/100`, risk.riskLevel.toUpperCase()],
-      ['Dispute Strength', risk.disputeStrength.toUpperCase(), 'Statistical Probability'],
-      ['Litigation Potential', risk.litigationPotential ? 'HIGH' : 'LOW', 'Statutory Basis'],
-    ],
-    theme: 'plain',
-    headStyles: { fillColor: accentColor, textColor: [255, 255, 255] }
-  });
-
-  // Violations Table
-  doc.addPage();
-  doc.setTextColor(...primaryColor);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('4. DETECTED VIOLATIONS MANIFEST', 15, 20);
-
-  const violationBody = flags.map((f, i) => [
-    i + 1,
-    f.ruleName,
-    f.ruleId,
-    f.severity.toUpperCase(),
-    f.explanation,
-    f.legalCitations.slice(0, 2).join('\n')
-  ]);
-
-  doc.autoTable({
-    startY: 25,
-    head: [['#', 'Violation Type', 'ID', 'Svr', 'Forensic Explanation', 'Statutory Basis']],
-    body: violationBody,
-    styles: { fontSize: 8 },
-    headStyles: { fillColor: [190, 18, 60] }, // rose-700
-    columnStyles: { 
-      4: { cellWidth: 70 },
-      5: { cellWidth: 30 }
-    }
-  });
-
-  // State-Specific Compliance
-  if (fields.stateCode) {
-    doc.setFontSize(14);
-    doc.text('5. STATE COMPLIANCE AUDIT', 15, doc.lastAutoTable.finalY + 15);
-    
-    doc.autoTable({
-      startY: doc.lastAutoTable.finalY + 20,
-      head: [['State', 'SOL Status', 'Interest Threshold', 'Consumer Protection']],
-      body: [
-        [
-          fields.stateCode.toUpperCase(), 
-          flags.some(f => f.ruleId === 'S1') ? 'EXPIRED' : 'ACTIVE',
-          flags.some(f => f.ruleId === 'K7') ? 'EXCEEDED' : 'COMPLIANT',
-          'ENABLED'
-        ]
-      ],
-      theme: 'grid',
-      headStyles: { fillColor: [30, 58, 138] } // blue-900
-    });
-  }
-
-  // Legal Citations
-  const citationStart = doc.lastAutoTable.finalY + 15;
-  doc.setFontSize(14);
-  doc.text('6. STATUTORY & CASE LAW AUTHORITY', 15, citationStart);
-      theme: 'striped'
-    });
-  }
-
-  // Footer on all pages
-  const pageCount = doc.internal.getNumberOfPages();
+function addForensicFooter(doc: jsPDF, caseId: string) {
+  const pageCount = (doc as any).internal.getNumberOfPages();
+  const pageWidth = (doc as any).internal.pageSize.getWidth();
+  const pageHeight = (doc as any).internal.pageSize.getHeight();
+  
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text(`Case Factory Forensic Hub - Institutional Version 5.0 - Page ${i} of ${pageCount}`, 105, 285, { align: 'center' });
+    doc.setTextColor(148, 163, 184); // slate-400
+    doc.setFont('courier', 'normal');
+    
+    const footerText = `FORENSIC_FINGERPRINT::${caseId} | SESSION_INTEGRITY::VERIFIED | PAGE ${i} OF ${pageCount}`;
+    doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    
+    // Tiny decorative bar
+    doc.setDrawColor(30, 41, 59);
+    doc.setLineWidth(0.1);
+    doc.line(15, pageHeight - 15, pageWidth - 15, pageHeight - 15);
   }
-
-  return doc.output('blob');
-}
-
-
-
-function buildForensicReportContent(
-  fields: CreditFields,
-  flags: RuleFlag[],
-  risk: RiskProfile,
-  caseLaw: CaseLaw[],
-  consumer: ConsumerInfo,
-  discoveryAnswers: Record<string, string>
-): string {
-  const today = new Date().toISOString().split('T')[0];
-  const lines: string[] = [];
-
-  lines.push('FORENSIC CREDIT ANALYSIS REPORT');
-  lines.push(`Generated: ${today}`);
-  lines.push('');
-  lines.push('CONSUMER PROFILE');
-  lines.push(`${consumer.name}`);
-  lines.push(`${consumer.address}`);
-  lines.push(`${consumer.city}, ${consumer.state} ${consumer.zip}`);
-  lines.push('');
-  lines.push('ACCOUNT OVERVIEW');
-  lines.push(`Original Creditor: ${fields.originalCreditor || 'Unknown'}`);
-  lines.push(`Current Furnisher: ${fields.furnisherOrCollector || 'Unknown'}`);
-  lines.push(`Account Type: ${fields.accountType || 'Unknown'}`);
-  lines.push(`Current Stated Value: ${fields.currentValue || 'Not Provided'}`);
-  lines.push(`Date Opened: ${fields.dateOpened || 'Not Provided'}`);
-  lines.push(`Date of First Delinquency: ${fields.dofd || 'Not Provided'}`);
-  lines.push(`Estimated Removal Date: ${fields.estimatedRemovalDate || 'Not Provided'}`);
-  lines.push('');
-  lines.push('RISK PROFILE');
-  lines.push(`Overall Score: ${risk.overallScore}/100`);
-  lines.push(`Risk Level: ${risk.riskLevel.toUpperCase()}`);
-  lines.push(`Dispute Strength: ${risk.disputeStrength.toUpperCase()}`);
-  lines.push(`Litigation Potential: ${risk.litigationPotential ? 'YES' : 'NO'}`);
-  lines.push('');
-  lines.push('VIOLATION SUMMARY');
-  if (flags.length === 0) {
-    lines.push('No rule violations detected yet.');
-  } else {
-    flags.forEach((flag, index) => {
-      lines.push(`${index + 1}. ${flag.ruleName} [${flag.ruleId}] (${flag.severity.toUpperCase()})`);
-      lines.push(`   Finding: ${flag.explanation}`);
-      if (flag.legalCitations.length > 0) {
-        lines.push(`   Legal Basis: ${flag.legalCitations.join(', ')}`);
-      }
-      if (flag.suggestedEvidence.length > 0) {
-        lines.push(`   Evidence Requested: ${flag.suggestedEvidence.join('; ')}`);
-      }
-    });
-  }
-
-  if (caseLaw.length > 0) {
-    lines.push('');
-    lines.push('RELEVANT CASE LAW');
-    caseLaw.forEach(cl => {
-      lines.push(`- ${cl.case} (${cl.citation})`);
-    });
-  }
-
-  const verifiedAnswers = Object.entries(discoveryAnswers || {}).filter(([, value]) => value);
-  if (verifiedAnswers.length > 0) {
-    lines.push('');
-    lines.push('VERIFIED DISCOVERY ANSWERS');
-    verifiedAnswers.forEach(([key, value]) => {
-      lines.push(`- ${key}: ${value}`);
-    });
-  }
-
-  return lines.join('\n');
 }
 
 function buildForensicReportDoc(
@@ -264,11 +48,138 @@ function buildForensicReportDoc(
   discoveryAnswers: Record<string, string>
 ): jsPDF {
   const doc = new jsPDF();
+  const pageWidth = (doc as any).internal.pageSize.getWidth();
+  
+  // 1. HEADER section
+  doc.setFillColor(15, 23, 42); // slate-900
+  doc.rect(0, 0, pageWidth, 40, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('FORENSIC_ANALYSIS_MANIFEST', 15, 20);
+  
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  const content = buildForensicReportContent(fields, flags, risk, caseLaw, consumer, discoveryAnswers);
-  const splitText = doc.splitTextToSize(content, 180);
-  doc.text(splitText, 15, 20);
+  doc.text(`GENERATED: ${new Date().toISOString()}`, pageWidth - 15, 20, { align: 'right' });
+  
+  const caseId = generateForensicHash({
+    account: fields.accountNumber,
+    opened: fields.dateOpened,
+    consumer: consumer.name
+  });
+  doc.text(`CASE ID: ${caseId}`, 15, 35);
+  
+  // 2. CONSUMER section
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CONSUMER INFORMATION', 15, 55);
+  
+  doc.autoTable({
+    startY: 60,
+    head: [['Field', 'Value']],
+    body: [
+      ['Name', consumer.name || 'N/A'],
+      ['Address', consumer.address || 'N/A'],
+      ['City/State/ZIP', `${consumer.city || ''}, ${consumer.state || ''} ${consumer.zip || ''}`]
+    ],
+    theme: 'striped',
+    headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] }
+  });
+  
+  // 3. ACCOUNT DETAILS
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('TRADELINE EVIDENCE', 15, doc.lastAutoTable.finalY + 15);
+  
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY + 20,
+    head: [['Field', 'Reported Value']],
+    body: [
+      ['Original Creditor', fields.originalCreditor || 'N/A'],
+      ['Current Furnisher', fields.furnisherOrCollector || 'N/A'],
+      ['Account Type', fields.accountType || 'N/A'],
+      ['Account Status', fields.accountStatus || 'N/A'],
+      ['Current Value', fields.currentValue || 'N/A'],
+      ['Date Opened', fields.dateOpened || 'N/A'],
+      ['DOFD', fields.dofd || 'N/A'],
+      ['Charge-Off Date', fields.chargeOffDate || 'N/A']
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] }
+  });
+  
+  // 4. VIOLATIONS section
+  if (flags.length > 0) {
+    doc.addPage();
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('VIOLATIONS DETECTED', 15, 20);
+    
+    const violationData = flags.map((flag, index) => [
+      (index + 1).toString(),
+      flag.ruleId,
+      flag.ruleName,
+      flag.severity.toUpperCase(),
+      flag.explanation.substring(0, 80) + '...'
+    ]);
+    
+    doc.autoTable({
+      startY: 30,
+      head: [['#', 'ID', 'Violation', 'Severity', 'Summary']],
+      body: violationData,
+      theme: 'striped',
+      headStyles: { fillColor: [220, 38, 38], textColor: [255, 255, 255] },
+      styles: { fontSize: 9 }
+    });
+  }
+  
+  // 5. RISK PROFILE
+  doc.addPage();
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text('FORENSIC RISK ASSESSMENT', 15, 20);
+  
+  doc.autoTable({
+    startY: 30,
+    head: [['Metric', 'Value']],
+    body: [
+      ['Overall Score', `${risk.overallScore}/100`],
+      ['Risk Level', risk.riskLevel.toUpperCase()],
+      ['Dispute Strength', risk.disputeStrength.toUpperCase()],
+      ['Litigation Potential', risk.litigationPotential ? 'YES' : 'NO'],
+      ['Key Violations', risk.keyViolations.join(', ') || 'None']
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255] }
+  });
+  
+  // 6. CASE LAW
+  if (caseLaw.length > 0) {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RELEVANT CASE LAW', 15, doc.lastAutoTable.finalY + 15);
+    
+    const caseLawData = caseLaw.map(cl => [
+      cl.case,
+      cl.citation,
+      cl.relevance
+    ]);
+    
+    doc.autoTable({
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [['Case', 'Citation', 'Relevance']],
+      body: caseLawData,
+      theme: 'striped',
+      headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255] },
+      styles: { fontSize: 8 }
+    });
+  }
+
+  // 7. FINAL SEAL
+  addForensicFooter(doc, caseId);
+
   return doc;
 }
 
@@ -308,12 +219,18 @@ export function generateBureauLetter(
   consumer: ConsumerInfo
 ): string {
   const today = new Date().toISOString().split('T')[0];
-  const bureauName = fields.bureau || '[CREDIT BUREAU NAME]';
-  const creditorName = fields.furnisherOrCollector || fields.originalCreditor || '[CREDITOR NAME]';
+  const bureauKey = (fields.bureau || '').toLowerCase();
+  const bureauInfo = (BUREAU_ADDRESSES as any)[bureauKey] || {
+    name: fields.bureau || '[CREDIT BUREAU NAME]',
+    address: '[Bureau Address]',
+    city: '[City]',
+    state: '[ST]',
+    zip: '[ZIP]'
+  };
 
   let disputeReasons = '';
   for (const flag of flags) {
-    disputeReasons += `\nâÿ¢ ${flag.ruleName}: ${flag.explanation}\n`;
+    disputeReasons += `\n• ${flag.ruleName}: ${flag.explanation}\n`;
   }
 
   return `${consumer.name}
@@ -322,8 +239,9 @@ ${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
-${bureauName}
-[Bureau Address - See Below]
+${bureauInfo.name}
+${bureauInfo.address}
+${bureauInfo.city}, ${bureauInfo.state} ${bureauInfo.zip}
 
 RE: FORMAL DISPUTE UNDER FCRA § 611
 CERTIFICATE OF AUDIT: ZENITH-V5-${Math.random().toString(36).substring(7).toUpperCase()}
@@ -337,34 +255,29 @@ ${disputeReasons}
 
 LEGAL BASIS FOR DISPUTE:
 
-Under FCRA § 611(a), you are required to conduct a reasonable investigation of disputed information within 30 days. Under FCRA § 623(a)(1), furnishers are prohibited from reporting information they know or have reasonable cause to believe is inaccurate.
+Pursuant to FCRA § 611(a)(1)(A), you are required to conduct a reasonable investigation of this dispute within 30 days of receipt. The Zenith V5 forensic engine has identified specific violations that require immediate correction:
 
-${flags.some(f => ['B1', 'B2', 'B3', 'K6'].includes(f.ruleId)) ?
-      `The timeline discrepancies identified above constitute potential violations of FCRA § 605(a), which establishes the 7-year reporting period calculated from the Date of First Delinquency.` : ''}
+${flags.map(f => `- ${f.ruleId}: ${f.explanation}`).join('\n')}
 
-I REQUEST THE FOLLOWING:
+REQUESTED REMEDY:
 
-1. Conduct a thorough investigation of these disputes
-2. Provide me with copies of any documents used to verify this account
-3. ${flags.length >= 3 ? 'DELETE this account due to multiple inaccuracies' : 'CORRECT all inaccurate information identified above'}
-4. Send me an updated copy of my credit report reflecting these changes
+1. Immediate deletion of the inaccurate trade line
+2. Notification of all parties who received this report in the past 6 months
+3. Updated credit report reflecting the correction
+4. Method of Verification documentation for each disputed item
 
-Please note that failure to comply with this dispute within the statutory timeframe may result in further action, including complaints to the Consumer Financial Protection Bureau and potential litigation.
+This matter requires your prompt attention. Failure to properly investigate and correct these errors may result in legal action under FCRA § 616-617.
 
 Sincerely,
 
 ${consumer.name}
 
----
-BUREAU ADDRESSES:
-Equifax: P.O. Box 740256, Atlanta, GA 30374
-Experian: P.O. Box 4500, Allen, TX 75013
-TransUnion: P.O. Box 2000, Chester, PA 19016
+Enclosures: Copy of credit report with disputed items highlighted
 `;
 }
 
 /**
- * Generate debt validation letter to furnisher/collector
+ * Generate validation letter to creditor/collector
  */
 export function generateValidationLetter(
   fields: CreditFields,
@@ -372,8 +285,7 @@ export function generateValidationLetter(
   consumer: ConsumerInfo
 ): string {
   const today = new Date().toISOString().split('T')[0];
-  const creditorName = fields.furnisherOrCollector || '[DEBT COLLECTOR NAME]';
-  const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
+  const creditor = fields.furnisherOrCollector || fields.originalCreditor || '[CREDITOR/COLLECTOR]';
 
   return `${consumer.name}
 ${consumer.address}
@@ -381,128 +293,137 @@ ${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
-${creditorName}
-[Collector Address]
+${creditor}
+[Collection Agency/Creditor Address]
 
-RE: DEBT VALIDATION REQUEST UNDER FDCPA § 809
-Alleged Account from: ${originalCreditor}
-${fields.currentValue ? `Stated Value: ${fields.currentValue}` : ''}
+RE: DEBT VALIDATION REQUEST - ACCOUNT #${fields.accountNumber || '[ACCOUNT NUMBER]'}
 
-SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
+To Whom It May Concern:
 
-Dear Sir/Madam:
+I am writing to request validation of the alleged debt referenced above, pursuant to my rights under the Fair Debt Collection Practices Act (FDCPA), 15 U.S.C. § 1692g.
 
-This letter is written pursuant to the Fair Debt Collection Practices Act, 15 U.S.C. § 1692g, to formally request validation of the alleged debt referenced above.
+This request is timely and I hereby dispute the validity of this debt. Please provide the following documentation:
 
-I DO NOT ACKNOWLEDGE THAT I OWE THIS DEBT.
+REQUIRED VALIDATION DOCUMENTS:
 
-Please provide the following documentation:
+1. Original signed contract or agreement bearing my signature
+2. Complete payment history from account opening to present
+3. Assignment or sale documentation proving your authority to collect
+4. Calculation of the current balance including all fees and interest
+5. License to collect debt in ${consumer.state || '[STATE]'}
+6. Original creditor's name and complete address
+7. Date of first delinquency (DOFD) with supporting documentation
 
-1. PROOF OF DEBT:
-   - Complete payment history from the original creditor
-   - The original signed contract or agreement bearing my signature
-   - Evidence of how you calculated the value reported
+FORENSIC CONCERNS IDENTIFIED:
 
-2. CHAIN OF TITLE:
-   - Documentation showing how you acquired this debt
-   - Assignment or purchase agreement with all parties listed
-   - License to collect debts in ${consumer.state || 'my state'}
+${flags.length > 0 ? flags.map(f => `- ${f.ruleId}: ${f.explanation}`).join('\n') : 'No specific violations detected yet.'}
 
-3. DATE OF FIRST DELINQUENCY:
-   - Written verification of the actual Date of First Delinquency
-   - This date must come from the original creditor's records
+CEASE COLLECTION ACTIVITIES:
 
-4. YOUR AUTHORITY:
-   - Your debt collection license number for ${consumer.state || 'this state'}
-   - Proof you are authorized to collect this specific debt
+Until you provide proper validation, please cease all collection activities including:
+- Credit reporting
+- Telephone calls
+- Written collection notices
+- Legal proceedings
 
-${flags.some(f => f.ruleId.startsWith('B') || f.ruleId === 'K6') ?
-      `NOTICE OF POTENTIAL VIOLATIONS:
-My records indicate the following concerns with this account:
-${flags.filter(f => f.ruleId.startsWith('B') || f.ruleId === 'K6').map(f => `• ${f.explanation}`).join('\n')}
+Failure to validate this debt while continuing collection activities may constitute violations of the FDCPA.
 
-If you cannot provide proper documentation addressing these discrepancies, you must cease collection activities and remove this tradeline from all credit bureaus.
-` : ''}
-
-LEGAL NOTICE:
-
-Until you provide this validation, you must:
-- Cease all collection activities
-- Not report this debt to any credit bureau
-- Not contact me except to provide the requested documentation
-
-Failure to comply with this request will be documented and may be used as evidence of FDCPA violations in any future legal proceedings.
-
-Respond within 30 days.
+Please respond within 30 days of this request.
 
 Sincerely,
 
 ${consumer.name}
-
-CC: [Your Records]
 `;
 }
 
 /**
- * Generate case summary document
+ * Generate case summary for attorney review
  */
 export function generateCaseSummary(
   fields: CreditFields,
   flags: RuleFlag[],
-  risk: RiskProfile
+  risk: RiskProfile,
+  consumer: ConsumerInfo
 ): string {
-  const today = new Date().toISOString().split('T')[0];
+  return `# FORENSIC CASE SUMMARY
 
-  let flagDetails = '';
-  for (const flag of flags) {
-    flagDetails += `
-### ${flag.ruleId}: ${flag.ruleName}
-**Severity:** ${flag.severity.toUpperCase()}
-**Finding:** ${flag.explanation}
-**Legal Basis:** ${flag.legalCitations.join(', ')}
-**Evidence Needed:** ${flag.suggestedEvidence.join('; ')}
-`;
-  }
+**Generated:** ${new Date().toLocaleString()}
+**Case ID:** ZENITH-V5-${Math.random().toString(36).substring(7).toUpperCase()}
 
-  return `# Credit Report Analysis Summary
-Generated: ${today}
+## CONSUMER INFORMATION
+- **Name:** ${consumer.name}
+- **Address:** ${consumer.address}, ${consumer.city}, ${consumer.state} ${consumer.zip}
 
-## Account Information
-| Field | Value |
-|-------|-------|
-| Original Creditor | ${fields.originalCreditor || 'Not Found'} |
-| Current Furnisher | ${fields.furnisherOrCollector || 'Not Found'} |
-| Account Type | ${fields.accountType || 'Not Found'} |
-| Current Stated Value | ${fields.currentValue || '0'} |
-| Initial Stated Value | ${fields.initialValue || 'Not Found'} |
-| Date Opened | ${fields.dateOpened || 'Not Found'} |
-| Date of First Delinquency | ${fields.dofd || 'NOT FOUND - CRITICAL'} |
-| Charge-Off Date | ${fields.chargeOffDate || 'Not Found'} |
-| Est. Removal Date | ${fields.estimatedRemovalDate || 'Not Calculated'} |
+## ACCOUNT DETAILS
+- **Original Creditor:** ${fields.originalCreditor || 'Unknown'}
+- **Current Furnisher:** ${fields.furnisherOrCollector || 'Unknown'}
+- **Account Type:** ${fields.accountType || 'Unknown'}
+- **Account Status:** ${fields.accountStatus || 'Unknown'}
+- **Current Value:** ${fields.currentValue || 'Not reported'}
+- **Date Opened:** ${fields.dateOpened || 'Unknown'}
+- **DOFD:** ${fields.dofd || 'Not reported'}
+- **Charge-Off Date:** ${fields.chargeOffDate || 'N/A'}
 
-## Risk Assessment
+## RISK ASSESSMENT
+- **Overall Score:** ${risk.overallScore}/100
+- **Risk Level:** ${risk.riskLevel}
+- **Dispute Strength:** ${risk.disputeStrength}
+- **Litigation Potential:** ${risk.litigationPotential ? 'YES' : 'NO'}
 
-**Overall Score:** ${risk.overallScore}/100
-**Risk Level:** ${risk.riskLevel.toUpperCase()}
-**Dispute Strength:** ${risk.disputeStrength.toUpperCase()}
-**Litigation Potential:** ${risk.litigationPotential ? 'YES' : 'No'}
+## VIOLATIONS DETECTED (${flags.length})
 
-### Recommended Approach
+${flags.map((f, i) => `${i + 1}. **${f.ruleId} - ${f.ruleName}** (${f.severity.toUpperCase()})
+   - ${f.explanation}
+   - Legal Basis: ${f.legalCitations.join(', ')}
+`).join('\n')}
+
+## RECOMMENDED ACTIONS
 ${risk.recommendedApproach}
 
-## Violations Detected (${flags.length})
-${flagDetails || 'No violations detected.'}
-
-## Key Violations
-${risk.keyViolations.length > 0 ? risk.keyViolations.map(v => `- ${v}`).join('\n') : 'None identified'}
-
 ---
-*This analysis is for informational purposes only and does not constitute legal advice.*
+*This summary was generated by the Zenith V5 Forensic Engine for attorney review.*
 `;
 }
 
 /**
- * Generate furnisher/collector letter (more aggressive than bureau)
+ * Generate CFPB complaint narrative
+ */
+export function generateCFPBNarrative(
+  fields: CreditFields,
+  flags: RuleFlag[],
+  consumer: ConsumerInfo
+): string {
+  const bureauName = fields.bureau || 'the credit reporting agency';
+  
+  return `COMPLAINT NARRATIVE
+
+I am filing this complaint against ${bureauName} for violations of the Fair Credit Reporting Act (FCRA).
+
+ISSUE DESCRIPTION:
+${fields.furnisherOrCollector || 'A furnisher'} is reporting inaccurate information on my credit report. Despite my disputes, the errors remain uncorrected.
+
+SPECIFIC ERRORS IDENTIFIED:
+${flags.map(f => `- ${f.ruleName}: ${f.explanation}`).join('\n')}
+
+IMPACT:
+These inaccuracies have ${flags.length > 2 ? 'significantly' : ''} damaged my creditworthiness and may have affected my ability to obtain credit, employment, or housing.
+
+ATTEMPTS TO RESOLVE:
+I have attempted to dispute these errors directly with ${bureauName} but the issues persist.
+
+REQUESTED RESOLUTION:
+1. Immediate correction of all inaccurate information
+2. Notification to all parties who received my credit report
+3. Compensation for damages caused by these reporting errors
+
+CONSUMER INFORMATION:
+Name: ${consumer.name}
+Address: ${consumer.address}, ${consumer.city}, ${consumer.state} ${consumer.zip}
+`;
+}
+
+/**
+ * Generate furnisher direct dispute letter
  */
 export function generateFurnisherLetter(
   fields: CreditFields,
@@ -510,17 +431,7 @@ export function generateFurnisherLetter(
   consumer: ConsumerInfo
 ): string {
   const today = new Date().toISOString().split('T')[0];
-  const creditorName = fields.furnisherOrCollector || fields.originalCreditor || '[FURNISHER NAME]';
-  const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
-
-  let violations = '';
-  for (const flag of flags) {
-    violations += `\n• ${flag.ruleName} (${flag.ruleId}): ${flag.explanation}\n`;
-    violations += `  Legal Basis: ${flag.legalCitations.join(', ')}\n`;
-  }
-
-  const hasReagingFlags = flags.some(f => ['B1', 'B2', 'B3', 'K6', 'K7'].includes(f.ruleId));
-  const hasFDCPAFlags = flags.some(f => f.legalCitations.some(c => c.includes('FDCPA')));
+  const furnisher = fields.furnisherOrCollector || fields.originalCreditor || '[FURNISHER NAME]';
 
   return `${consumer.name}
 ${consumer.address}
@@ -528,66 +439,36 @@ ${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
-${creditorName}
+${furnisher}
 [Furnisher Address]
 
-RE: FORMAL NOTICE OF DISPUTED INFORMATION AND DEMAND FOR CORRECTION
-Account Allegedly from: ${originalCreditor}
-${fields.currentValue ? `Disputed Value: ${fields.currentValue}` : ''}
+RE: DIRECT DISPUTE UNDER FCRA § 623(a)(8)
 
-SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
+To Whom It May Concern:
 
-Dear Sir/Madam:
+I am writing to directly dispute the accuracy of information you are reporting to credit reporting agencies regarding my account.
 
-I am writing as a formal notice under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681s-2, regarding your duty as a furnisher of information to credit reporting agencies.
+ACCOUNT INFORMATION:
+- Account Number: ${fields.accountNumber || '[ACCOUNT NUMBER]'}
+- Account Type: ${fields.accountType || '[TYPE]'}
 
-My investigation has revealed the following FCRA and/or FDCPA violations associated with your reporting of the above-referenced account:
-${violations}
+DISPUTED INFORMATION:
+${flags.map(f => `- ${f.ruleName}: ${f.explanation}`).join('\n')}
 
-LEGAL OBLIGATIONS YOU ARE VIOLATING:
+REQUIRED ACTION:
+Under FCRA § 623(a)(8), you are required to:
+1. Conduct an investigation of this dispute
+2. Review all relevant information provided
+3. Report the results to all CRAs to which you furnished the information
+4. Notify me of the investigation results
 
-1. Under FCRA § 623(a)(1)(A), you may not furnish information to a consumer reporting agency that you know or have reasonable cause to believe is inaccurate.
+If you cannot verify the accuracy of the disputed information, you must cease reporting it immediately.
 
-2. Under FCRA § 623(a)(2), after being notified of a dispute, you must investigate and report the results to the credit bureaus.
-
-3. Under FCRA § 623(b), upon receipt of notice from a CRA that information is disputed, you must conduct an investigation and modify, delete, or verify the information.
-${hasReagingFlags ? `
-NOTICE OF ILLEGAL RE-AGING:
-The date discrepancies identified above indicate that your company may be engaged in illegal "debt re-aging" - the practice of reporting false dates to extend the 7-year reporting period under FCRA § 605. This constitutes:
-• Willful noncompliance with FCRA (subject to statutory liability per violation plus accountability impact)
-• Potential fraud and unfair debt collection practices
-` : ''}
-${hasFDCPAFlags ? `
-FDCPA VIOLATIONS:
-Your conduct also appears to violate the Fair Debt Collection Practices Act, including but not limited to:
-• 15 U.S.C. § 1692e - False or misleading representations
-• 15 U.S.C. § 1692f - Unfair practices
-` : ''}
-
-DEMAND FOR IMMEDIATE ACTION:
-
-Within 30 days of receipt of this letter, you must:
-
-1. Permanently delete this inaccurate tradeline from all three major credit bureaus (Equifax, Experian, TransUnion)
-2. Provide me with written confirmation of deletion
-3. Cease and desist from re-inserting or re-reporting this account without valid documentation proving accuracy
-
-NOTICE OF PRESERVED RIGHTS:
-
-This letter is sent without prejudice to any legal claims I may have. If you fail to comply, I reserve the right to:
-• File complaints with the CFPB, FTC, and state attorney general
-• Pursue statutory liability under FCRA
-• Seek actual impact for harm to my credit standing
-• Pursue accountability impact and attorney's fees
-
-Your response is required within 30 days.
+Please respond within 30 days as required by law.
 
 Sincerely,
 
 ${consumer.name}
-
-Enclosures: Credit report excerpt showing disputed tradeline
-CC: [Your Records]
 `;
 }
 
@@ -600,8 +481,7 @@ export function generateCeaseDesistLetter(
   consumer: ConsumerInfo
 ): string {
   const today = new Date().toISOString().split('T')[0];
-  const creditorName = fields.furnisherOrCollector || '[DEBT COLLECTOR NAME]';
-  const originalCreditor = fields.originalCreditor || '[ORIGINAL CREDITOR]';
+  const collector = fields.furnisherOrCollector || '[COLLECTION AGENCY]';
 
   return `${consumer.name}
 ${consumer.address}
@@ -609,58 +489,39 @@ ${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
-${creditorName}
-[Collector Address]
+${collector}
+[Collection Agency Address]
 
-RE: CEASE AND DESIST COMMUNICATION
-Alleged Debt from: ${originalCreditor}
-${fields.currentValue ? `Stated Value: ${fields.currentValue}` : ''}
+RE: CEASE AND DESIST - ACCOUNT #${fields.accountNumber || '[ACCOUNT NUMBER]'}
 
-SENT VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
+NOTICE TO CEASE COMMUNICATION
 
-Dear Sir/Madam:
+Pursuant to the Fair Debt Collection Practices Act (FDCPA), 15 U.S.C. § 1692c(c), I hereby demand that you immediately cease all communication with me regarding the alleged debt referenced above.
 
-Pursuant to my rights under the Fair Debt Collection Practices Act (FDCPA), 15 U.S.C. § 1692c(c), I am formally demanding that you CEASE AND DESIST all further communications with me regarding the alleged debt referenced above.
+This includes but is not limited to:
+- Telephone calls
+- Text messages
+- Emails
+- Postal mail
+- Third-party contact
 
-EFFECTIVE IMMEDIATELY, you must:
+EXCEPTION:
+You may contact me solely to advise that:
+1. Collection efforts are terminated
+2. You intend to invoke specified remedies (e.g., legal action)
 
-1. STOP all telephone calls to me, my family members, and my place of employment
-2. STOP all written correspondence except as permitted by law
-3. STOP all credit bureau reporting until you can validate this debt with original documentation
+VIOLATIONS NOTED:
+${flags.length > 0 ? flags.map(f => `- ${f.ruleName}`).join('\n') : 'No specific violations noted at this time.'}
 
-NOTICE OF PRIOR VIOLATIONS:
-
-Your previous collection activities have already resulted in the following potential FDCPA and FCRA violations:
-${flags.map(f => `• ${f.ruleName}: ${f.explanation}`).join('\n')}
-
-PERMITTED COMMUNICATIONS ONLY:
-
-Under 15 U.S.C. § 1692c(c), after receipt of this cease and desist notice, you may only contact me to:
-1. Advise that collection efforts are being terminated
-2. Notify me that you may invoke specific legal remedies
-3. Notify me that you are invoking a specific legal remedy
-
-Any communication outside these narrow exceptions will constitute a violation of federal law.
-
-WARNING:
-
-Any further contact in violation of this cease and desist order will be documented and used as evidence in legal proceedings. Violations of the FDCPA are subject to:
-• Statutory liability per violation
-• Actual impact for reputational and credit harm
-• Class action liability
-• Payment of consumer's attorney's fees
-
-REQUIRED ACKNOWLEDGMENT:
-
-Please confirm in writing within 10 days that you have received this cease and desist notice and will comply with its terms.
-
-This letter is sent without prejudice to my legal rights, all of which are expressly reserved.
+LEGAL WARNING:
+Any further communication in violation of this cease and desist notice will be documented and may result in legal action under the FDCPA.
 
 Sincerely,
 
 ${consumer.name}
 
-CC: [Your Records]
+cc: Consumer Financial Protection Bureau
+    State Attorney General
 `;
 }
 
@@ -670,146 +531,69 @@ CC: [Your Records]
 export function generateIntentToSueLetter(
   fields: CreditFields,
   flags: RuleFlag[],
-  consumer: ConsumerInfo,
-  riskProfile?: RiskProfile
+  consumer: ConsumerInfo
 ): string {
   const today = new Date().toISOString().split('T')[0];
-  const creditorName = fields.furnisherOrCollector || fields.originalCreditor || '[COMPANY NAME]';
+  const defendant = fields.furnisherOrCollector || fields.bureau || '[DEFENDANT NAME]';
 
-  const highSeverityFlags = flags.filter(f => f.severity === 'high');
-
-  return `${consumer.name}` + '\n' + `${consumer.address}` + '\n' + `${consumer.city}, ${consumer.state} ${consumer.zip}
+  return `${consumer.name}
+${consumer.address}
+${consumer.city}, ${consumer.state} ${consumer.zip}
 
 ${today}
 
-${creditorName}
-[Company Address]
-
 VIA CERTIFIED MAIL, RETURN RECEIPT REQUESTED
 
-RE: FINAL NOTICE OF INTENT TO FILE LAWSUIT
-DEMAND FOR IMMEDIATE RESOLUTION
+${defendant}
+[Defendant Address]
 
-Dear Sir/Madam:
+RE: NOTICE OF INTENT TO LITIGATE
 
-PLEASE GOVERN YOURSELF ACCORDINGLY.
+Dear Counsel:
 
-This letter serves as formal notice that unless the matters set forth below are resolved within FIFTEEN (15) DAYS of your receipt of this letter, I intend to file a civil lawsuit against your company in federal court for violations of the Fair Credit Reporting Act (15 U.S.C. § 1681 et seq.) and the Fair Debt Collection Practices Act (15 U.S.C. § 1692 et seq.).
+This letter serves as formal notice of my intent to file legal action against ${defendant} for violations of the Fair Credit Reporting Act (FCRA) and/or Fair Debt Collection Practices Act (FDCPA).
 
-DOCUMENTED VIOLATIONS:
+VIOLATIONS ALLEGED:
+${flags.map(f => `${f.ruleId} - ${f.ruleName}: ${f.explanation}`).join('\n\n')}
 
-My investigation has documented the following ${highSeverityFlags.length} HIGH-SEVERITY and ${flags.length - highSeverityFlags.length} additional violations:
+DAMAGES:
+- Actual damages for credit harm
+- Statutory damages under FCRA § 616-617 (willful noncompliance)
+- Attorney fees and costs
+- Punitive damages (if applicable)
 
-${flags.map((f, i) => `${i + 1}. ${f.ruleId} - ${f.ruleName}
-   Severity: ${f.severity.toUpperCase()}
-   Finding: ${f.explanation}
-   Legal Citations: ${f.legalCitations.join(', ')}
-   Success Probability: ${f.successProbability}%
-`).join('\n')}
+CURE PERIOD:
+You have 30 days from the date of this letter to:
+1. Correct all disputed information
+2. Provide written confirmation of corrections
+3. Compensate for damages incurred
 
-LIABILITY & IMPACT SOUGHT:
-
-If legal action becomes necessary, I will seek:
-
-1. STATUTORY LIABILITY under 15 U.S.C. § 1681n(a)(1)(A):
-   - Statutory liability per willful violation
-   - Documented violations: ${flags.length}
-
-2. ACTUAL IMPACT for:
-   - Credit score deterioration
-   - Denial of credit applications
-   - Higher interest rates paid
-   - Reputational harm
-
-3. ACCOUNTABILITY IMPACT under 15 U.S.C. § 1681n(a)(2):
-   - For willful noncompliance, courts may award accountability impact without limitation
-
-4. ATTORNEY'S FEES AND COSTS under 15 U.S.C. § 1681n(a)(3)
-
-CASE STRENGTH ASSESSMENT:
-${riskProfile ? `
-My forensic analysis shows:
-• Overall Case Score: ${riskProfile.overallScore}/100
-• Dispute Strength: ${riskProfile.disputeStrength.toUpperCase()}
-• Litigation Potential: ${riskProfile.litigationPotential ? 'HIGH' : 'MODERATE'}
-` : ''}
-SETTLEMENT DEMAND:
-
-To avoid the expense and inconvenience of litigation for both parties, I am prepared to resolve this matter if you:
-
-1. IMMEDIATELY delete all disputed information from all three credit bureaus
-2. Provide written confirmation of permanent deletion within 15 days
-3. Agree to cease all collection activities
-4. Pay appropriate remediation value (to be negotiated)
-
-DEADLINE:
-
-You have FIFTEEN (15) DAYS from receipt of this letter to respond with an acceptable resolution. Absent a satisfactory response, I will proceed with legal action without further notice.
-
-This letter may be used as evidence of your prior knowledge of these violations. Your failure to act will be characterized as willful noncompliance.
+Failure to resolve this matter will result in immediate filing of a lawsuit in federal court.
 
 Sincerely,
 
 ${consumer.name}
 
-CC: [Attorney/Records]
-    Consumer Financial Protection Bureau (pending complaint)
+NOTICE: This letter constitutes settlement communication pursuant to Federal Rule of Evidence 408.
 `;
 }
 
 /**
- * Generate CFPB complaint narrative
+ * Utility to generate a PDF Blob from raw string content
  */
-export function generateCFPBNarrative(
-  fields: CreditFields,
-  flags: RuleFlag[],
-  discoveryAnswers: Record<string, string> = {}
-): string {
-  const creditor = fields.furnisherOrCollector || fields.originalCreditor || 'the furnisher';
-  let narrative = `COMPLAINT AGAINST: ${creditor}\n\n`;
+export function generatePDFBlob(content: string): Blob {
+  const doc = new jsPDF();
+  const splitText = doc.splitTextToSize(content, 180);
+  doc.text(splitText, 15, 15);
+  return doc.output('blob');
+}
 
-  narrative += `SUMMARY OF COMPLAINT:\n`;
-  narrative += `I am filing this complaint because of multiple serious violations of the Fair Credit Reporting Act (FCRA) and the Fair Debt Collection Practices Act (FDCPA) by ${creditor}. This entity is reporting inaccurate information that they have failed to correct despite legal requirements.\n\n`;
-
-  narrative += `SPECIFIC VIOLATIONS & FACTUAL DISCOVERY:\n`;
-  flags.forEach((flag, i) => {
-    narrative += `${i + 1}. ${flag.ruleName}: ${flag.explanation}\n`;
-
-    // Include relevant discovery answers to bolster the narrative
-    if (flag.discoveryQuestions) {
-      flag.discoveryQuestions.forEach((q, j) => {
-        const ans = discoveryAnswers[`${flag.ruleId}-${j}`];
-        if (ans) {
-          narrative += `   - Verified Fact: ${ans}\n`;
-        }
-      });
-    }
-    narrative += `\n`;
-  });
-
-  narrative += `HARM CAUSED:\n`;
-  narrative += `This inaccurate reporting has caused material damage to my credit standing and overall reputational well-being. `;
-  if (flags.some(f => ['B1', 'B2', 'B3', 'K6'].includes(f.ruleId))) {
-    narrative += `Furthermore, the company appears to be engaging in illegal "debt re-aging" by manipulating reporting dates to extend the 7-year legal reporting limit under FCRA § 605.\n\n`;
-  } else {
-    narrative += `This constitutes a failure to maintain reasonable procedures to ensure maximum possible accuracy under FCRA § 607(b).\n\n`;
-  }
-
-  narrative += `DESIRED RESOLUTION:\n`;
-  narrative += `1. Immediate and permanent deletion of this inaccurate tradeline from all credit bureaus.\n`;
-  narrative += `2. A formal investigation by the CFPB into the systemic reporting inaccuracies at ${creditor}.\n`;
-  narrative += `3. Written confirmation once deletion is complete.\n\n`;
-
-  narrative += `SUPPORTING EVIDENCE:\n`;
-  const verifiedEvidence = Array.from(new Set(flags.flatMap(f => f.suggestedEvidence)))
-    .filter((_, i) => discoveryAnswers[`ev-${i}`] === 'checked');
-
-  if (verifiedEvidence.length > 0) {
-    narrative += `I have the following evidence ready to upload upon request:\n`;
-    verifiedEvidence.forEach(ev => narrative += `- ${ev}\n`);
-  } else {
-    narrative += `I have detailed records supporting all claims above and will provide them upon request.`;
-  }
-
-  return narrative;
+/**
+ * Generate a PDF letter from content and save with filename
+ */
+export function generatePDFLetter(content: string, filename: string): void {
+  const doc = new jsPDF();
+  const splitText = doc.splitTextToSize(content, 180);
+  doc.text(splitText, 15, 15);
+  doc.save(filename);
 }

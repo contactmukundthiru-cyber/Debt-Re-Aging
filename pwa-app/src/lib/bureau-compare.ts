@@ -194,7 +194,7 @@ function findDiscrepancies(bureaus: ComparisonResult['bureaus']): Discrepancy[] 
     // Check for discrepancies
     const uniqueValues = new Set(Object.values(values).filter(v => v));
     if (uniqueValues.size > 1) {
-      discrepancies.push(createDiscrepancy(field, values));
+      discrepancies.push(createDiscrepancy(field as string, values));
     }
   });
 

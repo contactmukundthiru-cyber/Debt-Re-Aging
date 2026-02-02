@@ -5,7 +5,7 @@
  */
 
 import { CreditFields } from './types';
-import { normalizeDate, normalizeNumeric } from './validation';
+import { normalizeNumeric } from './validation';
 
 export interface ExtractedField {
   value: string;
@@ -71,6 +71,10 @@ const FIELD_PATTERNS: Record<string, RegExp[]> = {
     /sold\s*(?:to|by)[:\s]*([A-Za-z0-9\s&\-\.']+)/i,
     /transferred\s*(?:from|to)[:\s]*([A-Za-z0-9\s&\-\.']+)/i,
     /purchased\s*from[:\s]*([A-Za-z0-9\s&\-\.']+)/i,
+  ],
+  phone: [
+    /(?:phone|tel|contact|customer\s*service)[:\s]*(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})/i,
+    /\b(\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4})\b/
   ],
   furnisherOrCollector: [
     /(?:collection|collector|agency|furnisher)[:\s]*([A-Za-z0-9\s&\-\.']+?)(?:\n|$)/i,
@@ -305,9 +309,26 @@ export function segmentAccounts(text: string): string[] {
 }
 
 /**
+ * Detect and repair spaced-out text often found in mainframe exports or OCR
+ * E.g., "A C C O U N T  N U M B E R" -> "ACCOUNT NUMBER"
+ */
+function repairSpacedText(text: string): string {
+  // First, detect if the text has significant spacing between letters
+  // At least 4 instances of "Character Space Character"
+  const spacedMatches = text.match(/([A-Z]\s[A-Z]\s[A-Z]\s[A-Z])/g);
+  if (!spacedMatches || spacedMatches.length < 2) return text;
+
+  return text
+    .replace(/\b([A-Z])\s(?=[A-Z]\b)/g, '$1') // Merge single characters separated by spaces
+    .replace(/\b([A-Z])\s(?=[A-Z]\b)/g, '$1') // Second pass for remaining spaces
+    .replace(/\s{3,}/g, '  '); // Normalize extremely large gaps
+}
+
+/**
  * Main parsing function - extracts structured data from credit report text
  */
-export function parseCreditReport(text: string): ParsedFields {
+export function parseCreditReport(rawText: string): ParsedFields {
+  const text = repairSpacedText(rawText);
   const results: ParsedFields = {};
   const bureau = detectBureau(text);
   const bureauPatterns = bureau ? BUREAU_PATTERNS[bureau] || {} : {};

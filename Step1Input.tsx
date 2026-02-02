@@ -66,7 +66,6 @@ export const Step1Input: React.FC<Step1InputProps> = React.memo((props) => {
     importHistory,
     clearHistory,
   } = props;
-  return (
     <div className="fade-in max-w-5xl mx-auto">
       {/* Hero Section */}
       <div className="premium-card p-12 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl mb-12">

@@ -178,17 +178,3 @@ export function formatTimestamp(timestamp: number): string {
   
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
-
-  // Within last week
-  if (diff < 604800000) {
-    const days = Math.floor(diff / 86400000);
-    return days === 1 ? 'Yesterday' : `${days} days ago`;
-  }
-
-  // Otherwise show date
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-  });
-}

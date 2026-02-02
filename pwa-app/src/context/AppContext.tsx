@@ -29,6 +29,7 @@ export interface AppState {
   progressText: string;
   isAnalyzing: boolean;
   darkMode: boolean;
+  isPrivacyMode: boolean;
 
   // Active Tab
   activeTab: string;
@@ -53,6 +54,7 @@ type AppAction =
   | { type: 'SET_PROCESSING'; payload: { isProcessing: boolean; progress?: number; progressText?: string } }
   | { type: 'SET_ANALYZING'; payload: boolean }
   | { type: 'SET_DARK_MODE'; payload: boolean }
+  | { type: 'SET_PRIVACY_MODE'; payload: boolean }
   | { type: 'SET_ACTIVE_TAB'; payload: string }
   | { type: 'SET_SECURITY_MODAL'; payload: boolean }
   | { type: 'RESET' };
@@ -73,6 +75,7 @@ const initialState: AppState = {
   progressText: '',
   isAnalyzing: false,
   darkMode: false,
+  isPrivacyMode: false,
   activeTab: 'violations',
   showSecurityModal: false,
 };
@@ -143,6 +146,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'SET_DARK_MODE':
       return { ...state, darkMode: action.payload };
 
+    case 'SET_PRIVACY_MODE':
+      return { ...state, isPrivacyMode: action.payload };
+
     case 'SET_ACTIVE_TAB':
       return { ...state, activeTab: action.payload };
     case 'SET_SECURITY_MODAL':
@@ -177,6 +183,7 @@ interface AppContextValue {
   setProcessing: (isProcessing: boolean, progress?: number, progressText?: string) => void;
   setAnalyzing: (isAnalyzing: boolean) => void;
   setDarkMode: (darkMode: boolean) => void;
+  setPrivacyMode: (isPrivacyMode: boolean) => void;
   setActiveTab: (tab: string) => void;
   reset: () => void;
 }
@@ -240,6 +247,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_DARK_MODE', payload: darkMode });
   }, []);
 
+  const setPrivacyMode = useCallback((isPrivacyMode: boolean) => {
+    dispatch({ type: 'SET_PRIVACY_MODE', payload: isPrivacyMode });
+  }, []);
+
   const setActiveTab = useCallback((tab: string) => {
     dispatch({ type: 'SET_ACTIVE_TAB', payload: tab });
   }, []);
@@ -252,11 +263,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   React.useEffect(() => {
     if (typeof document === 'undefined' || typeof window === 'undefined') return;
     const saved = localStorage.getItem('cra_dark_mode');
+    const savedPrivacy = localStorage.getItem('cra_privacy_mode');
     if (saved !== null) {
       dispatch({ type: 'SET_DARK_MODE', payload: saved === 'true' });
     } else {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       dispatch({ type: 'SET_DARK_MODE', payload: prefersDark });
+    }
+    if (savedPrivacy !== null) {
+      dispatch({ type: 'SET_PRIVACY_MODE', payload: savedPrivacy === 'true' });
     }
   }, []);
 
@@ -271,6 +286,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, []);
+
+  // Sync privacy mode to localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cra_privacy_mode', state.isPrivacyMode ? 'true' : 'false');
+    }
+  }, [state.isPrivacyMode]);
 
   // Sync theme to DOM and localStorage; avoid overwriting script-set dark on first paint
   React.useEffect(() => {
@@ -308,6 +330,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProcessing,
     setAnalyzing,
     setDarkMode,
+    setPrivacyMode,
     setActiveTab,
     reset,
   };

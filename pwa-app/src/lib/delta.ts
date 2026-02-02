@@ -156,7 +156,7 @@ export function compareReports(oldReport: CreditFields, newReport: CreditFields)
       }
 
       deltas.push({
-        field: field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1'),
+        field: (field as string).charAt(0).toUpperCase() + (field as string).slice(1).replace(/([A-Z])/g, ' $1'),
         oldValue: oldVal as string,
         newValue: newVal as string,
         impact,

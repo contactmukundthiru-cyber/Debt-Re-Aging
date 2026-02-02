@@ -1,5 +1,5 @@
 import { CreditFields, RuleFlag } from './rules';
-import { ConsumerInfo } from './generator';
+import { ConsumerInfo } from './types';
 
 export function buildReminderEmail(creditor: string, nextAction: string, dueDate: string): string {
   return [

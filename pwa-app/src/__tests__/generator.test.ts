@@ -9,12 +9,23 @@ const mockJsPDF = {
   save: jest.fn().mockReturnThis(),
   splitTextToSize: jest.fn().mockReturnValue(['line1', 'line2']),
   setFillColor: jest.fn().mockReturnThis(),
+  setTextColor: jest.fn().mockReturnThis(),
+  setDrawColor: jest.fn().mockReturnThis(),
+  setLineWidth: jest.fn().mockReturnThis(),
+  line: jest.fn().mockReturnThis(),
   rect: jest.fn().mockReturnThis(),
   addPage: jest.fn().mockReturnThis(),
   setPage: jest.fn().mockReturnThis(),
+  autoTable: jest.fn().mockReturnThis(),
+  lastAutoTable: { finalY: 100 },
   internal: {
-    getNumberOfPages: jest.fn().mockReturnValue(1)
-  }
+    getNumberOfPages: jest.fn().mockReturnValue(1),
+    pageSize: {
+      getWidth: jest.fn().mockReturnValue(210),
+      getHeight: jest.fn().mockReturnValue(297)
+    }
+  },
+  output: jest.fn().mockReturnValue('blob')
 };
 
 jest.mock('jspdf', () => ({
@@ -38,13 +49,18 @@ describe('dispute letter generator (PWA)', () => {
       suggestedEvidence: ['Old reports'],
       fieldValues: {},
       legalCitations: ['FCRA 605'],
-      successProbability: 90
+      successProbability: 90,
+      category: 'violation',
+      confidence: 90
     }
   ];
 
   const sampleConsumer = {
     name: 'John Doe',
-    address: '123 Main St'
+    address: '123 Main St',
+    city: 'New York',
+    state: 'NY',
+    zip: '10001'
   };
 
   const sampleRisk: RiskProfile = {
@@ -55,7 +71,8 @@ describe('dispute letter generator (PWA)', () => {
     detectedPatterns: [],
     keyViolations: ['Re-aging'],
     recommendedApproach: 'Go to court.',
-    scoreBreakdown: []
+    scoreBreakdown: [],
+    summary: 'Critical violations detected with high confidence. Re-aging pattern identified with strong evidence supporting litigation.'
   };
 
   test('generatePDFLetter calls jsPDF methods', () => {
@@ -82,16 +99,17 @@ describe('dispute letter generator (PWA)', () => {
     expect(letter).toContain('Bad Collection');
   });
 
-  test('generateCaseSummary creates markdown', () => {
-    const summary = generateCaseSummary(sampleFields, sampleFlags, sampleRisk);
-    expect(summary).toContain('# Credit Report Analysis Summary');
+  test('generateCaseSummary creates markdown', async () => {
+    const summary = await generateCaseSummary(sampleFields, sampleFlags, sampleRisk, sampleConsumer);
+    expect(summary).toContain('# FORENSIC CASE SUMMARY');
     expect(summary).toContain('80/100');
-    expect(summary).toContain('CRITICAL');
+    expect(summary).toContain('critical');
   });
 
   test('generateCFPBNarrative creates text', () => {
-    const narrative = generateCFPBNarrative(sampleFields, sampleFlags);
-    expect(narrative).toContain('COMPLAINT AGAINST: Bad Collection');
-    expect(narrative).toContain('Fair Debt Collection Practices Act');
+    const narrative = generateCFPBNarrative(sampleFields, sampleFlags, sampleConsumer);
+    expect(narrative).toContain('COMPLAINT NARRATIVE');
+    expect(narrative).toContain('Bad Collection');
+    expect(narrative).toContain('John Doe');
   });
 });

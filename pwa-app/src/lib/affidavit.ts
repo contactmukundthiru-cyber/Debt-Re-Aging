@@ -7,7 +7,7 @@
  */
 
 import { RuleFlag, CreditFields, RiskProfile } from './rules';
-import { ConsumerInfo } from './generator';
+import { ConsumerInfo } from './types';
 
 export function generateForensicAffidavit(
     fields: Partial<CreditFields>,

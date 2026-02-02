@@ -30,7 +30,7 @@ interface Step2ReviewProps {
   parseCreditReport: (text: string) => ParsedFields;
 }
 
-export const Step2Review: React.FC<Step2ReviewProps> = ({
+export const Step2Review: React.FC<Step2ReviewProps> = React.memo(({
   analyzedAccounts,
   executiveSummary,
   flags,
@@ -368,6 +368,8 @@ export const Step2Review: React.FC<Step2ReviewProps> = ({
       </div>
     </div>
   );
-};
+});
+
+Step2Review.displayName = 'Step2Review';
 
 export default Step2Review;

@@ -26,7 +26,8 @@ import {
   GanttChartSquare,
   Network
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
+import { cn, maskSensitiveInText } from '../../../lib/utils';
+import { useApp } from '../../../context/AppContext';
 
 interface ViolationsTabProps {
   flags: RuleFlag[];
@@ -60,6 +61,8 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
   expandedCard,
   setExpandedCard
 }) => {
+  const { state } = useApp();
+  const { isPrivacyMode } = state;
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterSeverity, setFilterSeverity] = React.useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [showAnomalies, setShowAnomalies] = React.useState(false);
@@ -194,21 +197,41 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
           />
         </div>
         
-        <div className="xl:col-span-4 bg-slate-950/40 p-3 rounded-[3rem] flex gap-3 border border-white/5 shadow-4xl backdrop-blur-3xl">
-          {(['all', 'high', 'medium', 'low'] as const).map(s => (
-            <button
-              key={s}
-              onClick={() => setFilterSeverity(s)}
-              className={cn(
-                "flex-1 py-5 rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] transition-all relative overflow-hidden font-mono",
-                filterSeverity === s
-                  ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-400/50'
-                  : 'text-slate-500 hover:text-white hover:bg-white/5'
-              )}
-            >
-              {s}
-            </button>
-          ))}
+        <div className="xl:col-span-4 flex flex-col gap-6">
+          <div className="bg-slate-950/40 p-3 rounded-[3rem] flex gap-3 border border-white/5 shadow-4xl backdrop-blur-3xl">
+            {(['all', 'high', 'medium', 'low'] as const).map(s => (
+              <button
+                key={s}
+                onClick={() => setFilterSeverity(s)}
+                className={cn(
+                  "flex-1 py-5 rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] transition-all relative overflow-hidden font-mono",
+                  filterSeverity === s
+                    ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] border border-emerald-400/50'
+                    : 'text-slate-500 hover:text-white hover:bg-white/5'
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setShowAnomalies(!showAnomalies)}
+            className={cn(
+              "group relative overflow-hidden rounded-[2.5rem] border py-6 px-10 transition-all duration-500 font-mono italic flex items-center justify-between",
+              showAnomalies
+                ? "bg-amber-600/20 border-amber-500/50 text-amber-400"
+                : "bg-slate-950/40 border-white/5 text-slate-500 hover:border-white/10"
+            )}
+          >
+            <div className="flex items-center gap-4">
+              <Cpu className={cn("w-6 h-6", showAnomalies ? "animate-spin-slow" : "")} />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em]">
+                {showAnomalies ? 'Deep_Audit_Active' : 'Enable_Deep_Audit'}
+              </span>
+            </div>
+            {showAnomalies && <div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,1)]" />}
+          </button>
         </div>
       </div>
 
@@ -217,6 +240,8 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
         <AnimatePresence mode="popLayout">
           {filteredFlags.map((flag, i) => {
             const isExpanded = expandedCard === i;
+            const category = (flag as any).category || 'violation';
+            const isAnomaly = category === 'anomaly';
             
             return (
               <motion.div
@@ -230,7 +255,9 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                   "relative group rounded-[4rem] border transition-all duration-700 overflow-hidden",
                   isExpanded 
                     ? "bg-slate-900 border-white/20 shadow-[0_80px_160px_-40px_rgba(0,0,0,0.7)] ring-1 ring-white/10" 
-                    : "bg-slate-950/20 border-white/5 hover:border-white/10 hover:shadow-4xl"
+                    : isAnomaly
+                      ? "bg-slate-950/40 border-amber-900/20 opacity-80"
+                      : "bg-slate-950/20 border-white/5 hover:border-white/10 hover:shadow-4xl"
                 )}
               >
                 <div 
@@ -251,17 +278,19 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                         <div className="flex items-center gap-4">
                           <div className={cn(
                             "w-4 h-4 rounded-full shadow-2xl",
+                            isAnomaly ? "bg-amber-500 shadow-amber-500/50" :
                             flag.severity === 'high' ? "bg-rose-500 shadow-rose-500/50" :
                             flag.severity === 'medium' ? "bg-amber-500 shadow-amber-500/50" :
                             "bg-emerald-500 shadow-emerald-500/50"
                           )} />
                           <span className={cn(
                             "text-[10px] font-black uppercase tracking-[0.5em] font-mono italic",
+                            isAnomaly ? "text-amber-500" :
                             flag.severity === 'high' ? "text-rose-500" :
                             flag.severity === 'medium' ? "text-amber-500" :
                             "text-emerald-500"
                           )}>
-                             RISK_NODE::{flag.severity}
+                             {isAnomaly ? 'DATA_ANOMALY' : `RISK_NODE::${flag.severity}`}
                           </span>
                         </div>
 
@@ -311,7 +340,7 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                           "text-2xl leading-relaxed text-slate-500 font-medium italic",
                           isExpanded ? "" : "line-clamp-1"
                         )}>
-                          {flag.explanation}
+                          {maskSensitiveInText(flag.explanation, isPrivacyMode)}
                         </p>
                       </div>
                     </div>
@@ -377,7 +406,7 @@ const ViolationsTab: React.FC<ViolationsTabProps> = ({
                                   <Radiation size={150} />
                                 </div>
                                 <p className="text-3xl leading-relaxed text-slate-300 font-black italic relative z-10 tracking-tight leading-tight">
-                                  "{flag.whyItMatters}"
+                                  "{maskSensitiveInText(flag.whyItMatters, isPrivacyMode)}"
                                 </p>
                               </div>
 
