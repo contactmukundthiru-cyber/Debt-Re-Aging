@@ -217,13 +217,13 @@ const RULE_DEFINITIONS: Record<string, RuleDefinition> = {
     nextStep: 'Request an itemized account history to resolve the numerical discrepancies.'
   },
   F1: {
-    name: 'Stale Data (90+ Days)',
+    name: 'Stagnant Reporting Anomaly',
     severity: 'low',
     successProbability: 45,
-    whyItMatters: 'Accounts should be updated at least monthly. Stale data may indicate the furnisher is no longer verifying accuracy.',
+    whyItMatters: 'Active accounts should be updated at least monthly. Stale data (180+ days) may indicate the furnisher is no longer maintaining accurate records.',
     suggestedEvidence: ['Request current account statement'],
     legalCitations: ['FCRA_623_a2', 'METRO2_GUIDE'],
-    nextStep: 'Challenge the furnisher\'s ability to verify the data if they have not updated in 90+ days.'
+    nextStep: 'Challenge the furnisher\'s ability to verify accuracy if data has not been updated in over 6 months.'
   },
   F2: {
     name: 'Duplicate Reporting',
@@ -519,9 +519,10 @@ export function runRules(fields: CreditFields): RuleFlag[] {
   // B2: Impossible 7-year timeline
   if (dofd && removalDate) {
     const yearsToRemoval = yearsBetween(dofd, removalDate);
-    if (yearsToRemoval > 7.5) {
+    // Increased to 8.0 years to account for 180-day grace period PLUS buffer for rounding/reporting delays
+    if (yearsToRemoval > 8.0) {
       flags.push(createFlag('B2',
-        `The estimated removal date (${fields.estimatedRemovalDate}) is ${yearsToRemoval.toFixed(1)} years after the DOFD (${fields.dofd}). The maximum allowed is 7 years plus 180 days.`,
+        `The estimated removal date (${fields.estimatedRemovalDate}) is ${yearsToRemoval.toFixed(1)} years after the DOFD (${fields.dofd}). The reporting limit is strictly 7 years plus 180 days; this exceeds the statutory maximum.`,
         { dofd: fields.dofd, estimatedRemovalDate: fields.estimatedRemovalDate, yearsCalculated: yearsToRemoval.toFixed(1) },
         95
       ));
@@ -656,14 +657,15 @@ export function runRules(fields: CreditFields): RuleFlag[] {
   // L1: Status vs Payment History mismatch
   if (status && history) {
     const isCleanStatus = ['current', 'paid', 'on time'].some(s => status.includes(s));
+    // Check first 4 months of history for delinquency markers
     const hasRecentLates = ['30', '60', '90', '120', '150', '180'].some(late =>
-      history.substring(0, 10).includes(late)
+      history.substring(0, 4).includes(late)
     );
 
     if (isCleanStatus && hasRecentLates) {
       flags.push(createFlag('L1',
-        `Account status shows "${status}" but recent payment history shows delinquency markers. This is contradictory reporting.`,
-        { accountStatus: fields.accountStatus, paymentHistory: fields.paymentHistory?.substring(0, 20) }
+        `Reporting Conflict: Status indicates ${status}, but recent history markers (${history.substring(0, 4)}) contain delinquency codes. Bureau data is internally inconsistent.`,
+        { accountStatus: fields.accountStatus, paymentHistory: fields.paymentHistory?.substring(0, 12) }
       ));
     }
   }
@@ -686,16 +688,20 @@ export function runRules(fields: CreditFields): RuleFlag[] {
       const solExpiry = new Date(lastPayment);
       solExpiry.setFullYear(solExpiry.getFullYear() + limit);
 
-      if (today > solExpiry) {
+      // Only flag if it's SIGNIFICANTLY past SOL (30 day buffer)
+      const bufferDate = new Date(today);
+      bufferDate.setDate(bufferDate.getDate() - 30);
+
+      if (bufferDate > solExpiry) {
         flags.push(createFlag('S1',
-          `Forensic Audit: This debt exceeds the ${limit}-year ${fields.stateCode} SOL for ${typeLabel}s. The legal collection window likely expired on ${solExpiry.toISOString().split('T')[0]}.`,
+          `SOL Expiry: This debt appears to exceed the ${limit}-year ${fields.stateCode} SOL for ${typeLabel}s. The legal window for litigation likely expired around ${solExpiry.toISOString().split('T')[0]}.`,
           { stateCode: fields.stateCode, dateLastPayment: fields.dateLastPayment, solYears: limit, accountType: fields.accountType }
         ));
 
         // Trigger S3 if it's a collection or charge-off being actively reported as "Open" or "Activity"
         if (['collection', 'charge_off'].includes(accountType) && (status.includes('open') || status.includes('active'))) {
            flags.push(createFlag('S3',
-            `This time-barred debt is being actively reported with an "Open" or "Active" status, which may imply legal enforceability that does not exist under ${fields.stateCode} law.`,
+            `Unfair Practice: This time-barred debt is being reported with an "Open/Active" status, which may deceptively imply legal enforceability that has expired under ${fields.stateCode} law.`,
             { stateCode: fields.stateCode, solExpiry: solExpiry.toISOString().split('T')[0] }
            ));
         }
@@ -710,14 +716,13 @@ export function runRules(fields: CreditFields): RuleFlag[] {
 
     if (today > judgmentExpiry) {
       flags.push(createFlag('S2',
-        `This judgment appears to be older than 7 years from the filing date and should be removed from your credit report.`,
+        `Obsolete Judgment: This record is older than the 7-year FCRA reporting limit for judgments and should be excluded from future reports.`,
         { accountType: fields.accountType, dofd: fields.dofd }
       ));
     }
   }
 
   // K6: Removal Date Logic (Direct Re-aging Detection)
-  // removalDate already declared at top of function
   if (removalDate && dofd) {
     const maxRemoval = new Date(dofd);
     // 7 years + 180 days per FCRA 605(c)
@@ -725,46 +730,50 @@ export function runRules(fields: CreditFields): RuleFlag[] {
 
     if (removalDate > maxRemoval) {
       flags.push(createFlag('K6',
-        `Forensic marker detected: The removal date (${fields.estimatedRemovalDate}) is beyond the statutory 7-year+180-day limit based on the reported DOFD (${fields.dofd}).`,
+        `Forensic Re-aging: The projected removal date (${fields.estimatedRemovalDate}) is beyond the 7.5-year statutory limit from the reported DOFD (${fields.dofd}).`,
         { estimatedRemovalDate: fields.estimatedRemovalDate, dofd: fields.dofd }
       ));
     }
   }
 
   // Z1: Zombie Debt / Account Resuscitation logic
-  // dateOpened already declared at top of function
-  if (dateOpened && dofd && (accountType.toLowerCase().includes('collect') || accountType.toLowerCase().includes('factor'))) {
-    const yearsDiff = (dateOpened.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365);
-    if (yearsDiff > 3) {
+  if (dateOpened && dofd && (accountType.toLowerCase().includes('collect') || accountType.toLowerCase().includes('factor') || accountType.toLowerCase().includes('buyer'))) {
+    const yearsDiff = (dateOpened.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+    // Increased to 6.5 years for extremely conservative flagging
+    if (yearsDiff > 6.5) { 
       flags.push(createFlag('Z1',
-        `Suspected "Zombie Debt" pattern: This collection account was activated ${yearsDiff.toFixed(1)} years after the original delinquency. This is often proof of debt refreshing.`,
+        `Zombie Debt Signature: Account was "opened" with the collector ${yearsDiff.toFixed(1)} years after the original delinquency. This pattern strongly correlates with illegal reporting extensions.`,
         { dateOpened: fields.dateOpened, dofd: fields.dofd }
       ));
     }
   }
 
-  // F1: Stale data check (last reported > 90 days ago)
+  // F1: Stale data check (last reported > 180 days ago)
   const lastReported = parseDate(fields.dateReportedOrUpdated);
-  if (lastReported) {
+  const isClosed = status.includes('closed') || status.includes('transferred') || status.includes('sold') || status.includes('paid') || status.includes('settled');
+  if (lastReported && !isClosed) {
     const daysSinceUpdate = Math.floor((today.getTime() - lastReported.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysSinceUpdate > 90) {
+    if (daysSinceUpdate > 180) { // Increased to 180 days for much more conservative flagging
       flags.push(createFlag('F1',
-        `This account hasn't been updated in ${daysSinceUpdate} days. Furnishers should update at least monthly.`,
+        `Forensic Anomaly: This active account hasn't been updated in ${daysSinceUpdate} days. While not a direct FCRA violation, stagnant reporting on active debt often indicates a failure in furnisher verification systems.`,
         { dateReportedOrUpdated: fields.dateReportedOrUpdated, daysSinceUpdate }
       ));
     }
   }
 
   // P1: Payment history gaps
-  if (history && history.length > 12) {
-    const hasGaps = /[^COXR0123456789\s]{3,}/.test(history);
+  if (history && history.length > 24) { // Increased history length requirement
+    const hasGaps = /[^COXR0123456789\s]{5,}/.test(history); // check for 5+ non-standard chars
     if (hasGaps) {
       flags.push(createFlag('P1',
-        'Payment history appears to have gaps or missing data, which may not accurately reflect your payment behavior.',
-        { paymentHistory: history.substring(0, 24) }
+        'Payment history contains gaps or non-standard characters that may indicate reporting errors.',
+        { paymentHistory: history }
       ));
     }
   }
+
+  // ... (ignoring P1 replacement for now as I need the exact string context)
+
 
   // T1: Account type misclassification check
   if (accountType === 'collection' && status.includes('current')) {
@@ -772,17 +781,6 @@ export function runRules(fields: CreditFields): RuleFlag[] {
       'Account is classified as a collection but shows "current" status. This may be a misclassified account.',
       { accountType: fields.accountType, accountStatus: fields.accountStatus }
     ));
-  }
-
-  // Z1: Zombie Debt / Re-aging suspected by opening date
-  if (accountType === 'collection' && dateOpened && dofd) {
-    const yearsToCollection = (dateOpened.getTime() - dofd.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-    if (yearsToCollection > 3) {
-      flags.push(createFlag('Z1',
-        `This collection account was opened ${yearsToCollection.toFixed(1)} years after the DOFD. This "Zombie Debt" pattern often masks illegal re-aging of the reporting period.`,
-        { dofd: fields.dofd, dateOpened: fields.dateOpened, gap: yearsToCollection.toFixed(1) }
-      ));
-    }
   }
 
   // M3: Metro2 Integrity - Collection must have specific account types

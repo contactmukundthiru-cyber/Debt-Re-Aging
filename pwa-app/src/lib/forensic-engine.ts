@@ -84,38 +84,45 @@ export function runBatchAnalysis(accounts: { id: string; fields: CreditFields }[
     });
 
     // 2. Duplicate Detection (DU1)
-    const balanceGroups: Record<string, string[]> = {};
+    const balanceGroups: Record<string, { id: string, accNum?: string }[]> = {};
     accounts.forEach(acc => {
         const balance = (acc.fields.currentValue || '0').replace(/[$,]/g, '').trim();
         const creditor = (acc.fields.originalCreditor || acc.fields.furnisherOrCollector || '')
             .toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 12);
         
-        if (balance !== '0' && creditor.length > 3) {
+        // Only flag if balance is significant and creditor match is likely
+        if (balance !== '0' && parseFloat(balance) > 1 && creditor.length > 3) {
             const key = `${balance}-${creditor}`;
             if (!balanceGroups[key]) balanceGroups[key] = [];
-            balanceGroups[key].push(acc.id);
+            balanceGroups[key].push({ id: acc.id, accNum: acc.fields.accountNumber });
         }
     });
 
-    for (const [key, ids] of Object.entries(balanceGroups)) {
-        if (ids.length > 1) {
-            const flag: RuleFlag = {
-                ruleId: 'DU1',
-                ruleName: 'Duplicate Account Reporting',
-                severity: 'high',
-                category: 'violation',
-                confidence: 95,
-                explanation: `Detected ${ids.length} accounts reporting the same balance ($${key.split('-')[0]}) for similar creditors. This artificially suppresses your credit score by duplicating liability.`,
-                whyItMatters: 'Credit bureaus are required by the FCRA to maintain "maximum possible accuracy." Duplicate entries violate this standard and create a false perception of total debt.',
-                suggestedEvidence: ['Highlighted credit report showing matching balances with different account numbers or bureau tags'],
-                fieldValues: { duplicateCount: ids.length.toString() },
-                legalCitations: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
-                successProbability: 95
-            };
-            globalFlags.push(flag);
-            ids.forEach(id => {
-                if (analyses[id]) analyses[id].flags.push(flag);
-            });
+    for (const [key, items] of Object.entries(balanceGroups)) {
+        if (items.length > 1) {
+            // Check if account numbers are actually different (to avoid false positives on same account reported twice correctly)
+            const uniqueAccNums = new Set(items.map(i => i.accNum).filter(Boolean));
+            // If they have the same account number, it's just the same account reported, not necessarily a duplicate violation
+            // unless they are from different bureaus (handled in cross-bureau)
+            if (uniqueAccNums.size > 1 || uniqueAccNums.size === 0) {
+                const flag: RuleFlag = {
+                    ruleId: 'DU1',
+                    ruleName: 'Duplicate Account Reporting',
+                    severity: 'high',
+                    category: 'violation',
+                    confidence: 95,
+                    explanation: `Detected ${items.length} separate account entries reporting the same balance ($${key.split('-')[0]}) for similar creditors. This artificially suppresses your credit score by duplicating liability.`,
+                    whyItMatters: 'Credit bureaus are required by the FCRA to maintain "maximum possible accuracy." Duplicate entries violate this standard and create a false perception of total debt.',
+                    suggestedEvidence: ['Highlighted credit report showing matching balances with different account numbers or bureau tags'],
+                    fieldValues: { duplicateCount: items.length.toString() },
+                    legalCitations: ['15 USC 1681e(b)', '15 USC 1681s-2(a)(1)'],
+                    successProbability: 95
+                };
+                globalFlags.push(flag);
+                items.forEach(item => {
+                    if (analyses[item.id]) analyses[item.id].flags.push(flag);
+                });
+            }
         }
     }
 

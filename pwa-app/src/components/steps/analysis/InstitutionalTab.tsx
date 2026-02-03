@@ -53,24 +53,6 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
         a.click();
     };
 
-    const VelocityChart = () => (
-        <div className="h-48 w-full flex items-end gap-2 px-8" role="img" aria-label="Analysis throughput velocity over time">
-            {(metrics?.throughputHistory || [40, 70, 45, 90, 65, 80, 50, 95, 85, 100]).map((h: number, i: number) => (
-                <motion.div
-                    key={i}
-                    initial={{ height: 0 }}
-                    animate={{ height: `${h || 10}%` }}
-                    transition={{ delay: i * 0.05, duration: 1, ease: "circOut" }}
-                    className="flex-1 bg-gradient-to-t from-blue-600/40 to-blue-400 rounded-t-lg shadow-lg relative group/bar"
-                >
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[9px] px-2 py-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity font-mono">
-                        {h}%
-                    </div>
-                </motion.div>
-            ))}
-        </div>
-    );
-
     const downloadReport = async () => {
         const report = await generateImpactReport(reportName);
         const blob = new Blob([report], { type: 'text/markdown' });
@@ -90,6 +72,144 @@ const InstitutionalTab: React.FC<InstitutionalTabProps> = ({ caseId, collectorMa
         a.download = `Institutional_Export_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
     };
+
+    const StatCard = ({ title, value, icon: Icon, trend }: any) => (
+        <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-slate-900/60 transition-all duration-300">
+            <div className="flex items-center justify-between mb-6">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                    <Icon size={24} />
+                </div>
+                {trend && (
+                    <div className="px-2 py-1 bg-emerald-500/10 rounded-full text-[10px] font-bold text-emerald-500">
+                        +{trend}%
+                    </div>
+                )}
+            </div>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">{title}</p>
+            <h4 className="text-4xl font-bold text-white tracking-tight">{value}</h4>
+        </div>
+    );
+
+    return (
+        <div className="fade-in space-y-12 pb-20">
+            {!metrics ? (
+                <div className="flex flex-col items-center justify-center p-20">
+                    <div className="w-12 h-12 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4" />
+                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Loading Analytics...</p>
+                </div>
+            ) : (
+                <React.Fragment>
+            {/* HERO */}
+            <section className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/10 p-12 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] -mr-64 -mt-64" />
+                <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-6">
+                        <div className="flex items-center gap-6">
+                            <div className="w-20 h-20 rounded-3xl bg-blue-500 flex items-center justify-center text-white shadow-2xl shadow-blue-500/20">
+                                <Briefcase size={36} />
+                            </div>
+                            <div>
+                                <h2 className="text-5xl font-bold text-white tracking-tight leading-none">Institutional <span className="text-blue-500">Hub</span></h2>
+                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Enterprise Performance Matrix</p>
+                            </div>
+                        </div>
+                        <p className="text-lg text-slate-400 leading-relaxed max-w-xl">
+                            Professional analytics for legal departments and forensic units. Monitor case velocity, compliance health, and institutional impact metrics.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                        <StatCard title="Throughput" value={metrics.totalAnalyses} icon={Activity} trend="12" />
+                        <StatCard title="Compliance" value={`${metrics.complianceHealth}%`} icon={Award} />
+                        <StatCard title="Hours Saved" value={`${metrics.estimatedTimeSavedHours}h`} icon={Clock} />
+                        <StatCard title="Risk Incidents" value={metrics.highSeverityCount} icon={ShieldCheck} />
+                    </div>
+                </div>
+            </section>
+
+            {/* COLLECTOR INTEL */}
+            {collectorMatch && (
+                <section className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/10 p-12">
+                    <div className="flex flex-col xl:flex-row gap-12">
+                        <div className="flex-1 space-y-8">
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center text-rose-500 border border-rose-500/20">
+                                    <ShieldCheck size={32} />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-rose-500 uppercase tracking-widest mb-1">Collector Profile</p>
+                                    <h3 className="text-4xl font-bold text-white tracking-tight">{collectorMatch.collector.names[0]}</h3>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="p-8 bg-slate-950/40 rounded-3xl border border-white/5">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">CFPB Complaints</p>
+                                    <p className="text-4xl font-bold text-white tracking-tighter">{collectorMatch.collector.violations.cfpbComplaints.toLocaleString()}</p>
+                                </div>
+                                <div className="p-8 bg-slate-950/40 rounded-3xl border border-white/5">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Risk Level</p>
+                                    <p className={cn("text-4xl font-bold tracking-tighter uppercase", 
+                                        collectorMatch.collector.riskLevel === 'high' ? 'text-rose-500' : 'text-amber-500'
+                                    )}>
+                                        {collectorMatch.collector.riskLevel}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 space-y-6">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2">Known Issues</p>
+                            <div className="flex flex-wrap gap-2">
+                                {collectorMatch.collector.knownIssues.map((issue, idx) => (
+                                    <span key={idx} className="px-4 py-2 bg-slate-950/60 border border-white/10 rounded-xl text-xs font-semibold text-slate-300">
+                                        {issue}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="p-8 bg-blue-500/5 border border-blue-500/10 rounded-3xl">
+                                <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-2">Forensic Note</p>
+                                <p className="text-sm text-slate-400 leading-relaxed">{collectorMatch.collector.notes}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ACTIONS */}
+            <div className="grid lg:grid-cols-2 gap-6">
+                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-10 flex items-center justify-between hover:bg-slate-900/60 transition-all cursor-pointer group" onClick={downloadReport}>
+                    <div className="flex items-center gap-6">
+                        <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-white group-hover:bg-blue-500 transition-colors">
+                            <FileText size={28} />
+                        </div>
+                        <div>
+                            <h4 className="text-xl font-bold text-white tracking-tight">Impact Manifest</h4>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Professional PDF/Markdown Summary</p>
+                        </div>
+                    </div>
+                    <Download size={20} className="text-slate-500 group-hover:text-white transition-colors" />
+                </div>
+
+                <div className="bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-10 flex items-center justify-between hover:bg-slate-900/60 transition-all cursor-pointer group" onClick={downloadJSON}>
+                    <div className="flex items-center gap-6">
+                        <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-white group-hover:bg-indigo-500 transition-colors">
+                            <FileJson size={28} />
+                        </div>
+                        <div>
+                            <h4 className="text-xl font-bold text-white tracking-tight">Data Syndication</h4>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Normalized JSON Export for CRM</p>
+                        </div>
+                    </div>
+                    <Network size={20} className="text-slate-500 group-hover:text-white transition-colors" />
+                </div>
+            </div>
+                </React.Fragment>
+            )}
+        </div>
+    );
+};
+
+export default InstitutionalTab;
 
     const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
         <div 

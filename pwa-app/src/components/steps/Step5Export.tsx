@@ -114,10 +114,11 @@ const Step5Export: React.FC<Step5ExportProps> = ({
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
 
         <div className="relative z-10 text-center max-w-2xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex items-center justify-center gap-3 mb-6">
             <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-purple-400 font-mono">Document Generation Center // Certified V5.0</span>
+            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-purple-400 font-mono">Document Generation Center // Certified V{APP_VERSION}</span>
           </div>
+
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 relative">
             Export <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Legal Documents</span>
             <div className="absolute -top-10 -right-20 opacity-[0.03] select-none pointer-events-none rotate-12 scale-150">

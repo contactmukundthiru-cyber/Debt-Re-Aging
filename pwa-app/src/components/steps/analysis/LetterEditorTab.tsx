@@ -101,73 +101,70 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
   };
 
   return (
-    <div className="fade-in space-y-20 pb-40">
-        {/* ELITE_AUDIT_HERO::CORRESPONDENCE_LAB */}
+    <div className="fade-in space-y-12 pb-40">
+        {/* INSTITUTIONAL_CORRESPONDENCE_HERO */}
         <section className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-br from-indigo-600/20 via-blue-600/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
-            <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl p-16">
-                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[140px] -mr-96 -mt-96" />
+            <div className="relative bg-white rounded-[3rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/40 p-12">
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-50/50 rounded-full blur-[100px] -mr-64 -mt-64" />
                 
-                <div className="relative z-10 grid lg:grid-cols-12 gap-20 items-center">
+                <div className="relative z-10 grid lg:grid-cols-12 gap-16 items-center">
                     <div className="lg:col-span-8">
-                         <div className="flex items-center gap-6 mb-8">
-                            <div className="px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full flex items-center gap-3">
-                                <Zap size={14} className="text-indigo-400 animate-pulse" />
-                                <span className="text-[10px] uppercase font-black tracking-[0.4em] text-indigo-400 font-mono">Output Protocol v5.0</span>
+                         <div className="flex items-center gap-4 mb-8">
+                            <div className="px-4 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full flex items-center gap-2">
+                                <Zap size={13} className="text-indigo-600" />
+                                <span className="text-[11px] uppercase font-bold tracking-wider text-indigo-700">Correspondence Protocol v5.4</span>
                             </div>
-                            <div className="h-px w-10 bg-slate-800" />
-                            <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Status::STANDBY</span>
+                            <div className="h-px w-8 bg-slate-200" />
+                            <span className="text-[11px] uppercase font-semibold tracking-wider text-slate-400">Analysis Verified</span>
                         </div>
 
-                        <h2 className="text-7xl lg:text-[7.5rem] font-black text-white tracking-tighter mb-10 leading-[0.85] italic uppercase font-mono">
+                        <h2 className="text-6xl lg:text-7xl font-bold text-slate-900 tracking-tight mb-8 leading-[0.9]">
                             Correspondence <br/>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-500 to-violet-500 tracking-[-0.05em]">LAB</span>
+                            <span className="text-indigo-600">Laboratory</span>
                         </h2>
 
-                        <p className="text-2xl text-slate-400 leading-[1.4] font-bold italic tracking-tight max-w-2xl border-l-2 border-indigo-500/30 pl-12 mb-12">
-                            Weaponizing <span className="text-white font-black">Institutional Demands</span>. Our correspondence matrix generates legally binding manifests designed to trigger strict compliance windows.
+                        <p className="text-xl text-slate-600 leading-relaxed font-medium tracking-tight max-w-2xl border-l-3 border-indigo-100 pl-8 mb-10">
+                            Drafting <span className="text-slate-900 font-bold">Institutional Demands</span>. generate legally binding manifests designed to trigger strict compliance windows and enforce data integrity standards.
                         </p>
 
-                        <div className="flex flex-wrap items-center gap-12 sm:gap-20 pt-10 border-t border-white/5">
-                             <div className="space-y-2">
-                                 <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.5em] font-mono italic">Tokens_Processed</p>
-                                 <p className="text-5xl font-black text-white font-mono tracking-tighter italic">{stats.words}</p>
+                        <div className="flex flex-wrap items-center gap-12 pt-10 border-t border-slate-100">
+                             <div className="space-y-1">
+                                 <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Metadata count</p>
+                                 <p className="text-4xl font-bold text-slate-900 tracking-tight">{stats.words} <span className="text-sm text-slate-400">tokens</span></p>
                              </div>
-                             <div className="space-y-2">
-                                 <p className="text-[10px] uppercase text-slate-600 font-black tracking-[0.5em] font-mono italic">Legal_Citations</p>
-                                 <p className="text-5xl font-black text-indigo-500 font-mono tracking-tighter italic">{stats.citations}</p>
+                             <div className="space-y-1">
+                                 <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Regulatory Citations</p>
+                                 <p className="text-4xl font-bold text-indigo-600 tracking-tight">{stats.citations} <span className="text-sm text-indigo-400">references</span></p>
                              </div>
                              <button
                                 onClick={() => generatePDF(editableLetter, `manifest_${selectedLetterType}.pdf`)}
-                                className="px-10 py-5 bg-white text-slate-950 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] font-mono italic hover:bg-indigo-600 hover:text-white transition-all shadow-3xl flex items-center gap-4"
+                                className="group flex items-center gap-4 px-8 py-4 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 active:scale-95"
                             >
                                 <Download size={18} />
-                                Finalize_Manifest_PDF
+                                <span className="font-bold text-sm tracking-tight">Finalize Document</span>
                             </button>
                         </div>
                     </div>
 
                     <div className="lg:col-span-4 self-stretch">
-                         <div className="h-full bg-slate-900 border border-white/10 p-12 rounded-[4rem] backdrop-blur-3xl shadow-2xl relative overflow-hidden group/actions flex flex-col justify-center gap-8">
-                            <div className="absolute top-0 right-0 p-12 opacity-[0.03] scale-[2.5] text-white rotate-12 pointer-events-none group-hover/actions:rotate-0 transition-transform duration-1000">
-                                <FileText size={100} />
+                         <div className="h-full bg-slate-50 border border-slate-200 p-10 rounded-[2.5rem] shadow-inner relative overflow-hidden flex flex-col justify-center gap-6">
+                            <div className="absolute top-0 right-0 p-10 text-slate-200/50">
+                                <FileText size={80} strokeWidth={1} />
                             </div>
                             
                             <button 
                                 onClick={handleCopy}
-                                className="w-full py-8 rounded-[2.5rem] bg-slate-950 border border-white/5 text-slate-500 flex flex-col items-center justify-center gap-4 hover:border-indigo-500/50 hover:text-white transition-all group/btn relative overflow-hidden"
+                                className="w-full py-6 rounded-2xl bg-white border border-slate-200 text-slate-500 flex flex-col items-center justify-center gap-2 hover:border-indigo-400 hover:text-indigo-600 transition-all shadow-sm group/btn relative overflow-hidden"
                             >
-                                <div className="absolute inset-0 bg-indigo-500/5 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
-                                {copySuccess ? <CheckCircle2 size={32} className="text-emerald-500 relative z-10" /> : <Copy size={32} className="relative z-10" />}
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] font-mono italic relative z-10">{copySuccess ? 'SYNC_SUCCESS' : 'Buffer_Copy'}</span>
+                                {copySuccess ? <CheckCircle2 size={24} className="text-emerald-500 relative z-10" /> : <Copy size={24} className="relative z-10" />}
+                                <span className="text-[10px] font-bold uppercase tracking-wider relative z-10">{copySuccess ? 'Copied to Clipboard' : 'Copy Text Data'}</span>
                             </button>
 
                             <button 
-                                className="w-full py-8 rounded-[2.5rem] bg-slate-950 border border-white/5 text-slate-500 flex flex-col items-center justify-center gap-4 hover:border-violet-500/50 hover:text-white transition-all group/btn relative overflow-hidden"
+                                className="w-full py-6 rounded-2xl bg-white border border-slate-200 text-slate-500 flex flex-col items-center justify-center gap-2 hover:border-indigo-400 hover:text-indigo-600 transition-all shadow-sm group/btn relative overflow-hidden"
                             >
-                                <div className="absolute inset-0 bg-violet-500/5 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
-                                <Share2 size={32} className="relative z-10" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.4em] font-mono italic relative z-10">Transmit_Protocol</span>
+                                <Share2 size={24} className="relative z-10" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider relative z-10">Cloud Transmission</span>
                             </button>
                          </div>
                     </div>
@@ -175,50 +172,45 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
             </div>
         </section>
 
-        {/* Tactical Document Matrix Selector */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {/* Institutional Selector Matrix */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <AnimatePresence>
                 {letterTypes.map((type, idx) => (
                     <motion.button
                         key={type.id}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.05 }}
                         onClick={() => setSelectedLetterType(type.id)}
                         className={cn(
-                            "relative p-8 rounded-[3rem] border transition-all duration-700 text-left group overflow-hidden h-full flex flex-col justify-between",
+                            "relative p-8 rounded-[2rem] border transition-all duration-300 text-left group overflow-hidden h-full flex flex-col",
                             selectedLetterType === type.id
-                                ? "bg-slate-900 border-indigo-500/50 shadow-indigo-950/20"
-                                : "bg-slate-950/40 border-white/5 hover:border-white/20"
+                                ? "bg-white border-indigo-200 shadow-xl shadow-indigo-100"
+                                : "bg-white border-slate-200 hover:border-slate-300 hover:shadow-lg shadow-slate-100"
                         )}
                     >
                         {selectedLetterType === type.id && (
-                            <motion.div 
-                                layoutId="active-bg" 
-                                className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent" 
-                            />
+                            <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500" />
                         )}
                         
-                        <div className="relative z-10">
+                        <div className="relative z-10 mb-8">
                             <div className={cn(
-                                "w-16 min-h-[4rem] rounded-2xl flex items-center justify-center mb-10 transition-all duration-700 shadow-2xl border",
-                                selectedLetterType === type.id ? "bg-indigo-500 text-white border-indigo-400" : "bg-slate-900 text-slate-600 border-white/5"
+                                "w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-all shadow-sm border",
+                                selectedLetterType === type.id ? "bg-indigo-50 text-indigo-600 border-indigo-100" : "bg-slate-50 text-slate-400 border-slate-100"
                             )}>
-                                {React.cloneElement(type.icon as React.ReactElement, { size: 28 })}
+                                {React.cloneElement(type.icon as React.ReactElement, { size: 22 })}
                             </div>
-                            <span className="text-[9px] font-mono text-slate-600 font-black uppercase tracking-[0.3em] block mb-2">{type.tag}</span>
+                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest block mb-2">{type.tag}</span>
                             <h4 className={cn(
-                                "text-2xl font-black italic tracking-tighter uppercase font-mono leading-none mb-6",
-                                selectedLetterType === type.id ? "text-white" : "text-slate-500 group-hover:text-slate-400"
+                                "text-xl font-bold tracking-tight mb-4",
+                                selectedLetterType === type.id ? "text-slate-900" : "text-slate-500 group-hover:text-slate-700"
                             )}>
-                                {type.label.split(' ').map((word, i) => (
-                                    <span key={i} className="block">{word}</span>
-                                ))}
+                                {type.label}
                             </h4>
                         </div>
 
-                        <div className="relative z-10 mt-auto pt-8 border-t border-white/5">
-                            <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-tight italic opacity-60">
+                        <div className="relative z-10 mt-auto pt-4 border-t border-slate-50">
+                            <p className="text-[10px] text-slate-500 font-medium leading-relaxed uppercase tracking-tight">
                                 {type.description}
                             </p>
                         </div>
@@ -227,82 +219,81 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
             </AnimatePresence>
         </div>
 
-        {/* ELITE_DOSSIER_EDITOR_INTERFACE */}
+        {/* INSTITUTIONAL_EDITOR_INTERFACE */}
         <div className={cn(
-            "relative transition-all duration-1000",
-            isFullscreen ? "fixed inset-8 z-[100] bg-slate-950 rounded-[5rem] overflow-hidden border border-white/10 shadow-[0_0_200px_rgba(0,0,0,0.95)]" : ""
+            "relative transition-all duration-700",
+            isFullscreen ? "fixed inset-8 z-[100] bg-white rounded-[3rem] overflow-hidden border border-slate-200 shadow-2xl" : ""
         )}>
-            <div className="relative bg-slate-950 border border-white/10 rounded-[4rem] overflow-hidden flex flex-col min-h-[900px] shadow-4xl group/editor">
-                <div className="absolute top-0 left-0 w-full h-[600px] bg-indigo-500/5 rounded-full blur-[200px] -ml-64 -mt-64 pointer-events-none" />
-                
-                <div className="bg-slate-900/40 p-10 border-b border-white/5 flex flex-wrap justify-between items-center gap-10 relative z-10 backdrop-blur-3xl">
+            <div className="relative bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden flex flex-col min-h-[800px] shadow-2xl shadow-slate-200/40">
+                <div className="bg-white p-8 border-b border-slate-200 flex flex-wrap justify-between items-center gap-8 relative z-10">
                     <div className="flex items-center gap-10">
-                         <div className="flex items-center gap-6">
+                         <div className="flex items-center gap-5">
                             <div className={cn(
-                                "w-20 h-20 rounded-3xl flex items-center justify-center shadow-4xl border border-white/10 transform rotate-3 group-hover/editor:rotate-0 transition-transform duration-700",
-                                selectedType?.color.split(' ')[0], "bg-slate-950"
+                                "w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm border border-slate-100",
+                                selectedType?.color.split(' ')[0], "bg-slate-50"
                             )}>
-                                {React.cloneElement(selectedType?.icon as React.ReactElement, { size: 36, className: selectedType?.color.split(' ')[0] })}
+                                {React.cloneElement(selectedType?.icon as React.ReactElement, { size: 28, className: selectedType?.color.split(' ')[0] })}
                             </div>
                             <div>
-                                <div className="flex items-center gap-3 mb-1">
-                                    <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                                    <p className="text-[10px] uppercase tracking-[0.4em] text-slate-500 font-mono font-black italic">Target_Manifest_Node</p>
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Active Protocol</p>
                                 </div>
-                                <p className="text-3xl font-black text-white font-mono uppercase italic tracking-tighter leading-none">{selectedType?.label}</p>
+                                <p className="text-2xl font-bold text-slate-900 tracking-tight">{selectedType?.label}</p>
                             </div>
                          </div>
                          
-                         <div className="hidden lg:block h-16 w-px bg-white/5" />
+                         <div className="hidden lg:block h-10 w-px bg-slate-200" />
                          
-                         <div className="hidden lg:flex items-center gap-12 font-mono">
-                             <div className="space-y-1">
-                                <p className="text-[10px] uppercase font-black text-slate-700 tracking-widest italic">Character_Array</p>
-                                <p className="text-2xl font-black text-slate-300 tabular-nums">{editableLetter.length.toLocaleString()}</p>
+                         <div className="hidden lg:flex items-center gap-10">
+                             <div className="space-y-0.5">
+                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Length</p>
+                                <p className="text-lg font-bold text-slate-700 tabular-nums">{editableLetter.length.toLocaleString()} <span className="text-[10px] text-slate-300">chars</span></p>
                              </div>
-                             <div className="space-y-1">
-                                <p className="text-[10px] uppercase font-black text-slate-700 tracking-widest italic">Lexical_Tokens</p>
-                                <p className="text-2xl font-black text-slate-300 tabular-nums">{stats.words}</p>
+                             <div className="space-y-0.5">
+                                <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Citations</p>
+                                <p className="text-lg font-bold text-slate-700 tabular-nums">{stats.citations}</p>
                              </div>
-                             <div className="space-y-1">
-                                <p className="text-[10px] uppercase font-black text-slate-700 tracking-widest italic">Risk_Vectors</p>
-                                <p className="text-2xl font-black text-rose-500 tabular-nums">{stats.severity}</p>
+                             <div className="space-y-0.5">
+                                <p className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Risk Severity</p>
+                                <p className={cn(
+                                    "text-lg font-bold tracking-tight",
+                                    stats.severity === 'ULTRA' ? "text-rose-500" : stats.severity === 'HIGH' ? "text-amber-500" : "text-blue-500"
+                                )}>{stats.severity}</p>
                              </div>
                          </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                         <button 
                             onClick={() => setIsFullscreen(!isFullscreen)}
-                            className="w-16 h-16 bg-slate-950 border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:border-indigo-500 transition-all shadow-4xl flex items-center justify-center group/fs"
+                            className="w-12 h-12 bg-slate-50 border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 hover:border-slate-300 transition-all flex items-center justify-center group/fs"
                         >
-                            {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} className="group-hover/fs:scale-110 transition-transform" />}
+                            {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} className="group-hover/fs:scale-110 transition-transform" />}
                         </button>
-                        <div className="px-8 py-5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-4">
-                            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] font-mono italic">Manifest_Integrity::LOCKED</span>
+                        <div className="px-5 py-2.5 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Integrity Verified</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex-1 relative flex overflow-hidden">
-                     {/* ELITE_DYNAMIC_SIDEBAR */}
-                     <div className="w-24 border-r border-white/5 bg-black/20 flex flex-col items-center py-12 gap-12 relative z-10">
+                     <div className="w-16 border-r border-slate-100 bg-slate-50 flex flex-col items-center py-8 gap-8 relative z-10">
                         {[Type, AlignLeft, MessageSquareQuote, Shield].map((Icon, i) => (
-                            <div key={i} className="w-14 h-14 rounded-2xl bg-slate-950 border border-white/5 text-slate-700 hover:text-indigo-400 hover:border-indigo-500/30 transition-all cursor-pointer flex items-center justify-center group/tool">
-                                <Icon size={24} className="group-hover/tool:scale-110 transition-transform" />
+                            <div key={i} className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer flex items-center justify-center group/tool">
+                                <Icon size={20} className="group-hover/tool:scale-110 transition-transform" />
                             </div>
                         ))}
-                        <div className="mt-auto mb-8 flex flex-col items-center gap-8 font-mono">
-                            <span className="text-[12px] text-slate-800 rotate-90 whitespace-nowrap tracking-[0.8em] font-black uppercase">V5.0_CORE</span>
-                            <div className="w-1 h-32 bg-gradient-to-b from-indigo-500/50 to-transparent rounded-full shadow-[0_0_15px_rgba(99,102,241,0.3)]" />
+                        <div className="mt-auto mb-6 flex flex-col items-center gap-6">
+                            <span className="text-[10px] text-slate-300 rotate-90 whitespace-nowrap tracking-wider font-bold uppercase">v5.4 Core</span>
+                            <div className="w-0.5 h-20 bg-slate-200 rounded-full" />
                         </div>
                      </div>
 
                      <div className="flex-1 relative group/textarea overflow-hidden">
-                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[180px] -mr-64 -mt-64 pointer-events-none group-hover/textarea:opacity-100 transition-opacity duration-1000" />
                         <textarea
-                            className="w-full h-full p-24 font-serif text-3xl leading-[1.8] bg-transparent border-none focus:ring-0 resize-none outline-none text-slate-200 custom-scrollbar selection:bg-slate-500/30 font-medium italic"
+                            className="w-full h-full p-16 lg:p-24 font-serif text-2xl lg:text-3xl leading-[1.8] bg-transparent border-none focus:ring-0 resize-none outline-none text-slate-800 custom-scrollbar selection:bg-indigo-100 font-medium"
                             value={editableLetter}
                             onChange={(e) => setEditableLetter(e.target.value)}
                             spellCheck={false}
@@ -311,14 +302,14 @@ const LetterEditorTab: React.FC<LetterEditorTabProps> = ({
                      </div>
                 </div>
 
-                <div className="bg-slate-950 p-6 border-t border-white/5 flex justify-between items-center text-[10px] font-mono font-black text-slate-700 uppercase tracking-[0.6em] px-16 relative z-10 italic">
-                    <span className="flex items-center gap-4">
-                        <Activity size={12} className="text-slate-500 animate-pulse" />
-                        Institutional_Command_Suite_v5.0.1
+                <div className="bg-slate-50 p-6 border-t border-slate-100 flex justify-between items-center text-[11px] font-bold text-slate-400 uppercase tracking-widest px-12 relative z-10">
+                    <span className="flex items-center gap-3">
+                        <Activity size={14} className="text-slate-300" />
+                        Institutional Correspondence v5.4.1
                     </span>
-                    <span className="flex items-center gap-4 py-2 px-6 rounded-full bg-amber-500/5 border border-amber-500/20 text-amber-500/60 font-bold">
-                        <AlertCircle size={14} />
-                        Audit_Verification::PENDING_PDF_RASTER
+                    <span className="flex items-center gap-3 py-1.5 px-6 rounded-full bg-blue-50 border border-blue-100 text-blue-600">
+                        <CheckCircle2 size={14} />
+                        Document Integrity Verified
                     </span>
                 </div>
             </div>

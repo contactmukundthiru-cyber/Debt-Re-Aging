@@ -16,6 +16,7 @@ import {
   Layers
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { APP_VERSION } from '../../../lib/constants';
 
 interface CaseSummaryDashboardProps {
     flags: RuleFlag[];
@@ -45,40 +46,45 @@ const CaseSummaryDashboard: React.FC<CaseSummaryDashboardProps> = ({ flags, risk
         ? Math.round(flags.reduce((acc, f) => acc + (f.successProbability || 0), 0) / flags.length)
         : 0;
 
-    const prioritizedAction = flags.find(f => f.severity === 'high')?.ruleName || 'Reviewing forensic data';
-    const nextStepAction = (flags.find(f => f.severity === 'high') as any)?.nextStep || 'Standard audit protocol';
+    const prioritizedAction = flags.find(f => f.severity === 'high')?.ruleName || 'Analysis Complete';
+    const nextStepAction = (flags.find(f => f.severity === 'high') as any)?.nextStep || 'Standard monitoring';
 
     return (
-        <div className="space-y-16 mb-24">
-            {/* ACTION_PRIORITY_HEADER */}
+        <div className="space-y-10 mb-20 px-2">
+            {/* INSTITUTIONAL_STATUS_BAR */}
             <motion.div 
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative p-12 bg-slate-950 border border-white/5 rounded-[3rem] overflow-hidden group shadow-4xl mb-16"
+                className="relative p-8 bg-white border border-slate-200 rounded-[2.5rem] shadow-xl shadow-slate-200/40"
             >
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-600/5 rounded-full blur-[120px] -mr-64 -mt-64" />
-                <div className="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-12">
-                    <div className="flex items-center gap-10">
-                        <div className="w-20 h-20 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-[0_0_40px_rgba(16,185,129,0.5)]">
-                            <Target size={36} className="animate-pulse" />
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                    <div className="flex items-center gap-6">
+                        <div className={cn(
+                            "w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all duration-500",
+                            highImpact > 0 ? "bg-rose-500 shadow-rose-200" : "bg-blue-600 shadow-blue-200"
+                        )}>
+                            <Shield size={28} />
                         </div>
-                        <div className="space-y-2">
-                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-500 font-mono">Institutional_Protocol::NEXT_PHASE</p>
-                            <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase font-mono">
-                                {highImpact > 0 ? 'CRITICAL_LEGAL_ACTION_REQUIRED' : 'STANDARD_AUDIT_VERIFICATION'}
+                        <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Analysis Status</p>
+                            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                                {highImpact > 0 ? 'Action Required' : 'Forensic Compliance Verified'}
                             </h2>
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-slate-900/60 p-8 rounded-[2rem] border border-white/5 flex flex-col sm:flex-row items-center gap-10">
-                        <div className="flex-1 space-y-2">
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono">RECOMMENDED_NEXT_STEP</p>
-                            <p className="text-2xl font-black text-white italic tracking-tight">{nextStepAction}</p>
+                    <div className="flex flex-wrap items-center gap-10 md:text-right">
+                        <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Recommended Action</p>
+                            <p className="text-lg font-bold text-slate-700 tracking-tight">{nextStepAction}</p>
                         </div>
-                        <div className="h-16 w-px bg-white/5 hidden sm:block" />
-                        <div className="text-right shrink-0">
-                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest font-mono mb-2">PRIMARY_VIOLATION</p>
-                            <p className="text-xl font-bold text-rose-500 italic tracking-tight uppercase font-mono">{prioritizedAction}</p>
+                        <div className="h-8 w-px bg-slate-200 hidden md:block" />
+                        <div className="space-y-0.5">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Primary Finding</p>
+                            <p className={cn(
+                                "text-lg font-bold tracking-tight",
+                                highImpact > 0 ? "text-rose-600" : "text-blue-600"
+                            )}>{prioritizedAction}</p>
                         </div>
                     </div>
                 </div>
@@ -86,191 +92,137 @@ const CaseSummaryDashboard: React.FC<CaseSummaryDashboardProps> = ({ flags, risk
 
             <motion.div 
                 variants={container}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
             >
                 {/* Total Violations */}
-                <motion.div variants={item} className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-rose-500/30 via-transparent to-transparent rounded-[2.5rem] opacity-50 blur-sm group-hover:opacity-100 transition-all duration-700" />
-                <div className="relative bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.4rem] p-8 h-full overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-rose-500/15 transition-all duration-700" />
-                    
-                    <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-10">
-                            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                <Radiation size={22} className="group-hover:rotate-12 transition-transform" />
+                <motion.div variants={item}>
+                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 h-full shadow-lg shadow-slate-100/50 hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className={cn(
+                                "w-11 h-11 rounded-xl flex items-center justify-center transition-colors",
+                                flags.length > 0 ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-500"
+                            )}>
+                                <AlertTriangle size={20} />
                             </div>
-                            <div className="text-right">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] font-mono leading-none block mb-2">Detection Node</span>
-                                <div className="px-3 py-1 bg-rose-500/10 border border-rose-500/20 rounded-full text-rose-500 text-[9px] font-black font-mono">
-                                    {highImpact} CRITICAL
-                                </div>
-                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Findings</span>
                         </div>
                         
-                        <div className="space-y-2">
-                            <div className="flex items-baseline gap-2">
-                                <h3 className="text-7xl font-black tracking-tighter text-white tabular-nums leading-none">
-                                    {flags.length}
-                                </h3>
-                                <span className="text-rose-500 font-mono text-[9px] font-bold tracking-widest uppercase animate-pulse">Live</span>
-                            </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono italic">Violations Manifest</p>
+                        <div className="space-y-0.5">
+                            <h3 className="text-6xl font-bold tracking-tighter text-slate-900 tabular-nums">
+                                {flags.length}
+                            </h3>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Flags</p>
                         </div>
 
-                        <div className="mt-10 grid grid-cols-6 gap-1.5">
-                            {Array.from({ length: 18 }).map((_, i) => (
+                        <div className="mt-8 flex gap-1">
+                            {Array.from({ length: 12 }).map((_, i) => (
                                 <div 
                                     key={i} 
                                     className={cn(
-                                        "h-1 rounded-full transition-all duration-700 ease-out",
+                                        "h-1.5 flex-1 rounded-full transition-all duration-700",
                                         i < flags.length 
-                                            ? (i < highImpact ? "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]" : "bg-slate-700") 
-                                            : "bg-slate-900 border border-white/5"
+                                            ? (i < highImpact ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.3)]" : "bg-amber-400") 
+                                            : "bg-slate-100"
                                     )} 
                                 />
                             ))}
                         </div>
-                        <div className="mt-4 flex items-center justify-between text-[8px] font-mono text-slate-600 font-bold uppercase tracking-widest">
-                            <span>Matrix Seq_01</span>
-                            <span>{Math.round((flags.length/18)*100)}% Load</span>
-                        </div>
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
 
-            {/* Forensic Leverage */}
-            <motion.div variants={item} className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-emerald-500/30 via-transparent to-transparent rounded-[2.5rem] opacity-50 blur-sm group-hover:opacity-100 transition-all duration-700" />
-                <div className="relative bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.4rem] p-8 h-full overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/15 transition-all duration-700" />
-                    
-                    <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-10">
-                            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                <Zap size={22} className="group-hover:rotate-12 transition-transform" />
+                {/* Success Probability */}
+                <motion.div variants={item}>
+                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 h-full shadow-lg shadow-slate-100/50 hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                <Zap size={20} />
                             </div>
-                            <div className="text-right">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] font-mono leading-none block mb-2">Success Proxy</span>
-                                <span className="text-emerald-500 text-[9px] font-black uppercase font-mono italic tracking-widest">Neural Logic</span>
-                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confidence</span>
                         </div>
 
-                        <div className="space-y-2">
-                             <div className="flex items-baseline gap-2">
-                                <h3 className="text-7xl font-black tracking-tighter text-white tabular-nums leading-none">
+                        <div className="space-y-0.5">
+                            <div className="flex items-baseline gap-1">
+                                <h3 className="text-6xl font-bold tracking-tighter text-slate-900 tabular-nums">
                                     {avgProbability}
                                 </h3>
-                                <span className="text-emerald-500 font-mono text-2xl font-black">%</span>
+                                <span className="text-blue-600 text-2xl font-bold">%</span>
                             </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono italic">Leverage Index</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Success Probability</p>
                         </div>
 
-                        <div className="mt-10">
-                            <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-                                <motion.div 
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${avgProbability}%` }}
-                                    transition={{ duration: 2, ease: "circOut" }}
-                                    className="h-full bg-gradient-to-r from-emerald-600 via-emerald-400 to-teal-400 shadow-[0_0_20px_rgba(16,185,129,0.5)]"
-                                />
-                            </div>
-                            <div className="mt-4 flex items-center justify-between text-[8px] font-mono text-slate-600 font-bold uppercase tracking-widest">
-                                <span className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> Signal Stable</span>
-                                <span>v5.2.0</span>
-                            </div>
+                        <div className="mt-8 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${avgProbability}%` }}
+                                className="h-full bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.4)]"
+                            />
                         </div>
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
 
-            {/* Case Integrity */}
-            <motion.div variants={item} className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-blue-500/30 via-transparent to-transparent rounded-[2.5rem] opacity-50 blur-sm group-hover:opacity-100 transition-all duration-700" />
-                <div className="relative bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.4rem] p-8 h-full overflow-hidden">
-                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -ml-16 -mb-16 group-hover:bg-blue-500/15 transition-all duration-700" />
-                    
-                    <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-10">
-                            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-inner group-hover:scale-110 transition-transform duration-500">
-                                <ShieldCheck size={22} className="group-hover:rotate-12 transition-transform" />
+                {/* Forensic Readiness */}
+                <motion.div variants={item}>
+                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 h-full shadow-lg shadow-slate-100/50 hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="w-11 h-11 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center">
+                                <Layers size={20} />
                             </div>
-                            <div className="text-right">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] font-mono leading-none block mb-2">Audit Phase</span>
-                                <div className={cn(
-                                    "px-3 py-1 rounded-full text-[8px] font-black uppercase font-mono tracking-widest leading-none border transition-colors duration-500",
-                                    readiness > 80 ? "bg-blue-500/10 border-blue-500/20 text-blue-400" : "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                                )}>
-                                    {readiness > 80 ? 'PHASE 04 READY' : 'REFINEMENT REQ.'}
-                                </div>
-                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Completeness</span>
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="flex items-baseline gap-2">
-                                <h3 className="text-7xl font-black tracking-tighter text-white tabular-nums leading-none">
+                        <div className="space-y-0.5">
+                            <div className="flex items-baseline gap-1">
+                                <h3 className="text-6xl font-bold tracking-tighter text-slate-900 tabular-nums">
                                     {readiness}
                                 </h3>
-                                <span className="text-blue-500 font-mono text-2xl font-black">%</span>
+                                <span className="text-slate-400 text-2xl font-bold">%</span>
                             </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono italic">Integrity Grade</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Evidence Maturity</p>
                         </div>
 
-                        <div className="mt-10 flex items-center justify-between">
-                            <div className="flex gap-1.5">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className={cn(
-                                    "w-4 h-1.5 rounded-full transition-all duration-700",
-                                    i * 25 <= readiness ? "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]" : "bg-slate-900 border border-white/5"
-                                )} />
-                            ))}
-                            </div>
-                            <span className="text-[8px] text-slate-600 font-mono font-bold uppercase tracking-widest">Dossier Locked</span>
+                        <div className="mt-8 grid grid-cols-4 gap-2">
+                             {Array.from({ length: 4 }).map((_, i) => (
+                                <div 
+                                    key={i} 
+                                    className={cn(
+                                        "h-1.5 rounded-full transition-all duration-700",
+                                        (i + 1) * 25 <= readiness ? "bg-slate-900" : "bg-slate-100"
+                                    )} 
+                                />
+                             ))}
                         </div>
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
 
-            {/* Institutional Impact */}
-            <motion.div variants={item} className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-white/20 via-transparent to-transparent rounded-[2.5rem] opacity-30 blur-sm group-hover:opacity-60 transition-all duration-700" />
-                <div className="relative bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[2.4rem] p-8 h-full overflow-hidden">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-[80px] -mr-20 -mt-20 transition-colors duration-1000" />
-                    
-                    <div className="relative z-10">
-                        <div className="flex items-start justify-between mb-10">
-                            <div className="w-12 h-12 rounded-2xl bg-white text-slate-950 flex items-center justify-center shadow-[0_0_25px_rgba(255,255,255,0.4)] group-hover:scale-110 transition-transform duration-500">
-                                <Target size={22} className="group-hover:rotate-12 transition-transform" />
+                {/* Litigation Risk */}
+                <motion.div variants={item}>
+                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 h-full shadow-lg shadow-slate-100/50 hover:shadow-xl hover:translate-y-[-2px] transition-all duration-300">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className={cn(
+                                "w-11 h-11 rounded-xl flex items-center justify-center",
+                                riskProfile?.riskLevel === 'critical' || riskProfile?.riskLevel === 'high' ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-600"
+                            )}>
+                                <Activity size={20} />
                             </div>
-                            <div className="text-right">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] font-mono leading-none block mb-2">Liability Map</span>
-                                <span className="text-white text-[9px] font-black uppercase font-mono tracking-widest">Inst. Sync</span>
-                            </div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stability</span>
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="flex items-baseline gap-2">
-                                <h3 className="text-7xl font-black tracking-tighter text-white tabular-nums leading-none">
-                                    {impactScore}
-                                </h3>
-                                <span className="text-slate-500 font-black text-xs font-mono">LU</span>
-                            </div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono italic">Liability Potential</p>
+                        <div className="space-y-0.5">
+                            <h3 className="text-4xl font-bold tracking-tight text-slate-900 uppercase">
+                                {riskProfile?.riskLevel || 'Stable'}
+                            </h3>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Risk Category</p>
                         </div>
 
-                        <div className="mt-10 flex items-center justify-between">
-                            <div className="w-full h-1.5 bg-slate-900 rounded-full relative">
-                                <div className="absolute top-0 left-[40%] w-0.5 h-full bg-slate-700" />
-                                <div className="absolute top-0 left-[70%] w-0.5 h-full bg-slate-700" />
-                            </div>
-                        </div>
-                        <div className="mt-4 flex items-center justify-between text-[8px] font-mono text-slate-600 font-bold uppercase tracking-widest">
-                            <span>Strategic Manifest</span>
-                            <span className="text-white">Active</span>
+                        <div className="mt-10 px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">
+                            Institutional Profile v{APP_VERSION}
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </motion.div>
-        </motion.div>
-    </div>
+        </div>
     );
 };
 

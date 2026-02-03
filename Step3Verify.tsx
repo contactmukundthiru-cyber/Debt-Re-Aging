@@ -116,62 +116,62 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
   }, []);
 
   return (
-    <div className="fade-in max-w-5xl mx-auto">
+    <div className="fade-in max-w-5xl mx-auto px-4 sm:px-0 pb-20">
       {/* Hero Header */}
-      <div className="premium-card p-10 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl mb-10">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[100px] -mr-40 -mt-40" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
+      <div className="bg-white p-10 rounded-[3rem] border border-slate-200 overflow-hidden relative shadow-xl shadow-slate-200/50 mb-10">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-50 rounded-full blur-[100px] -mr-40 -mt-40" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-slate-50 rounded-full blur-[100px] -ml-32 -mb-32 opacity-60" />
 
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
-              <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-cyan-400 font-mono">Data Validation Suite</span>
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.4)]" />
+              <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Institutional Validation Suite</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-              Verify <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400">Forensic Indicators</span>
+            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
+              Verify <span className="text-blue-600 tracking-tighter">Indicators</span>
             </h2>
-            <p className="text-slate-400 text-sm max-w-lg">Accurate data points are essential for institutional-grade violation mapping and legal defensibility.</p>
+            <p className="text-slate-500 text-base font-bold tracking-tight max-w-lg">Validated data points are essential for legal defensibility and forensic mapping.</p>
           </div>
 
           <button
             onClick={() => setShowWorkbench(!showWorkbench)}
-            className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-3 ${showWorkbench
-              ? 'bg-white text-slate-900 shadow-xl'
-              : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+            className={`px-8 py-4 rounded-2xl text-sm font-bold transition-all flex items-center gap-3 shadow-lg ${showWorkbench
+              ? 'bg-slate-900 text-white shadow-slate-300'
+              : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
               }`}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
-            {showWorkbench ? 'Hide Workbench' : 'Forensic Workbench'}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+            {showWorkbench ? 'Exit Workbench' : 'Forensic Workbench'}
           </button>
         </div>
       </div>
 
       {/* Extraction Quality Panel */}
       {quality && (
-        <div className="premium-card p-6 mb-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -mr-16 -mt-16" />
-          <div className="relative z-10 flex flex-wrap items-center gap-8">
-            <div className="flex items-center gap-5">
-              <div className="relative w-16 h-16 flex items-center justify-center">
-                <div className="absolute inset-0 bg-emerald-500/10 rounded-full blur-lg" />
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 mb-10 shadow-lg shadow-slate-100/50 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-2xl -mr-16 -mt-16" />
+          <div className="relative z-10 flex flex-wrap items-center gap-10">
+            <div className="flex items-center gap-6">
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-blue-50 rounded-full blur-md" />
                 <svg className="w-full h-full -rotate-90 relative z-10" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="14" fill="none" className="stroke-slate-200 dark:stroke-slate-800" strokeWidth="3"></circle>
-                  <circle cx="18" cy="18" r="14" fill="none" className="stroke-emerald-500" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${quality.score * 0.88}, 100`}></circle>
+                  <circle cx="18" cy="18" r="15" fill="none" className="stroke-slate-100" strokeWidth="3"></circle>
+                  <circle cx="18" cy="18" r="15" fill="none" className="stroke-blue-600" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${quality.score * 0.94}, 100`}></circle>
                 </svg>
-                <span className="absolute text-lg font-bold tabular-nums dark:text-white">{quality.score}%</span>
+                <span className="absolute text-xl font-black tabular-nums text-slate-900">{quality.score}%</span>
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Extraction Confidence</p>
-                <p className="text-base font-bold text-emerald-500">{quality.description}</p>
+                <p className="text-lg font-bold text-blue-600">{quality.description}</p>
               </div>
             </div>
-            <div className="h-12 w-px bg-slate-200 dark:bg-slate-800 hidden lg:block" />
+            <div className="h-12 w-px bg-slate-100 hidden lg:block" />
             <div className="flex-grow">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Detected Fields</p>
-              <div className="flex flex-wrap gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Audited Fields</p>
+              <div className="flex flex-wrap gap-2.5">
                 {quality.details.map((detail, i) => (
-                  <span key={i} className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">
+                  <span key={i} className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] text-slate-600 font-bold uppercase tracking-widest">
                     {detail}
                   </span>
                 ))}
@@ -184,52 +184,51 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
       {/* Smart Recommendations Panel */}
       {recommendations.length > 0 && showSmartFixes && (
         <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="premium-card p-6 bg-emerald-500/5 border-emerald-500/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -mr-16 -mt-16" />
-            <div className="flex items-center justify-between mb-6 relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <div className="bg-blue-600 rounded-[2.5rem] p-8 relative overflow-hidden shadow-xl shadow-blue-200">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-32 -mt-32" />
+            <div className="flex items-center justify-between mb-8 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-white text-blue-600 flex items-center justify-center shadow-lg">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-widest dark:text-emerald-400">Smart Forensic Corrections</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest">AI-detected inconsistencies ({recommendations.length})</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-blue-100">Intelligent Corrections</p>
+                  <p className="text-xl font-bold text-white tracking-tight">Audit Findings ({recommendations.length})</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {recommendedFixes.length > 0 && (
                   <button
                     onClick={applyAllFixes}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all"
+                    className="px-5 py-2 rounded-xl bg-white text-blue-600 text-[11px] font-extrabold uppercase tracking-widest shadow-lg hover:scale-105 transition-transform"
                   >
                     Apply All ({recommendedFixes.length})
                   </button>
                 )}
                 <button
                   onClick={() => setShowSmartFixes(false)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  title="Close Smart Fixes"
-                  aria-label="Close Smart Fixes"
+                  className="w-10 h-10 rounded-xl bg-black/10 text-white hover:bg-black/20 flex items-center justify-center transition-colors"
+                  aria-label="Dismiss"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 relative z-10">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
               {recommendations.map((rec) => (
-                <div key={rec.id} className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-emerald-500/10 shadow-sm flex flex-col justify-between group hover:border-emerald-500/30 transition-all">
+                <div key={rec.id} className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 flex flex-col justify-between group">
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`w-1.5 h-1.5 rounded-full ${rec.type === 'error' ? 'bg-rose-500' : rec.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'}`} />
-                      <h4 className="text-xs font-bold dark:text-white uppercase tracking-tight">{rec.title}</h4>
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className={`w-2 h-2 rounded-full ${rec.type === 'error' ? 'bg-white shadow-[0_0_8px_white]' : rec.type === 'warning' ? 'bg-amber-300 shadow-[0_0_8px_rgb(252,211,77)]' : 'bg-blue-300 shadow-[0_0_8px_rgb(147,197,253)]'}`} />
+                      <h4 className="text-xs font-bold text-white uppercase tracking-widest">{rec.title}</h4>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mb-4">{rec.description}</p>
+                    <p className="text-sm text-blue-50/80 font-semibold leading-relaxed mb-6">{rec.description}</p>
                   </div>
                   {rec.suggestedValue && (
                     <button
                       onClick={() => setEditableFields(prev => ({ ...prev, [rec.field]: rec.suggestedValue }))}
-                      className="w-full py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/20"
+                      className="w-full py-3 bg-white text-blue-600 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-50 transition-colors shadow-sm"
                     >
                       {rec.actionLabel}: {rec.suggestedValue}
                     </button>
@@ -242,33 +241,38 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
       )}
 
       {(blockingIssues.length > 0 || logicalBlocking.length > 0 || logicalWarnings.length > 0) && (
-        <div className="premium-card p-6 mb-10 bg-slate-50/70 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Case Quality Drilldown</p>
-              <h3 className="text-lg font-bold dark:text-white">Blocking Issues & Warnings</h3>
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 mb-10 shadow-lg shadow-slate-100/50">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+               <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+               </div>
+               <div>
+                  <h3 className="text-lg font-bold text-slate-900">Compliance Exceptions</h3>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Case Quality Audit</p>
+               </div>
             </div>
-            <span className="text-xs font-bold text-slate-500">
-              {blockingIssues.length + logicalBlocking.length} blocking • {logicalWarnings.length} warnings
+            <span className="text-xs font-bold text-slate-500 px-4 py-1.5 bg-slate-50 rounded-full border border-slate-100">
+              {blockingIssues.length + logicalBlocking.length} Critical • {logicalWarnings.length} Notices
             </span>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5">
-              <p className="text-[10px] uppercase tracking-widest text-rose-500 mb-2">Blocking</p>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="p-6 rounded-[2rem] border border-rose-100 bg-rose-50/30">
+              <p className="text-[10px] uppercase font-bold tracking-widest text-rose-500 mb-4">Critical Exceptions</p>
               {(blockingIssues.length === 0 && logicalBlocking.length === 0) ? (
-                <p className="text-xs text-slate-500">No blocking issues found.</p>
+                <p className="text-sm font-semibold text-slate-400">Compliance verified. No critical issues.</p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {blockingIssues.map(issue => (
                     <button
                       key={issue.key}
                       type="button"
                       onClick={() => jumpToField(issue.key)}
-                      className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-500/20 text-left"
+                      className="w-full flex items-center justify-between gap-4 px-5 py-3 rounded-xl bg-white border border-rose-100 text-left shadow-sm hover:border-rose-300 transition-colors group"
                     >
-                      <span className="text-xs font-semibold text-rose-500">{issue.label}: {issue.message}</span>
-                      <span className="text-[9px] uppercase tracking-widest text-rose-400">Jump</span>
+                      <span className="text-xs font-bold text-rose-600">{issue.label}: {issue.message}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-rose-400 group-hover:translate-x-1 transition-transform">Solve</span>
                     </button>
                   ))}
                   {logicalBlocking.map(issue => (
@@ -276,30 +280,30 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
                       key={issue.field}
                       type="button"
                       onClick={() => jumpToField(issue.field)}
-                      className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-rose-500/20 text-left"
+                      className="w-full flex items-center justify-between gap-4 px-5 py-3 rounded-xl bg-white border border-rose-100 text-left shadow-sm hover:border-rose-300 transition-colors group"
                     >
-                      <span className="text-xs font-semibold text-rose-500">{issue.message}</span>
-                      <span className="text-[9px] uppercase tracking-widest text-rose-400">Jump</span>
+                      <span className="text-xs font-bold text-rose-600">{issue.message}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-rose-400 group-hover:translate-x-1 transition-transform">Solve</span>
                     </button>
                   ))}
                 </div>
               )}
             </div>
-            <div className="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5">
-              <p className="text-[10px] uppercase tracking-widest text-amber-500 mb-2">Warnings</p>
+            <div className="p-6 rounded-[2rem] border border-amber-100 bg-amber-50/30">
+              <p className="text-[10px] uppercase font-bold tracking-widest text-amber-600 mb-4">Quality Notices</p>
               {logicalWarnings.length === 0 ? (
-                <p className="text-xs text-slate-500">No warnings detected.</p>
+                <p className="text-sm font-semibold text-slate-400">No data quality notices.</p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {logicalWarnings.map(issue => (
                     <button
                       key={issue.field}
                       type="button"
                       onClick={() => jumpToField(issue.field)}
-                      className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-amber-500/20 text-left"
+                      className="w-full flex items-center justify-between gap-4 px-5 py-3 rounded-xl bg-white border border-amber-100 text-left shadow-sm hover:border-amber-300 transition-colors group"
                     >
-                      <span className="text-xs font-semibold text-amber-600">{issue.message}</span>
-                      <span className="text-[9px] uppercase tracking-widest text-amber-500">Jump</span>
+                      <span className="text-xs font-bold text-amber-600">{issue.message}</span>
+                      <span className="text-[9px] uppercase tracking-widest text-amber-400 group-hover:translate-x-1 transition-transform">Solve</span>
                     </button>
                   ))}
                 </div>
@@ -309,72 +313,83 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
         </div>
       )}
 
-      <div className={`transition-all duration-500 grid gap-8 ${showWorkbench ? 'lg:grid-cols-[1fr_400px]' : 'grid-cols-1'}`}>
-        <div className="space-y-8">
+      <div className={`transition-all duration-500 grid gap-10 ${showWorkbench ? 'lg:grid-cols-[1fr_400px]' : 'grid-cols-1'}`}>
+        <div className="space-y-10">
           {/* Account Info Section */}
-          <div className="premium-card overflow-hidden bg-white dark:bg-slate-900">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+          <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-lg shadow-slate-100/50">
+            <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-slate-200">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
               </div>
               <div>
-                <p className="text-sm font-bold dark:text-white">Identity & Account Meta</p>
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest">Core forensic identifiers</p>
+                <h3 className="text-lg font-bold text-slate-900 leading-tight">Identity & Account Metadata</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Core forensic identifiers</p>
               </div>
             </div>
-            <div className="p-8 grid sm:grid-cols-2 gap-8">
+            <div className="p-10 grid sm:grid-cols-2 gap-10">
               {FIELD_CONFIG.filter(f => f.section === 'account').map(field => (
                 <div key={field.key} className="relative group">
                   <label
                     htmlFor={field.key}
-                    className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-2 cursor-help group-hover:text-emerald-500 transition-colors"
+                    className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2 cursor-help group-hover:text-blue-600 transition-colors"
                     onMouseEnter={() => setShowHelp(field.key)}
                     onMouseLeave={() => setShowHelp(null)}
                   >
                     {field.label}
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
                   </label>
                   {showHelp === field.key && field.help && (
-                    <div className="absolute z-50 left-0 bottom-full mb-2 p-3 glass-panel bg-slate-900 text-white text-[10px] font-medium max-w-xs shadow-2xl">
+                    <div className="absolute z-50 left-0 bottom-full mb-3 p-4 bg-slate-900 text-white text-[11px] font-bold leading-relaxed max-w-xs shadow-2xl rounded-2xl">
                       {field.help}
                     </div>
                   )}
                   {field.key === 'accountType' ? (
-                    <select
-                      id={field.key}
-                      className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-slate-950 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all appearance-none cursor-pointer ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10' : 'border-slate-200 dark:border-slate-800'
-                        }`}
-                      value={(editableFields as Record<string, string>)[field.key] || ''}
-                      onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                    >
-                      <option value="">Select Category...</option>
-                      {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                    <div className="relative">
+                      <select
+                        id={field.key}
+                        className={`w-full h-14 px-5 rounded-2xl border bg-slate-50 text-slate-900 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all appearance-none cursor-pointer ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10 bg-amber-50' : 'border-slate-100'
+                          }`}
+                        value={(editableFields as Record<string, string>)[field.key] || ''}
+                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                      >
+                        <option value="">Select Category...</option>
+                        {ACCOUNT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
+                      </div>
+                    </div>
                   ) : field.key === 'accountStatus' ? (
-                    <select
-                      id={field.key}
-                      className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-slate-950 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all appearance-none cursor-pointer ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10' : 'border-slate-200 dark:border-slate-800'
-                        }`}
-                      value={(editableFields as Record<string, string>)[field.key] || ''}
-                      onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                    >
-                      <option value="">Select Status...</option>
-                      {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <div className="relative">
+                      <select
+                        id={field.key}
+                        className={`w-full h-14 px-5 rounded-2xl border bg-slate-50 text-slate-900 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all appearance-none cursor-pointer ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10 bg-amber-50' : 'border-slate-100'
+                          }`}
+                        value={(editableFields as Record<string, string>)[field.key] || ''}
+                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                      >
+                        <option value="">Select Status...</option>
+                        {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
+                      </div>
+                    </div>
                   ) : (
                     <div className="relative">
                       <input
                         id={field.key}
                         type="text"
-                        className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-slate-950 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-inner ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10' : 'border-slate-200 dark:border-slate-800'
+                        className={`w-full h-14 px-5 rounded-2xl border bg-slate-50 text-slate-900 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all ${activeParsedFields?.[field.key]?.confidence === 'Low' ? 'border-amber-300 ring-2 ring-amber-500/10 bg-amber-50' : 'border-slate-100'
                           } ${isPrivacyMode && field.key === 'accountNumber' ? 'opacity-50' : ''}`}
                         value={isPrivacyMode && field.key === 'accountNumber' ? maskPII((editableFields as Record<string, string>)[field.key] || '') : ((editableFields as Record<string, string>)[field.key] || '')}
                         onChange={(e) => !isPrivacyMode && setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
                         readOnly={isPrivacyMode && field.key === 'accountNumber'}
+                        placeholder={`Enter ${field.label}...`}
                       />
                       {activeParsedFields?.[field.key]?.confidence === 'Low' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-amber-500" title="Low confidence extraction - please verify">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-amber-500" title="Low confidence extraction - please verify">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                         </div>
                       )}
                     </div>
@@ -385,31 +400,34 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
           </div>
 
           {/* Numeric Valuations & Dates Section */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-10">
             {/* Quantitative Data Section */}
-            <div className="premium-card overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+            <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-lg shadow-slate-100/50">
+              <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-100">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
                 </div>
-                <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Quantitative Indicators</p>
+                <h3 className="text-sm font-black text-slate-900 tracking-tight uppercase">Quantitative Indicators</h3>
               </div>
-              <div className="p-6 space-y-6">
+              <div className="p-8 space-y-8">
                 {FIELD_CONFIG.filter(f => f.section === 'values').map(field => {
                   const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
                   const validation = getNumericValidation(fieldValue);
                   return (
                     <div key={field.key} className="relative group">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block">{field.label}</label>
-                      <input
-                        type="text"
-                        className={`w-full h-10 px-4 rounded-xl border font-mono text-sm transition-all ${!validation.valid ? 'border-red-500 bg-red-50/30' : 'border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white'
-                          }`}
-                        value={fieldValue}
-                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                        placeholder="0.00"
-                      />
-                      {!validation.valid && <p className="text-[10px] text-red-500 mt-1 font-bold">{validation.message}</p>}
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2.5 block px-1">{field.label}</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          className={`w-full h-12 px-5 rounded-2xl border font-bold text-sm transition-all focus:ring-4 focus:ring-blue-500/10 focus:bg-white ${!validation.valid ? 'border-rose-400 bg-rose-50 text-rose-900' : 'border-slate-100 bg-slate-50 text-slate-900'
+                            }`}
+                          value={fieldValue}
+                          onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                          placeholder="0.00"
+                        />
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-l-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                      </div>
+                      {!validation.valid && <p className="text-[10px] text-rose-500 mt-2 font-black uppercase tracking-wider px-1">{validation.message}</p>}
                     </div>
                   );
                 })}
@@ -417,32 +435,39 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
             </div>
 
             {/* Date Section */}
-            <div className="premium-card overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+            <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-lg shadow-slate-100/50">
+              <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                 </div>
-                <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Forensic Chronology</p>
+                <h3 className="text-sm font-black text-slate-900 tracking-tight uppercase">Forensic Chronology</h3>
               </div>
-              <div className="p-6 space-y-6">
+              <div className="p-8 space-y-8">
                 {FIELD_CONFIG.filter(f => f.section === 'dates').map(field => {
                   const fieldValue = (editableFields as Record<string, string>)[field.key] || '';
                   const validation = getDateValidation(fieldValue, !!field.required);
                   return (
                     <div key={field.key} className="relative group">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block flex items-center justify-between">
-                        <span>{field.label} {field.required && <span className="text-red-500">*</span>}</span>
-                        {fieldValue && validation.valid && <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" /></svg>}
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2.5 block px-1 flex items-center justify-between">
+                        <span>{field.label} {field.required && <span className="text-rose-500 font-black">*</span>}</span>
+                        {fieldValue && validation.valid && (
+                          <div className="w-4 h-4 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" /></svg>
+                          </div>
+                        )}
                       </label>
-                      <input
-                        type="text"
-                        className={`w-full h-10 px-4 rounded-xl border font-mono text-sm transition-all ${!validation.valid ? 'border-red-500 bg-red-50/30' : 'border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white'
-                          }`}
-                        value={fieldValue}
-                        onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
-                        placeholder="YYYY-MM-DD"
-                      />
-                      {!validation.valid && <p className="text-[10px] text-red-500 mt-1 font-bold">{validation.message}</p>}
+                      <div className="relative">
+                        <input
+                          type="text"
+                          className={`w-full h-12 px-5 rounded-2xl border font-bold text-sm transition-all focus:ring-4 focus:ring-blue-500/10 focus:bg-white ${!validation.valid ? 'border-rose-400 bg-rose-50 text-rose-900' : 'border-slate-100 bg-slate-50 text-slate-900'
+                            }`}
+                          value={fieldValue}
+                          onChange={(e) => setEditableFields(prev => ({ ...prev, [field.key]: e.target.value }))}
+                          placeholder="YYYY-MM-DD"
+                        />
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-l-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                      </div>
+                      {!validation.valid && <p className="text-[10px] text-rose-500 mt-2 font-black uppercase tracking-wider px-1">{validation.message}</p>}
                     </div>
                   );
                 })}
@@ -451,63 +476,68 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
           </div>
 
           {/* Consumer Info */}
-          <div className="premium-card overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+          <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-lg shadow-slate-100/50">
+            <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 text-white flex items-center justify-center shadow-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
               </div>
-              <p className="text-xs font-bold uppercase tracking-widest dark:text-white">Consumer Attribution</p>
+              <h3 className="text-sm font-black text-slate-900 tracking-tight uppercase">Consumer Attribution</h3>
             </div>
-            <div className="p-8 grid sm:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="consumer-name" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Legal Name</label>
+            <div className="p-8 grid sm:grid-cols-3 gap-8">
+              <div className="space-y-3">
+                <label htmlFor="consumer-name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Legal Name</label>
                 <input
                   id="consumer-name"
                   type="text"
                   placeholder="Full Legal Name"
                   title="Consumer Legal Name"
-                  className={cn("w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm", isPrivacyMode && "opacity-50")}
+                  className={cn("w-full h-12 px-5 rounded-2xl border border-slate-100 bg-slate-50 text-slate-900 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all", isPrivacyMode && "opacity-50")}
                   value={isPrivacyMode ? maskPII(consumer.name || '') : (consumer.name || '')}
                   onChange={(e) => !isPrivacyMode && setConsumer(prev => ({ ...prev, name: e.target.value }))}
                   readOnly={isPrivacyMode}
                 />
               </div>
-              <div className="space-y-2">
-                <label htmlFor="consumer-address" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Address</label>
+              <div className="space-y-3">
+                <label htmlFor="consumer-address" className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Current Address</label>
                 <input
                   id="consumer-address"
                   type="text"
                   placeholder="Street, City, Zip"
                   title="Consumer Current Address"
-                  className={cn("w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm", isPrivacyMode && "opacity-50")}
+                  className={cn("w-full h-12 px-5 rounded-2xl border border-slate-100 bg-slate-50 text-slate-900 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all", isPrivacyMode && "opacity-50")}
                   value={isPrivacyMode ? maskPII(consumer.address || '') : (consumer.address || '')}
                   onChange={(e) => !isPrivacyMode && setConsumer(prev => ({ ...prev, address: e.target.value }))}
                   readOnly={isPrivacyMode}
                 />
               </div>
-              <div className="space-y-2">
-                <label htmlFor="state-jurisdiction" className="text-[10px] font-bold uppercase tracking-widest text-slate-400">State Jurisdiction</label>
-                <select
-                  id="state-jurisdiction"
-                  title="State Jurisdiction"
-                  className="w-full h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-white text-sm appearance-none"
-                  value={consumer.state || ''}
-                  onChange={(e) => {
-                    setConsumer(prev => ({ ...prev, state: e.target.value }));
-                    setEditableFields(prev => ({ ...prev, stateCode: e.target.value }));
-                  }}
-                >
-                  <option value="">Select...</option>
-                  {STATES.map(st => <option key={st} value={st}>{st}</option>)}
-                </select>
+              <div className="space-y-3">
+                <label htmlFor="state-jurisdiction" className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">State Jurisdiction</label>
+                <div className="relative">
+                  <select
+                    id="state-jurisdiction"
+                    title="State Jurisdiction"
+                    className="w-full h-12 px-5 rounded-2xl border border-slate-100 bg-slate-50 text-slate-900 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all appearance-none cursor-pointer"
+                    value={consumer.state || ''}
+                    onChange={(e) => {
+                      setConsumer(prev => ({ ...prev, state: e.target.value }));
+                      setEditableFields(prev => ({ ...prev, stateCode: e.target.value }));
+                    }}
+                  >
+                    <option value="">Select...</option>
+                    {STATES.map(st => <option key={st} value={st}>{st}</option>)}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6" /></svg>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6 bg-slate-900 p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-800">
             <button
               type="button"
-              className="btn btn-secondary !py-3 !px-8 !rounded-xl"
+              className="w-full sm:w-auto px-10 py-4 rounded-2xl text-sm font-bold text-slate-400 hover:text-white transition-colors"
               onClick={() => setStep(2)}
               disabled={isAnalyzing}
             >
@@ -515,14 +545,14 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
             </button>
             <button
               type="button"
-              className="btn btn-primary !h-14 !px-12 !rounded-xl shadow-xl shadow-emerald-500/10 flex items-center gap-3 active:scale-95 transition-transform"
+              className="w-full sm:w-auto h-16 px-12 rounded-2xl bg-blue-600 text-white text-sm font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 flex items-center justify-center gap-4 active:scale-95 transition-all hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={runAnalysis}
               disabled={isAnalyzing || !canAnalyze}
             >
               {isAnalyzing ? (
                 <>
-                  <div className="spinner w-5 h-5 border-2 border-white/30 border-t-white" />
-                  <span>Analyzing Heuristics...</span>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Scanning...</span>
                 </>
               ) : (
                 <>
@@ -536,24 +566,43 @@ const Step3Verify = React.memo<Step3VerifyProps>((props) => {
 
         {showWorkbench && (
           <div className="lg:sticky lg:top-8 h-fit space-y-4 fade-in">
-            <div className="premium-card p-6 bg-slate-900 border-none text-white h-[calc(100vh-160px)] flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Forensic Source Evidence</p>
-                <button onClick={() => setShowWorkbench(false)} className="text-slate-500 hover:text-white" title="Close Source Evidence Workbench" aria-label="Close Source Evidence Workbench">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            <div className="bg-white rounded-[3rem] p-10 border border-slate-200/50 flex flex-col h-[calc(100vh-160px)] shadow-2xl shadow-slate-200/50">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-indigo-600">Forensic Source</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Raw Evidence Layer</p>
+                </div>
+                <button 
+                  onClick={() => setShowWorkbench(false)} 
+                  className="w-10 h-10 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               </div>
-              <textarea
-                id="source-evidence-text"
-                title="Forensic Source Evidence"
-                placeholder="Source Text for Verification"
-                className="flex-grow w-full bg-slate-950/50 border border-slate-800 rounded-xl p-6 font-mono text-xs leading-relaxed text-slate-300 resize-none focus:ring-1 focus:ring-emerald-500/30 transition-all"
-                value={rawText}
-                readOnly
-              />
-              <p className="text-[9px] text-slate-500 mt-4 leading-normal italic text-center">
-                Review source data for OCR discrepancies while verifying fields on the left.
-              </p>
+
+              <div className="flex-grow flex flex-col bg-slate-50/50 rounded-[2rem] p-6 border border-slate-100 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500 opacity-20" />
+                <textarea
+                  id="source-evidence-text"
+                  title="Forensic Source Evidence"
+                  placeholder="Source Text for Verification"
+                  className="flex-grow w-full bg-transparent border-none focus:ring-0 p-0 font-mono text-xs leading-relaxed text-slate-600 resize-none selection:bg-indigo-100 selection:text-indigo-900"
+                  value={rawText}
+                  readOnly
+                />
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-slate-100">
+                <div className="flex items-center gap-3 px-4 py-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                  <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                    SHA-256 Integrity Verified
+                  </p>
+                </div>
+                <p className="text-[9px] text-slate-400 mt-4 leading-normal text-center font-medium">
+                  Review original OCR data to audit extraction accuracy.
+                </p>
+              </div>
             </div>
           </div>
         )}

@@ -21,8 +21,8 @@ describe('storage utils', () => {
     scoreBreakdown: []
   };
 
-  test('saveAnalysis and getHistory', () => {
-    const id = saveAnalysis(sampleFields, sampleFlags, sampleRisk, 'test.pdf');
+  test('saveAnalysis and getHistory', async () => {
+    const id = await saveAnalysis(sampleFields, sampleFlags, sampleRisk, 'test.pdf');
     expect(id).toBeDefined();
     
     const history = getHistory();
@@ -31,24 +31,24 @@ describe('storage utils', () => {
     expect(history[0].fileName).toBe('test.pdf');
   });
 
-  test('getAnalysis finds correct record', () => {
-    const id = saveAnalysis(sampleFields, sampleFlags, sampleRisk);
-    const record = getAnalysis(id);
+  test('getAnalysis finds correct record', async () => {
+    const id = await saveAnalysis(sampleFields, sampleFlags, sampleRisk);
+    const record = await getAnalysis(id);
     expect(record).not.toBeNull();
     expect(record?.id).toBe(id);
   });
 
-  test('deleteAnalysis removes record', () => {
-    const id = saveAnalysis(sampleFields, sampleFlags, sampleRisk);
-    const success = deleteAnalysis(id);
+  test('deleteAnalysis removes record', async () => {
+    const id = await saveAnalysis(sampleFields, sampleFlags, sampleRisk);
+    const success = await deleteAnalysis(id);
     expect(success).toBe(true);
     expect(getHistory().length).toBe(0);
   });
 
-  test('clearHistory wipes everything', () => {
-    saveAnalysis(sampleFields, sampleFlags, sampleRisk);
-    saveAnalysis(sampleFields, sampleFlags, sampleRisk);
-    clearHistory();
+  test('clearHistory wipes everything', async () => {
+    await saveAnalysis(sampleFields, sampleFlags, sampleRisk);
+    await saveAnalysis(sampleFields, sampleFlags, sampleRisk);
+    await clearHistory();
     expect(getHistory().length).toBe(0);
   });
 

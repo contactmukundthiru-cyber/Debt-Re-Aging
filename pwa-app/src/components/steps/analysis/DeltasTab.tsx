@@ -136,15 +136,14 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
 
   if (deltas.length === 0 && seriesInsights.length === 0 && seriesSnapshots.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-32 text-center bg-slate-950/40 rounded-[4rem] border border-white/5 shadow-2xl relative overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-500/5 via-transparent to-slate-500/5 group-hover:opacity-100 transition-opacity" />
+      <div className="flex flex-col items-center justify-center p-32 text-center bg-white rounded-[3rem] border border-slate-200 shadow-2xl shadow-slate-200/50 relative overflow-hidden group">
         <div className="relative z-10">
-          <div className="w-24 h-24 bg-slate-900 rounded-[2rem] border border-white/5 flex items-center justify-center mb-10 text-slate-500 shadow-inner mx-auto group-hover:scale-110 transition-transform">
-            <History className="w-10 h-10 animate-pulse" />
+          <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-8 text-slate-300 mx-auto group-hover:scale-110 transition-transform duration-500">
+            <History className="w-10 h-10" />
           </div>
-          <h3 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 font-mono italic">No Delta Series</h3>
-          <p className="text-slate-500 max-w-sm mx-auto font-medium leading-relaxed italic uppercase tracking-tight text-sm">
-            To use Delta Analysis, load a previous analysis snapshot from history. This enables comparative forensics across the record evolution.
+          <h3 className="text-3xl font-bold text-slate-900 tracking-tight mb-4">Historical Drift Analysis</h3>
+          <p className="text-slate-500 max-w-sm mx-auto font-medium leading-relaxed">
+            To use Delta Analysis, load a previous snapshot from history. This enables comparative forensics and tracks how the record evolves over time.
           </p>
         </div>
       </div>
@@ -153,90 +152,88 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
 
   return (
     <div className="contents">
-    <div className="fade-in space-y-20 pb-32">
-      {/* ELITE_DELTA_HERO::FORENSIC_VECTOR_V5 */}
-      <section className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-br from-slate-600/20 via-slate-500/10 to-transparent rounded-[4rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000" />
-        <div className="relative bg-slate-950/40 backdrop-blur-3xl rounded-[4rem] border border-white/5 overflow-hidden shadow-2xl p-16">
-          <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-500/5 rounded-full blur-[140px] -mr-96 -mt-96" />
+    <div className="fade-in space-y-12 pb-32">
+      {/* INSTITUTIONAL_DRIFT_HERO */}
+      <section className="relative">
+        <div className="relative bg-white rounded-[3rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/40 p-12">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-50/50 rounded-full blur-[100px] -mr-64 -mt-64" />
           
-          <div className="relative z-10 grid lg:grid-cols-12 gap-20 items-center">
+          <div className="relative z-10 grid lg:grid-cols-12 gap-16 items-center">
             <div className="lg:col-span-12 xl:col-span-7">
-               <div className="flex items-center gap-6 mb-12">
-                  <div className="px-5 py-2 bg-slate-500/10 border border-slate-500/20 rounded-full flex items-center gap-3">
-                      <Zap size={14} className="text-slate-400 animate-pulse" />
-                      <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-400 font-mono">Delta Reconstruction v5.0</span>
+               <div className="flex items-center gap-4 mb-8">
+                  <div className="px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full flex items-center gap-2">
+                      <Zap size={13} className="text-blue-600" />
+                      <span className="text-[11px] uppercase font-bold tracking-wider text-blue-700">Drift Reconstruction v5.4</span>
                   </div>
-                  <div className="h-px w-10 bg-slate-800" />
-                  <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono italic">Status: Vector_Analyzed</span>
+                  <div className="h-px w-8 bg-slate-200" />
+                  <span className="text-[11px] uppercase font-semibold tracking-wider text-slate-400">Analysis Verified</span>
               </div>
 
-              <h2 className="text-7xl xl:text-[7rem] font-black text-white tracking-tighter mb-10 leading-[0.85] italic uppercase font-mono">
-                  Forensic <br/>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-white to-slate-400 tracking-[-0.05em]">RECON</span>
+              <h2 className="text-6xl xl:text-7xl font-bold text-slate-900 tracking-tight mb-8 leading-[0.9]">
+                  Comparative <br/>
+                  <span className="text-blue-600">Forensics</span>
               </h2>
-              <p className="text-slate-400 text-lg xl:text-xl leading-relaxed mb-12 max-w-2xl font-medium italic border-l-2 border-slate-500/30 pl-8">
-                  Structural variance analysis across <span className="text-white font-mono font-bold">{seriesSnapshots.length} SECURED SNAPSHOTS</span>. Detecting unauthorized metadata shifts and illegal re-aging vectors within the institutional ecosystem.
+              <p className="text-slate-600 text-lg leading-relaxed mb-10 max-w-2xl font-medium border-l-3 border-blue-100 pl-8">
+                  Structural variance analysis across <span className="text-slate-900 font-bold">{seriesSnapshots.length} Secured Snapshots</span>. Identifying unauthorized metadata shifts and illegal re-aging vectors within the record lifecycle.
               </p>
               
-              <div className="flex flex-wrap items-center gap-8">
+              <div className="flex flex-wrap items-center gap-6">
                 <button 
                    onClick={() => exportComparisonDossierPdf(deltas, seriesInsights, seriesSnapshots)}
-                   title="Export Delta Dossier as PDF"
-                   aria-label="Export Delta Dossier"
-                   className="relative group/btn overflow-hidden rounded-[2rem] p-px bg-gradient-to-br from-slate-500 via-slate-600 to-slate-400"
+                   className="group flex items-center gap-4 px-8 py-4 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 active:scale-95"
                 >
-                   <div className="relative flex items-center gap-6 px-10 py-5 rounded-[1.9rem] bg-slate-950 group-hover/btn:bg-transparent transition-all duration-700 text-white cursor-pointer">
-                      <span className="font-black uppercase tracking-widest text-sm font-mono italic">Export_Delta_Dossier</span>
-                      <Download size={20} className="group-hover/btn:-translate-y-1 transition-transform duration-700" />
-                   </div>
+                   <span className="font-bold text-sm tracking-tight">Export Delta Dossier</span>
+                   <Download size={18} className="group-hover:-translate-y-0.5 transition-transform" />
                 </button>
                 
-                <div className="flex items-center gap-12 bg-black/40 px-10 py-5 rounded-[2rem] border border-white/5">
-                   <div className="group/stat">
-                       <p className="text-[9px] uppercase text-slate-500 font-black tracking-[0.5em] font-mono mb-2">Confidence_Score</p>
-                       <p className="text-3xl font-black text-white font-mono tracking-tighter uppercase italic">{confidenceScore}%</p>
+                <div className="flex items-center gap-10 bg-slate-50 px-8 py-4 rounded-2xl border border-slate-200">
+                   <div>
+                       <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider mb-1">Confidence</p>
+                       <p className="text-2xl font-bold text-slate-900 tracking-tight">{confidenceScore}%</p>
                    </div>
-                   <div className="h-8 w-px bg-slate-800" />
-                   <div className="group/stat">
-                       <p className="text-[9px] uppercase text-slate-500 font-black tracking-[0.5em] font-mono mb-2">Readiness_Tier</p>
-                       <p className="text-xl font-black text-slate-400 font-mono tracking-tighter italic uppercase">{(evidenceReadiness >= 75 ? 'HIGH' : evidenceReadiness >= 50 ? 'MEDIUM' : 'LOW').replace('_', ' ')}</p>
+                   <div className="h-8 w-px bg-slate-200" />
+                   <div>
+                       <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider mb-1">Readiness</p>
+                       <p className="text-lg font-bold text-slate-700 tracking-tight">{(evidenceReadiness >= 75 ? 'Optimal' : evidenceReadiness >= 50 ? 'Stable' : 'Incomplete')}</p>
                    </div>
                 </div>
               </div>
             </div>
 
-            <div className="lg:col-span-12 xl:col-span-5 relative group/telemetry">
-                 <div className="absolute -inset-0.5 bg-gradient-to-br from-slate-500/20 to-transparent rounded-[3rem] blur-sm opacity-50 group-hover/telemetry:opacity-100 transition-all" />
-                 <div className="relative bg-slate-900/20 border border-white/10 p-12 rounded-[3.5rem] backdrop-blur-3xl shadow-inner min-h-[340px] flex flex-col justify-center overflow-hidden">
-                     <div className="absolute top-0 right-0 p-8 opacity-[0.03] scale-[4] rotate-12">
-                        <Cpu size={120} />
+            <div className="lg:col-span-12 xl:col-span-5 relative">
+                 <div className="relative bg-slate-50 border border-slate-200 p-10 rounded-[2.5rem] shadow-inner min-h-[300px] flex flex-col justify-center overflow-hidden">
+                     <div className="absolute top-0 right-0 p-8 text-slate-200/50">
+                        <Activity size={100} strokeWidth={1} />
                      </div>
-                     <div className="space-y-10 relative z-10">
-                         <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono italic">Drift_Nodes_Detected</h4>
-                            <Activity size={16} className="text-slate-400 animate-pulse" />
+                     <div className="space-y-8 relative z-10">
+                         <div className="flex items-center justify-between">
+                            <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Detected Drift Nodes</h4>
+                            <div className="flex gap-1">
+                               <div className="w-1 h-1 rounded-full bg-blue-400 animate-pulse" />
+                               <div className="w-1 h-1 rounded-full bg-blue-300 animate-pulse delay-75" />
+                               <div className="w-1 h-1 rounded-full bg-blue-200 animate-pulse delay-150" />
+                            </div>
                          </div>
-                         <div className="flex items-baseline gap-4">
-                            <span className="text-9xl font-black text-white font-mono tracking-tighter leading-none">{deltas.length}</span>
-                            <span className="text-3xl font-black text-slate-600 font-mono">NODES</span>
+                         <div className="flex items-baseline gap-3">
+                            <span className="text-8xl font-bold text-slate-900 tracking-tighter leading-none">{deltas.length}</span>
+                            <span className="text-2xl font-bold text-slate-400 tracking-tight">DATA POINTS</span>
                          </div>
-                         <div className="h-4 w-full bg-black rounded-full overflow-hidden border border-white/5 shadow-inner">
+                         <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
                             <motion.div 
                                 initial={{ width: 0 }}
-                                animate={{ width: `${(deltas.length / 50) * 100}%` }}
+                                animate={{ width: `${Math.min(100, (deltas.length / 50) * 100)}%` }}
                                 transition={{ duration: 1.5, ease: "circOut" }}
-                                className="h-full bg-gradient-to-r from-slate-500 via-slate-400 to-slate-300 shadow-[0_0_20px_rgba(100,116,139,0.5)]"
+                                className="h-full bg-blue-600 rounded-full"
                             />
                          </div>
-                         <div className="grid grid-cols-2 gap-6 pt-4">
+                         <div className="grid grid-cols-2 gap-8 pt-2">
                             <div className="space-y-1">
-                               <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Negative_Drift</span>
-                               <p className="text-3xl font-black text-slate-400 font-mono tracking-tighter">{negativeCount}</p>
+                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Negative Drift</span>
+                               <p className="text-3xl font-bold text-slate-900 tracking-tight">{negativeCount}</p>
                             </div>
                             <div className="space-y-1 text-right">
-                               <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Structural_Fixes</span>
-                               <p className="text-3xl font-black text-slate-400 font-mono tracking-tighter">{positiveCount}</p>
+                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Structural Fixes</span>
+                               <p className="text-3xl font-bold text-slate-900 tracking-tight">{positiveCount}</p>
                             </div>
                          </div>
                      </div>
@@ -246,30 +243,28 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
         </div>
       </section>
 
-      <div className="grid lg:grid-cols-12 gap-16">
+      <div className="grid lg:grid-cols-12 gap-12">
         {/* INSIGHT_SEQUENCER */}
-        <div className="lg:col-span-8 space-y-16">
-          <div className="flex items-center justify-between px-4">
-             <div className="flex items-center gap-8">
-                <div className="w-16 h-16 rounded-[2rem] bg-slate-500/10 text-slate-400 flex items-center justify-center border border-slate-500/20 shadow-2xl">
-                   <Target size={28} />
+        <div className="lg:col-span-8 space-y-12">
+          <div className="flex items-center justify-between px-2">
+             <div className="flex items-center gap-6">
+                <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-sm">
+                   <Target size={24} />
                 </div>
                 <div>
-                  <h4 className="text-3xl font-black text-white uppercase tracking-tighter italic">Strategic Vectors</h4>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold mt-1">High-Severity Anomaly Detection</p>
+                  <h4 className="text-2xl font-bold text-slate-900 tracking-tight">Strategic Vectors</h4>
+                  <p className="text-[11px] text-slate-400 uppercase tracking-widest font-bold mt-0.5">Anomaly Detection Engine</p>
                 </div>
              </div>
              
-             <div className="flex items-center gap-4 bg-black/40 p-2 rounded-full border border-white/5">
+             <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
                 {['all', 'high', 'medium', 'low'].map((tier) => (
                   <button
                     key={tier}
                     onClick={() => setSeverityFilter(tier as any)}
-                    title={`Filter by ${tier} severity`}
-                    aria-label={`Filter by ${tier} severity`}
                     className={cn(
-                      "px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest font-mono transition-all",
-                      severityFilter === tier ? "bg-slate-500 text-white shadow-lg shadow-slate-500/20" : "text-slate-500 hover:text-white"
+                      "px-5 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all",
+                      severityFilter === tier ? "bg-white text-slate-900 shadow-md" : "text-slate-500 hover:text-slate-700"
                     )}
                   >
                     {tier}
@@ -278,73 +273,69 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
              </div>
           </div>
 
-          <div className="grid gap-10">
+          <div className="grid gap-8">
             <AnimatePresence mode="popLayout">
               {filteredInsights.map((insight, i) => (
                 <motion.div
                   key={insight.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1, duration: 0.8 }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
                   className="group relative"
                 >
-                  <div className="absolute -inset-px bg-gradient-to-br from-slate-500/20 to-transparent rounded-[3.5rem] opacity-0 group-hover:opacity-100 transition-opacity blur-sm" />
-                  <div className="relative bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[3.5rem] p-12 transition-all duration-700 flex flex-col shadow-2xl overflow-hidden min-h-[500px]">
-                    <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none select-none group-hover:scale-110 transition-transform duration-1000 grayscale">
-                       <Radiation size={150} />
+                  <div className="relative bg-white border border-slate-200 border-b-4 border-b-slate-300 rounded-[2.5rem] p-10 transition-all hover:translate-y-[-2px] hover:border-b-blue-500 flex flex-col shadow-lg shadow-slate-200/30 overflow-hidden min-h-[400px]">
+                    <div className="absolute top-0 right-0 p-10 text-slate-50 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000 grayscale">
+                       <Radiation size={150} strokeWidth={1} />
                     </div>
                     
-                    <div className="relative z-10 flex items-center justify-between mb-12">
-                      <div className="flex items-center gap-6">
+                    <div className="relative z-10 flex items-center justify-between mb-8">
+                      <div className="flex items-center gap-5">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl flex items-center justify-center border shadow-2xl font-mono font-black text-xs italic",
-                          insight.severity === 'high' ? "bg-slate-500/10 text-slate-400 border-slate-500/20" : "bg-slate-500/10 text-slate-400 border-slate-500/20"
+                          "w-12 h-12 rounded-xl flex items-center justify-center border shadow-sm font-bold text-xs",
+                          insight.severity === 'high' ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-blue-50 text-blue-600 border-blue-100"
                         )}>
                           {insight.type.charAt(0).toUpperCase()}
                         </div>
-                        <div className="space-y-1">
-                           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono italic">Vector_Analysis::{insight.type}</span>
-                           <h5 className="text-4xl font-black text-white italic tracking-tighter group-hover:text-slate-400 transition-colors uppercase font-mono leading-none">
+                        <div className="space-y-0.5">
+                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Vector Analysis</span>
+                           <h5 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
                               {maskSensitiveInText(insight.title, isPrivacyMode)}
                            </h5>
                         </div>
                       </div>
                       <div className={cn(
-                        "px-6 py-2 rounded-full border flex items-center gap-3",
-                        insight.severity === 'high' ? "bg-slate-500/10 border-slate-500/20 text-slate-400" : "bg-slate-500/10 border-slate-500/20 text-slate-400"
+                        "px-4 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider",
+                        insight.severity === 'high' ? "bg-rose-50 border-rose-100 text-rose-600" : "bg-blue-50 border-blue-100 text-blue-600"
                       )}>
-                         <div className="w-2 h-2 rounded-full bg-current animate-pulse" />
-                         <span className="text-[9px] font-black uppercase tracking-widest font-mono italic">{insight.severity}_Severity</span>
+                         {insight.severity} Severity
                       </div>
                     </div>
 
-                    <div className="relative z-10 flex-1 flex flex-col justify-between pt-10 border-t border-white/5">
-                        <p className="text-2xl text-slate-400 font-medium italic leading-relaxed mb-12 max-w-2xl pr-10">
+                    <div className="relative z-10 flex-1 flex flex-col justify-between pt-8 border-t border-slate-100">
+                        <p className="text-xl text-slate-600 font-medium leading-relaxed mb-10 max-w-2xl">
                            {maskSensitiveInText(insight.summary, isPrivacyMode)}
                         </p>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                           <div className="space-y-2">
-                              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Impact_Shift</span>
-                              <div className="flex items-center gap-3">
-                                 <TrendingUp size={16} className="text-slate-400" />
-                                 <span className="text-xl font-black text-white font-mono tracking-tighter italic">+{insightScore(insight)}%</span>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+                           <div className="space-y-1">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Impact Shift</span>
+                              <div className="flex items-center gap-2">
+                                 <TrendingUp size={16} className="text-emerald-500" />
+                                 <span className="text-xl font-bold text-slate-900 tracking-tight">+{insightScore(insight)}%</span>
                               </div>
                            </div>
-                           <div className="space-y-2">
-                              <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest font-mono italic">Temporal_Delta</span>
-                              <div className="flex items-center gap-3">
-                                 <Clock size={16} className="text-slate-500" />
-                                 <span className="text-xl font-black text-white font-mono tracking-tighter italic">ACTIVE</span>
+                           <div className="space-y-1">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</span>
+                              <div className="flex items-center gap-2">
+                                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                 <span className="text-xl font-bold text-slate-900 tracking-tight">Active</span>
                               </div>
                            </div>
-                           <div className="col-span-2 hidden md:flex items-center justify-end gap-6">
+                           <div className="hidden md:flex items-center justify-end">
                               <button 
-                                title="View Field Mappings"
-                                aria-label="View Field Mappings"
-                                className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-black text-white uppercase tracking-[0.3em] font-mono italic transition-all"
+                                className="px-6 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 uppercase tracking-wider transition-all"
                               >
-                                 View_Mappings
+                                 View Details
                               </button>
                            </div>
                         </div>
@@ -357,96 +348,86 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
         </div>
 
         {/* HUD_CONTROL_PANEL */}
-        <div className="lg:col-span-4 space-y-16">
-          <div className="space-y-4 px-4 text-right">
-            <h4 className="text-5xl font-black text-white tracking-tighter uppercase font-mono italic leading-none">Process_Matrix</h4>
-            <p className="text-[12px] text-slate-500 uppercase tracking-[0.4em] font-black font-mono">Realtime_Sequence_HUD</p>
-          </div>
-
-          <div className="sticky top-12 space-y-12">
+        <div className="lg:col-span-4 space-y-12">
+          <div className="sticky top-12 space-y-8">
             {/* RECORD_EVOLUTION_PLAYBACK */}
-            <div className="relative group/evolution">
-               <div className="absolute -inset-1 bg-gradient-to-b from-slate-500/20 to-transparent rounded-[4rem] blur-xl opacity-30 group-hover/evolution:opacity-60 transition duration-700" />
-               <div className="relative p-12 bg-slate-950/40 backdrop-blur-3xl border border-white/5 rounded-[4rem] shadow-2xl overflow-hidden min-h-[600px] flex flex-col">
-                  <div className="absolute top-0 right-0 p-12 opacity-[0.03] scale-[3] -rotate-12">
-                    <History size={120} />
+            <div className="relative group">
+               <div className="relative p-10 bg-white border border-slate-200 rounded-[2.5rem] shadow-xl shadow-slate-200/40 overflow-hidden flex flex-col">
+                  <div className="absolute top-0 right-0 p-10 text-slate-50 pointer-events-none">
+                    <History size={100} strokeWidth={1} />
                   </div>
 
-                  <div className="relative z-10 space-y-12 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between mb-4">
-                       <div className="w-16 h-16 rounded-3xl bg-slate-500/10 flex items-center justify-center text-slate-400 border border-slate-500/20 shadow-2xl group-hover/evolution:scale-110 transition-transform">
-                          <GitBranch size={32} />
+                  <div className="relative z-10 space-y-10 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between">
+                       <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-sm group-hover:scale-105 transition-transform">
+                          <GitBranch size={24} />
                        </div>
                        <div className="text-right">
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono block mb-1">Sequence_ID</span>
-                          <span className="text-2xl font-black text-white font-mono tracking-tighter italic uppercase">Evolution</span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Sequence ID</span>
+                          <span className="text-xl font-bold text-slate-900 tracking-tight">Timeline Evolution</span>
                        </div>
                     </div>
 
-                    <div className="bg-black/40 rounded-[3rem] p-10 border border-white/5 space-y-10 flex-1 flex flex-col justify-between group/monitor">
-                       <div className="space-y-8">
+                    <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-200 space-y-8 flex-1 flex flex-col justify-between">
+                       <div className="space-y-6">
                           <div className="flex items-center justify-between">
-                             <div className="flex items-center gap-4">
-                                <span className="w-3 h-3 rounded-full bg-slate-500 animate-pulse" />
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest font-mono">Playback_Monitor</span>
+                             <div className="flex items-center gap-3">
+                                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Playback Monitor</span>
                              </div>
-                             <span className="text-[10px] font-black text-slate-400 font-mono italic">{replayIndex + 1}/{displaySnapshots.length}</span>
+                             <span className="text-[11px] font-bold text-slate-400">{replayIndex + 1} / {displaySnapshots.length}</span>
                           </div>
                           
-                          <div className="space-y-6">
+                          <div className="space-y-5">
                              <div className="flex items-baseline justify-between">
-                                <span className="text-sm font-black text-slate-700 uppercase italic font-mono">Timestamp</span>
-                                <span className="text-xl font-black text-white font-mono italic">
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">Timestamp</span>
+                                <span className="text-lg font-bold text-slate-900 tracking-tight">
                                    {maskSensitiveInText(String(displaySnapshots[replayIndex]?.timestamp || ''), isPrivacyMode)}
                                 </span>
                              </div>
-                             <div className="h-px w-full bg-white/5" />
+                             <div className="h-px w-full bg-slate-200" />
                              <div className="flex items-baseline justify-between">
-                                <span className="text-sm font-black text-slate-700 uppercase italic font-mono">Reported</span>
-                                <span className="text-xl font-black text-white font-mono italic">
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">Reported</span>
+                                <span className="text-lg font-bold text-slate-900 tracking-tight">
                                    {maskSensitiveInText(displaySnapshots[replayIndex]?.reported || '---', isPrivacyMode)}
                                 </span>
                              </div>
-                             <div className="h-px w-full bg-white/5" />
+                             <div className="h-px w-full bg-slate-200" />
                              <div className="flex items-baseline justify-between">
-                                <span className="text-sm font-black text-slate-700 uppercase italic font-mono">Status_Key</span>
-                                <span className="text-xl font-black text-slate-400 font-mono italic">
-                                   {maskSensitiveInText(displaySnapshots[replayIndex]?.status || 'NO_DATA', isPrivacyMode)}
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">Status</span>
+                                <span className="text-lg font-bold text-slate-600 tracking-tight">
+                                   {maskSensitiveInText(displaySnapshots[replayIndex]?.status || 'No Data', isPrivacyMode)}
                                 </span>
                              </div>
                           </div>
                        </div>
 
-                       <div className="space-y-10">
-                          <div className="flex items-center justify-center gap-8">
+                       <div className="space-y-8">
+                          <div className="flex items-center justify-center gap-6">
                              <button 
                                onClick={() => setReplayPlaying(!replayPlaying)}
-                               title={replayPlaying ? "Pause Playback" : "Start Playback"}
-                               aria-label={replayPlaying ? "Pause Playback" : "Start Playback"}
-                               className="w-20 h-20 rounded-full bg-slate-500 text-white flex items-center justify-center shadow-4xl transform hover:scale-110 active:scale-95 transition-all"
+                               className="w-16 h-16 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-lg hover:bg-slate-800 transition-all active:scale-95"
                              >
-                                {replayPlaying ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" className="ml-2" />}
+                                {replayPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" className="ml-1" />}
                              </button>
-                             <div className="flex-1 h-3 bg-black rounded-full overflow-hidden border border-white/5">
+                             <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                                 <motion.div 
                                   animate={{ width: `${((replayIndex + 1) / displaySnapshots.length) * 100}%` }}
-                                  className="h-full bg-slate-500 shadow-[0_0_15px_rgba(100,116,139,0.5)]"
+                                  className="h-full bg-blue-600"
                                 />
                              </div>
                           </div>
                           
-                          <div className="p-px rounded-[2rem] bg-gradient-to-br from-slate-500 to-slate-600 group/btn shadow-4xl cursor-pointer overflow-hidden transition-all hover:scale-[1.02]">
-                             <div 
-                                onClick={() => setDrawerOpen(true)}
-                                className="bg-slate-950 p-8 rounded-[1.9rem] flex items-center justify-between group-hover/btn:bg-transparent transition-all"
-                              >
-                                <div className="text-left">
-                                   <span className="text-[10px] font-black text-white/50 uppercase tracking-widest block mb-1">Full_Matrix</span>
-                                   <span className="text-2xl font-black text-white font-mono italic uppercase tracking-tighter leading-none">Inspect_Nodes</span>
-                                </div>
-                                <ArrowRight size={32} className="text-white group-hover/btn:translate-x-2 transition-transform duration-500" />
+                          <button 
+                             onClick={() => setDrawerOpen(true)}
+                             className="w-full bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between hover:bg-slate-50 transition-all shadow-sm group/btn"
+                           >
+                             <div className="text-left">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">Navigation</span>
+                                <span className="text-lg font-bold text-slate-900 tracking-tight">Inspect Full Matrix</span>
                              </div>
-                          </div>
+                             <ArrowRight size={24} className="text-slate-400 group-hover/btn:translate-x-1 transition-transform" />
+                          </button>
                        </div>
                     </div>
                   </div>
@@ -454,21 +435,20 @@ const DeltasTab: React.FC<DeltasTabProps> = ({ deltas, seriesInsights = [], seri
             </div>
 
             {/* STRATEGIC_TRAJECTORY_STATS */}
-            <div className="p-12 rounded-[4rem] bg-gradient-to-br from-slate-900 to-black border border-white/5 relative overflow-hidden shadow-2xl group/stats">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
-                <div className="relative z-10 flex items-center gap-10">
-                   <div className="w-20 h-20 bg-slate-500/5 rounded-full flex items-center justify-center border border-white/5 group-hover:scale-110 transition-transform duration-700">
-                      <Hash size={32} className="text-slate-400 animate-pulse" />
+            <div className="p-8 rounded-[2.5rem] bg-slate-900 text-white border border-slate-800 relative overflow-hidden shadow-xl group/stats">
+                <div className="relative z-10 flex items-center gap-8">
+                   <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform">
+                      <Hash size={24} className="text-blue-400" />
                    </div>
-                   <div className="space-y-2 flex-grow">
-                      <h5 className="text-2xl font-black text-white italic uppercase tracking-tight">System_Convergence</h5>
-                      <p className="text-sm text-slate-500 font-medium italic max-w-lg leading-relaxed uppercase tracking-tight pr-10">
-                         Verification of <span className="text-slate-400">{deltas.length} DRIFT_NODES</span> suggests systemic <span className="text-white font-bold">RE-AGING</span> across the series.
+                   <div className="space-y-1 flex-grow">
+                      <h5 className="text-lg font-bold tracking-tight">System Convergence</h5>
+                      <p className="text-[11px] text-slate-400 font-medium leading-relaxed max-w-[200px]">
+                         Verified <span className="text-white">{deltas.length} Drift Nodes</span> indicating systemic activity.
                       </p>
                    </div>
                    <div className="text-right shrink-0">
-                      <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest font-mono italic block mb-1">CRC_CHECK</span>
-                      <span className="text-xl font-black text-white font-mono tracking-tighter italic">VALID</span>
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mb-0.5">CRC</span>
+                      <span className="text-lg font-bold text-emerald-400">VALID</span>
                    </div>
                 </div>
             </div>

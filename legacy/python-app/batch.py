@@ -21,6 +21,7 @@ from app.utils import generate_case_id
 @dataclass
 class AccountEntry:
     """Represents a single account/tradeline."""
+
     account_id: str
     raw_text: str
     fields: Dict[str, Any]
@@ -31,6 +32,7 @@ class AccountEntry:
 @dataclass
 class BatchResult:
     """Results from batch processing."""
+
     batch_id: str
     timestamp: str
     total_accounts: int
@@ -64,14 +66,14 @@ class BatchProcessor:
         """
         # Common account separators/headers
         separators = [
-            '\n\nACCOUNT',
-            '\n\nTRADELINE',
-            '\n\nCOLLECTION',
-            '\n\n---',
-            '\n\n___',
-            '\n\nCreditor:',
-            '\n\nCreditor Name:',
-            '\n\nAccount Number:',
+            "\n\nACCOUNT",
+            "\n\nTRADELINE",
+            "\n\nCOLLECTION",
+            "\n\n---",
+            "\n\n___",
+            "\n\nCreditor:",
+            "\n\nCreditor Name:",
+            "\n\nAccount Number:",
         ]
 
         # Try to split by separators
@@ -112,7 +114,10 @@ class BatchProcessor:
         # Convert to simple value dict for rule checking
         simple_fields = {}
         for key, data in fields.items():
-            simple_fields[key] = data.get('value')
+            if isinstance(data, dict):
+                simple_fields[key] = data.get("value")
+            else:
+                simple_fields[key] = data
 
         # Run rules
         flags = run_rules(simple_fields)
@@ -122,14 +127,10 @@ class BatchProcessor:
             raw_text=text,
             fields=fields,
             flags=flags,
-            verified=False
+            verified=False,
         )
 
-    def process_batch(
-        self,
-        texts: List[str],
-        auto_split: bool = False
-    ) -> BatchResult:
+    def process_batch(self, texts: List[str], auto_split: bool = False) -> BatchResult:
         """
         Process multiple account texts.
 
@@ -153,21 +154,26 @@ class BatchProcessor:
 
         # Process each account
         for i, text in enumerate(texts):
-            account_id = f"{batch_id}-{i+1:03d}"
+            account_id = f"{batch_id}-{i + 1:03d}"
             account = self.process_account(text, account_id)
             accounts.append(account)
-            
+
         # Run batch-level rules (like DU1)
         simple_account_list = []
         for acc in accounts:
-            simple_acc = {k: v.get('value') for k, v in acc.fields.items()}
+            simple_acc = {}
+            for k, v in acc.fields.items():
+                if isinstance(v, dict):
+                    simple_acc[k] = v.get("value")
+                else:
+                    simple_acc[k] = v
             simple_account_list.append(simple_acc)
-            
+
         batch_flags = self.rule_engine.check_batch_rules(simple_account_list)
-        
+
         # Apply batch flags back to individual accounts
         for flag in batch_flags:
-            involved_indices = flag.pop('involved_indices', [])
+            involved_indices = flag.pop("involved_indices", [])
             for idx in involved_indices:
                 if idx < len(accounts):
                     accounts[idx].flags.append(flag)
@@ -176,16 +182,13 @@ class BatchProcessor:
         accounts_with_flags = sum(1 for a in accounts if a.flags)
         total_flags = sum(len(a.flags) for a in accounts)
         high_severity = sum(
-            sum(1 for f in a.flags if f.get('severity') == 'high')
-            for a in accounts
+            sum(1 for f in a.flags if f.get("severity") == "high") for a in accounts
         )
         medium_severity = sum(
-            sum(1 for f in a.flags if f.get('severity') == 'medium')
-            for a in accounts
+            sum(1 for f in a.flags if f.get("severity") == "medium") for a in accounts
         )
         low_severity = sum(
-            sum(1 for f in a.flags if f.get('severity') == 'low')
-            for a in accounts
+            sum(1 for f in a.flags if f.get("severity") == "low") for a in accounts
         )
 
         return BatchResult(
@@ -197,7 +200,7 @@ class BatchProcessor:
             high_severity_count=high_severity,
             medium_severity_count=medium_severity,
             low_severity_count=low_severity,
-            accounts=accounts
+            accounts=accounts,
         )
 
     def generate_batch_packet(
@@ -205,7 +208,7 @@ class BatchProcessor:
         batch_result: BatchResult,
         verified_accounts: List[Dict[str, Any]],
         consumer_info: Optional[Dict[str, str]] = None,
-        output_dir: Optional[str] = None
+        output_dir: Optional[str] = None,
     ) -> str:
         """
         Generate dispute packets for all accounts in batch.
@@ -221,7 +224,7 @@ class BatchProcessor:
         """
         if output_dir is None:
             repo_root = Path(__file__).resolve().parents[2]
-            output_dir = repo_root / 'output'
+            output_dir = repo_root / "output"
 
         batch_dir = Path(output_dir) / batch_result.batch_id
         batch_dir.mkdir(parents=True, exist_ok=True)
@@ -237,7 +240,7 @@ class BatchProcessor:
             if i < len(verified_accounts):
                 verified = verified_accounts[i]
             else:
-                verified = {k: v.get('value') for k, v in account.fields.items()}
+                verified = {k: v.get("value") for k, v in account.fields.items()}
 
             # Generate individual packet
             result = generate_dispute_packet(
@@ -245,20 +248,20 @@ class BatchProcessor:
                 flags=account.flags,
                 consumer_info=consumer_info,
                 case_id=account.account_id,
-                output_dir=str(batch_dir)
+                output_dir=str(batch_dir),
             )
 
-            all_files[account.account_id] = result['generated_files']
+            all_files[account.account_id] = result["generated_files"]
 
         # Create batch summary
         summary = self._create_batch_summary(batch_result)
-        summary_path = batch_dir / 'batch_summary.md'
-        with open(summary_path, 'w', encoding='utf-8') as f:
+        summary_path = batch_dir / "batch_summary.md"
+        with open(summary_path, "w", encoding="utf-8") as f:
             f.write(summary)
 
         # Create master ZIP
         zip_path = Path(output_dir) / f"{batch_result.batch_id}_complete.zip"
-        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
             # Add summary
             zipf.write(summary_path, f"{batch_result.batch_id}/batch_summary.md")
 
@@ -298,7 +301,9 @@ class BatchProcessor:
 """
 
         for account in batch_result.accounts:
-            creditor = account.fields.get('furnisher_or_collector', {}).get('value', 'Unknown')
+            creditor = account.fields.get("furnisher_or_collector", {}).get(
+                "value", "Unknown"
+            )
             flag_count = len(account.flags)
             status = "Flagged" if flag_count > 0 else "No Issues"
 
@@ -325,8 +330,7 @@ class BatchProcessor:
 
 
 def process_multiple_files(
-    file_contents: List[Tuple[str, bytes]],
-    auto_split: bool = True
+    file_contents: List[Tuple[str, bytes]], auto_split: bool = True
 ) -> BatchResult:
     """
     Process multiple uploaded files.

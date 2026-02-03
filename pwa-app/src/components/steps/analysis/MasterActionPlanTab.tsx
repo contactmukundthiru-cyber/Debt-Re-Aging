@@ -13,7 +13,10 @@ import {
     Target,
     Activity,
     Lock,
-    Scale
+    Scale,
+    ShieldCheck,
+    ChevronRight,
+    Send
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
@@ -44,227 +47,172 @@ const MasterActionPlanTab: React.FC<MasterActionPlanTabProps> = ({ actions = [],
     };
 
     return (
-        <div className="space-y-12 pb-32">
-            {/* Tactical Command Briefing */}
-            <div className="relative group">
-                <div className="absolute -inset-4 bg-gradient-to-r from-slate-500/20 via-slate-500/20 to-slate-500/20 rounded-[4rem] blur-3xl opacity-0 group-hover:opacity-100 transition-duration-700 pointer-events-none" />
-                
-                <div className="relative overflow-hidden rounded-[4rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 shadow-2xl transition-all duration-700 hover:border-slate-500/30">
-                    <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:40px_40px]" />
-                    <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-slate-500/5 rounded-full blur-[150px] -mr-96 -mt-96" />
-                    
-                    <div className="relative z-10 p-12 md:p-20">
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-                            <div className="flex-1 space-y-8 text-center lg:text-left">
-                                <div className="inline-flex items-center gap-4 px-6 py-2 rounded-full bg-slate-500/10 border border-slate-500/20">
-                                    <div className="w-2 h-2 rounded-full bg-slate-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                                    <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-400 font-mono">Mission ID: EXEC-ALPHA-01</span>
-                                    <div className="w-px h-3 bg-slate-500/30" />
-                                    <span className="text-[10px] uppercase font-bold tracking-[0.4em] text-slate-500 font-mono">Status: CALIBRATED</span>
+        <div className="fade-in space-y-12 pb-32 px-2">
+            {/* Action Protocol Header */}
+            <section className="relative">
+                <div className="relative bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-xl shadow-slate-200/50 p-12">
+                    <div className="relative z-10 grid lg:grid-cols-12 gap-12 items-center">
+                        <div className="lg:col-span-7 space-y-8">
+                            <div className="flex items-center gap-4">
+                                <div className="px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full flex items-center gap-2">
+                                    <Zap size={14} className="text-blue-600" />
+                                    <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600">Action Protocol Engine</span>
                                 </div>
+                                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Institutional Strategy</span>
+                            </div>
 
-                                <div className="space-y-4">
-                                    <h2 className="text-7xl md:text-8xl font-black text-white tracking-tighter leading-none italic uppercase">
-                                        Tactical <br/>
-                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-300 via-white to-slate-400">Command Dossier</span>
-                                    </h2>
-                                    <p className="max-w-2xl text-slate-400 text-xl md:text-2xl leading-relaxed font-mono font-light italic">
-                                        {'// SYNTHESIS OF ACTIVE TACTICAL MANEUVERS DERIVED FROM FORENSIC FINDINGS. CALIBRATED FOR MAXIMUM LIABILITY RECOVERY & INSTITUTIONAL COMPLIANCE FORCE.'}
+                            <h2 className="text-6xl font-extrabold text-slate-900 tracking-tight leading-none">
+                                Action <span className="text-blue-600">Protocol</span>
+                            </h2>
+                            <p className="text-slate-500 text-lg leading-relaxed max-w-xl font-medium">
+                                Synthesis of institutional maneuvers derived from technical findings. Optimized for regulatory pressure and maximum compliance enforcement.
+                            </p>
+                            
+                            <div className="flex items-center gap-12">
+                                 <div>
+                                     <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest mb-1">Items Indexed</p>
+                                     <p className="text-6xl font-bold text-slate-900 tracking-tighter tabular-nums">{actions.length + 2}</p>
+                                 </div>
+                                 <div className="h-12 w-px bg-slate-100 hidden sm:block" />
+                                 <div>
+                                     <p className="text-[10px] uppercase text-slate-400 font-bold tracking-widest mb-1">Status</p>
+                                     <p className="text-2xl font-bold text-blue-600 tracking-tight uppercase">Calibrated</p>
+                                 </div>
+                            </div>
+                        </div>
+
+                        <div className="lg:col-span-5">
+                             <div className="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[300px]">
+                                <div className="relative z-10">
+                                    <h4 className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-4">Final Objective</h4>
+                                    <p className="text-2xl font-bold leading-tight mb-8">
+                                        Execute communication package to force institutional audit.
                                     </p>
                                 </div>
-                            </div>
-
-                            <div className="relative shrink-0">
-                                <div className="w-64 h-64 md:w-80 md:h-80 rounded-full bg-slate-950 border border-white/5 flex flex-col items-center justify-center relative overflow-hidden group/ring">
-                                    <div className="absolute inset-0 border-[12px] border-slate-500/5 rounded-full" />
-                                    <div className="absolute inset-0 border-t-[12px] border-slate-500/40 rounded-full animate-[spin_10s_linear_infinite]" />
-                                    <div className="absolute inset-8 border border-white/5 rounded-full" />
-                                    
-                                    <div className="relative z-10 text-center space-y-1">
-                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] font-mono">Actions Indexed</span>
-                                        <div className="text-8xl font-black text-white font-mono tracking-tighter leading-none">
-                                            {(actions.length + 3)}
-                                        </div>
-                                        <div className="text-[8px] font-black text-slate-400/60 uppercase tracking-[0.5em] font-mono pt-2">Ready for Dispatch</div>
-                                    </div>
-
-                                    {/* Scanning Effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-500/10 via-transparent to-transparent opacity-0 group-hover/ring:opacity-100 transition-opacity duration-500" />
-                                </div>
-                            </div>
+                                <button
+                                    onClick={onExport}
+                                    className="w-full py-5 bg-white text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-50 transition-all shadow-lg"
+                                >
+                                    Dispatch Package <Send size={14} />
+                                </button>
+                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* Tactical Grid */}
+            {/* Strategy Grid */}
             <div className="grid lg:grid-cols-2 gap-12">
-                {/* Deployment Phase */}
+                {/* Phase 01 */}
                 <div className="space-y-10">
-                    <div className="flex items-center justify-between px-8">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-[2rem] bg-slate-500/10 text-slate-400 flex items-center justify-center border border-slate-500/20 shadow-2xl">
-                                <Zap size={28} />
-                            </div>
-                            <div>
-                                <h4 className="text-3xl font-black text-white uppercase tracking-tighter italic">Phase 01: Deployment</h4>
-                                <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold">T-MINUS 0-7 DAYS / INITIAL STRIKE</p>
-                            </div>
+                    <div className="flex items-center gap-6 px-4">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shadow-sm">
+                            <Activity size={24} />
                         </div>
-                        <div className="h-0.5 w-24 bg-gradient-to-l from-slate-500/50 to-transparent rounded-full" />
+                        <div>
+                            <h4 className="text-2xl font-bold text-slate-900 tracking-tight">Phase 01: Deployment</h4>
+                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-1">Initial Regulatory Strike</p>
+                        </div>
                     </div>
 
-                    <div className="space-y-8 px-4">
-                        {/* Static High Priority Item */}
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            className="group relative p-10 rounded-[3.5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 hover:border-slate-500/30 transition-all duration-500 overflow-hidden"
-                        >
-                            <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <Activity size={120} className="text-slate-400" />
+                    <div className="space-y-6">
+                        {/* Static Priority Item */}
+                        <div className="p-8 rounded-[2.5rem] bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 relative group">
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold uppercase tracking-widest">Immediate</span>
+                                <ShieldAlert size={18} className="text-slate-300 group-hover:text-rose-500 transition-colors" />
                             </div>
+                            <h4 className="text-xl font-bold text-slate-900 mb-3">Regulatory Escalation</h4>
+                            <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8">
+                                File formal complaints with oversight agencies to force manual institution-level audit of the technical discrepancies found.
+                            </p>
+                            <button 
+                                onClick={() => setActiveTab('overview')} 
+                                className="flex items-center gap-2 text-[10px] font-bold text-blue-600 uppercase tracking-widest group-hover:translate-x-1 transition-transform"
+                            >
+                                Open Deployment Node <ChevronRight size={14} />
+                            </button>
+                        </div>
 
-                            <div className="relative z-10">
-                                <div className="flex justify-between items-center mb-10">
-                                    <div className="px-5 py-2 rounded-full bg-slate-500/10 border border-slate-500/20">
-                                        <span className="text-[10px] font-black text-slate-400 font-mono uppercase tracking-[0.3em]">PRIORITY_OMEGA</span>
-                                    </div>
-                                    <Target size={20} className="text-slate-800 group-hover:text-slate-400 transition-colors" />
+                        {actions.map((action, idx) => (action.priority === 'high' || action.priority === 'medium') && (
+                            <div 
+                                key={action.id}
+                                className="p-8 rounded-[2.5rem] bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300"
+                            >
+                                <div className="flex justify-between items-center mb-6">
+                                    <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-lg text-[10px] font-bold uppercase tracking-widest">Protocol {idx + 1}</span>
+                                    <Target size={18} className="text-slate-200" />
                                 </div>
-
-                                <div className="space-y-4 mb-10">
-                                    <h4 className="text-3xl font-black text-white uppercase italic tracking-tighter">Initialize Regulatory Escalation</h4>
-                                    <p className="text-slate-400 text-sm font-mono leading-relaxed uppercase tracking-tight max-w-lg">
-                                        Detected Metro 2 format variances require mandatory regulatory oversight. File CFPB/AG complaints to force manual institution-level audit.
-                                    </p>
-                                </div>
-
+                                <h4 className="text-lg font-bold text-slate-900 mb-2">{action.title}</h4>
+                                <p className="text-slate-500 text-xs font-medium leading-relaxed mb-6">
+                                    {action.description}
+                                </p>
                                 <button 
-                                    onClick={() => setActiveTab('escalation')} 
-                                    className="group/btn flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono"
+                                    onClick={() => handleActionClick(action)} 
+                                    className="flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-blue-600 uppercase tracking-widest transition-colors shadow-none"
                                 >
-                                    <span className="relative">
-                                        Access Escalation Node
-                                        <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-500 group-hover/btn:w-full transition-all duration-300" />
-                                    </span>
-                                    <ArrowRight size={16} className="group-hover/btn:translate-x-3 transition-transform duration-300" />
+                                    Execute <ChevronRight size={14} />
                                 </button>
                             </div>
-                        </motion.div>
-
-                        {actions.map((action, idx) => (
-                            <motion.div 
-                                key={action.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.1 }}
-                                className="group relative p-10 rounded-[3.5rem] bg-slate-950/20 backdrop-blur-xl border border-white/5 hover:border-white/10 transition-all duration-500"
-                            >
-                                <div className="relative z-10">
-                                    <div className="flex justify-between items-center mb-8">
-                                        <div className={cn(
-                                            "px-5 py-2 rounded-full border tracking-[0.3em] font-black text-[9px] font-mono uppercase",
-                                            action.priority === 'high' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' : 
-                                            action.priority === 'medium' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' : 
-                                            'bg-slate-500/10 text-slate-500 border-white/5'
-                                        )}>
-                                            {action.priority}_LEVEL_TASK
-                                        </div>
-                                        <Lock size={18} className="text-slate-800 group-hover:text-slate-400/50 transition-colors" />
-                                    </div>
-
-                                    <div className="space-y-4 mb-10">
-                                        <h4 className="text-2xl font-black text-white uppercase italic tracking-tighter">{action.title}</h4>
-                                        <p className="text-slate-500 text-sm font-mono leading-relaxed uppercase tracking-tight">
-                                           {'// '}{action.description}
-                                        </p>
-                                    </div>
-
-                                    <button 
-                                        onClick={() => handleActionClick(action)} 
-                                        className="group/btn flex items-center gap-6 text-[10px] font-black text-slate-400 group-hover:text-slate-400 uppercase tracking-[0.4em] font-mono transition-colors"
-                                    >
-                                        Execute Command Node 
-                                        <ArrowRight size={14} className="group-hover/btn:translate-x-3 transition-transform duration-300" />
-                                    </button>
-                                </div>
-                            </motion.div>
                         ))}
                     </div>
                 </div>
 
-                {/* Adjudication Phase */}
+                {/* Phase 02 */}
                 <div className="space-y-10">
-                    <div className="flex items-center justify-between px-8">
-                        <div className="flex items-center gap-6">
-                            <div className="w-16 h-16 rounded-[2rem] bg-slate-500/10 text-slate-400 flex items-center justify-center border border-slate-500/20 shadow-2xl">
-                                <Scale size={28} />
-                            </div>
-                            <div>
-                                <h4 className="text-3xl font-black text-white uppercase tracking-tighter italic">Phase 02: Adjudication</h4>
-                                <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-mono font-bold">T-MINUS 15-45 DAYS / FORCE MULTIPLIER</p>
-                            </div>
+                    <div className="flex items-center gap-6 px-4">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shadow-sm">
+                            <Scale size={24} />
                         </div>
-                        <div className="h-0.5 w-24 bg-gradient-to-l from-slate-500/50 to-transparent rounded-full" />
+                        <div>
+                            <h4 className="text-2xl font-bold text-slate-900 tracking-tight">Phase 02: Adjudication</h4>
+                            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-1">Verification Cleanup</p>
+                        </div>
                     </div>
 
-                    <div className="space-y-8 px-4">
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            className="group relative p-10 rounded-[3.5rem] bg-slate-950/40 backdrop-blur-3xl border border-white/5 hover:border-slate-500/30 transition-all duration-500 overflow-hidden"
-                        >
-                            <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <ShieldAlert size={120} className="text-slate-400" />
+                    <div className="space-y-6">
+                        <div className="p-8 rounded-[2.5rem] bg-emerald-50/30 border border-emerald-100 shadow-sm hover:shadow-xl hover:border-emerald-200 transition-all duration-300 relative group">
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold uppercase tracking-widest">Verification</span>
+                                <FileCheck size={18} className="text-emerald-300 group-hover:text-emerald-500 transition-colors" />
                             </div>
-
-                            <div className="relative z-10">
-                                <div className="flex justify-between items-center mb-10">
-                                    <div className="px-5 py-2 rounded-full bg-slate-500/10 border border-slate-500/20">
-                                        <span className="text-[10px] font-black text-slate-400 font-mono uppercase tracking-[0.3em]">STRATEGIC_PREP</span>
-                                    </div>
-                                    <FileCheck size={20} className="text-slate-800 group-hover:text-slate-400 transition-colors" />
-                                </div>
-
-                                <div className="space-y-4 mb-10">
-                                    <h4 className="text-3xl font-black text-white uppercase italic tracking-tighter">Prepare Forensic Affidavit</h4>
-                                    <p className="text-slate-400 text-sm font-mono leading-relaxed uppercase tracking-tight max-w-lg">
-                                        Finalize all forensic findings into a notarized Affidavit of Fact. This establishes prime facie evidence for potential litigation recovery.
-                                    </p>
-                                </div>
-
-                                <button 
-                                    onClick={() => setActiveTab('escalation')} 
-                                    className="group/btn flex items-center gap-6 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] font-mono"
-                                >
-                                    <span className="relative">
-                                        Generate Legal Instrument
-                                        <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-slate-500 group-hover/btn:w-full transition-all duration-300" />
-                                    </span>
-                                    <ArrowRight size={16} className="group-hover/btn:translate-x-3 transition-transform duration-300" />
-                                </button>
+                            <h4 className="text-xl font-bold text-slate-900 mb-3">Institutional Affidavit</h4>
+                            <p className="text-slate-600 text-sm font-medium leading-relaxed mb-8">
+                                Document all technical findings into a notarized statement of fact to establish prime facie evidence for potential recovery.
+                            </p>
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase tracking-widest">
+                                Status: Ready for Prep
                             </div>
-                        </motion.div>
-
-
-                        <div className="p-12 rounded-[2.5rem] bg-slate-950 border-2 border-dashed border-slate-900 flex flex-col items-center justify-center text-center">
-                            <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-slate-800 mb-8">
-                                <Target size={32} className="text-slate-400/50" />
-                            </div>
-                            <p className="font-mono text-xs font-bold text-slate-500 uppercase tracking-[0.4em] mb-8">Dispatch Package Ready</p>
-                            <button
-                                onClick={onExport}
-                                className="w-full py-5 bg-white text-slate-950 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.3em] hover:bg-slate-500 hover:text-white transition-all transform hover:scale-[1.02] shadow-2xl"
-                            >
-                                Dispatch Communication Package
-                            </button>
                         </div>
+
+                        {actions.map((action, idx) => (action.priority === 'low') && (
+                            <div 
+                                key={action.id}
+                                className="p-8 rounded-[2.5rem] bg-white border border-slate-200 shadow-sm opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                            >
+                                <div className="flex justify-between items-center mb-4">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secondary</span>
+                                    <Lock size={14} className="text-slate-200" />
+                                </div>
+                                <h4 className="text-lg font-bold text-slate-900 mb-2">{action.title}</h4>
+                                <p className="text-slate-500 text-xs font-medium leading-relaxed">
+                                    {action.description}
+                                </p>
+                            </div>
+                        ))}
+
+                        <div className="p-12 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+                            <ShieldCheck size={32} className="text-slate-300 mb-6" />
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Institutional Assurance</p>
+                            <p className="text-slate-900 font-bold mb-6 italic">Verification Protocol v5.0 Active</p>
                     </div>
                 </div>
             </div>
         </div>
-    );
+    </div>
+);
 };
+
+export default MasterActionPlanTab;
 
 export default MasterActionPlanTab;

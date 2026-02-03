@@ -1,5 +1,6 @@
 import { CreditFields, RuleFlag, RiskProfile, AnalysisRecord } from './types';
 import { saveAnalysisToDB, getHistoryFromDB, deleteAnalysisFromDB, clearHistoryFromDB } from './dexie-storage';
+import { calculateStringHash } from './evidence-custody';
 
 export type { AnalysisRecord } from './types';
 
@@ -23,6 +24,9 @@ export async function saveAnalysis(
   fileName?: string,
   tags?: string[]
 ): Promise<string> {
+  const baseData = JSON.stringify({ fields, flags, riskProfile });
+  const integrityHash = await calculateStringHash(baseData);
+
   const record: AnalysisRecord = {
     id: generateId(),
     timestamp: Date.now(),
@@ -30,6 +34,7 @@ export async function saveAnalysis(
     fields,
     flags,
     riskProfile,
+    integrityHash,
     tags,
   };
 
@@ -174,6 +179,12 @@ export function formatTimestamp(timestamp: number): string {
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
     return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+  }
+  
+  // Within last week
+  if (diff < 604800000) {
+    const days = Math.floor(diff / 86400000);
+    return days === 1 ? 'Yesterday' : `${days} days ago`;
   }
   
   return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

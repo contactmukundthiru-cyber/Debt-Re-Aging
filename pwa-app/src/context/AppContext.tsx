@@ -34,6 +34,7 @@ export interface AppState {
   // Active Tab
   activeTab: string;
   showSecurityModal: boolean;
+  showStatsBar: boolean;
 }
 
 // Actions
@@ -57,6 +58,7 @@ type AppAction =
   | { type: 'SET_PRIVACY_MODE'; payload: boolean }
   | { type: 'SET_ACTIVE_TAB'; payload: string }
   | { type: 'SET_SECURITY_MODAL'; payload: boolean }
+  | { type: 'SET_STATS_BAR'; payload: boolean }
   | { type: 'RESET' };
 
 // Initial State
@@ -78,6 +80,7 @@ const initialState: AppState = {
   isPrivacyMode: false,
   activeTab: 'violations',
   showSecurityModal: false,
+  showStatsBar: false,
 };
 
 // Reducer
@@ -153,11 +156,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, activeTab: action.payload };
     case 'SET_SECURITY_MODAL':
       return { ...state, showSecurityModal: action.payload };
+    case 'SET_STATS_BAR':
+      return { ...state, showStatsBar: action.payload };
 
     case 'RESET':
       return {
         ...initialState,
         darkMode: state.darkMode, // Preserve dark mode preference
+        showStatsBar: state.showStatsBar, // Preserve stats bar preference
       };
 
     default:
@@ -185,6 +191,7 @@ interface AppContextValue {
   setDarkMode: (darkMode: boolean) => void;
   setPrivacyMode: (isPrivacyMode: boolean) => void;
   setActiveTab: (tab: string) => void;
+  setStatsBar: (showStatsBar: boolean) => void;
   reset: () => void;
 }
 
@@ -255,6 +262,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'SET_ACTIVE_TAB', payload: tab });
   }, []);
 
+  const setStatsBar = useCallback((showStatsBar: boolean) => {
+    dispatch({ type: 'SET_STATS_BAR', payload: showStatsBar });
+  }, []);
+
   const reset = useCallback(() => {
     dispatch({ type: 'RESET' });
   }, []);
@@ -264,6 +275,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (typeof document === 'undefined' || typeof window === 'undefined') return;
     const saved = localStorage.getItem('cra_dark_mode');
     const savedPrivacy = localStorage.getItem('cra_privacy_mode');
+    const savedStatsBar = localStorage.getItem('cra_show_stats_bar');
     if (saved !== null) {
       dispatch({ type: 'SET_DARK_MODE', payload: saved === 'true' });
     } else {
@@ -272,6 +284,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     if (savedPrivacy !== null) {
       dispatch({ type: 'SET_PRIVACY_MODE', payload: savedPrivacy === 'true' });
+    }
+    if (savedStatsBar !== null) {
+      dispatch({ type: 'SET_STATS_BAR', payload: savedStatsBar === 'true' });
     }
   }, []);
 
@@ -293,6 +308,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('cra_privacy_mode', state.isPrivacyMode ? 'true' : 'false');
     }
   }, [state.isPrivacyMode]);
+
+  // Sync stats bar to localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cra_show_stats_bar', state.showStatsBar ? 'true' : 'false');
+    }
+  }, [state.showStatsBar]);
 
   // Sync theme to DOM and localStorage; avoid overwriting script-set dark on first paint
   React.useEffect(() => {
@@ -332,6 +354,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDarkMode,
     setPrivacyMode,
     setActiveTab,
+    setStatsBar,
     reset,
   };
 

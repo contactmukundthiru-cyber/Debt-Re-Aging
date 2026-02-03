@@ -159,12 +159,16 @@ export const Header: React.FC<HeaderProps> = ({
                 {[
                   { icon: FileText, label: 'Reports', color: 'text-blue-500', bg: 'bg-blue-500/10' },
                   { icon: Shield, label: 'Audit', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                  { icon: RotateCcw, label: 'Revisit', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+                  { icon: Activity, label: 'Stats', color: 'text-amber-500', bg: 'bg-amber-500/10', onClick: () => dispatch({ type: 'SET_STATS_BAR', payload: !state.showStatsBar }), active: state.showStatsBar },
                   { icon: Settings, label: 'Settings', color: 'text-slate-500', bg: 'bg-slate-500/10' },
                 ].map((tool) => (
                   <button 
                     key={tool.label}
-                    className="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 hover:shadow-lg"
+                    onClick={tool.onClick}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 hover:shadow-lg",
+                      tool.active && "bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200 dark:ring-slate-700"
+                    )}
                   >
                     <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center mb-1", tool.bg)}>
                       <tool.icon className={cn("w-6 h-6", tool.color)} />

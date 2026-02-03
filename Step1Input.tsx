@@ -66,80 +66,71 @@ export const Step1Input: React.FC<Step1InputProps> = React.memo((props) => {
     importHistory,
     clearHistory,
   } = props;
-    <div className="fade-in max-w-5xl mx-auto">
+    <div className="fade-in max-w-5xl mx-auto px-4 sm:px-0 pb-20">
       {/* Hero Section */}
-      <div className="premium-card p-12 bg-slate-950 text-white border-slate-800 overflow-hidden relative shadow-2xl mb-12">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] -mr-48 -mt-48" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] -ml-32 -mb-32" />
+      <div className="bg-white p-12 rounded-[3.5rem] border border-slate-200 overflow-hidden relative shadow-xl shadow-slate-200/50 mb-12">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-50 rounded-full blur-[120px] -mr-48 -mt-48" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-50 rounded-full blur-[100px] -ml-32 -mb-32" />
 
         <div className="relative z-10 text-center max-w-2xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-emerald-400 font-mono">Forensic Analysis Engine // Institutional V5.0</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.4)]" />
+            <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Institutional Forensic Protocol v{APP_VERSION}</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 leading-tight relative">
-            Analyze Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Credit Report</span>
-            <div className="absolute -top-6 -right-10 px-3 py-1 bg-slate-800 rounded-lg border border-white/5 shadow-2xl rotate-6 text-[8px] font-mono text-slate-400 uppercase tracking-widest hidden md:block">
-              Institutional_Access
-            </div>
+          <h1 className="text-5xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
+            Institutional <span className="text-blue-600">Credit Forensics</span>
           </h1>
-          <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
-            Upload any format — PDF, image, or text. Our forensic engine detects FCRA/FDCPA violations and illegal debt re-aging with institutional-grade precision.
+          <p className="text-slate-500 text-lg font-semibold leading-relaxed max-w-xl mx-auto">
+            Upload any credit report format — PDF, image, or text. Our engine detects regulatory violations and illegal data aging with forensic precision.
           </p>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 mb-12">
         {/* File Upload */}
-        <div className="premium-card p-8 flex flex-col bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 flex flex-col shadow-lg shadow-slate-100/50">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
             </div>
             <div>
-              <p className="text-sm font-bold dark:text-white">Forensic Evidence Upload</p>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Secure • Local • Private</p>
+              <p className="text-base font-bold text-slate-900">Document Intake</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Secure Local Environment</p>
             </div>
           </div>
 
-          <div
-            className="flex-grow flex flex-col items-center justify-center p-0 group relative"
-          >
+          <div className="flex-grow flex flex-col items-center justify-center group relative">
             {isProcessing ? (
               <ForensicScanner progress={progress} stage={progressText} />
             ) : (
               <div
-                className="w-full min-h-[300px] flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-50/5 dark:hover:bg-emerald-500/5 transition-all cursor-pointer relative overflow-hidden"
+                className="w-full min-h-[340px] flex flex-col items-center justify-center rounded-[2rem] border-2 border-dashed border-slate-100 bg-slate-50/30 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer relative overflow-hidden"
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => fileInputRef.current?.click()}
               >
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.05] dot-pattern-current" />
-
-                <div className="relative z-10 text-center">
-                  <div className="w-24 h-24 rounded-3xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/10 transition-all shadow-xl">
-                    <svg className="w-12 h-12 text-slate-400 group-hover:text-emerald-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <div className="relative z-10 text-center px-6">
+                  <div className="w-24 h-24 rounded-[2rem] bg-white flex items-center justify-center mb-8 mx-auto shadow-xl group-hover:scale-105 transition-transform duration-500">
+                    <svg className="w-10 h-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
 
                   <button
                     type="button"
-                    title="Initiate Scan"
-                    className="mb-4 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/20 active:scale-95 transition-all flex items-center gap-2 mx-auto"
+                    title="Upload Files"
+                    className="mb-6 px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center gap-3 mx-auto"
                     onClick={(e) => {
                       e.stopPropagation();
                       fileInputRef.current?.click();
                     }}
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12h.01M9 16h6M12 12V8m0 4h.01M12 12v4" /></svg>
-                    INITIATE SCAN
+                    <span>Import Evidence</span>
                   </button>
 
-                  <p className="text-sm text-slate-500 mb-2">or drag & drop credit report files</p>
-                  <p className="text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full inline-block">Supports PDF, PNG, JPG, TXT</p>
+                  <p className="text-sm font-bold text-slate-400 mb-1">Drag & drop report files</p>
+                  <p className="text-[10px] text-slate-300 uppercase tracking-widest">PDF • PNG • JPG • TXT</p>
                 </div>
               </div>
             )}
@@ -160,42 +151,46 @@ export const Step1Input: React.FC<Step1InputProps> = React.memo((props) => {
         </div>
 
         {/* Text Input */}
-        <div className="premium-card p-8 flex flex-col bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 flex flex-col shadow-lg shadow-slate-100/50">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             </div>
             <div>
-              <p className="text-sm font-bold dark:text-white">Direct Text Analysis</p>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest">Copy & Paste Credit Data</p>
+              <p className="text-base font-bold text-slate-900">Direct Entry Analysis</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Paste Structured Data</p>
             </div>
           </div>
           <textarea
-            className="flex-grow min-h-[240px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 p-6 font-mono text-sm focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500/50 transition-all resize-none dark:text-white placeholder:text-slate-400"
-            placeholder="Paste raw credit report data here...&#10;&#10;Tip: Copy text directly from your credit bureau PDF or online account."
+            className="flex-grow min-h-[340px] rounded-[2rem] border border-slate-100 bg-slate-50/30 p-8 font-mono text-xs focus:ring-4 focus:ring-blue-50/50 focus:border-blue-200 transition-all resize-none text-slate-700 placeholder:text-slate-300"
+            placeholder="Paste raw credit report data here...&#10;&#10;Use this for text copied from bureau dashboards or PDFs."
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
           />
         </div>
       </div>
 
-      <div className="premium-card p-6 mb-10 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-slate-400 font-mono">Scan Intensity</p>
-            <h3 className="text-lg font-bold dark:text-white">Choose Extraction Force</h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Max Scan runs multi-pass OCR and signal merging for noisy or scanned reports.
-            </p>
+      <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 mb-12 shadow-lg shadow-slate-100/50">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="flex items-center gap-4">
+             <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+             </div>
+             <div>
+                <h3 className="text-lg font-bold text-slate-900">Analysis Depth</h3>
+                <p className="text-xs font-semibold text-slate-500">
+                  Select intensity for data extraction and multi-pass OCR audits.
+                </p>
+             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
             <button
               type="button"
               onClick={() => setScanMode('standard')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
+              className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
                 scanMode === 'standard'
-                  ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                  ? 'bg-white text-blue-600 shadow-md border border-slate-200'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               Standard
@@ -203,71 +198,78 @@ export const Step1Input: React.FC<Step1InputProps> = React.memo((props) => {
             <button
               type="button"
               onClick={() => setScanMode('max')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all ${
+              className={`px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
                 scanMode === 'max'
-                  ? 'bg-slate-950 text-emerald-400 border-emerald-500 shadow-lg shadow-emerald-500/20'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              Max Scan
+              Deep Scan
             </button>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+      <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
         <button
           type="button"
-          title="Analyze Report Text"
-          className="btn btn-primary px-12 py-5 h-auto text-base font-bold shadow-xl shadow-emerald-900/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02]"
+          title="Run Forensic Analysis"
+          className="px-14 py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-[1.5rem] text-lg font-bold shadow-xl shadow-blue-200 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 min-w-[280px]"
           onClick={processText}
           disabled={!rawText.trim()}
         >
-          <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          Analyze Report
-          <kbd className="ml-3 text-[10px] bg-white/10 px-2 py-1 rounded border border-white/20 hidden sm:inline font-mono">⌘↵</kbd>
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          Run Analysis
         </button>
         <button
           type="button"
-          title="Load Sample Data"
-          className="btn btn-secondary px-12 py-5 h-auto text-base font-bold dark:bg-slate-900 dark:text-white dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 transition-all"
+          title="Load Sample Case"
+          className="px-14 py-5 bg-white border border-slate-200 text-slate-600 rounded-[1.5rem] text-lg font-bold shadow-lg shadow-slate-100 hover:border-slate-400 active:scale-95 transition-all flex items-center justify-center gap-3 min-w-[280px]"
           onClick={loadSample}
         >
-          <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-          Try Sample Data
+          <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          Sample Data
         </button>
       </div>
 
       {sources.length > 0 && (
-        <div className="premium-card p-6 mb-12 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Evidence Queue</p>
-              <h3 className="text-lg font-bold dark:text-white">Merged Intake Sources</h3>
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 mb-12 shadow-lg shadow-slate-100/50">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Intake Batch</h3>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">{sources.length} Combined Sources</p>
+              </div>
             </div>
             <button
               type="button"
               onClick={clearSources}
-              className="btn btn-secondary !py-2 !px-4 !text-[10px] !uppercase !tracking-widest !rounded-xl"
+              className="px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-rose-600 border border-rose-100 rounded-xl hover:bg-rose-50 transition-colors"
             >
-              Clear Batch
+              Clear Session
             </button>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             {sources.map((source) => (
-              <div key={source.id} className="flex items-center gap-3 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+              <div key={source.id} className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-slate-50 border border-slate-100 group">
+                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400 group-hover:text-blue-600 transition-colors">
+                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                </div>
                 <div>
-                  <p className="text-xs font-bold dark:text-white">{source.name}</p>
-                  <p className="text-[10px] text-slate-400">{Math.round(source.size / 1024)} KB • {source.type || 'unknown'}</p>
+                  <p className="text-sm font-bold text-slate-900">{source.name}</p>
+                  <p className="text-[10px] text-slate-400 font-semibold">{Math.round(source.size / 1024)} KB • {source.type || 'Source Data'}</p>
                 </div>
                 <button
                   type="button"
                   title={`Remove ${source.name}`}
                   aria-label={`Remove ${source.name}`}
                   onClick={() => removeSource(source.id)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="ml-2 p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -277,27 +279,27 @@ export const Step1Input: React.FC<Step1InputProps> = React.memo((props) => {
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-6 mb-12">
-        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+      <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-lg shadow-slate-100/30">
+          <div className="flex items-start gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
+              <svg className="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
             </div>
             <div>
-              <p className="text-base font-bold mb-2 dark:text-white">Zero-Trust Privacy</p>
-              <p className="text-sm text-slate-500 leading-relaxed">Every byte stays on your machine. We use on-device compute for zero-latency, zero-risk analysis. No data transmission.</p>
+              <p className="text-lg font-bold mb-2 text-slate-900">End-to-End Privacy</p>
+              <p className="text-sm text-slate-500 leading-relaxed font-semibold">Every byte stays on your machine. We use on-device compute for zero-latency, zero-risk analysis. No data transmission occurs.</p>
             </div>
           </div>
         </div>
 
-        <div className="premium-card p-6 bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-lg shadow-slate-100/30">
+          <div className="flex items-start gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center shrink-0">
+              <svg className="w-7 h-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
             </div>
             <div>
-              <p className="text-base font-bold mb-2 dark:text-white">Institutional Grade</p>
-              <p className="text-sm text-slate-500 leading-relaxed">24+ core forensic heuristics map report inconsistencies against federal data standards (FCRA § 611, FDCPA § 809).</p>
+              <p className="text-lg font-bold mb-2 text-slate-900">Forensic Integrity</p>
+              <p className="text-sm text-slate-500 leading-relaxed font-semibold">24+ core forensic heuristics map report inconsistencies against federal data standards (FCRA § 611, FDCPA § 809) with surgical accuracy.</p>
             </div>
           </div>
         </div>

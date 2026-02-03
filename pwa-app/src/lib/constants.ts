@@ -1,4 +1,7 @@
+export const APP_VERSION = '5.0.0';
+
 export const FIELD_CONFIG = [
+
   { key: 'originalCreditor', label: 'Original Creditor', section: 'account', help: 'The company that originally extended credit' },
   { key: 'furnisherOrCollector', label: 'Current Furnisher', section: 'account', help: 'Who is currently reporting this account' },
   { key: 'accountNumber', label: 'Account Number', section: 'account', help: 'The unique identifier for this account' },
@@ -47,33 +50,11 @@ export const BUREAU_ADDRESSES = {
 };
 
 export const ANALYSIS_TABS = [
-  { id: 'overview', label: 'EXECUTIVE DASHBOARD' },
-  { id: 'violations', label: 'VIOLATION MANIFEST' },
-  { id: 'institutional', label: 'INSTITUTIONAL HUB' },
-  { id: 'briefing', label: 'FORENSIC BRIEFING' },
-  { id: 'review', label: 'AUDIT REVIEW' },
-  { id: 'aianalysis', label: 'INTELLIGENCE LAB' },
-  { id: 'deadlines', label: 'TEMPORAL FORENSICS' },
-  { id: 'simulation', label: 'TACTICAL SIMULATOR' },
-  { id: 'liability', label: 'LIABILITY VECTORS' },
-  { id: 'escalation', label: 'STATUTORY PROTOCOL' },
-  { id: 'metro2', label: 'STRUCTURAL INTEGRITY' },
-  { id: 'statutes', label: 'STATUTE MATRIX' },
-  { id: 'legalshield', label: 'INSTITUTIONAL DEFENSE' },
-  { id: 'multibureau', label: 'CROSS-BUREAU AUDIT' },
-  { id: 'narrative', label: 'DISPUTE NARRATIVE' },
-  { id: 'scoresim', label: 'IMPACT FORECASTING' },
-  { id: 'timeline', label: 'SEQUENCE FORENSICS' },
-  { id: 'adversarial', label: 'OPPOSITION LOGIC' },
-  { id: 'evidence', label: 'EVIDENCE REPOSITORY' },
-  { id: 'workflow', label: 'DISPUTE LIFECYCLE' },
-  { id: 'voice', label: 'COMMUNICATIONS LOG' },
-  { id: 'caselaw', label: 'JUDICIAL PRECEDENTS' },
-  { id: 'deltas', label: 'DRIFT RECONSTRUCTION' },
-  { id: 'discovery', label: 'DISCOVERY PROTOCOL' },
-  { id: 'lab', label: 'EVIDENCE LAB' },
-  { id: 'lettereditor', label: 'CORRESPONDENCE ENGINE' },
-  { id: 'actions', label: 'EXECUTION PROTOCOL' },
+  { id: 'overview', label: 'Executive Summary' },
+  { id: 'metro2', label: 'Compliance Audit' },
+  { id: 'statutes', label: 'Statute Tracker' },
+  { id: 'liability', label: 'Liability Assets' },
+  { id: 'actions', label: 'Action Protocol' },
 ] as const;
 
 

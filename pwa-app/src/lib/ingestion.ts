@@ -1,3 +1,6 @@
+import { isPDF, extractPDFText, extractPDFTextViaOCR } from './pdf';
+import { isImage, performOCR } from './ocr';
+
 export type ScanMode = 'standard' | 'max';
 
 export interface ScanProfile {
@@ -32,6 +35,72 @@ export function getScanProfile(mode: ScanMode): ScanProfile {
     ocrThresholdLow: 90,
     ocrThresholdHigh: 160
   };
+}
+
+export async function extractTextFromFile(
+  file: File, 
+  onProgress: (progress: number) => void,
+  scanMode: ScanMode = 'standard',
+  maxUploadSizeMB: number = 20
+): Promise<string> {
+  if (file.size > maxUploadSizeMB * 1024 * 1024) {
+    throw new Error(`File exceeds ${maxUploadSizeMB}MB limit`);
+  }
+
+  let text = '';
+  const profile = getScanProfile(scanMode);
+  const scanLabel = scanMode === 'max' ? 'Max Scan' : 'Standard Scan';
+
+  if (isPDF(file)) {
+    try {
+      const direct = await extractPDFText(file, onProgress);
+      const normalized = normalizeExtractedText(direct);
+      const quality = scoreTextQuality(normalized);
+      text = normalized;
+
+      if (scanMode === 'max' || quality < 55) {
+        const ocrText = await extractPDFTextViaOCR(file, onProgress, {
+          maxPages: profile.pdfMaxPages,
+          scale: profile.pdfScale
+        });
+        text = mergeTextVariants(text, normalizeExtractedText(ocrText));
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      if (message.toLowerCase().includes('no selectable text')) {
+        text = await extractPDFTextViaOCR(file, onProgress, {
+          maxPages: profile.pdfMaxPages,
+          scale: profile.pdfScale
+        });
+      } else {
+        throw error;
+      }
+    }
+  } else if (isImage(file)) {
+    text = await performOCR(file, onProgress, {
+      scale: profile.ocrScale,
+      contrast: profile.ocrContrast,
+      thresholdLow: profile.ocrThresholdLow,
+      thresholdHigh: profile.ocrThresholdHigh
+    });
+  } else {
+    text = await file.text();
+  }
+
+  const normalized = normalizeExtractedText(text);
+  if (!normalized) {
+    throw new Error(`No readable text detected in ${file.name}. Try Max Scan or a higher-quality source.`);
+  }
+  return normalized;
+}
+
+export function mergeSourcesText(items: { name: string; size: number; type: string; text: string }[]): string {
+  return items
+    .map((item) => {
+      const meta = `[SOURCE:${item.name} | ${item.type || 'unknown'} | ${Math.round(item.size / 1024)}KB]`;
+      return `${meta}\n${normalizeExtractedText(item.text)}`.trim();
+    })
+    .join('\n\n-----\n\n');
 }
 
 export function normalizeExtractedText(text: string): string {

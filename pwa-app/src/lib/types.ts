@@ -126,5 +126,6 @@ export interface AnalysisRecord {
     fields: CreditFields;
     flags: RuleFlag[];
     riskProfile: RiskProfile;
+    integrityHash: string; // SHA-256 for litigation-grade chain of custody
     tags?: string[];
 }
