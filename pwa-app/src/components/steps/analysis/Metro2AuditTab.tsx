@@ -135,6 +135,24 @@ const Metro2AuditTab: React.FC<Metro2AuditTabProps> = ({ fields }) => {
                             <p className="text-[10px] text-slate-500 leading-relaxed font-semibold">
                                 {field.description}
                             </p>
+
+                            {/* Importance Marker */}
+                            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <div className="flex gap-0.5">
+                                    {[1, 2, 3].map(i => (
+                                        <div 
+                                            key={i} 
+                                            className={cn(
+                                                "w-1 h-3 rounded-full",
+                                                i <= (field.label.toLowerCase().includes('status') || field.label.toLowerCase().includes('balance') ? 3 : 1)
+                                                    ? "bg-blue-600" 
+                                                    : "bg-slate-100"
+                                            )} 
+                                        />
+                                    ))}
+                                </div>
+                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Priority Segment</span>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
@@ -171,6 +189,10 @@ const Metro2AuditTab: React.FC<Metro2AuditTabProps> = ({ fields }) => {
                                         <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                                             <Scale size={14} className="text-rose-500" /> Compliance Mapping Discrepancy
                                         </div>
+                                        {/* Added logic for resolution suggestion */}
+                                        <p className="mt-4 text-[10px] text-slate-400 font-medium italic">
+                                            Resolution: Manual comparison of Base Segment 42-43 vs 21-22 required.
+                                        </p>
                                     </div>
                                     <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center opacity-0 group-hover/v:opacity-100 transition-opacity">
                                         <ChevronRight className="text-slate-400" size={24} />

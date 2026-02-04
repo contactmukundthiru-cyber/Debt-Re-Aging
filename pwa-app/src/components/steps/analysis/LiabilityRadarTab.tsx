@@ -15,10 +15,10 @@ const LiabilityRadarTab: React.FC<LiabilityRadarTabProps> = ({ flags }) => {
     const radarMetrics = useMemo(function radarMetricsFn() {
         const categories = {
             Statutory: flags.filter(f => f.legalCitations.length > 0).length,
-            Forensic: flags.filter(f => f.severity === 'critical').length,
-            Procedural: flags.filter(f => f.ruleId.startsWith('B')).length,
-            Substantive: flags.filter(f => f.ruleId.startsWith('E')).length,
-            Temporal: flags.filter(f => f.ruleId.includes('A')).length,
+            Forensic: flags.filter(f => f.severity === 'critical' || f.ruleId.startsWith('B')).length,
+            Accuracy: flags.filter(f => f.ruleId.startsWith('K') || f.ruleId.startsWith('M')).length,
+            Substantive: flags.filter(f => f.severity === 'medium' || f.severity === 'high').length,
+            Temporal: flags.filter(f => f.ruleId.includes('Timeline') || f.ruleId.includes('DOFD') || f.ruleName.includes('Date')).length,
         };
         const max = Math.max(...Object.values(categories), 5);
         return Object.entries(categories).map(function mapEntry(entry: [string, number], i: number, arr: [string, number][]) {

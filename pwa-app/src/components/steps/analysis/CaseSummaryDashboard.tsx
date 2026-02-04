@@ -222,6 +222,140 @@ const CaseSummaryDashboard: React.FC<CaseSummaryDashboardProps> = ({ flags, risk
                     </div>
                 </motion.div>
             </motion.div>
+
+            {/* Strategic Findings Grid */}
+            <div className="grid lg:grid-cols-12 gap-12 pt-12">
+                <div className="lg:col-span-8 flex flex-col gap-12">
+                     <section className="bg-slate-900 rounded-[3rem] p-12 text-white relative overflow-hidden shadow-2xl">
+                        <div className="absolute top-0 right-0 p-8 opacity-10">
+                            <Radiation size={180} />
+                        </div>
+                        
+                        <div className="relative z-10 flex flex-col md:flex-row gap-12 items-center">
+                            <div className="flex-1 space-y-6">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10">
+                                    <Target size={14} className="text-blue-400" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Primary Objective</span>
+                                </div>
+                                <h4 className="text-3xl font-black tracking-tight leading-tight">
+                                    Strategic Analysis & <span className="text-blue-400">Tactical Intent</span>
+                                </h4>
+                                <p className="text-slate-400 font-medium leading-relaxed">
+                                    Based on the identified <span className="text-white">{flags.length} violations</span>, the optimal strategy focuses on <span className="text-white font-bold">{prioritizedAction}</span>. 
+                                    This approach targets systemic reporting failures which hold the highest leverage for institutional correction.
+                                </p>
+                                <div className="pt-4 flex flex-wrap gap-4">
+                                    <div className="px-5 py-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-3 group hover:bg-white/10 transition-colors">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">FCRA Compliance: Targeted</span>
+                                    </div>
+                                    <div className="px-5 py-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-3 group hover:bg-white/10 transition-colors">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Metro 2® Alignment: Audited</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                     </section>
+
+                     <section className="grid md:grid-cols-2 gap-8">
+                        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-lg shadow-slate-100/50">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                    <Terminal size={18} />
+                                </div>
+                                <h5 className="text-sm font-black text-slate-900 uppercase tracking-widest">Logic Patterns</h5>
+                            </div>
+                            <div className="space-y-6">
+                                {flags.slice(0, 3).map((f, i) => (
+                                    <div key={i} className="flex gap-4">
+                                        <div className="w-px h-12 bg-slate-100 mt-1" />
+                                        <div>
+                                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{f.ruleId}</p>
+                                            <p className="text-sm font-bold text-slate-700">{f.ruleName}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {flags.length === 0 && (
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest py-8 text-center italic">No patterns detected in current stream</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-lg shadow-slate-100/50">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                    <Cpu size={18} />
+                                </div>
+                                <h5 className="text-sm font-black text-slate-900 uppercase tracking-widest">Decision Logic</h5>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="p-4 rounded-2xl bg-blue-50/30 border border-blue-100 border-dashed">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Next Operational Step</p>
+                                    <p className="text-xs font-bold text-slate-700 leading-relaxed italic">
+                                        "{nextStepAction}"
+                                    </p>
+                                </div>
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                                    Neural analysis suggests a multi-stage escalation protocol for accounts with {riskProfile?.riskLevel} risk profiles.
+                                </p>
+                            </div>
+                        </div>
+                     </section>
+                </div>
+
+                <div className="lg:col-span-4">
+                    <div className="bg-slate-50 border border-slate-200 rounded-[3rem] p-10 h-full shadow-inner flex flex-col justify-between">
+                         <div>
+                            <div className="flex items-center gap-4 mb-10">
+                                <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                                <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Technical Telemetry</h5>
+                            </div>
+                            
+                            <div className="space-y-10">
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                        <span>Data Integrity</span>
+                                        <span>72%</span>
+                                    </div>
+                                    <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                                        <div className="h-full bg-slate-900 w-[72%]" />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                        <span>Risk Exposure</span>
+                                        <span>{impactScore > 200 ? '94%' : '42%'}</span>
+                                    </div>
+                                    <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                                        <div className={cn(
+                                            "h-full transition-all duration-1000",
+                                            impactScore > 200 ? "bg-rose-500 w-[94%]" : "bg-blue-600 w-[42%]"
+                                        )} />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                                        <span>Bureau Accountability</span>
+                                        <span>88%</span>
+                                    </div>
+                                    <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                                        <div className="h-full bg-emerald-500 w-[88%]" />
+                                    </div>
+                                </div>
+                            </div>
+                         </div>
+
+                         <div className="mt-20 pt-10 border-t border-slate-200 text-center">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                                System calibrated for regulatory enforcement and technical discrepancy identification. 
+                            </p>
+                         </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

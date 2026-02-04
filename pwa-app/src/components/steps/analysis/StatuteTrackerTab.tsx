@@ -180,11 +180,57 @@ const StatuteTrackerTab: React.FC<StatuteTrackerTabProps> = ({ fields }) => {
                                         )}>
                                             {isExpired ? 'Statute Expired' : 'Active Limitation'}
                                         </div>
+
+                                        {/* Legal Authority Citation */}
+                                        <div className="mt-6 flex items-start gap-2 group/cite">
+                                            <Scale size={12} className="text-slate-400 mt-1" />
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                                                Authority: {law.keyStatutes.find(s => s.toLowerCase().includes('sol')) || law.keyStatutes[0] || 'State Limitation Code'}
+                                            </p>
+                                        </div>
                                     </div>
                                 );
                             })}
                         </motion.div>
                     </AnimatePresence>
+
+                    {/* Legal Context & Citations */}
+                    <div className="grid md:grid-cols-2 gap-8">
+                        <div className="p-10 rounded-[2.5rem] bg-white border border-slate-200 shadow-sm relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full translate-x-16 -translate-y-16 group-hover:scale-110 transition-transform" />
+                            <div className="relative z-10">
+                                <h4 className="text-lg font-black text-slate-900 tracking-tight mb-6">Legislative Basis</h4>
+                                <div className="space-y-4">
+                                    {law.keyStatutes.map((statute, i) => (
+                                        <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                            <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center border border-slate-200 text-blue-600 shrink-0">
+                                                <Gavel size={14} />
+                                            </div>
+                                            <p className="text-xs font-bold text-slate-700 leading-tight py-1">{statute}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-10 rounded-[2.5rem] bg-slate-900 text-white shadow-xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full translate-x-16 -translate-y-16 group-hover:scale-110 transition-transform" />
+                            <div className="relative z-10">
+                                <h4 className="text-lg font-black text-blue-400 tracking-tight mb-6">Tolling Factors</h4>
+                                <div className="space-y-4">
+                                    {law.specialNotes.map((note, i) => (
+                                        <div key={i} className="flex items-start gap-4">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                                            <p className="text-xs font-medium text-slate-300 leading-relaxed italic">"{note}"</p>
+                                        </div>
+                                    ))}
+                                    {law.specialNotes.length === 0 && (
+                                        <p className="text-xs font-medium text-slate-400">Standard tolling rules apply based on federal guidelines.</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Warning Notice */}
                     <div className="relative p-10 rounded-[2.5rem] bg-amber-50 border border-amber-100 shadow-xl shadow-amber-100/20">

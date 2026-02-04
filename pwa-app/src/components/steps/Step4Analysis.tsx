@@ -17,6 +17,7 @@ import { RuleFlag, RiskProfile, CreditFields, ConsumerInfo } from '../../lib/typ
 import { CaseLaw } from '../../lib/caselaw';
 import { CollectorMatch } from '../../lib/collector-database';
 import { DeltaResult, SeriesInsight, SeriesSnapshot, SeriesSnapshotOption } from '../../lib/delta';
+import { STATE_LAWS } from '../../lib/state-laws';
 
 // Refactored Sub-components
 import CaseSummaryDashboard from './analysis/CaseSummaryDashboard';
@@ -103,6 +104,63 @@ const Step4Analysis = React.memo<Step4AnalysisProps>((props) => {
     return totalPossibleEvidence > 0 ? Math.round((checkedEvidenceCount / totalPossibleEvidence) * 100) : 0;
   }, [flags, discoveryAnswers]);
 
+  // Strategy Synthesis Engine
+  const actionPlan = useMemo(() => {
+    const baseActions = analytics?.actions.map((item, i) => ({
+      id: `action-${i}`,
+      title: item.action,
+      description: item.reason,
+      priority: item.priority === 'immediate' ? 'high' : item.priority === 'optional' ? 'low' : 'medium' as any,
+    })) || [];
+
+    // Inject intelligence if we have specific findings
+    const syntheticActions: any[] = [];
+    
+    // Check for SOL
+    const dlp = editableFields.dateLastPayment;
+    if (dlp) {
+      const state = consumer.state || 'CA';
+      const law = STATE_LAWS[state];
+      if (law) {
+        const years = law.sol.openAccounts; // Defaulting to open accounts for analysis
+        const date = new Date(dlp);
+        date.setFullYear(date.getFullYear() + years);
+        if (date < new Date()) {
+          syntheticActions.push({
+            id: 'syn-sol',
+            title: 'Statute of Limitations Enforcement',
+            description: `The debt at hand is past the ${years}-year limitation for ${state}. Priority should shift to Cease and Desist protocol.`,
+            priority: 'high',
+            letterType: 'cease_desist'
+          });
+        }
+      }
+    }
+
+    // Check for Metro 2 errors
+    if (flags.some(f => f.ruleName.includes('Metro'))) {
+      syntheticActions.push({
+        id: 'syn-m2',
+        title: 'Metro 2® Structural Audit Demand',
+        description: 'Systemic compliance failures detected. Require the furnisher to provide the raw Metro 2 data log.',
+        priority: 'high',
+        letterType: 'audit'
+      });
+    }
+
+    const finalActions = [...syntheticActions, ...baseActions].map(a => ({
+       ...a,
+       tabLink: 'lettereditor' as any,
+       letterType: a.letterType || (a.title.toLowerCase().includes('validation') ? 'validation' : 
+                          a.title.toLowerCase().includes('bureau') ? 'bureau' :
+                          a.title.toLowerCase().includes('furnisher') ? 'furnisher' :
+                          a.title.toLowerCase().includes('cease') ? 'cease_desist' :
+                          a.title.toLowerCase().includes('sue') ? 'intent_to_sue' : undefined)
+    }));
+
+    return finalActions;
+  }, [flags, analytics, editableFields, consumer]);
+
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'overview':
@@ -116,18 +174,7 @@ const Step4Analysis = React.memo<Step4AnalysisProps>((props) => {
       case 'actions':
         return (
           <MasterActionPlanTab
-            actions={analytics?.actions.map((item, i) => ({
-              id: `action-${i}`,
-              title: item.action,
-              description: item.reason,
-              priority: item.priority === 'immediate' ? 'high' : item.priority === 'optional' ? 'low' : 'medium',
-              tabLink: 'lettereditor' as any,
-              letterType: (item.action.toLowerCase().includes('validation') ? 'validation' : 
-                          item.action.toLowerCase().includes('bureau') ? 'bureau' :
-                          item.action.toLowerCase().includes('furnisher') ? 'furnisher' :
-                          item.action.toLowerCase().includes('cease') ? 'cease_desist' :
-                          item.action.toLowerCase().includes('sue') ? 'intent_to_sue' : undefined) as LetterType | undefined
-            })) || []}
+            actions={actionPlan}
             setActiveTab={setActiveTab as any}
             setSelectedLetterType={setSelectedLetterType}
             onExport={() => setActiveTab('actions' as any)}
